@@ -121,7 +121,7 @@ export default async function HomePage() {
       {/* Editorial Content */}
       <PhilosophySection />
 
-      <NotesSection collections={trending ?? []} />
+      <NotesSection />
 
       <BrandShowcaseSection />
 

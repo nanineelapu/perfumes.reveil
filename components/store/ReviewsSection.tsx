@@ -75,7 +75,7 @@ export function ReviewsSection() {
             <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 40px', position: 'relative', zIndex: 1 }}>
                 {/* Header with High-Fashion Layout */}
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginBottom: '100px' }}>
-                    <div style={{ display: 'flex', items: 'center', gap: '12px', opacity: 0.6, marginBottom: '24px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', opacity: 0.6, marginBottom: '24px' }}>
                         <div style={{ width: '30px', height: '1px', background: '#d4af37', marginTop: '8px' }} />
                         <span style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.4em', textTransform: 'uppercase', color: '#d4af37' }}>Refined Feedback</span>
                     </div>
@@ -96,14 +96,14 @@ export function ReviewsSection() {
             </div>
 
             {/* Kinetic Row 1 */}
-            <motion.div style={{ display: 'flex', gap: '32px', x: x1, marginBottom: '32px', paddingLeft: '40px', willChange: 'transform' }}>
+            <motion.div style={{ display: 'flex', gap: '32px', x: x1, marginBottom: '32px', paddingLeft: '40px' }}>
                 {[...reviews, ...reviews].map((review, i) => (
                     <ReviewCard key={i} review={review} />
                 ))}
             </motion.div>
 
             {/* Kinetic Row 2 */}
-            <motion.div style={{ display: 'flex', gap: '32px', x: x2, paddingLeft: '200px', willChange: 'transform' }}>
+            <motion.div style={{ display: 'flex', gap: '32px', x: x2, paddingLeft: '200px' }}>
                 {[...reviews.reverse(), ...reviews].map((review, i) => (
                     <ReviewCard key={i} review={review} dark />
                 ))}

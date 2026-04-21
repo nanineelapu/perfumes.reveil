@@ -180,7 +180,7 @@ function SlideMedia({ slide, isActive, emblaApi }: { slide: Slide, isActive: boo
                     opacity: { duration: 1.5, ease: "easeOut" },
                     scale: { duration: 25, ease: "linear" }
                 }}
-                style={{ height: '100%', width: '100%', willChange: 'opacity, transform' }}
+                style={{ height: '100%', width: '100%' }}
             >
                 {slide.video_url ? (
                     <video
