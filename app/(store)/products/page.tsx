@@ -45,10 +45,7 @@ function ShopContent() {
         fetchProducts()
     }, [])
 
-    const categories = useMemo(() => {
-        const cats = new Set(products.map(p => p.category).filter(Boolean))
-        return ["ALL", ...Array.from(cats) as string[]]
-    }, [products])
+    const categories = ["ALL", "Perfumes", "DEODRANTS", "ATTARS", "AIRFRESHNER", "Reveil Fragrance"]
 
     const filteredAndSortedProducts = useMemo(() => {
         // 1. Filtering

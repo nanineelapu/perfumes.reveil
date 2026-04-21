@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
-const CATEGORIES = ['shoes', 'clothing', 'accessories', 'bags', 'sports']
+const CATEGORIES = ['Perfumes', 'DEODRANTS', 'ATTARS', 'AIRFRESHNER', 'Reveil Fragrance']
 
 export default function NewProductPage() {
     const router = useRouter()
@@ -185,7 +185,7 @@ export default function NewProductPage() {
                         <input
                             style={input} name="name" value={form.name}
                             onChange={handleChange} onBlur={handleNameBlur}
-                            placeholder="e.g. Nike Air Max 270" required
+                            placeholder="e.g. Midnight Oud or Velvet Rose" required
                         />
                     </div>
 
@@ -332,7 +332,7 @@ export default function NewProductPage() {
                             }}
                             name="meta_title" value={form.meta_title}
                             onChange={handleChange}
-                            placeholder="Nike Air Max 270 | MyShop"
+                            placeholder="Midnight Oud | REVEIL"
                         />
                     </div>
 
@@ -351,7 +351,7 @@ export default function NewProductPage() {
                             }}
                             name="meta_description" value={form.meta_description}
                             onChange={handleChange}
-                            placeholder="Buy the best Nike Air Max 270 online at the lowest price..."
+                            placeholder="Experience the deep, mysterious notes of Midnight Oud, a signature fragrance by REVEIL..."
                         />
                     </div>
 
@@ -366,7 +366,7 @@ export default function NewProductPage() {
                                 {form.meta_title || form.name}
                             </div>
                             <div style={{ fontSize: '13px', color: '#006621', marginBottom: '4px' }}>
-                                yourshop.com/products/{form.name.toLowerCase().replace(/\s+/g, '-')}
+                                reveilperfumes.com/products/{form.name.toLowerCase().replace(/\s+/g, '-')}
                             </div>
                             <div style={{ fontSize: '13px', color: '#545454' }}>
                                 {form.meta_description || form.description || 'No description yet.'}

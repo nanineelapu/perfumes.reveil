@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase/client'
 import { Smartphone, Lock, ArrowRight, Loader2, CheckCircle2, ChevronLeft, ShieldCheck } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import Link from 'next/link'
+import { Home } from 'lucide-react'
 
 export default function AuthPage() {
     const router = useRouter()
@@ -168,6 +170,22 @@ export default function AuthPage() {
                 zIndex: 10,
                 minHeight: '100vh'
             }}>
+                {/* Back to Home Button at top left of form container area */}
+                <div style={{ position: 'absolute', top: '40px', left: '40px' }}>
+                    <Link href="/" style={{
+                        display: 'flex', alignItems: 'center', gap: '10px',
+                        color: 'rgba(0,0,0,0.4)', textDecoration: 'none',
+                        fontSize: '11px', fontWeight: 500, letterSpacing: '0.2em',
+                        textTransform: 'uppercase', transition: 'all 0.3s ease'
+                    }}
+                        onMouseEnter={(e) => e.currentTarget.style.color = '#d4af37'}
+                        onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(0,0,0,0.4)'}
+                    >
+                        <Home size={14} style={{ marginBottom: '1px' }} />
+                        <span style={{ lineHeight: 1 }}>Back to Home</span>
+                    </Link>
+                </div>
+
                 <motion.div
                     initial={{ opacity: 0, scale: 0.98 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -317,7 +335,7 @@ export default function AuthPage() {
                                 }}
                             >
                                 {loading ? <Loader2 className="animate-spin" size={16} /> : (
-                                    otpSent ? <>Verify Sequence <CheckCircle2 size={16} /></> : <>Continue Sequence <ArrowRight size={16} /></>
+                                    otpSent ? <>Verify Sequence <CheckCircle2 size={16} /></> : <>Continue <ArrowRight size={16} /></>
                                 )}
                             </motion.button>
                         </div>

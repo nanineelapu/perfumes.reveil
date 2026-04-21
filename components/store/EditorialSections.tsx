@@ -1,6 +1,8 @@
 'use client'
-import { useRef, useState, useEffect } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { AnimatedPageSection } from './AnimatedPageSection'
 import { Collection } from '@/types/store'
@@ -137,6 +139,27 @@ export function NotesSection() {
     })
 
     const [collections, setCollections] = useState<Collection[]>([])
+    const router = useRouter()
+    const supabase = createClient()
+    const [user, setUser] = useState<any>(null)
+
+    useEffect(() => {
+        const checkUser = async () => {
+            const { data: { user } } = await supabase.auth.getUser()
+            setUser(user)
+        }
+        checkUser()
+    }, [])
+
+    const handleAction = (e: React.MouseEvent, path: string) => {
+        e.preventDefault()
+        e.stopPropagation()
+        if (!user) {
+            router.push('/auth')
+            return
+        }
+        router.push(path)
+    }
 
     useEffect(() => {
         fetch('/api/collections')
@@ -239,7 +262,7 @@ export function NotesSection() {
                                 borderRadius: '2px'
                             }}
                         >
-                            <Link href="/products" style={{ display: 'block', height: '100%', textDecoration: 'none' }}>
+                            <div onClick={(e) => handleAction(e, '/products')} style={{ display: 'block', height: '100%' }}>
                                 <motion.div
                                     whileHover="hover"
                                     style={{ width: '100%', height: '100%' }}
@@ -265,7 +288,7 @@ export function NotesSection() {
                                         transition={{ duration: 0.3 }}
                                         style={{
                                             position: 'absolute', inset: 0,
-                                            background: 'rgba(0,0,0,0.7)',
+                                            background: 'radial-gradient(circle at center, rgba(0,0,0,0.4) 0%, transparent 80%)',
                                             display: 'flex', alignItems: 'center', justifyContent: 'center'
                                         }}
                                     >
@@ -307,7 +330,8 @@ export function NotesSection() {
                                         </div>
                                     </div>
                                 </motion.div>
-                            </Link>
+                            </div>
+
                         </motion.div>
                     ))}
                 </div>
@@ -454,6 +478,18 @@ export function BrandShowcaseSection() {
  */
 export function ReveilCollectionSection() {
     const containerRef = useRef(null)
+    const router = useRouter()
+    const supabase = createClient()
+    const [user, setUser] = useState<any>(null)
+
+    useEffect(() => {
+        const checkUser = async () => {
+            const { data: { user } } = await supabase.auth.getUser()
+            setUser(user)
+        }
+        checkUser()
+    }, [])
+
     const { scrollYProgress } = useScroll({
         target: containerRef,
         offset: ["start end", "end start"]
@@ -581,8 +617,12 @@ export function ReveilCollectionSection() {
                                 Made for those who love high-quality fragrance.
                             </p>
 
-                            <motion.a
-                                href="/products"
+                            <motion.div
+                                onClick={(e) => {
+                                    e.preventDefault()
+                                    if (!user) { router.push('/auth'); return; }
+                                    router.push('/products')
+                                }}
                                 whileHover={{ scale: 1.05, background: '#d4af37', color: '#000' }}
                                 style={{
                                     display: 'inline-block',
@@ -595,11 +635,12 @@ export function ReveilCollectionSection() {
                                     textTransform: 'uppercase',
                                     letterSpacing: '0.3em',
                                     transition: 'all 0.4s ease',
-                                    willChange: 'transform'
+                                    willChange: 'transform',
+                                    cursor: 'pointer'
                                 }}
                             >
                                 View Collection
-                            </motion.a>
+                            </motion.div>
                         </motion.div>
                     </div>
                 </div>

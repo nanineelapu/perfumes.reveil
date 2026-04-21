@@ -1,49 +1,98 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Trash2, Plus, Minus, ArrowRight, ShieldCheck, Truck } from 'lucide-react'
-
-const initialCart = [
-    {
-        id: '1',
-        name: 'Oudh Noir',
-        category: 'EXTRAIT SERIES',
-        price: 18500,
-        quantity: 1,
-        image: 'https://images.unsplash.com/photo-1547887538-e3a2f32cb1cc?auto=format&fit=crop&q=80&w=600'
-    },
-    {
-        id: '2',
-        name: 'Saffron Silk',
-        category: 'ESSENCE SERIES',
-        price: 9200,
-        quantity: 1,
-        image: 'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&q=80&w=600'
-    }
-]
+import { Trash2, Plus, Minus, ArrowRight, ShieldCheck, Truck, Loader2, Home } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 export default function CartPage() {
-    const [cart, setCart] = useState(initialCart)
+    const [cartItems, setCartItems] = useState<any[]>([])
+    const [totals, setTotals] = useState({ subtotal: 0, shipping: 0, total: 0 })
+    const [loading, setLoading] = useState(true)
+    const [updatingId, setUpdatingId] = useState<string | null>(null)
+    
+    const router = useRouter()
+    const supabase = createClient()
 
-    const updateQuantity = (id: string, delta: number) => {
-        setCart(prev => prev.map(item =>
-            item.id === id ? { ...item, quantity: Math.max(1, item.quantity + delta) } : item
-        ))
+    const fetchCart = async () => {
+        try {
+            const res = await fetch('/api/cart')
+            if (res.status === 401) {
+                router.push('/auth')
+                return
+            }
+            const data = await res.json()
+            setCartItems(data.items || [])
+            setTotals({
+                subtotal: data.subtotal,
+                shipping: data.shipping,
+                total: data.total
+            })
+        } catch (error) {
+            console.error('Fetch error:', error)
+        } finally {
+            setLoading(false)
+        }
     }
 
-    const removeItem = (id: string) => {
-        setCart(prev => prev.filter(item => item.id !== id))
+    useEffect(() => {
+        const checkUser = async () => {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) {
+                router.push('/auth')
+            } else {
+                fetchCart()
+            }
+        }
+        checkUser()
+    }, [])
+
+    const updateQuantity = async (id: string, newQty: number) => {
+        if (newQty < 1) return
+        setUpdatingId(id)
+        try {
+            const res = await fetch(`/api/cart/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ quantity: newQty })
+            })
+            if (res.ok) await fetchCart()
+        } catch (error) {
+            console.error('Update error:', error)
+        } finally {
+            setUpdatingId(null)
+        }
     }
 
-    const subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0)
-    const shipping = subtotal > 15000 ? 0 : 500
-    const total = subtotal + shipping
+    const removeItem = async (id: string) => {
+        setUpdatingId(id)
+        try {
+            const res = await fetch(`/api/cart/${id}`, {
+                method: 'DELETE'
+            })
+            if (res.ok) await fetchCart()
+        } catch (error) {
+            console.error('Remove error:', error)
+        } finally {
+            setUpdatingId(null)
+        }
+    }
+
+    if (loading) {
+        return (
+            <div style={{ height: '100vh', background: '#050505', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '24px' }}>
+                <Loader2 className="animate-spin" size={32} color="#d4af37" />
+                <span style={{ fontSize: '10px', color: '#d4af37', letterSpacing: '0.4em', textTransform: 'uppercase' }}>Synchronizing Atelier Basket</span>
+            </div>
+        )
+    }
 
     return (
-        <main style={{ background: '#050505', minHeight: '100vh', color: '#fff', paddingTop: '100px', paddingBottom: '100px' }}>
+        <main style={{ background: '#050505', minHeight: '100vh', color: '#fff', paddingTop: '80px', paddingBottom: '100px', position: 'relative' }}>
             <div style={{ maxWidth: '1300px', margin: '0 auto', padding: '0 40px' }}>
 
-                {/* Header: Refined and compact */}
+                {/* Header */}
                 <header style={{ marginBottom: '60px', height: '110px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#d4af37', fontSize: '9px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.6em', marginBottom: '16px', fontFamily: 'var(--font-baskerville)' }}>
                         STUDIO SELECTIONS <div style={{ width: '30px', height: '1px', background: 'rgba(212,175,55,0.3)' }} />
@@ -53,21 +102,19 @@ export default function CartPage() {
                     </h1>
                 </header>
 
-                {cart.length > 0 ? (
+                {cartItems.length > 0 ? (
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '60px', alignItems: 'start' }}>
 
-                        {/* ITEM LIST: Refined card layout */}
+                        {/* ITEM LIST */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                             <AnimatePresence mode="popLayout" initial={false}>
-                                {cart.map((item) => (
+                                {cartItems.map((item) => (
                                     <motion.div
                                         key={item.id}
                                         layout
                                         initial={{ opacity: 0, scale: 0.98 }}
                                         animate={{ opacity: 1, scale: 1 }}
                                         exit={{ opacity: 0, scale: 0.98 }}
-                                        whileHover={{ borderColor: 'rgba(212, 175, 55, 0.15)' }}
-                                        transition={{ duration: 0.4 }}
                                         style={{
                                             display: 'grid',
                                             gridTemplateColumns: '140px 1fr auto',
@@ -76,114 +123,101 @@ export default function CartPage() {
                                             background: '#0a0a0a',
                                             borderRadius: '2px',
                                             border: '1px solid rgba(255,255,255,0.05)',
-                                            alignItems: 'center'
+                                            alignItems: 'center',
+                                            opacity: updatingId === item.id ? 0.5 : 1,
+                                            pointerEvents: updatingId === item.id ? 'none' : 'auto'
                                         }}
                                     >
-                                        <div style={{ width: '140px', height: '180px', background: '#000', borderRadius: '2px', overflow: 'hidden', flexShrink: 0 }}>
-                                            <img src={item.image} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        <div style={{ width: '140px', height: '180px', background: '#000', borderRadius: '2px', overflow: 'hidden' }}>
+                                            <img src={item.products.images?.[0]} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                         </div>
 
-                                        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                                            <p style={{ fontSize: '9px', color: '#d4af37', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px', fontFamily: 'var(--font-baskerville)' }}>{item.category}</p>
-                                            <h3 style={{ fontSize: '20px', fontFamily: 'var(--font-baskerville)', margin: 0, fontWeight: 400 }}>{item.name}</h3>
+                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                            <p style={{ fontSize: '9px', color: '#d4af37', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px', fontFamily: 'var(--font-baskerville)' }}>{item.products.category}</p>
+                                            <h3 style={{ fontSize: '20px', fontFamily: 'var(--font-baskerville)', margin: 0, fontWeight: 400 }}>{item.products.name}</h3>
                                             <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', marginTop: '6px', fontFamily: 'var(--font-baskerville)' }}>Standard Atelier Bottling — 100ml</p>
 
                                             <div style={{ marginTop: '24px', display: 'flex', alignItems: 'center', gap: '24px' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'transparent', padding: '4px 12px', borderRadius: '2px', border: '1px solid #222' }}>
-                                                    <button onClick={() => updateQuantity(item.id, -1)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', padding: '4px' }}><Minus size={10} /></button>
-                                                    <span style={{ fontSize: '12px', fontWeight: 600, minWidth: '20px', textAlign: 'center', fontFamily: 'var(--font-baskerville)' }}>{item.quantity}</span>
-                                                    <button onClick={() => updateQuantity(item.id, 1)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', padding: '4px' }}><Plus size={10} /></button>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', border: '1px solid #222', padding: '4px 12px' }}>
+                                                    <button onClick={() => updateQuantity(item.id, item.quantity - 1)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer' }}><Minus size={10} /></button>
+                                                    <span style={{ fontSize: '12px', fontWeight: 600, minWidth: '20px', textAlign: 'center' }}>{item.quantity}</span>
+                                                    <button onClick={() => updateQuantity(item.id, item.quantity + 1)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer' }}><Plus size={10} /></button>
                                                 </div>
-                                                <button onClick={() => removeItem(item.id)} style={{ background: 'none', border: 'none', color: '#444', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '9px', textTransform: 'uppercase', fontWeight: 900, letterSpacing: '0.1em', fontFamily: 'var(--font-baskerville)' }}
-                                                    onMouseOver={(e) => e.currentTarget.style.color = '#fff'}
-                                                    onMouseOut={(e) => e.currentTarget.style.color = '#444'}>
+                                                <button onClick={() => removeItem(item.id)} style={{ background: 'none', border: 'none', color: '#444', cursor: 'pointer', fontSize: '9px', fontWeight: 900, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                                     <Trash2 size={12} /> Remove
                                                 </button>
                                             </div>
                                         </div>
 
-                                        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'right', minWidth: '100px' }}>
-                                            <p style={{ fontSize: '18px', fontWeight: 300, fontFamily: 'var(--font-baskerville)', margin: 0 }}>₹{(item.price * item.quantity).toLocaleString()}</p>
+                                        <div style={{ textAlign: 'right', minWidth: '100px' }}>
+                                            <p style={{ fontSize: '18px', fontWeight: 300, fontFamily: 'var(--font-baskerville)', margin: 0 }}>₹{(item.products.price * item.quantity).toLocaleString()}</p>
                                         </div>
                                     </motion.div>
                                 ))}
                             </AnimatePresence>
                         </div>
 
-                        {/* SUMMARY PANEL: Refined and compact */}
-                        <aside style={{
-                            background: '#0a0a0a', color: '#fff', padding: '32px',
-                            borderRadius: '2px', position: 'sticky', top: '140px',
-                            width: '340px', flexShrink: 0,
-                            border: '1px solid rgba(255,255,255,0.05)'
-                        }}>
+                        {/* SUMMARY PANEL */}
+                        <aside style={{ background: '#0a0a0a', padding: '32px', borderRadius: '2px', border: '1px solid rgba(255,255,255,0.05)', position: 'sticky', top: '140px' }}>
                             <h2 style={{ fontSize: '9px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4em', marginBottom: '32px', color: '#d4af37', fontFamily: 'var(--font-baskerville)' }}>Atelier Summary</h2>
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontFamily: 'var(--font-baskerville)' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
                                     <span style={{ color: 'rgba(255,255,255,0.4)' }}>Subtotal</span>
-                                    <span style={{ fontWeight: 600 }}>₹{subtotal.toLocaleString()}</span>
+                                    <span>₹{totals.subtotal.toLocaleString()}</span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontFamily: 'var(--font-baskerville)' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
                                     <span style={{ color: 'rgba(255,255,255,0.4)' }}>Shipping</span>
-                                    <span style={{ fontWeight: 600, color: shipping === 0 ? '#16a34a' : '#fff' }}>
-                                        {shipping === 0 ? 'COMPLIMENTARY' : `₹${shipping}`}
+                                    <span style={{ color: totals.shipping === 0 ? '#16a34a' : '#fff' }}>
+                                        {totals.shipping === 0 ? 'COMPLIMENTARY' : `₹${totals.shipping.toLocaleString()}`}
                                     </span>
                                 </div>
                                 <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', margin: '16px 0' }} />
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '20px', fontWeight: 400, fontFamily: 'var(--font-baskerville)' }}>
-                                    <span style={{ letterSpacing: '0.1em' }}>TOTAL</span>
-                                    <span style={{ color: '#fff' }}>₹{total.toLocaleString()}</span>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '20px', fontWeight: 400 }}>
+                                    <span>TOTAL</span>
+                                    <span>₹{totals.total.toLocaleString()}</span>
                                 </div>
                             </div>
 
                             <button style={{
                                 width: '100%', background: '#fff', color: '#000', border: 'none',
-                                padding: '18px', borderRadius: '2px', fontSize: '10px', fontWeight: 900,
+                                padding: '18px', fontSize: '10px', fontWeight: 900,
                                 textTransform: 'uppercase', letterSpacing: '0.3em', cursor: 'pointer',
-                                marginTop: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                                fontFamily: 'var(--font-baskerville)'
+                                marginTop: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px'
                             }}>
                                 Secure Checkout <ArrowRight size={14} />
                             </button>
 
-                            <div style={{ marginTop: '32px', display: 'flex', flexDirection: 'column', gap: '16px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '32px' }}>
-                                <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                                    <ShieldCheck size={14} style={{ color: '#d4af37', flexShrink: 0, marginTop: '2px' }} />
-                                    <div>
-                                        <p style={{ fontSize: '9px', fontWeight: 900, margin: 0, textTransform: 'uppercase', letterSpacing: '0.1em', fontFamily: 'var(--font-baskerville)' }}>Secure Transaction</p>
-                                        <p style={{ fontSize: '9px', color: 'rgba(255,255,255,0.3)', margin: '4px 0 0', lineHeight: 1.4, fontFamily: 'var(--font-baskerville)' }}>Encrypted by REVEIL protocols.</p>
-                                    </div>
+                            <div style={{ marginTop: '32px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '32px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                <div style={{ display: 'flex', gap: '12px' }}>
+                                    <ShieldCheck size={14} color="#d4af37" />
+                                    <p style={{ fontSize: '9px', fontWeight: 900, margin: 0, textTransform: 'uppercase' }}>Secure Transaction</p>
                                 </div>
-                                <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                                    <Truck size={14} style={{ color: '#d4af37', flexShrink: 0, marginTop: '2px' }} />
-                                    <div>
-                                        <p style={{ fontSize: '9px', fontWeight: 900, margin: 0, textTransform: 'uppercase', letterSpacing: '0.1em', fontFamily: 'var(--font-baskerville)' }}>Artisan Packaging</p>
-                                        <p style={{ fontSize: '9px', color: 'rgba(255,255,255,0.3)', margin: '4px 0 0', lineHeight: 1.4, fontFamily: 'var(--font-baskerville)' }}>Standard boutique boxing included.</p>
-                                    </div>
+                                <div style={{ display: 'flex', gap: '12px' }}>
+                                    <Truck size={14} color="#d4af37" />
+                                    <p style={{ fontSize: '9px', fontWeight: 900, margin: 0, textTransform: 'uppercase' }}>Artisan Packaging</p>
                                 </div>
                             </div>
                         </aside>
-
                     </div>
                 ) : (
-                    <div style={{ textAlign: 'center', padding: '120px 0', border: '1px dashed rgba(255,255,255,0.05)', borderRadius: '2px' }}>
-                        <h2 style={{ fontSize: '13px', fontWeight: 300, color: '#444', textTransform: 'uppercase', letterSpacing: '0.4em', fontFamily: 'var(--font-baskerville)' }}>Your studio basket is empty</h2>
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            style={{
-                                marginTop: '32px', background: 'transparent', border: '1px solid #d4af37', color: '#d4af37',
-                                padding: '14px 32px', cursor: 'pointer', fontSize: '9px', fontWeight: 900,
-                                textTransform: 'uppercase', letterSpacing: '0.2em', borderRadius: '2px',
-                                fontFamily: 'var(--font-baskerville)'
-                            }}
-                        >
-                            Return to Collection
-                        </motion.button>
+                    <div style={{ textAlign: 'center', padding: '120px 0', border: '1px dashed rgba(255,255,255,0.05)' }}>
+                        <h2 style={{ fontSize: '13px', fontWeight: 300, color: '#444', textTransform: 'uppercase', letterSpacing: '0.4em' }}>Your studio basket is empty</h2>
+                        <Link href="/products" style={{ textDecoration: 'none' }}>
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                style={{
+                                    marginTop: '32px', background: 'transparent', border: '1px solid #d4af37', color: '#d4af37',
+                                    padding: '14px 32px', cursor: 'pointer', fontSize: '9px', fontWeight: 900,
+                                    textTransform: 'uppercase', letterSpacing: '0.2em'
+                                }}
+                            >
+                                Return to Collection
+                            </motion.button>
+                        </Link>
                     </div>
                 )}
             </div>
         </main>
-
     )
 }

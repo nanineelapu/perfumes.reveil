@@ -156,10 +156,11 @@ export default function EditProductPage(props: { params: Params }) {
                                     defaultValue={product.category}
                                     className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-accent transition-all appearance-none font-medium"
                                 >
-                                    <option value="Perfume">Perfume</option>
-                                    <option value="Cologne">Cologne</option>
-                                    <option value="Limited Edition">Limited Edition</option>
-                                    <option value="Gift Set">Gift Set</option>
+                                    <option value="Perfumes">Perfumes</option>
+                                    <option value="DEODRANTS">DEODRANTS</option>
+                                    <option value="ATTARS">ATTARS</option>
+                                    <option value="AIRFRESHNER">AIRFRESHNER</option>
+                                    <option value="Reveil Fragrance">Reveil Fragrance</option>
                                 </select>
                             </div>
                         </div>

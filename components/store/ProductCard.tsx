@@ -1,12 +1,63 @@
 'use client'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import { Product } from '@/types/store'
 
 export default function ProductCard({ product }: { product: Product }) {
     const [hovered, setHovered] = useState(false)
     const [imgError, setImgError] = useState(false)
+    const [user, setUser] = useState<any>(null)
+    const router = useRouter()
+    const supabase = createClient()
+
+    useEffect(() => {
+        const checkUser = async () => {
+            const { data: { user } } = await supabase.auth.getUser()
+            setUser(user)
+        }
+        checkUser()
+    }, [])
+
+    const [adding, setAdding] = useState(false)
+
+    const handleAction = async (e: React.MouseEvent, type: 'cart' | 'buy' | 'view') => {
+        e.preventDefault()
+        e.stopPropagation()
+
+        if (!user) {
+            router.push('/auth')
+            return
+        }
+
+        if (type === 'view') {
+            router.push(`/products/${product.slug}`)
+            return
+        }
+
+        setAdding(true)
+        try {
+            const res = await fetch('/api/cart', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ product_id: product.id, quantity: 1 })
+            })
+
+            if (res.ok) {
+                if (type === 'buy') {
+                    router.push('/cart')
+                } else {
+                    // Success feedback
+                }
+            }
+        } catch (error) {
+            console.error('Cart error:', error)
+        } finally {
+            setAdding(false)
+        }
+    }
 
     const mainImage = product.images?.[0]
 
@@ -136,6 +187,8 @@ export default function ProductCard({ product }: { product: Product }) {
                             EXPERIENCE
                         </Link>
                         <button
+                            disabled={adding}
+                            onClick={(e) => handleAction(e, 'cart')}
                             style={{
                                 width: '100%',
                                 background: 'rgba(255,255,255,0.05)',
@@ -147,10 +200,11 @@ export default function ProductCard({ product }: { product: Product }) {
                                 fontWeight: 700,
                                 letterSpacing: '0.2em',
                                 textTransform: 'uppercase',
-                                cursor: 'pointer'
+                                cursor: adding ? 'not-allowed' : 'pointer',
+                                opacity: adding ? 0.6 : 1
                             }}
                         >
-                            ADD TO CART
+                            {adding ? 'SYNCHRONIZING...' : 'ADD TO CART'}
                         </button>
                     </div>
                 </motion.div>
@@ -163,7 +217,7 @@ export default function ProductCard({ product }: { product: Product }) {
                     fontWeight: 900, zIndex: 3, writingMode: 'vertical-rl',
                     opacity: hovered ? 0.2 : 0.6, transition: '0.5s'
                 }}>
-                    BATCH — REF.{product.id.padStart(3, '0')}
+                    BATCH — REF.{product.id.toString().padStart(3, '0')}
                 </div>
             </motion.div>
 
@@ -202,7 +256,7 @@ export default function ProductCard({ product }: { product: Product }) {
                         fontFamily: 'var(--font-tenor)'
                     }}>
                         <span style={{ fontSize: '14px', fontWeight: 500, color: '#d4af37' }}>
-                            349 INR
+                            {product.price} INR
                         </span>
                         <span style={{
                             fontSize: '9px',
@@ -216,7 +270,7 @@ export default function ProductCard({ product }: { product: Product }) {
                         </span>
                     </div>
                 </Link>
-                ...
+
                 {/* Integrated Static Controls for Accessibility - Theme Focused */}
                 <div style={{
                     display: 'flex',
@@ -224,8 +278,9 @@ export default function ProductCard({ product }: { product: Product }) {
                     marginTop: '20px',
                     background: 'transparent'
                 }}>
-                    <Link href={`/products/${product.slug}`} style={{ flex: 1, textDecoration: 'none' }}>
+                    <div onClick={(e) => handleAction(e, 'buy')} style={{ flex: 1 }}>
                         <motion.button
+                            disabled={adding}
                             whileHover="hover"
                             initial="initial"
                             style={{
@@ -238,7 +293,7 @@ export default function ProductCard({ product }: { product: Product }) {
                                 fontWeight: 700,
                                 letterSpacing: '0.3em',
                                 textTransform: 'uppercase',
-                                cursor: 'pointer',
+                                cursor: adding ? 'not-allowed' : 'pointer',
                                 fontFamily: 'var(--font-tenor)',
                                 position: 'relative',
                                 overflow: 'hidden',
@@ -269,7 +324,7 @@ export default function ProductCard({ product }: { product: Product }) {
                                     }}
                                     style={{ display: 'block' }}
                                 >
-                                    BUY NOW
+                                    {adding ? '...' : 'BUY NOW'}
                                 </motion.span>
                                 <motion.span
                                     variants={{
@@ -278,13 +333,15 @@ export default function ProductCard({ product }: { product: Product }) {
                                     }}
                                     style={{ position: 'absolute', left: 0, right: 0, top: 0 }}
                                 >
-                                    BUY NOW
+                                    {adding ? '...' : 'BUY NOW'}
                                 </motion.span>
                             </motion.div>
                         </motion.button>
-                    </Link>
+                    </div>
 
                     <motion.button
+                        disabled={adding}
+                        onClick={(e) => handleAction(e, 'cart')}
                         whileHover="hover"
                         initial="initial"
                         style={{
@@ -297,7 +354,7 @@ export default function ProductCard({ product }: { product: Product }) {
                             fontWeight: 700,
                             letterSpacing: '0.3em',
                             textTransform: 'uppercase',
-                            cursor: 'pointer',
+                            cursor: adding ? 'not-allowed' : 'pointer',
                             fontFamily: 'var(--font-tenor)',
                             position: 'relative',
                             overflow: 'hidden',
@@ -328,7 +385,7 @@ export default function ProductCard({ product }: { product: Product }) {
                                 }}
                                 style={{ display: 'block' }}
                             >
-                                + CART
+                                {adding ? 'ADDING...' : 'ADD TO CART'}
                             </motion.span>
                             <motion.span
                                 variants={{
@@ -337,7 +394,7 @@ export default function ProductCard({ product }: { product: Product }) {
                                 }}
                                 style={{ position: 'absolute', left: 0, right: 0, top: 0 }}
                             >
-                                + CART
+                                {adding ? 'ADDING...' : 'ADD TO CART'}
                             </motion.span>
                         </motion.div>
                     </motion.button>

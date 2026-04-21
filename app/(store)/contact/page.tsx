@@ -41,7 +41,7 @@ export default function ContactPage() {
                         style={{ position: 'absolute', inset: 0 }}
                     >
                         <img
-                            src="https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&q=80"
+                            src="https://lhnamtkpjkrawgql.public.blob.vercel-storage.com/ChatGPT%20Image%20Apr%2021%2C%202026%2C%2010_18_56%20PM%20%281%29.webp"
                             alt="Perfume Essence"
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                         />
@@ -64,7 +64,7 @@ export default function ContactPage() {
                         </h2>
                         <p style={{
                             fontSize: '16px',
-                            color: '#888',
+                            color: '#ffffff',
                             maxWidth: '400px',
                             lineHeight: 1.7,
                             marginBottom: '48px'
@@ -77,19 +77,19 @@ export default function ContactPage() {
                                 <div style={{ width: '40px', height: '40px', borderRadius: '50%', border: '1px solid rgba(212,175,55,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#d4af37' }}>
                                     <Mail size={16} />
                                 </div>
-                                <span style={{ fontSize: '14px', letterSpacing: '0.1em' }}>refreshub@yahoo.com</span>
+                                <span style={{ fontSize: '14px', letterSpacing: '0.1em', color: '#ffffff' }}>refreshub@yahoo.com</span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                                 <div style={{ width: '40px', height: '40px', borderRadius: '50%', border: '1px solid rgba(212,175,55,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#d4af37' }}>
                                     <Phone size={16} />
                                 </div>
-                                <span style={{ fontSize: '14px', letterSpacing: '0.1em' }}>+91 7873789595</span>
+                                <span style={{ fontSize: '14px', letterSpacing: '0.1em', color: '#ffffff' }}>+91 7873789595</span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                                 <div style={{ width: '40px', height: '40px', borderRadius: '50%', border: '1px solid rgba(212,175,55,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#d4af37' }}>
                                     <MapPin size={16} />
                                 </div>
-                                <p style={{ fontSize: '13px', color: '#888', lineHeight: 1.5 }}>
+                                <p style={{ fontSize: '13px', color: '#ffffff', lineHeight: 1.5 }}>
                                     Trimurty Enterprises, Marthapeta Street, <br />
                                     Near Sano Bazar, Berhampur, Odisha, India - 760002
                                 </p>

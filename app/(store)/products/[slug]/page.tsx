@@ -128,7 +128,7 @@ export default function ProductExperiencePage() {
                         </h1>
 
                         <div style={{ fontSize: '24px', color: '#fff', fontFamily: 'var(--font-tenor)', marginBottom: '48px', opacity: 0.8 }}>
-                            {product.price.toLocaleString()} IDR
+                            {product.price.toLocaleString()} INR
                         </div>
 
                         <p style={{ 
