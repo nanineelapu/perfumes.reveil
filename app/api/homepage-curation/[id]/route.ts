@@ -3,8 +3,9 @@ import { NextResponse } from 'next/server'
 
 export async function PATCH(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
+    const { id } = await params;
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -13,7 +14,7 @@ export async function PATCH(
     const { data, error } = await supabase
         .from('homepage_curation')
         .update(body)
-        .eq('id', params.id)
+        .eq('id', id)
         .select()
         .single()
 
@@ -23,8 +24,9 @@ export async function PATCH(
 
 export async function DELETE(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
+    const { id } = await params;
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -32,7 +34,7 @@ export async function DELETE(
     const { error } = await supabase
         .from('homepage_curation')
         .delete()
-        .eq('id', params.id)
+        .eq('id', id)
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ success: true })

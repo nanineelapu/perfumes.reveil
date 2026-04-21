@@ -4,7 +4,8 @@ import { notFound } from 'next/navigation'
 import OrderStatusBadge from '@/components/admin/OrderStatusBadge'
 import StatusUpdateMenu from '@/components/admin/StatusUpdateMenu'
 
-export default async function OrderDetailPage({ params }: { params: { id: string } }) {
+export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
     const supabase = await createClient()
 
     // Fetch single order with detailed breakdown and profiles
@@ -35,7 +36,7 @@ export default async function OrderDetailPage({ params }: { params: { id: string
                 )
             )
         `)
-        .eq('id', params.id)
+        .eq('id', id)
         .single()
 
     if (error || !order) {

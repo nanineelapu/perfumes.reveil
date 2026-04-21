@@ -1,10 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
-type Params = { params: { id: string } }
+type Params = Promise<{ id: string }>
 
 // GET single order
-export async function GET(_req: Request, { params }: Params) {
+export async function GET(_req: Request, { params }: { params: Params }) {
+    const { id } = await params;
     const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
@@ -20,7 +21,7 @@ export async function GET(_req: Request, { params }: Params) {
         products ( id, name, images, slug )
       )
     `)
-        .eq('id', params.id)
+        .eq('id', id)
         .single()
 
     if (error) return NextResponse.json({ error: 'Order not found' }, { status: 404 })
@@ -37,7 +38,8 @@ export async function GET(_req: Request, { params }: Params) {
 }
 
 // PATCH — update order status (admin only)
-export async function PATCH(request: Request, { params }: Params) {
+export async function PATCH(request: Request, { params }: { params: Params }) {
+    const { id } = await params;
     const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
@@ -62,7 +64,7 @@ export async function PATCH(request: Request, { params }: Params) {
     const { data, error } = await supabase
         .from('orders')
         .update({ status })
-        .eq('id', params.id)
+        .eq('id', id)
         .select()
         .single()
 
@@ -71,7 +73,8 @@ export async function PATCH(request: Request, { params }: Params) {
 }
 
 // DELETE order (admin only)
-export async function DELETE(_req: Request, { params }: Params) {
+export async function DELETE(_req: Request, { params }: { params: Params }) {
+    const { id } = await params;
     const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
@@ -84,8 +87,8 @@ export async function DELETE(_req: Request, { params }: Params) {
     }
 
     // Delete order items first (foreign key constraint)
-    await supabase.from('order_items').delete().eq('order_id', params.id)
-    const { error } = await supabase.from('orders').delete().eq('id', params.id)
+    await supabase.from('order_items').delete().eq('order_id', id)
+    const { error } = await supabase.from('orders').delete().eq('id', id)
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ success: true })

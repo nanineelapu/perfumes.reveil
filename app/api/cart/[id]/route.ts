@@ -1,10 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
-type Params = { params: { id: string } }
+type Params = Promise<{ id: string }>
 
 // ── PATCH — update quantity of a specific cart item ──────────────────────────
-export async function PATCH(request: Request, { params }: Params) {
+export async function PATCH(request: Request, { params }: { params: Params }) {
+    const { id } = await params;
     const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -25,7 +26,7 @@ export async function PATCH(request: Request, { params }: Params) {
     const { data: cartItem, error: fetchError } = await supabase
         .from('cart_items')
         .select('id, user_id, product_id, quantity')
-        .eq('id', params.id)
+        .eq('id', id)
         .single()
 
     if (fetchError || !cartItem) {
@@ -53,7 +54,7 @@ export async function PATCH(request: Request, { params }: Params) {
     const { data, error } = await supabase
         .from('cart_items')
         .update({ quantity })
-        .eq('id', params.id)
+        .eq('id', id)
         .select(`
       id, quantity,
       products ( id, name, slug, price, images, stock )
@@ -68,7 +69,8 @@ export async function PATCH(request: Request, { params }: Params) {
 }
 
 // ── DELETE — remove a specific item from cart ────────────────────────────────
-export async function DELETE(_req: Request, { params }: Params) {
+export async function DELETE(_req: Request, { params }: { params: Params }) {
+    const { id } = await params;
     const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -80,7 +82,7 @@ export async function DELETE(_req: Request, { params }: Params) {
     const { data: cartItem } = await supabase
         .from('cart_items')
         .select('user_id')
-        .eq('id', params.id)
+        .eq('id', id)
         .single()
 
     if (!cartItem) {
@@ -93,7 +95,7 @@ export async function DELETE(_req: Request, { params }: Params) {
     const { error } = await supabase
         .from('cart_items')
         .delete()
-        .eq('id', params.id)
+        .eq('id', id)
 
     if (error) {
         return NextResponse.json({ error: error.message }, { status: 500 })
