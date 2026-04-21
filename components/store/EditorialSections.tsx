@@ -11,7 +11,7 @@ import { Collection } from '@/types/store'
 export function PhilosophySection() {
     return (
         <AnimatedPageSection delay={0.2} style={{
-            padding: '40px 80px',
+            padding: 'clamp(40px, 6vw, 80px) clamp(20px, 6vw, 80px)',
             background: '#f8f7f2',
             color: '#1a1a1a',
             position: 'relative',
@@ -25,7 +25,7 @@ export function PhilosophySection() {
                 style={{
                     position: 'absolute', top: '50%', left: '0',
                     transform: 'translateY(-50%)',
-                    fontSize: '15vw', fontWeight: 900, color: 'rgba(0,0,0,0.02)',
+                    fontSize: 'clamp(60px, 12vw, 180px)', fontWeight: 900, color: 'rgba(0,0,0,0.02)',
                     letterSpacing: '-0.05em', zIndex: 0, pointerEvents: 'none',
                     whiteSpace: 'nowrap', textTransform: 'uppercase',
                     fontFamily: 'var(--font-baskerville)'
@@ -36,18 +36,18 @@ export function PhilosophySection() {
                 Authenticity
             </motion.div>
 
-            {/* Side Headings */}
+            {/* Side Headings (Hidden on small mobile) */}
             <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 whileInView={{ opacity: 0.4, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 1.5 }}
                 style={{
-                    position: 'absolute', right: '60px', top: '50%', transform: 'translateY(-50%)',
+                    position: 'absolute', right: 'clamp(20px, 4vw, 60px)', top: '50%', transform: 'translateY(-50%)',
                     writingMode: 'vertical-rl',
                     textTransform: 'uppercase',
                     letterSpacing: '1em',
-                    fontSize: '9px',
+                    fontSize: '8px',
                     fontWeight: 600,
                     color: '#d4af37',
                     fontFamily: 'var(--font-baskerville)',
@@ -57,72 +57,106 @@ export function PhilosophySection() {
             </motion.div>
 
             <div style={{ maxWidth: '1400px', margin: '0 auto', width: '100%', position: 'relative', zIndex: 1 }}>
-                <div style={{ maxWidth: '800px' }}>
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                    alignItems: 'center',
+                    gap: 'clamp(30px, 6vw, 60px)'
+                }}>
+                    <div style={{ maxWidth: '700px' }}>
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 1 }}
+                            style={{
+                                fontSize: '9px',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.8em',
+                                marginBottom: 'clamp(20px, 3vw, 32px)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '12px',
+                                color: '#d4af37'
+                            }}
+                        >
+                            The Creative Process <span style={{ width: '30px', height: '1px', background: '#d4af37' }} />
+                        </motion.div>
+
+                        <h2 style={{
+                            fontSize: 'clamp(22px, 3.2vw, 38px)',
+                            fontFamily: 'var(--font-baskerville)',
+                            lineHeight: 1.2,
+                            fontWeight: 400,
+                            letterSpacing: '-0.01em',
+                            margin: 0,
+                            color: '#1a1a1a',
+                            maxWidth: '680px'
+                        }}>
+                            {"Elevated perfumes crafted with natural extraits and made with artisanal care. Timeless and sensory experiences.".split(' ').map((word, i) => (
+                                <motion.span
+                                    key={i}
+                                    initial={{ opacity: 0, y: 40, filter: 'blur(10px)' }}
+                                    whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                                    viewport={{ once: true }}
+                                    transition={{
+                                        duration: 1.2,
+                                        delay: i * 0.05,
+                                        ease: [0.215, 0.61, 0.355, 1]
+                                    }}
+                                    style={{ display: 'inline-block', marginRight: '0.25em' }}
+                                >
+                                    {word}
+                                </motion.span>
+                            ))}
+                        </h2>
+
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 1.5, delay: 1 }}
+                            style={{ marginTop: 'clamp(32px, 5vw, 48px)' }}
+                        >
+                            <Link href="/about" style={{
+                                fontSize: '10px',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.4em',
+                                color: '#1a1a1a',
+                                textDecoration: 'none',
+                                borderBottom: '1px solid #d4af37',
+                                paddingBottom: '6px'
+                            }}>
+                                OUR STORY
+                            </Link>
+                        </motion.div>
+                    </div>
+
+                    {/* Right Side Image (Refined Size) */}
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
+                        initial={{ opacity: 0, x: 20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
-                        transition={{ duration: 1 }}
+                        transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
                         style={{
-                            fontSize: '10px',
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.8em',
-                            marginBottom: '48px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '12px',
-                            color: '#d4af37'
+                            position: 'relative',
+                            height: 'clamp(260px, 24vw, 340px)',
+                            width: '100%',
+                            borderRadius: '2px',
+                            overflow: 'hidden',
+                            boxShadow: '0 30px 90px rgba(0,0,0,0.07)'
                         }}
                     >
-                        The Creative Process <span style={{ width: '40px', height: '1px', background: '#d4af37' }} />
-                    </motion.div>
-
-                    <h2 style={{
-                        fontSize: 'clamp(28px, 4vw, 52px)',
-                        fontFamily: 'var(--font-baskerville)',
-                        lineHeight: 1.25,
-                        fontWeight: 400,
-                        letterSpacing: '-0.01em',
-                        margin: 0,
-                        color: '#1a1a1a',
-                        maxWidth: '760px'
-                    }}>
-                        {"Elevated perfumes crafted with natural extraits and made with artisanal care. Timeless and sensory experiences.".split(' ').map((word, i) => (
-                            <motion.span
-                                key={i}
-                                initial={{ opacity: 0, y: 40, filter: 'blur(10px)' }}
-                                whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                                viewport={{ once: true }}
-                                transition={{
-                                    duration: 1.2,
-                                    delay: i * 0.05,
-                                    ease: [0.215, 0.61, 0.355, 1]
-                                }}
-                                style={{ display: 'inline-block', marginRight: '0.25em' }}
-                            >
-                                {word}
-                            </motion.span>
-                        ))}
-                    </h2>
-
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 1.5, delay: 1 }}
-                        style={{ marginTop: '64px' }}
-                    >
-                        <Link href="/about" style={{
-                            fontSize: '11px',
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.4em',
-                            color: '#1a1a1a',
-                            textDecoration: 'none',
-                            borderBottom: '1px solid #d4af37',
-                            paddingBottom: '8px'
-                        }}>
-                            OUR STORY
-                        </Link>
+                        <img
+                            src="https://lhnamtkpjkrawgql.public.blob.vercel-storage.com/Untitled%20%281%29.png"
+                            alt="Reveil Artistry"
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                        {/* Soft Overlay */}
+                        <div style={{
+                            position: 'absolute', inset: 0,
+                            background: 'linear-gradient(to top, rgba(0,0,0,0.03) 0%, transparent 100%)'
+                        }} />
                     </motion.div>
                 </div>
             </div>
