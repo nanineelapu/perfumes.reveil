@@ -1,0 +1,232 @@
+'use client'
+import Link from 'next/link'
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Product } from '@/types/store'
+
+export default function ProductCard({ product }: { product: Product }) {
+    const [hovered, setHovered] = useState(false)
+    const [imgError, setImgError] = useState(false)
+
+    const mainImage = product.images?.[0]
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            style={{
+                background: 'transparent',
+                position: 'relative',
+                cursor: 'pointer'
+            }}
+        >
+            {/* Visual Media Container */}
+            <motion.div
+                onMouseEnter={() => setHovered(true)}
+                onMouseLeave={() => setHovered(false)}
+                animate={{
+                    y: hovered ? -10 : 0,
+                    boxShadow: hovered ? '0 30px 60px rgba(0,0,0,0.5)' : '0 0 0 rgba(0,0,0,0)'
+                }}
+                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                style={{
+                    position: 'relative',
+                    overflow: 'hidden',
+                    paddingBottom: '145%',
+                    background: '#111',
+                    borderRadius: '2px', // Sharper, professional corners
+                    border: '1px solid rgba(255,255,255,0.05)'
+                }}
+            >
+                {/* Background Image with Cinematic Focus */}
+                <motion.div
+                    animate={{
+                        scale: hovered ? 1.08 : 1,
+                        filter: hovered ? 'brightness(0.6) blur(2px)' : 'brightness(0.8) blur(0px)'
+                    }}
+                    transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                    style={{ position: 'absolute', inset: 0, zIndex: 0 }}
+                >
+                    {mainImage && !imgError ? (
+                        <img
+                            src={mainImage}
+                            alt={product.name}
+                            onError={() => setImgError(true)}
+                            style={{
+                                width: '100%', height: '100%', objectFit: 'cover'
+                            }}
+                        />
+                    ) : (
+                        <div style={{
+                            position: 'absolute', inset: 0,
+                            display: 'flex', alignItems: 'center',
+                            justifyContent: 'center', color: 'rgba(255,255,255,0.05)', fontSize: '8px',
+                            letterSpacing: '0.4em', textTransform: 'uppercase'
+                        }}>
+                            Fragrance <br /> Archive
+                        </div>
+                    )}
+                </motion.div>
+
+                {/* Subtle Grain Overlay for Texture */}
+                <div style={{
+                    position: 'absolute', inset: 0, zIndex: 1,
+                    background: 'url("https://grainy-gradients.vercel.app/noise.svg")',
+                    opacity: 0.05, pointerEvents: 'none'
+                }} />
+
+                {/* Action Interface - Sliding Glassmorphism */}
+                <motion.div
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: hovered ? 0 : 20, opacity: hovered ? 1 : 0 }}
+                    transition={{ duration: 0.4, delay: 0.1 }}
+                    style={{
+                        position: 'absolute', inset: 0,
+                        zIndex: 2,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'flex-end',
+                        padding: '30px',
+                        background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 60%)'
+                    }}
+                >
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <Link
+                            href={`/products/${product.slug}`}
+                            style={{
+                                width: '100%',
+                                textAlign: 'center',
+                                background: '#fff',
+                                color: '#000',
+                                padding: '16px 0',
+                                textDecoration: 'none',
+                                fontSize: '10px',
+                                fontWeight: 900,
+                                letterSpacing: '0.4em',
+                                textTransform: 'uppercase',
+                                boxShadow: '0 10px 20px rgba(0,0,0,0.2)'
+                            }}
+                        >
+                            EXPERIENCE
+                        </Link>
+                        <button
+                            style={{
+                                width: '100%',
+                                background: 'rgba(255,255,255,0.05)',
+                                backdropFilter: 'blur(10px)',
+                                color: '#fff',
+                                border: '1px solid rgba(255,255,255,0.1)',
+                                padding: '14px 0',
+                                fontSize: '9px',
+                                fontWeight: 700,
+                                letterSpacing: '0.2em',
+                                textTransform: 'uppercase',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            ADD TO CART
+                        </button>
+                    </div>
+                </motion.div>
+
+                {/* Vertical Batch ID */}
+                <div style={{
+                    position: 'absolute', top: '30px', right: '30px',
+                    fontSize: '8px', color: '#d4af37',
+                    letterSpacing: '0.4em', textTransform: 'uppercase',
+                    fontWeight: 900, zIndex: 3, writingMode: 'vertical-rl',
+                    opacity: hovered ? 0.2 : 0.6, transition: '0.5s'
+                }}>
+                    BATCH — REF.{product.id.padStart(3, '0')}
+                </div>
+            </motion.div>
+
+            {/* Typography Section */}
+            <div style={{ padding: '24px 0', textAlign: 'left' }}>
+                <Link href={`/products/${product.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <div style={{
+                        fontSize: '8px', color: '#666',
+                        letterSpacing: '0.6em', marginBottom: '12px',
+                        fontWeight: 400, textTransform: 'uppercase',
+                        display: 'flex', alignItems: 'center', gap: '8px',
+                        fontFamily: 'var(--font-tenor)'
+                    }}>
+                        <div style={{
+                            width: hovered ? '30px' : '0px',
+                            height: '1px',
+                            background: '#d4af37',
+                            transition: 'width 0.6s cubic-bezier(0.22, 1, 0.36, 1)'
+                        }} />
+                        {product.category}
+                    </div>
+                    <h3 style={{
+                        margin: '0 0 4px', fontSize: '22px', fontWeight: 300,
+                        color: '#fff', fontFamily: 'var(--font-cormorant)',
+                        letterSpacing: '-0.01em'
+                    }}>
+                        {product.name}
+                    </h3>
+                    <div style={{
+                        fontSize: '13px', fontWeight: 400, color: '#d4af37',
+                        letterSpacing: '0.05em', fontFamily: 'var(--font-tenor)',
+                        marginBottom: '20px'
+                    }}>
+                        {product.price.toLocaleString()} IDR
+                    </div>
+                </Link>
+
+                {/* Integrated Static Controls for Accessibility */}
+                <div style={{
+                    display: 'flex',
+                    gap: '1px',
+                    marginTop: '16px',
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.03)',
+                    borderRadius: '2px',
+                    overflow: 'hidden'
+                }}>
+                    <Link href={`/products/${product.slug}`} style={{ flex: 1.2, textDecoration: 'none' }}>
+                        <motion.button
+                            whileHover={{ backgroundColor: 'rgba(212, 175, 55, 0.1)' }}
+                            style={{
+                                width: '100%',
+                                background: 'transparent',
+                                color: '#fff',
+                                border: 'none',
+                                padding: '12px 0',
+                                fontSize: '8px',
+                                fontWeight: 700,
+                                letterSpacing: '0.3em',
+                                textTransform: 'uppercase',
+                                cursor: 'pointer',
+                                fontFamily: 'var(--font-tenor)',
+                                borderRight: '1px solid rgba(255,255,255,0.05)'
+                            }}
+                        >
+                            Experience
+                        </motion.button>
+                    </Link>
+                    <motion.button
+                        whileHover={{ backgroundColor: '#fff', color: '#000' }}
+                        style={{
+                            flex: 0.8,
+                            background: 'transparent',
+                            color: '#d4af37',
+                            border: 'none',
+                            padding: '12px 0',
+                            fontSize: '8px',
+                            fontWeight: 700,
+                            letterSpacing: '0.3em',
+                            textTransform: 'uppercase',
+                            cursor: 'pointer',
+                            fontFamily: 'var(--font-tenor)'
+                        }}
+                    >
+                        + Cart
+                    </motion.button>
+                </div>
+            </div>
+        </motion.div>
+    )
+}

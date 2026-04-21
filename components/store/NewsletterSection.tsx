@@ -1,0 +1,224 @@
+'use client'
+import { useRef } from 'react'
+import { motion, useScroll, useTransform, useSpring } from 'framer-motion'
+
+export function NewsletterSection() {
+    const containerRef = useRef(null)
+    const { scrollYProgress } = useScroll({
+        target: containerRef,
+        offset: ["start end", "end start"]
+    })
+
+    const smoothProgress = useSpring(scrollYProgress, {
+        stiffness: 100,
+        damping: 30,
+        restDelta: 0.001
+    })
+
+    // Parallax background text
+    const bgX = useTransform(smoothProgress, [0, 1], [-200, 200])
+    const bgOpacity = useTransform(smoothProgress, [0, 0.5, 1], [0.05, 0.2, 0.05])
+
+    // Aesthetic elements
+    const circleRotate = useTransform(smoothProgress, [0, 1], [0, 180])
+    const circleX = useTransform(smoothProgress, [0, 1], [-50, 50])
+
+    return (
+        <section
+            ref={containerRef}
+            className="relative overflow-hidden bg-white text-[#1a1a1a]"
+            style={{
+                padding: '100px 24px',
+                minHeight: '50vh',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+            }}
+        >
+            {/* Background Aesthetic: Large Parallax Text */}
+            <motion.div
+                style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    x: '-50%',
+                    y: '-55%',
+                    fontSize: 'clamp(150px, 30vw, 380px)',
+                    fontFamily: 'var(--font-baskerville)',
+                    color: '#d4af37',
+                    opacity: bgOpacity,
+                    whiteSpace: 'nowrap',
+                    zIndex: 0,
+                    translateX: bgX,
+                    pointerEvents: 'none',
+                    userSelect: 'none'
+                }}
+            >
+                REVEIL
+            </motion.div>
+
+            {/* Decorative Gold Elements */}
+            <motion.div
+                style={{
+                    position: 'absolute',
+                    width: '350px',
+                    height: '350px',
+                    border: '1px solid #d4af3715',
+                    borderRadius: '50%',
+                    zIndex: 0,
+                    rotate: circleRotate,
+                    translateX: circleX,
+                    left: '5%',
+                    top: '-10%'
+                }}
+            />
+
+            {/* Content Grid */}
+            <div className="relative z-10 w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+
+                {/* Left Column: Heading */}
+                <div className="flex flex-col items-start text-left">
+                    <motion.span
+                        initial={{ opacity: 0, x: -20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.8 }}
+                        style={{
+                            fontSize: '10px',
+                            color: '#d4af37',
+                            letterSpacing: '0.8em',
+                            textTransform: 'uppercase',
+                            marginBottom: '20px',
+                            fontWeight: 600,
+                            fontFamily: 'var(--font-baskerville)'
+                        }}
+                    >
+                        Our Community
+                    </motion.span>
+
+                    <motion.h2
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.8, delay: 0.2 }}
+                        style={{
+                            fontSize: 'clamp(45px, 7vw, 90px)',
+                            fontWeight: 800,
+                            lineHeight: 0.85,
+                            margin: 0,
+                            fontFamily: 'var(--font-baskerville)',
+                            textTransform: 'uppercase',
+                            letterSpacing: '-0.04em'
+                        }}
+                    >
+                        JOIN <br />
+                        <span style={{
+                            color: 'transparent',
+                            WebkitTextStroke: '1.5px #1a1a1a',
+                            fontFamily: 'var(--font-baskerville)'
+                        }}>
+                            REVEIL
+                        </span>
+                    </motion.h2>
+
+                    <motion.div
+                        initial={{ scaleX: 0 }}
+                        whileInView={{ scaleX: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 1.5, ease: "circOut", delay: 0.5 }}
+                        style={{
+                            height: '1px',
+                            width: '100px',
+                            background: '#d4af37',
+                            marginTop: '32px',
+                            originX: 0
+                        }}
+                    />
+                </div>
+
+                {/* Right Column: Info & Form */}
+                <div className="flex flex-col items-start lg:items-end text-left lg:text-right">
+                    <motion.p
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.8, delay: 0.4 }}
+                        style={{
+                            fontSize: '17px',
+                            color: '#666',
+                            fontFamily: 'var(--font-baskerville)',
+                            fontStyle: 'italic',
+                            fontWeight: 400,
+                            lineHeight: 1.6,
+                            maxWidth: '400px',
+                            marginBottom: '40px',
+                            letterSpacing: '-0.01em'
+                        }}
+                    >
+                        Be the first to know about our new perfume launches and special offers.
+                        Join our list to get exclusive updates on our luxury collections.
+                    </motion.p>
+
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.98 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.8, delay: 0.6 }}
+                        className="w-full max-w-md relative"
+                    >
+                        <div className="relative group">
+                            <input
+                                type="email"
+                                placeholder="ENTER YOUR EMAIL"
+                                style={{
+                                    fontFamily: 'var(--font-baskerville)',
+                                    fontSize: '11px',
+                                    paddingRight: '48px'
+                                }}
+                                className="w-full bg-transparent border-b border-[#ddd] py-5 focus:border-[#d4af37] outline-none transition-colors duration-500 tracking-[0.3em]"
+                            />
+                            <motion.button
+                                whileHover={{ x: 5, color: '#d4af37' }}
+                                className="absolute right-0 top-1/2 -translate-y-1/2 transition-colors duration-300"
+                            >
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                            </motion.button>
+                        </div>
+                        <p
+                            style={{ fontFamily: 'var(--font-baskerville)' }}
+                            className="mt-4 text-[8px] text-gray-400 uppercase tracking-widest font-medium"
+                        >
+                            Get the latest perfume news and offers
+                        </p>
+                    </motion.div>
+                </div>
+            </div>
+
+            {/* Floating Vertical Decorative Text */}
+            <motion.div
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 1, delay: 1 }}
+                style={{
+                    position: 'absolute',
+                    bottom: '40px',
+                    right: '40px',
+                    fontSize: '9px',
+                    color: '#c4a64f',
+                    writingMode: 'vertical-rl',
+                    letterSpacing: '0.8em',
+                    textTransform: 'uppercase',
+                    fontFamily: 'var(--font-baskerville)',
+                    opacity: 0.4
+                }}
+            >
+                REVEIL / {new Date().getFullYear()} / PRIVÉ
+            </motion.div>
+        </section>
+    )
+}
+
+
