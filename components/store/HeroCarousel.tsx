@@ -311,7 +311,7 @@ function SlideMedia({ slide, isActive, emblaApi }: { slide: Slide, isActive: boo
                                 transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
                             >
                                 <motion.a
-                                    href="/products"
+                                    href={slide.link || "/products"}
                                     whileHover={{
                                         backgroundColor: '#d4af37',
                                         color: '#000',

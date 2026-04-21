@@ -2,17 +2,23 @@
 import { useState, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, ArrowRight, LayoutGrid, List, SlidersHorizontal, ChevronRight, Filter, Plus, Loader2 } from 'lucide-react'
+import { useSearchParams } from 'next/navigation'
 import ProductCard from '@/components/store/ProductCard'
 import { Product } from '@/types/store'
 import { createClient } from '@/lib/supabase/client'
 
 const concentrations = ["Pure Parfum", "Extrait de Parfum", "Eau de Parfum", "Parfum Oil"]
 
-export default function ShopPage() {
+import { Suspense } from 'react'
+
+function ShopContent() {
+    const searchParams = useSearchParams()
+    const initialSearch = searchParams.get('search') || ""
+
     const [products, setProducts] = useState<Product[]>([])
     const [loading, setLoading] = useState(true)
     const [selectedCategory, setSelectedCategory] = useState("ALL")
-    const [searchQuery, setSearchQuery] = useState("")
+    const [searchQuery, setSearchQuery] = useState(initialSearch)
     const [isFilterOpen, setIsFilterOpen] = useState(false)
     const [sortBy, setSortBy] = useState("Featured")
     const [selectedConcentrations, setSelectedConcentrations] = useState<string[]>([])
@@ -456,3 +462,13 @@ export default function ShopPage() {
         </main>
     )
 }
+
+export default function ShopPage() {
+    return (
+        <Suspense fallback={<div>Loading archive...</div>}>
+            <ShopContent />
+        </Suspense>
+    )
+}
+
+

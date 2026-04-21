@@ -57,7 +57,7 @@ export function ReviewsSection() {
             className="reviews-section"
             style={{
                 background: '#050505',
-                padding: '160px 0',
+                padding: '100px 80px',
                 overflow: 'hidden',
                 position: 'relative'
             }}

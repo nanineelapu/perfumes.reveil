@@ -15,22 +15,11 @@ export default function ProductGrid({ items }: { items: (Product | Collection)[]
     }
 
     return (
-        <AnimatedPageSection delay={0.1} style={{ background: '#050505', padding: '160px 0', position: 'relative', overflow: 'hidden' }}>
+        <AnimatedPageSection delay={0.1} style={{ background: '#050505', padding: '100px 80px', position: 'relative', overflow: 'hidden' }}>
             {/* Architectural Border Accents */}
             <div style={{ position: 'absolute', top: 0, left: '5%', right: '5%', height: '1px', background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.05), transparent)' }} />
 
-            {/* Side Branding */}
-            <div style={{
-                position: 'absolute', left: '40px', top: '160px',
-                writingMode: 'vertical-rl', transform: 'rotate(180deg)',
-                fontSize: '9px', letterSpacing: '1.2em', color: '#d4af37',
-                textTransform: 'uppercase', opacity: 0.3, fontWeight: 300,
-                fontFamily: 'var(--font-baskerville)'
-            }}>
-                P R E M I E R — T R E N D S
-            </div>
-
-            <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 40px', position: 'relative' }}>
+            <div style={{ maxWidth: '1440px', margin: '0 auto', position: 'relative' }}>
                 <div style={{
                     display: 'flex',
                     justifyContent: 'space-between',

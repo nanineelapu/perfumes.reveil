@@ -22,14 +22,15 @@ export default function AboutPage() {
                     transition={{ duration: 1 }}
                 >
                     <h1 style={{
-                        fontSize: 'clamp(40px, 8vw, 120px)',
+                        fontSize: 'clamp(40px, 8vw, 100px)',
                         fontFamily: 'var(--font-baskerville)',
-                        fontWeight: 900,
-                        letterSpacing: '-0.02em',
+                        fontWeight: 400,
+                        letterSpacing: '0.1em',
                         lineHeight: 1.1,
-                        marginBottom: '24px'
+                        marginBottom: '24px',
+                        textTransform: 'uppercase'
                     }}>
-                        The <span style={{ color: '#d4af37', fontStyle: 'italic' }}>Archive</span> of <br /> Scents
+                        The <span style={{ color: '#d4af37' }}>Reveil</span> Story
                     </h1>
                     <p style={{
                         fontSize: '14px',
@@ -42,17 +43,6 @@ export default function AboutPage() {
                         Curating excellence since 1999
                     </p>
                 </motion.div>
-
-                {/* Background Ghost Text */}
-                <div style={{
-                    position: 'absolute', top: '50%', left: '50%',
-                    transform: 'translate(-50%, -50%)', fontSize: '25vw',
-                    fontFamily: 'var(--font-baskerville)', color: 'rgba(255,255,255,0.02)',
-                    userSelect: 'none', pointerEvents: 'none', whiteSpace: 'nowrap',
-                    fontWeight: 900, zIndex: 0
-                }}>
-                    LEGACY
-                </div>
             </section>
 
             {/* Heritage Section */}

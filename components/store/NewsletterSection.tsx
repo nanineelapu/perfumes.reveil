@@ -28,7 +28,7 @@ export function NewsletterSection() {
             ref={containerRef}
             className="relative overflow-hidden bg-white text-[#1a1a1a]"
             style={{
-                padding: '100px 24px',
+                padding: '80px 80px',
                 minHeight: '50vh',
                 display: 'flex',
                 alignItems: 'center',

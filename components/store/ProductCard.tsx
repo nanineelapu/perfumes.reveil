@@ -15,12 +15,37 @@ export default function ProductCard({ product }: { product: Product }) {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
+            whileHover="cardHover"
             style={{
-                background: 'transparent',
+                background: 'linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(212,175,55,0.03) 100%)',
                 position: 'relative',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                borderRadius: '8px',
+                padding: '12px',
+                border: '1px solid rgba(255,255,255,0.03)',
+                overflow: 'hidden',
+                transition: 'all 0.6s cubic-bezier(0.22, 1, 0.36, 1)'
             }}
         >
+            {/* Atmospheric Chassis Glow (Animated on Hover) */}
+            <motion.div
+                variants={{
+                    cardHover: { opacity: 1, scale: 1.1 }
+                }}
+                initial={{ opacity: 0, scale: 1 }}
+                transition={{ duration: 0.8 }}
+                style={{
+                    position: 'absolute',
+                    bottom: '-40px',
+                    left: '10%',
+                    right: '10%',
+                    height: '100px',
+                    background: 'radial-gradient(circle, rgba(212,175,55,0.08) 0%, transparent 70%)',
+                    filter: 'blur(30px)',
+                    zIndex: 0,
+                    pointerEvents: 'none'
+                }}
+            />
             {/* Visual Media Container */}
             <motion.div
                 onMouseEnter={() => setHovered(true)}
@@ -33,7 +58,7 @@ export default function ProductCard({ product }: { product: Product }) {
                 style={{
                     position: 'relative',
                     overflow: 'hidden',
-                    paddingBottom: '145%',
+                    paddingBottom: '125%',
                     background: '#111',
                     borderRadius: '2px', // Sharper, professional corners
                     border: '1px solid rgba(255,255,255,0.05)'
@@ -147,7 +172,7 @@ export default function ProductCard({ product }: { product: Product }) {
                 <Link href={`/products/${product.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                     <div style={{
                         fontSize: '8px', color: '#666',
-                        letterSpacing: '0.6em', marginBottom: '12px',
+                        letterSpacing: '0.6em', marginBottom: '8px',
                         fontWeight: 400, textTransform: 'uppercase',
                         display: 'flex', alignItems: 'center', gap: '8px',
                         fontFamily: 'var(--font-tenor)'
@@ -161,69 +186,160 @@ export default function ProductCard({ product }: { product: Product }) {
                         {product.category}
                     </div>
                     <h3 style={{
-                        margin: '0 0 4px', fontSize: '22px', fontWeight: 300,
+                        margin: '0 0 8px', fontSize: '18px', fontWeight: 300,
                         color: '#fff', fontFamily: 'var(--font-cormorant)',
-                        letterSpacing: '-0.01em'
+                        letterSpacing: '0.02em', textTransform: 'none' // Allows admin casing
                     }}>
                         {product.name}
                     </h3>
+
+                    {/* Price and Discount Tag */}
                     <div style={{
-                        fontSize: '13px', fontWeight: 400, color: '#d4af37',
-                        letterSpacing: '0.05em', fontFamily: 'var(--font-tenor)',
-                        marginBottom: '20px'
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        marginBottom: '20px',
+                        fontFamily: 'var(--font-tenor)'
                     }}>
-                        {product.price.toLocaleString()} IDR
+                        <span style={{ fontSize: '14px', fontWeight: 500, color: '#d4af37' }}>
+                            349 INR
+                        </span>
+                        <span style={{
+                            fontSize: '9px',
+                            color: '#d4af37',
+                            padding: '2px 8px',
+                            border: '1px solid rgba(212,175,55,0.3)',
+                            borderRadius: '1px',
+                            letterSpacing: '0.1em'
+                        }}>
+                            12% OFF
+                        </span>
                     </div>
                 </Link>
-
-                {/* Integrated Static Controls for Accessibility */}
+                ...
+                {/* Integrated Static Controls for Accessibility - Theme Focused */}
                 <div style={{
                     display: 'flex',
-                    gap: '1px',
-                    marginTop: '16px',
-                    background: 'rgba(255,255,255,0.05)',
-                    border: '1px solid rgba(255,255,255,0.03)',
-                    borderRadius: '2px',
-                    overflow: 'hidden'
+                    gap: '12px', // Sophisticated gap
+                    marginTop: '20px',
+                    background: 'transparent'
                 }}>
-                    <Link href={`/products/${product.slug}`} style={{ flex: 1.2, textDecoration: 'none' }}>
+                    <Link href={`/products/${product.slug}`} style={{ flex: 1, textDecoration: 'none' }}>
                         <motion.button
-                            whileHover={{ backgroundColor: 'rgba(212, 175, 55, 0.1)' }}
+                            whileHover="hover"
+                            initial="initial"
                             style={{
                                 width: '100%',
-                                background: 'transparent',
-                                color: '#fff',
-                                border: 'none',
-                                padding: '12px 0',
+                                background: 'rgba(255,255,255,0.02)',
+                                color: '#d4af37', // Gold text by default
+                                border: '1px solid rgba(212,175,55,0.2)', // Subtle gold border
+                                padding: '14px 0',
                                 fontSize: '8px',
                                 fontWeight: 700,
                                 letterSpacing: '0.3em',
                                 textTransform: 'uppercase',
                                 cursor: 'pointer',
                                 fontFamily: 'var(--font-tenor)',
-                                borderRight: '1px solid rgba(255,255,255,0.05)'
+                                position: 'relative',
+                                overflow: 'hidden',
+                                borderRadius: '1px'
                             }}
                         >
-                            Experience
+                            {/* Hover Background Slide */}
+                            <motion.div
+                                variants={{
+                                    initial: { y: '100%' },
+                                    hover: { y: 0 }
+                                }}
+                                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                                style={{ position: 'absolute', inset: 0, background: '#d4af37', zIndex: 0 }}
+                            />
+
+                            <motion.div
+                                variants={{
+                                    initial: { color: '#d4af37' },
+                                    hover: { color: '#000' }
+                                }}
+                                style={{ position: 'relative', zIndex: 1 }}
+                            >
+                                <motion.span
+                                    variants={{
+                                        initial: { y: 0, opacity: 1 },
+                                        hover: { y: -20, opacity: 0 }
+                                    }}
+                                    style={{ display: 'block' }}
+                                >
+                                    BUY NOW
+                                </motion.span>
+                                <motion.span
+                                    variants={{
+                                        initial: { y: 20, opacity: 0 },
+                                        hover: { y: 0, opacity: 1 }
+                                    }}
+                                    style={{ position: 'absolute', left: 0, right: 0, top: 0 }}
+                                >
+                                    BUY NOW
+                                </motion.span>
+                            </motion.div>
                         </motion.button>
                     </Link>
+
                     <motion.button
-                        whileHover={{ backgroundColor: '#fff', color: '#000' }}
+                        whileHover="hover"
+                        initial="initial"
                         style={{
-                            flex: 0.8,
-                            background: 'transparent',
+                            flex: 1,
+                            background: 'rgba(255,255,255,0.02)',
                             color: '#d4af37',
-                            border: 'none',
-                            padding: '12px 0',
+                            border: '1px solid rgba(212,175,55,0.2)',
+                            padding: '14px 0',
                             fontSize: '8px',
                             fontWeight: 700,
                             letterSpacing: '0.3em',
                             textTransform: 'uppercase',
                             cursor: 'pointer',
-                            fontFamily: 'var(--font-tenor)'
+                            fontFamily: 'var(--font-tenor)',
+                            position: 'relative',
+                            overflow: 'hidden',
+                            borderRadius: '1px'
                         }}
                     >
-                        + Cart
+                        {/* Hover Background Slide */}
+                        <motion.div
+                            variants={{
+                                initial: { y: '100%' },
+                                hover: { y: 0 }
+                            }}
+                            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                            style={{ position: 'absolute', inset: 0, background: '#d4af37', zIndex: 0 }}
+                        />
+
+                        <motion.div
+                            variants={{
+                                initial: { color: '#d4af37' },
+                                hover: { color: '#000' }
+                            }}
+                            style={{ position: 'relative', zIndex: 1 }}
+                        >
+                            <motion.span
+                                variants={{
+                                    initial: { y: 0, opacity: 1 },
+                                    hover: { y: -20, opacity: 0 }
+                                }}
+                                style={{ display: 'block' }}
+                            >
+                                + CART
+                            </motion.span>
+                            <motion.span
+                                variants={{
+                                    initial: { y: 20, opacity: 0 },
+                                    hover: { y: 0, opacity: 1 }
+                                }}
+                                style={{ position: 'absolute', left: 0, right: 0, top: 0 }}
+                            >
+                                + CART
+                            </motion.span>
+                        </motion.div>
                     </motion.button>
                 </div>
             </div>

@@ -191,7 +191,7 @@ export default function CollectionsPage() {
                             <input
                                 className="w-full bg-transparent border-b border-gray-200 py-2 focus:border-accent focus:outline-none transition-colors text-sm font-light tracking-wide text-gray-900"
                                 value={form.name}
-                                onChange={e => setForm(p => ({ ...p, name: e.target.value.toUpperCase() }))}
+                                onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
                                 placeholder="e.g. THE NOIR SERIES"
                             />
                         </div>
@@ -201,7 +201,7 @@ export default function CollectionsPage() {
                             <input
                                 className="w-full bg-transparent border-b border-gray-200 py-2 focus:border-accent focus:outline-none transition-colors text-sm font-light tracking-wide text-gray-900"
                                 value={form.type}
-                                onChange={e => setForm(p => ({ ...p, type: e.target.value.toUpperCase() }))}
+                                onChange={e => setForm(p => ({ ...p, type: e.target.value }))}
                                 placeholder="e.g. BOLD & DARK"
                             />
                         </div>
@@ -244,7 +244,7 @@ export default function CollectionsPage() {
                         </div>
                         <div className="p-4">
                             <p className="text-[9px] text-accent font-bold tracking-widest mb-1">{col.type}</p>
-                            <h3 className="text-sm font-bold tracking-wider uppercase text-gray-900">{col.name}</h3>
+                            <h3 className="text-sm font-bold tracking-wider text-gray-900">{col.name}</h3>
                             <p className="text-[10px] text-gray-400 mt-2">Order: {col.display_order}</p>
                         </div>
                     </div>

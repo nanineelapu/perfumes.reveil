@@ -1,6 +1,7 @@
 'use client'
 import { useRef, useState, useEffect } from 'react'
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion'
+import Link from 'next/link'
 import { AnimatedPageSection } from './AnimatedPageSection'
 import { Collection } from '@/types/store'
 
@@ -8,7 +9,7 @@ import { Collection } from '@/types/store'
 export function PhilosophySection() {
     return (
         <AnimatedPageSection delay={0.2} style={{
-            padding: '80px 48px',
+            padding: '40px 80px',
             background: '#f8f7f2',
             color: '#1a1a1a',
             position: 'relative',
@@ -109,7 +110,7 @@ export function PhilosophySection() {
                         transition={{ duration: 1.5, delay: 1 }}
                         style={{ marginTop: '64px' }}
                     >
-                        <a href="/about" style={{
+                        <Link href="/about" style={{
                             fontSize: '11px',
                             textTransform: 'uppercase',
                             letterSpacing: '0.4em',
@@ -118,8 +119,8 @@ export function PhilosophySection() {
                             borderBottom: '1px solid #d4af37',
                             paddingBottom: '8px'
                         }}>
-                            Our Story
-                        </a>
+                            OUR STORY
+                        </Link>
                     </motion.div>
                 </div>
             </div>
@@ -157,7 +158,7 @@ export function NotesSection() {
 
     return (
         <section ref={containerRef} style={{
-            padding: '100px 24px',
+            padding: '80px 80px',
             background: '#0a0a0a',
             position: 'relative',
             overflow: 'hidden'
@@ -232,79 +233,81 @@ export function NotesSection() {
                             transition={{ duration: 0.6, delay: i * 0.1 }}
                             style={{
                                 position: 'relative',
-                                height: '380px', // Decreased size
+                                height: '380px',
                                 overflow: 'hidden',
                                 cursor: 'pointer',
                                 borderRadius: '2px'
                             }}
                         >
-                            <motion.div
-                                whileHover="hover"
-                                style={{ width: '100%', height: '100%' }}
-                            >
-                                <motion.img
-                                    variants={{
-                                        hover: { scale: 1.1 }
-                                    }}
-                                    transition={{ duration: 0.8, ease: "easeOut" }}
-                                    src={item.image_url}
-                                    style={{
-                                        width: '100%', height: '100%', objectFit: 'cover',
-                                        filter: 'brightness(0.8)'
-                                    }}
-                                />
-
-                                {/* Compact Hover Reveal */}
+                            <Link href="/products" style={{ display: 'block', height: '100%', textDecoration: 'none' }}>
                                 <motion.div
-                                    variants={{
-                                        hover: { opacity: 1 }
-                                    }}
-                                    initial={{ opacity: 0 }}
-                                    transition={{ duration: 0.3 }}
-                                    style={{
-                                        position: 'absolute', inset: 0,
-                                        background: 'rgba(0,0,0,0.7)',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                    }}
+                                    whileHover="hover"
+                                    style={{ width: '100%', height: '100%' }}
                                 >
+                                    <motion.img
+                                        variants={{
+                                            hover: { scale: 1.1 }
+                                        }}
+                                        transition={{ duration: 0.8, ease: "easeOut" }}
+                                        src={item.image_url}
+                                        style={{
+                                            width: '100%', height: '100%', objectFit: 'cover',
+                                            filter: 'brightness(0.8)'
+                                        }}
+                                    />
+
+                                    {/* Compact Hover Reveal */}
                                     <motion.div
                                         variants={{
-                                            hover: { opacity: 1, scale: 1 }
+                                            hover: { opacity: 1 }
                                         }}
-                                        initial={{ opacity: 0, scale: 0.9 }}
+                                        initial={{ opacity: 0 }}
+                                        transition={{ duration: 0.3 }}
                                         style={{
-                                            background: '#d4af37', color: '#000',
-                                            padding: '12px 24px', fontSize: '9px',
-                                            fontWeight: 900, textTransform: 'uppercase',
-                                            letterSpacing: '0.2em'
+                                            position: 'absolute', inset: 0,
+                                            background: 'rgba(0,0,0,0.7)',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center'
                                         }}
                                     >
-                                        Explore
+                                        <motion.div
+                                            variants={{
+                                                hover: { opacity: 1, scale: 1 }
+                                            }}
+                                            initial={{ opacity: 0, scale: 0.9 }}
+                                            style={{
+                                                background: '#d4af37', color: '#000',
+                                                padding: '12px 24px', fontSize: '9px',
+                                                fontWeight: 900, textTransform: 'uppercase',
+                                                letterSpacing: '0.2em'
+                                            }}
+                                        >
+                                            Explore
+                                        </motion.div>
                                     </motion.div>
-                                </motion.div>
 
-                                {/* Label Area */}
-                                <div style={{
-                                    position: 'absolute', bottom: 0, left: 0, right: 0,
-                                    padding: '24px',
-                                    background: 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%)'
-                                }}>
+                                    {/* Label Area */}
                                     <div style={{
-                                        fontSize: '8px', color: '#d4af37',
-                                        letterSpacing: '0.3em', marginBottom: '6px',
-                                        fontFamily: 'var(--font-baskerville)'
+                                        position: 'absolute', bottom: 0, left: 0, right: 0,
+                                        padding: '24px',
+                                        background: 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%)'
                                     }}>
-                                        {item.type}
+                                        <div style={{
+                                            fontSize: '8px', color: '#d4af37',
+                                            letterSpacing: '0.3em', marginBottom: '6px',
+                                            fontFamily: 'var(--font-baskerville)',
+                                            textTransform: 'uppercase'
+                                        }}>
+                                            {item.type}
+                                        </div>
+                                        <div style={{
+                                            fontSize: '16px', color: '#fff',
+                                            fontWeight: 800, fontFamily: 'var(--font-baskerville)',
+                                        }}>
+                                            {item.name}
+                                        </div>
                                     </div>
-                                    <div style={{
-                                        fontSize: '16px', color: '#fff',
-                                        fontWeight: 800, fontFamily: 'var(--font-baskerville)',
-                                        textTransform: 'uppercase',
-                                    }}>
-                                        {item.name}
-                                    </div>
-                                </div>
-                            </motion.div>
+                                </motion.div>
+                            </Link>
                         </motion.div>
                     ))}
                 </div>
@@ -328,7 +331,7 @@ export function BrandShowcaseSection() {
 
     return (
         <section style={{
-            padding: '80px 24px',
+            padding: '60px 80px',
             background: '#050505',
             position: 'relative',
             overflow: 'hidden',
@@ -389,53 +392,55 @@ export function BrandShowcaseSection() {
                                 justifyContent: 'center'
                             }}
                         >
-                            <motion.div
-                                whileHover="hover"
-                                style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                            >
-                                {brand.logo ? (
-                                    <motion.img
-                                        variants={{ hover: { scale: 1.1 } }}
-                                        src={brand.logo}
+                            <Link href={`/products?search=${encodeURIComponent(brand.name)}`} style={{ textDecoration: 'none', width: '100%', height: '100%' }}>
+                                <motion.div
+                                    whileHover="hover"
+                                    style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                >
+                                    {brand.logo ? (
+                                        <motion.img
+                                            variants={{ hover: { scale: 1.1 } }}
+                                            src={brand.logo}
+                                            style={{
+                                                width: '80%',
+                                                height: '80%',
+                                                objectFit: 'contain',
+                                                filter: 'brightness(0.7) grayscale(0.5)',
+                                                transition: 'all 0.4s ease'
+                                            }}
+                                        />
+                                    ) : (
+                                        <span style={{ fontSize: '32px', color: '#d4af37', opacity: 0.6 }}>{brand.name[0]}</span>
+                                    )}
+
+                                    {/* Hover Spotlight Overlay */}
+                                    <motion.div
+                                        variants={{ hover: { opacity: 1 } }}
+                                        initial={{ opacity: 0 }}
                                         style={{
-                                            width: '80%',
-                                            height: '80%',
-                                            objectFit: 'contain',
-                                            filter: 'brightness(0.7) grayscale(0.5)',
-                                            transition: 'all 0.4s ease'
+                                            position: 'absolute', inset: 0,
+                                            background: 'radial-gradient(circle at center, rgba(212,175,55,0.06) 0%, transparent 80%)',
+                                            pointerEvents: 'none'
                                         }}
                                     />
-                                ) : (
-                                    <span style={{ fontSize: '32px', color: '#d4af37', opacity: 0.6 }}>{brand.name[0]}</span>
-                                )}
 
-                                {/* Hover Spotlight Overlay */}
-                                <motion.div
-                                    variants={{ hover: { opacity: 1 } }}
-                                    initial={{ opacity: 0 }}
-                                    style={{
-                                        position: 'absolute', inset: 0,
-                                        background: 'radial-gradient(circle at center, rgba(212,175,55,0.06) 0%, transparent 80%)',
-                                        pointerEvents: 'none'
-                                    }}
-                                />
-
-                                {/* Subtle Label (Reveals on Hover) */}
-                                <motion.div
-                                    variants={{ hover: { opacity: 1, y: -10 } }}
-                                    initial={{ opacity: 0, y: 0 }}
-                                    style={{
-                                        position: 'absolute', bottom: '12px',
-                                        fontSize: '8px', color: '#fff',
-                                        fontFamily: 'var(--font-baskerville)',
-                                        letterSpacing: '0.15em',
-                                        textAlign: 'center', width: '100%',
-                                        zIndex: 2
-                                    }}
-                                >
-                                    {brand.name}
+                                    {/* Subtle Label (Reveals on Hover) */}
+                                    <motion.div
+                                        variants={{ hover: { opacity: 1, y: -10 } }}
+                                        initial={{ opacity: 0, y: 0 }}
+                                        style={{
+                                            position: 'absolute', bottom: '12px',
+                                            fontSize: '8px', color: '#fff',
+                                            fontFamily: 'var(--font-baskerville)',
+                                            letterSpacing: '0.15em',
+                                            textAlign: 'center', width: '100%',
+                                            zIndex: 2
+                                        }}
+                                    >
+                                        {brand.name}
+                                    </motion.div>
                                 </motion.div>
-                            </motion.div>
+                            </Link>
                         </motion.div>
                     ))}
                 </div>
@@ -455,23 +460,24 @@ export function ReveilCollectionSection() {
     })
 
     // Cinematic Parallax Transforms
-    const imageScale = useTransform(scrollYProgress, [0, 1], [1, 1.25])
-    const titleY = useTransform(scrollYProgress, [0, 1], [60, -60])
-    const labelX = useTransform(scrollYProgress, [0, 1], [-40, 40])
+    // Cinematic Parallax Transforms - Snappier ranges for better sync
+    const imageScale = useTransform(scrollYProgress, [0, 0.8], [1.05, 1.2])
+    const titleY = useTransform(scrollYProgress, [0, 0.8], [30, -30])
+    const labelX = useTransform(scrollYProgress, [0, 0.8], [-20, 20])
 
     return (
         <section ref={containerRef} style={{
             background: '#050505',
-            padding: '160px 24px',
+            padding: '100px 80px',
             position: 'relative',
             overflow: 'hidden'
         }}>
             {/* The Floating Rounded Card Container */}
             <motion.div
-                initial={{ opacity: 0, y: 40 }}
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 1.5, ease: "circOut" }}
+                viewport={{ once: true, amount: 0.1 }}
+                transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
                 style={{
                     maxWidth: '1400px',
                     margin: '0 auto',

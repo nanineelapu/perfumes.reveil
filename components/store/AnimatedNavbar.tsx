@@ -63,14 +63,14 @@ export function AnimatedNavbar() {
             style={{
                 background: 'transparent',
                 position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
-                padding: '12px 24px 0'
+                padding: '12px 75px 0'
             }}
         >
             <div style={{
                 maxWidth: '1400px', margin: '0 auto',
                 display: 'flex', height: '64px', alignItems: 'center', justifyContent: 'space-between',
             }}>
-                <motion.div variants={itemVariants}>
+                <motion.div variants={itemVariants} style={{ marginLeft: '-24px' }}>
                     <Link href="/" style={{
                         display: 'flex', alignItems: 'center', height: '100%'
                     }}>
