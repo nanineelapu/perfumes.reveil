@@ -86,7 +86,7 @@ export function Footer() {
                                         color: '#666', transition: 'all 0.4s'
                                     }}
                                 >
-                                    <s.icon size={16} strokeWidth={1.5} />
+                                    <s.icon size={16} />
                                 </motion.a>
                             ))}
                         </div>
