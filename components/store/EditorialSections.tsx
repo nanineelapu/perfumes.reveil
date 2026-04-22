@@ -171,7 +171,7 @@ export function NotesSection() {
         offset: ["start end", "end start"]
     })
 
-    const [collections, setCollections] = useState<Collection[]>(FALLBACK_COLLECTIONS)
+    const [collections, setCollections] = useState<Collection[]>([])
     const router = useRouter()
     const supabase = createClient()
     const [user, setUser] = useState<any>(null)
@@ -198,12 +198,16 @@ export function NotesSection() {
         fetch('/api/collections')
             .then(res => res.json())
             .then(data => {
-                if (Array.isArray(data) && data.length > 0) {
+                if (Array.isArray(data)) {
                     setCollections(data)
+                } else {
+                    console.error('Expected array of collections, got:', data)
+                    setCollections([])
                 }
             })
             .catch(err => {
                 console.error('Failed to fetch collections:', err)
+                setCollections([])
             })
     }, [])
 
@@ -677,38 +681,3 @@ export function ReveilCollectionSection() {
         </section>
     )
 }
-
-const FALLBACK_COLLECTIONS: Collection[] = [
-    {
-        id: 'wild-stone',
-        name: 'WILD STONE',
-        type: 'Cinematic Series',
-        image_url: 'https://lhnamtkpjkrawgql.public.blob.vercel-storage.com/ChatGPT%20Image%20Apr%2021%2C%202026%2C%2006_05_32%20PM.webp',
-        price: 1890,
-        display_order: 1
-    },
-    {
-        id: 'meena',
-        name: 'MEENA',
-        type: 'Artisan Extraits',
-        image_url: 'https://lhnamtkpjkrawgql.public.blob.vercel-storage.com/ChatGPT%20Image%20Apr%2019%2C%202026%2C%2009_02_17%20PM.webp',
-        price: 2450,
-        display_order: 2
-    },
-    {
-        id: 'voyage',
-        name: 'VOYAGE',
-        type: 'Travel Archive',
-        image_url: 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&q=80&w=800',
-        price: 1550,
-        display_order: 3
-    },
-    {
-        id: 'noir-series',
-        name: 'NOIR SERIES',
-        type: 'Midnight Edit',
-        image_url: 'https://images.unsplash.com/photo-1557170334-a9632e77c6e4?auto=format&fit=crop&q=80&w=800',
-        price: 2990,
-        display_order: 4
-    }
-]
