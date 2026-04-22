@@ -5,6 +5,7 @@ import { Truck, CheckCircle, ChevronRight, Download, HelpCircle, Loader2, Shoppi
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { getAutomaticStatus } from '@/lib/utils/order-status'
 
 interface OrderItem {
     id: string
@@ -142,7 +143,8 @@ export default function OrdersPage() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
                     {orders.length > 0 ? (
                         orders.map((order, idx) => {
-                            const status = getStatusStyles(order.status)
+                            const autoStatus = getAutomaticStatus(order.status, order.created_at)
+                            const statusStyles = getStatusStyles(autoStatus)
                             return (
                                 <motion.div
                                     key={order.id}
@@ -181,9 +183,9 @@ export default function OrdersPage() {
                                             </div>
                                         </div>
 
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 24px', borderRadius: '2px', background: status.bg, border: `1px solid ${status.border}` }}>
-                                            {status.icon}
-                                            <span style={{ fontSize: '9px', fontWeight: 800, color: status.text, textTransform: 'uppercase', letterSpacing: '0.2em', fontFamily: 'var(--font-baskerville)' }}>{order.status}</span>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 24px', borderRadius: '2px', background: statusStyles.bg, border: `1px solid ${statusStyles.border}` }}>
+                                            {statusStyles.icon}
+                                            <span style={{ fontSize: '9px', fontWeight: 800, color: statusStyles.text, textTransform: 'uppercase', letterSpacing: '0.2em', fontFamily: 'var(--font-baskerville)' }}>{autoStatus}</span>
                                         </div>
                                     </div>
 

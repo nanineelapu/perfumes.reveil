@@ -131,40 +131,70 @@ export default function HeroCarousel({ slides }: { slides: Slide[] }) {
 function SlideMedia({ slide, isActive, emblaApi }: { slide: Slide, isActive: boolean, emblaApi: any }) {
     const [isLoaded, setIsLoaded] = useState(false)
 
-    // Immediate load strategy for snappier navigation
+    // Multi-layered loading strategy for maximum reliability
     useEffect(() => {
+        setIsLoaded(false) // Reset on slide change
         if (!slide.video_url) {
             setIsLoaded(true)
-        } else {
-            // Safety timeout for videos
-            const timer = setTimeout(() => setIsLoaded(true), 2500)
-            return () => clearTimeout(timer)
         }
-    }, [slide.video_url])
+        // Safety fallback
+        const timer = setTimeout(() => setIsLoaded(true), 4000)
+        return () => clearTimeout(timer)
+    }, [slide.id])
 
     return (
-        <div style={{ position: 'relative', height: '100vh', width: '100%', overflow: 'hidden', background: '#000' }}>
+        <div style={{ position: 'relative', height: '100vh', width: '100%', overflow: 'hidden', background: '#050505' }}>
+
+            {/* Premium Placeholder State */}
+            {!isLoaded && (
+                <div style={{
+                    position: 'absolute', inset: 0,
+                    background: 'radial-gradient(circle at center, #111 0%, #050505 100%)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 0
+                }}>
+                    <div style={{
+                        width: '40px', height: '40px', border: '1px solid rgba(212,175,55,0.2)',
+                        borderTop: '1px solid #d4af37', borderRadius: '50%',
+                        animation: 'spin 1s linear infinite'
+                    }} />
+                    <style>{`
+                        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+                    `}</style>
+                </div>
+            )}
 
             {/* Background Media */}
             <motion.div
                 animate={{
-                    opacity: isActive && isLoaded ? 1 : 0,
+                    opacity: isActive ? 1 : 0,
                     scale: isActive ? 1.05 : 1.1
                 }}
                 transition={{
-                    opacity: { duration: 1.5, ease: "easeOut" },
+                    opacity: { duration: 0.8, ease: "easeOut" },
                     scale: { duration: 25, ease: "linear" }
                 }}
-                style={{ height: '100%', width: '100%' }}
+                style={{ height: '100%', width: '100%', position: 'relative' }}
             >
-                {slide.video_url ? (
+                {/* Visual Placeholder (Poster) - Always there for instant reveal */}
+                <img
+                    src={slide.image_url}
+                    alt=""
+                    style={{
+                        position: 'absolute', inset: 0, width: '100%', height: '100%',
+                        objectFit: 'cover', filter: 'brightness(0.35)',
+                        opacity: isLoaded ? 0 : 1, transition: 'opacity 1s ease'
+                    }}
+                />
+
+                {slide.video_url && (
                     <video
                         src={slide.video_url}
-                        autoPlay
+                        autoPlay={isActive}
                         muted
                         playsInline
+                        preload="auto"
                         onLoadedData={() => setIsLoaded(true)}
-                        onCanPlay={() => setIsLoaded(true)}
+                        onPlaying={() => setIsLoaded(true)}
                         onEnded={() => {
                             setTimeout(() => emblaApi?.scrollNext(), 3000)
                         }}
@@ -172,19 +202,9 @@ function SlideMedia({ slide, isActive, emblaApi }: { slide: Slide, isActive: boo
                             width: '100%',
                             height: '100%',
                             objectFit: 'cover',
-                            filter: 'brightness(0.25) contrast(1.15)'
-                        }}
-                    />
-                ) : (
-                    <img
-                        src={slide.image_url}
-                        alt={slide.title ?? 'Slide'}
-                        onLoad={() => setIsLoaded(true)}
-                        style={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover',
-                            filter: 'brightness(0.35)'
+                            filter: 'brightness(0.25) contrast(1.15)',
+                            opacity: isLoaded ? 1 : 0,
+                            transition: 'opacity 0.8s ease'
                         }}
                     />
                 )}
@@ -214,12 +234,12 @@ function SlideMedia({ slide, isActive, emblaApi }: { slide: Slide, isActive: boo
                 <div style={{ maxWidth: '900px' }}>
                     <motion.div
                         initial="initial"
-                        animate={isActive ? "animate" : "initial"}
+                        animate={(isActive && isLoaded) ? "animate" : "initial"}
                         variants={{
                             animate: {
                                 transition: {
                                     staggerChildren: 0.1,
-                                    delayChildren: 0.8
+                                    delayChildren: 0.2
                                 }
                             }
                         }}

@@ -3,6 +3,7 @@ import Link from 'next/link'
 import OrderStatusBadge from '@/components/admin/OrderStatusBadge'
 import StatusUpdateMenu from '@/components/admin/StatusUpdateMenu'
 import { cn } from '@/lib/utils'
+import { getAutomaticStatus } from '@/lib/utils/order-status'
 
 export default async function AdminOrdersPage() {
     const supabase = await createClient()
@@ -121,7 +122,7 @@ export default async function AdminOrdersPage() {
                                             <div className="text-[8px] text-gray-400 uppercase tracking-tighter mt-1">{order.payment_method?.toUpperCase() ?? 'N/A'}</div>
                                         </td>
                                         <td className="px-8 py-6">
-                                            <OrderStatusBadge status={order.status ?? 'pending'} />
+                                            <OrderStatusBadge status={getAutomaticStatus(order.status ?? 'pending', order.created_at)} />
                                         </td>
                                         <td className="px-8 py-6">
                                             <div className="flex items-center gap-6">

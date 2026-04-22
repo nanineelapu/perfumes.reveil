@@ -2,9 +2,45 @@
 import { motion } from 'framer-motion'
 import { AnimatedNavbar } from '@/components/store/AnimatedNavbar'
 import { StayConnected } from '@/components/store/StayConnected'
-import { Phone, Mail, MapPin, ArrowRight } from 'lucide-react'
+import { Phone, Mail, MapPin, ArrowRight, Loader2, CheckCircle } from 'lucide-react'
+import { useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
 
 export default function ContactPage() {
+    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle')
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        phone: '',
+        message: ''
+    })
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setIsSubmitting(true)
+        setStatus('idle')
+
+        try {
+            const res = await fetch('/api/contact', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            })
+
+            if (res.ok) {
+                setStatus('success')
+                setFormData({ name: '', email: '', phone: '', message: '' })
+            } else {
+                setStatus('error')
+            }
+        } catch (err) {
+            setStatus('error')
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
+
     return (
         <main style={{
             background: '#ffffff',
@@ -21,7 +57,7 @@ export default function ContactPage() {
                 display: 'grid',
                 gridTemplateColumns: '1fr 1fr',
                 width: '100%',
-                marginTop: '0' // We'll handle navbar padding inside
+                marginTop: '0'
             }}>
 
                 {/* Left Side: Visual Legacy */}
@@ -77,22 +113,13 @@ export default function ContactPage() {
                                 <div style={{ width: '40px', height: '40px', borderRadius: '50%', border: '1px solid rgba(212,175,55,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#d4af37' }}>
                                     <Mail size={16} />
                                 </div>
-                                <span style={{ fontSize: '14px', letterSpacing: '0.1em', color: '#ffffff' }}>refreshub@yahoo.com</span>
+                                <span style={{ fontSize: '14px', letterSpacing: '0.1em', color: '#ffffff' }}>naniatworkmail@gmail.com</span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                                 <div style={{ width: '40px', height: '40px', borderRadius: '50%', border: '1px solid rgba(212,175,55,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#d4af37' }}>
                                     <Phone size={16} />
                                 </div>
                                 <span style={{ fontSize: '14px', letterSpacing: '0.1em', color: '#ffffff' }}>+91 7873789595</span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                                <div style={{ width: '40px', height: '40px', borderRadius: '50%', border: '1px solid rgba(212,175,55,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#d4af37' }}>
-                                    <MapPin size={16} />
-                                </div>
-                                <p style={{ fontSize: '13px', color: '#ffffff', lineHeight: 1.5 }}>
-                                    Trimurty Enterprises, Marthapeta Street, <br />
-                                    Near Sano Bazar, Berhampur, Odisha, India - 760002
-                                </p>
                             </div>
                         </div>
                     </motion.div>
@@ -125,70 +152,115 @@ export default function ContactPage() {
                             </p>
                         </div>
 
-                        <form style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
-                                <div style={{ position: 'relative' }}>
-                                    <input
-                                        type="text"
-                                        placeholder="Name"
-                                        style={{
-                                            width: '100%', background: 'transparent', border: 'none', borderBottom: '1px solid #eee',
-                                            padding: '12px 0', color: '#050505', fontSize: '16px', outline: 'none'
-                                        }}
-                                    />
-                                    <motion.div style={{ position: 'absolute', bottom: 0, left: 0, height: '1px', background: '#d4af37', width: '0%' }} whileFocus={{ width: '100%' }} />
-                                </div>
-                                <div style={{ position: 'relative' }}>
-                                    <input
-                                        type="email"
-                                        placeholder="Email"
-                                        style={{
-                                            width: '100%', background: 'transparent', border: 'none', borderBottom: '1px solid #eee',
-                                            padding: '12px 0', color: '#050505', fontSize: '16px', outline: 'none'
-                                        }}
-                                    />
-                                </div>
-                            </div>
-
-                            <div style={{ position: 'relative' }}>
-                                <input
-                                    type="tel"
-                                    placeholder="Phone Number"
-                                    style={{
-                                        width: '100%', background: 'transparent', border: 'none', borderBottom: '1px solid #eee',
-                                        padding: '12px 0', color: '#050505', fontSize: '16px', outline: 'none'
-                                    }}
-                                />
-                            </div>
-
-                            <div style={{ position: 'relative' }}>
-                                <textarea
-                                    rows={1}
-                                    placeholder="Message"
-                                    style={{
-                                        width: '100%', background: 'transparent', border: 'none', borderBottom: '1px solid #eee',
-                                        padding: '12px 0', color: '#050505', fontSize: '16px', outline: 'none',
-                                        resize: 'none'
-                                    }}
-                                />
-                            </div>
-
-                            <motion.button
-                                whileHover={{ backgroundColor: '#050505', color: '#fff', x: 10 }}
-                                whileTap={{ scale: 0.98 }}
+                        {status === 'success' ? (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
                                 style={{
-                                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                                    padding: '20px 30px',
-                                    background: '#d4af37', color: '#000',
-                                    border: 'none', cursor: 'pointer',
-                                    fontWeight: 900, fontSize: '12px', letterSpacing: '0.4em',
-                                    textTransform: 'uppercase', transition: 'all 0.4s'
+                                    padding: '40px',
+                                    border: '1px solid #d4af37',
+                                    textAlign: 'center',
+                                    background: '#fffcf5',
+                                    borderRadius: '2px'
                                 }}
                             >
-                                Send Message
-                                <ArrowRight size={18} />
-                            </motion.button>
-                        </form>
+                                <CheckCircle size={48} color="#d4af37" style={{ marginBottom: '20px' }} />
+                                <h3 style={{ fontFamily: 'var(--font-baskerville)', fontSize: '24px', marginBottom: '12px' }}>Message Received</h3>
+                                <p style={{ color: '#666', fontSize: '14px' }}>Our concierge team will contact you shortly.</p>
+                                <button
+                                    onClick={() => setStatus('idle')}
+                                    style={{
+                                        marginTop: '24px', background: 'none', border: 'none',
+                                        textDecoration: 'underline', cursor: 'pointer', fontSize: '12px',
+                                        letterSpacing: '0.1em'
+                                    }}
+                                >
+                                    Send another message
+                                </button>
+                            </motion.div>
+                        ) : (
+                            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
+                                    <div style={{ position: 'relative' }}>
+                                        <input
+                                            type="text"
+                                            placeholder="Name"
+                                            required
+                                            value={formData.name}
+                                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                            style={{
+                                                width: '100%', background: 'transparent', border: 'none', borderBottom: '1px solid #eee',
+                                                padding: '12px 0', color: '#050505', fontSize: '16px', outline: 'none'
+                                            }}
+                                        />
+                                    </div>
+                                    <div style={{ position: 'relative' }}>
+                                        <input
+                                            type="email"
+                                            placeholder="Email"
+                                            required
+                                            value={formData.email}
+                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                            style={{
+                                                width: '100%', background: 'transparent', border: 'none', borderBottom: '1px solid #eee',
+                                                padding: '12px 0', color: '#050505', fontSize: '16px', outline: 'none'
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div style={{ position: 'relative' }}>
+                                    <input
+                                        type="tel"
+                                        placeholder="Phone Number"
+                                        required
+                                        value={formData.phone}
+                                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                        style={{
+                                            width: '100%', background: 'transparent', border: 'none', borderBottom: '1px solid #eee',
+                                            padding: '12px 0', color: '#050505', fontSize: '16px', outline: 'none'
+                                        }}
+                                    />
+                                </div>
+
+                                <div style={{ position: 'relative' }}>
+                                    <textarea
+                                        rows={1}
+                                        placeholder="Message"
+                                        required
+                                        value={formData.message}
+                                        onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                                        style={{
+                                            width: '100%', background: 'transparent', border: 'none', borderBottom: '1px solid #eee',
+                                            padding: '12px 0', color: '#050505', fontSize: '16px', outline: 'none',
+                                            resize: 'none'
+                                        }}
+                                    />
+                                </div>
+
+                                {status === 'error' && (
+                                    <p style={{ color: '#ff4b4b', fontSize: '12px' }}>Failed to send message. Please try again.</p>
+                                )}
+
+                                <motion.button
+                                    disabled={isSubmitting}
+                                    whileHover={!isSubmitting ? { backgroundColor: '#050505', color: '#fff', x: 10 } : {}}
+                                    whileTap={!isSubmitting ? { scale: 0.98 } : {}}
+                                    style={{
+                                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                        padding: '20px 30px',
+                                        background: '#d4af37', color: '#000',
+                                        border: 'none', cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                                        fontWeight: 900, fontSize: '12px', letterSpacing: '0.4em',
+                                        textTransform: 'uppercase', transition: 'all 0.4s',
+                                        opacity: isSubmitting ? 0.7 : 1
+                                    }}
+                                >
+                                    {isSubmitting ? 'Sending...' : 'Send Message'}
+                                    {isSubmitting ? <Loader2 className="animate-spin" size={18} /> : <ArrowRight size={18} />}
+                                </motion.button>
+                            </form>
+                        )}
                     </motion.div>
                 </div>
             </div>

@@ -166,11 +166,6 @@ export function PhilosophySection() {
 
 export function NotesSection() {
     const containerRef = useRef(null)
-    const { scrollYProgress } = useScroll({
-        target: containerRef,
-        offset: ["start end", "end start"]
-    })
-
     const [collections, setCollections] = useState<Collection[]>([])
     const router = useRouter()
     const supabase = createClient()
@@ -223,10 +218,7 @@ export function NotesSection() {
 
                 {/* Unique Offset Header */}
                 <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-start', gap: '40px' }}>
-                    <motion.div
-                        initial={{ opacity: 0, x: -30 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
+                    <div
                         style={{
                             fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.6em',
                             color: '#d4af37', writingMode: 'vertical-rl', transform: 'rotate(180deg)',
@@ -234,24 +226,18 @@ export function NotesSection() {
                         }}
                     >
                         EST. 2026
-                    </motion.div>
+                    </div>
 
                     <div style={{ flex: 1 }}>
-                        <motion.span
-                            initial={{ opacity: 0 }}
-                            whileInView={{ opacity: 0.5 }}
-                            viewport={{ once: true }}
+                        <span
                             style={{
                                 fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1em',
-                                color: '#fff', display: 'block', marginBottom: '12px'
+                                color: '#fff', display: 'block', marginBottom: '12px', opacity: 0.5
                             }}
                         >
                             Curated Series
-                        </motion.span>
-                        <motion.h2
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
+                        </span>
+                        <h2
                             style={{
                                 fontSize: 'clamp(24px, 4vw, 48px)',
                                 fontFamily: 'var(--font-baskerville)',
@@ -260,7 +246,7 @@ export function NotesSection() {
                             }}
                         >
                             THE <span style={{ color: '#d4af37' }}>COLLECTIONS</span>
-                        </motion.h2>
+                        </h2>
                     </div>
 
                     <div style={{ maxWidth: '350px', position: 'absolute', right: 0, bottom: 0, textAlign: 'right' }}>
@@ -281,12 +267,8 @@ export function NotesSection() {
                     gap: '20px'
                 }}>
                     {Array.isArray(collections) && collections.map((item, i) => (
-                        <motion.div
+                        <div
                             key={item.name}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.6, delay: i * 0.1 }}
                             style={{
                                 position: 'relative',
                                 height: '380px',
@@ -364,8 +346,7 @@ export function NotesSection() {
                                     </div>
                                 </motion.div>
                             </div>
-
-                        </motion.div>
+                        </div>
                     ))}
                 </div>
             </div>
@@ -400,10 +381,10 @@ export function BrandShowcaseSection() {
                 {/* Minimalist Heading */}
                 <div style={{ textAlign: 'center', marginBottom: '60px' }}>
                     <motion.div
-                        initial={{ opacity: 0, y: 10 }}
+                        initial={{ opacity: 0, y: 30 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        transition={{ duration: 1 }}
+                        transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
                     >
                         <span style={{
                             fontSize: '9px', textTransform: 'uppercase', letterSpacing: '1.2em',
@@ -432,10 +413,14 @@ export function BrandShowcaseSection() {
                     {brands.map((brand, i) => (
                         <motion.div
                             key={i}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.6, delay: i * 0.1 }}
+                            initial={{ opacity: 0, y: 40, scale: 0.95 }}
+                            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                            viewport={{ once: true, amount: 0.1 }}
+                            transition={{ 
+                                duration: 1, 
+                                delay: i * 0.15, 
+                                ease: [0.16, 1, 0.3, 1] 
+                            }}
                             style={{
                                 position: 'relative',
                                 height: '180px',
@@ -514,6 +499,16 @@ export function ReveilCollectionSection() {
     const router = useRouter()
     const supabase = createClient()
     const [user, setUser] = useState<any>(null)
+    const { scrollYProgress } = useScroll({
+        target: containerRef,
+        offset: ["start end", "end start"]
+    })
+
+    const smoothProgress = useSpring(scrollYProgress, {
+        stiffness: 100,
+        damping: 30,
+        restDelta: 0.001
+    })
 
     useEffect(() => {
         const checkUser = async () => {
@@ -523,16 +518,10 @@ export function ReveilCollectionSection() {
         checkUser()
     }, [])
 
-    const { scrollYProgress } = useScroll({
-        target: containerRef,
-        offset: ["start end", "end start"]
-    })
-
-    // Cinematic Parallax Transforms
-    // Cinematic Parallax Transforms - Snappier ranges for better sync
-    const imageScale = useTransform(scrollYProgress, [0, 0.8], [1.05, 1.2])
-    const titleY = useTransform(scrollYProgress, [0, 0.8], [30, -30])
-    const labelX = useTransform(scrollYProgress, [0, 0.8], [-20, 20])
+    // Parallax Transforms
+    const imageScale = useTransform(smoothProgress, [0, 1], [1.1, 1])
+    const titleY = useTransform(smoothProgress, [0, 1], [0, -50])
+    const labelX = useTransform(smoothProgress, [0, 1], [-100, 100])
 
     return (
         <section ref={containerRef} style={{

@@ -1,9 +1,26 @@
 'use client'
-import { useRef } from 'react'
-import { motion, useScroll, useTransform, useSpring } from 'framer-motion'
+import { useRef, useState } from 'react'
+import { motion, useScroll, useTransform, useSpring, AnimatePresence } from 'framer-motion'
+import { CheckCircle } from 'lucide-react'
 
 export function NewsletterSection() {
+    const [email, setEmail] = useState('')
+    const [isSubmitted, setIsSubmitted] = useState(false)
+    const [isSubmitting, setIsSubmitting] = useState(false)
     const containerRef = useRef(null)
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!email) return
+        setIsSubmitting(true)
+
+        // Mocking API call
+        setTimeout(() => {
+            setIsSubmitting(false)
+            setIsSubmitted(true)
+            setEmail('')
+        }, 1000)
+    }
     const { scrollYProgress } = useScroll({
         target: containerRef,
         offset: ["start end", "end start"]
@@ -159,40 +176,71 @@ export function NewsletterSection() {
                         Join our list to get exclusive updates on our luxury collections.
                     </motion.p>
 
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.98 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.8, delay: 0.6 }}
-                        className="w-full max-w-md relative"
-                    >
-                        <div className="relative group">
-                            <input
-                                type="email"
-                                placeholder="ENTER YOUR EMAIL"
-                                style={{
-                                    fontFamily: 'var(--font-baskerville)',
-                                    fontSize: '11px',
-                                    paddingRight: '48px'
-                                }}
-                                className="w-full bg-transparent border-b border-[#ddd] py-5 focus:border-[#d4af37] outline-none transition-colors duration-500 tracking-[0.3em]"
-                            />
-                            <motion.button
-                                whileHover={{ x: 5, color: '#d4af37' }}
-                                className="absolute right-0 top-1/2 -translate-y-1/2 transition-colors duration-300"
+                    <AnimatePresence mode="wait">
+                        {!isSubmitted ? (
+                            <motion.form
+                                key="form"
+                                initial={{ opacity: 0, scale: 0.98 }}
+                                whileInView={{ opacity: 1, scale: 1 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.8, delay: 0.6 }}
+                                onSubmit={handleSubmit}
+                                className="w-full max-w-md relative"
                             >
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-                                </svg>
-                            </motion.button>
-                        </div>
-                        <p
-                            style={{ fontFamily: 'var(--font-baskerville)' }}
-                            className="mt-4 text-[8px] text-gray-400 uppercase tracking-widest font-medium"
-                        >
-                            Get the latest perfume news and offers
-                        </p>
-                    </motion.div>
+                                <div className="relative group">
+                                    <input
+                                        type="email"
+                                        required
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        placeholder="ENTER YOUR EMAIL"
+                                        style={{
+                                            fontFamily: 'var(--font-baskerville)',
+                                            fontSize: '11px',
+                                            paddingRight: '48px'
+                                        }}
+                                        className="w-full bg-transparent border-b border-[#ddd] py-5 focus:border-[#d4af37] outline-none transition-colors duration-500 tracking-[0.3em]"
+                                    />
+                                    <motion.button
+                                        type="submit"
+                                        disabled={isSubmitting}
+                                        whileHover={{ x: 5, color: '#d4af37' }}
+                                        className="absolute right-0 top-1/2 -translate-y-1/2 transition-colors duration-300"
+                                    >
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                                        </svg>
+                                    </motion.button>
+                                </div>
+                                <p
+                                    style={{ fontFamily: 'var(--font-baskerville)' }}
+                                    className="mt-4 text-[8px] text-gray-400 uppercase tracking-widest font-medium"
+                                >
+                                    Get the latest perfume news and offers
+                                </p>
+                            </motion.form>
+                        ) : (
+                            <motion.div
+                                key="success"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                style={{
+                                    textAlign: 'right',
+                                    color: '#d4af37',
+                                    fontFamily: 'var(--font-baskerville)'
+                                }}
+                            >
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '12px', marginBottom: '8px' }}>
+                                    <CheckCircle size={16} />
+                                    <span style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.4em' }}>Subscription Confirmed</span>
+                                </div>
+                                <h4 style={{ fontSize: '18px', color: '#1a1a1a', fontWeight: 600, letterSpacing: '-0.02em' }}>
+                                    Thank you for choosing REVEIL. <br />
+                                    <span style={{ color: '#666', fontSize: '14px', fontWeight: 400 }}>We will contact you soon.</span>
+                                </h4>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             </div>
 
