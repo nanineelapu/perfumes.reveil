@@ -10,7 +10,7 @@ function getServiceClient() {
 }
 
 export async function GET() {
-    const supabase = getServiceClient()
+    const supabase = await createClient()
     const { data, error } = await supabase
         .from('editorial_collections')
         .select('*')
