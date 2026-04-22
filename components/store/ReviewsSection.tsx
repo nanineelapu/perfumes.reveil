@@ -1,250 +1,257 @@
 'use client'
 import { useState, useRef, useEffect } from 'react'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Star, Quote } from 'lucide-react'
 
 const reviews = [
     {
         name: "Arjun Mehta",
-        location: "Mumbai, India",
+        location: "Mumbai",
         text: "The Oudh Noir is absolutely mesmerizing. It has this unique depth that I haven't found anywhere else.",
         initials: "AM",
         image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=200"
     },
     {
         name: "Sanya Malhotra",
-        location: "Delhi, India",
+        location: "Delhi",
         text: "I was skeptical about ordering online, but the scent trail of Velvet Rose exceeded everything.",
         initials: "SM",
         image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200"
     },
     {
         name: "Rohan Varma",
-        location: "Bangalore, India",
+        location: "Bangalore",
         text: "Exceptional longevity. I applied Saffron Silk in the morning and could still catch it by dinner.",
         initials: "RV",
         image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200"
     },
     {
         name: "Ananya Iyer",
-        location: "Chennai, India",
+        location: "Chennai",
         text: "Reveil has mastered the art of minimalism in design but absolute complexity in scent.",
         initials: "AI",
         image: "https://images.unsplash.com/photo-1548142813-c348350df52b?auto=format&fit=crop&q=80&w=200"
     },
     {
         name: "Vikram Singh",
-        location: "Jaipur, India",
+        location: "Jaipur",
         text: "A truly international luxury experience right here in India. The packaging itself is a work of art.",
         initials: "VS",
         image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=200"
+    },
+    {
+        name: "Meera Kapoor",
+        location: "Hyderabad",
+        text: "The presentation is impeccable. It feels like unboxing a piece of high fashion rather than just a perfume.",
+        initials: "MK",
+        image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=200"
     }
 ]
 
 export function ReviewsSection() {
-    const containerRef = useRef<HTMLDivElement>(null)
-    const { scrollYProgress } = useScroll({
-        target: containerRef,
-        offset: ["start end", "end start"]
-    })
-
-    const x1 = useTransform(scrollYProgress, [0, 1], [0, -200])
-    const x2 = useTransform(scrollYProgress, [0, 1], [-200, 0])
-
     return (
         <section
-            ref={containerRef}
-            className="reviews-section"
             style={{
                 background: '#050505',
-                padding: '100px 80px',
-                overflow: 'hidden',
-                position: 'relative'
+                padding: '120px 80px',
+                position: 'relative',
+                overflow: 'hidden'
             }}
         >
-            {/* Background Narrative Text */}
-            <div style={{
-                position: 'absolute', top: '10%', left: '50%', transform: 'translateX(-50%)',
-                fontSize: '15vw', fontWeight: 900, color: 'rgba(255,255,255,0.02)',
-                whiteSpace: 'nowrap', zIndex: 0, pointerEvents: 'none',
-                fontFamily: 'var(--font-baskerville)', letterSpacing: '-0.05em'
-            }}>
-                DISTINGUISHED
-            </div>
+            <div style={{ maxWidth: '100vw', margin: '0 auto', padding: '0 0 0 80px', position: 'relative' }}>
+                
+                {/* Minimalist Header */}
+                <div style={{ marginBottom: '60px', textAlign: 'left' }}>
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 1 }}
+                    >
+                        <span style={{ 
+                            fontSize: '9px', 
+                            textTransform: 'uppercase', 
+                            letterSpacing: '0.8em', 
+                            color: '#d4af37',
+                            marginBottom: '16px',
+                            display: 'block'
+                        }}>
+                            Archive Reflections
+                        </span>
+                        <h2 style={{
+                            fontSize: 'clamp(32px, 4vw, 42px)',
+                            fontFamily: 'var(--font-baskerville)',
+                            color: '#fff',
+                            fontWeight: 400,
+                            margin: 0,
+                            letterSpacing: '-0.01em'
+                        }}>
+                            Refined <span style={{ fontStyle: 'italic', color: '#d4af37' }}>Voices</span>
+                        </h2>
+                    </motion.div>
+                </div>
 
-            <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 40px', position: 'relative', zIndex: 1 }}>
-                {/* Header with High-Fashion Layout */}
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginBottom: '100px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', opacity: 0.6, marginBottom: '24px' }}>
-                        <div style={{ width: '30px', height: '1px', background: '#d4af37', marginTop: '8px' }} />
-                        <span style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.4em', textTransform: 'uppercase', color: '#d4af37' }}>Refined Feedback</span>
-                    </div>
+                {/* Draggable Carousel Container */}
+                <motion.div 
+                    style={{
+                        display: 'flex',
+                        gap: '24px',
+                        cursor: 'grab',
+                        paddingBottom: '40px',
+                        overflowX: 'auto',
+                        msOverflowStyle: 'none',
+                        scrollbarWidth: 'none',
+                        paddingRight: '80px'
+                    }}
+                    whileTap={{ cursor: 'grabbing' }}
+                >
+                    {reviews.map((review, i) => (
+                        <ReviewCard key={i} review={review} index={i} />
+                    ))}
+                </motion.div>
 
-                    <h2 style={{
-                        fontSize: 'clamp(32px, 6vw, 64px)',
-                        fontFamily: 'var(--font-baskerville)',
-                        color: '#fff',
+                {/* Google Meta Info - Offset */}
+                <motion.div 
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 0.3 }}
+                    viewport={{ once: true }}
+                    style={{
+                        marginTop: '40px',
+                        paddingRight: '80px',
+                        fontSize: '8px',
+                        letterSpacing: '0.5em',
                         textTransform: 'uppercase',
-                        lineHeight: 0.85,
-                        margin: 0,
-                        letterSpacing: '-0.02em'
-                    }}>
-                        Voices of <br />
-                        <span style={{ color: '#d4af37' }}>The Archive</span>
-                    </h2>
-                </div>
-            </div>
-
-            {/* Kinetic Row 1 */}
-            <motion.div style={{ display: 'flex', gap: '32px', x: x1, marginBottom: '32px', paddingLeft: '40px' }}>
-                {[...reviews, ...reviews].map((review, i) => (
-                    <ReviewCard key={i} review={review} />
-                ))}
-            </motion.div>
-
-            {/* Kinetic Row 2 */}
-            <motion.div style={{ display: 'flex', gap: '32px', x: x2, paddingLeft: '200px' }}>
-                {[...reviews.reverse(), ...reviews].map((review, i) => (
-                    <ReviewCard key={i} review={review} dark />
-                ))}
-            </motion.div>
-
-            {/* Google Trust Banner */}
-            <div style={{
-                marginTop: '100px',
-                textAlign: 'center',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '12px'
-            }}>
-                <div style={{ display: 'flex', gap: '4px' }}>
-                    {[...Array(5)].map((_, i) => <Star key={i} size={14} fill="#d4af37" color="#d4af37" />)}
-                </div>
-                <p style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.3em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}>
-                    Verified 4.9 Rating — Powered by Google
-                </p>
+                        color: '#fff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'flex-start',
+                        gap: '20px'
+                    }}
+                >
+                    <div style={{ width: '40px', height: '1px', background: '#fff' }} />
+                    VERIFIED 4.9 RATING — ARCHIVAL FEEDBACK
+                </motion.div>
             </div>
         </section>
     )
 }
 
-function ReviewCard({ review, dark = false }: { review: any, dark?: boolean }) {
-    const [imgError, setImgError] = useState(false)
-    const [randomId, setRandomId] = useState<number | null>(null)
-
-    useEffect(() => {
-        setRandomId(Math.floor(Math.random() * 900 + 100))
-    }, [])
-    const cardBg = dark ? '#000' : '#fff'
-    const nameColor = '#d4af37' // Signature Gold
-    const textColor = dark ? '#fff' : '#000'
-    const borderColor = dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'
-    const metaColor = dark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)'
-
+function ReviewCard({ review, index }: { review: any, index: number }) {
     return (
         <motion.div
-            whileHover={{ scale: 1.02 }}
+            initial="initial"
+            whileInView="animate"
+            whileHover="hover"
+            viewport={{ once: true }}
+            variants={{
+                initial: { opacity: 0, x: 20 },
+                animate: { opacity: 1, x: 0, transition: { duration: 0.8, delay: index * 0.1 } },
+                hover: { 
+                    backgroundColor: '#d4af37',
+                    borderColor: '#d4af37',
+                    transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] }
+                }
+            }}
             style={{
                 flexShrink: 0,
-                width: '500px',
-                background: cardBg,
-                border: `1px solid ${borderColor}`,
-                padding: '30px 40px',
-                borderRadius: '60px 4px 60px 4px',
-                position: 'relative',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '30px',
-                boxShadow: dark ? '0 20px 40px rgba(0,0,0,0.4)' : '0 10px 30px rgba(0,0,0,0.05)'
-            }}
-        >
-            {/* Left Column: Profile & Identity */}
-            <div style={{
-                width: '140px',
-                textAlign: 'center',
-                borderRight: `1px solid ${dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
-                paddingRight: '30px',
+                width: '340px',
+                background: 'rgba(255,255,255,0.015)',
+                border: '1px solid rgba(255,255,255,0.04)',
+                padding: '40px',
+                borderRadius: '2px',
                 display: 'flex',
                 flexDirection: 'column',
-                alignItems: 'center'
-            }}>
-                <div style={{
-                    width: '48px', height: '48px', borderRadius: '50%',
-                    overflow: 'hidden', marginBottom: '15px',
-                    border: `1px solid ${nameColor}`,
-                    background: '#111',
-                    boxShadow: `0 0 10px ${nameColor}33`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center'
-                }}>
-                    {!imgError ? (
-                        <img
-                            src={review.image}
-                            alt={review.name}
-                            onError={() => setImgError(true)}
-                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                        />
-                    ) : (
-                        <span style={{ fontSize: '12px', fontWeight: 900, color: nameColor }}>
-                            {review.initials}
-                        </span>
-                    )}
-                </div>
-
-                <h4 style={{
-                    fontSize: '12px',
-                    fontWeight: 950,
-                    color: nameColor,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    lineHeight: 1.2,
-                    marginBottom: '8px',
-                    fontFamily: 'var(--font-baskerville)'
-                }}>
-                    {review.name}
-                </h4>
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '2px', marginBottom: '6px' }}>
+                justifyContent: 'space-between',
+                height: '420px',
+                cursor: 'pointer',
+                position: 'relative',
+                overflow: 'hidden',
+                transition: 'border-color 0.4s'
+            }}
+        >
+            <div>
+                <motion.div 
+                    variants={{
+                        hover: { color: '#000', scale: 1.1 }
+                    }}
+                    style={{ display: 'flex', gap: '4px', marginBottom: '32px', color: '#d4af37' }}
+                >
                     {[...Array(5)].map((_, i) => (
-                        <Star key={i} size={8} fill={nameColor} color={nameColor} />
+                        <Star key={i} size={11} fill="currentColor" color="currentColor" strokeWidth={3} />
                     ))}
-                </div>
-                <div style={{
-                    fontSize: '6px',
-                    fontWeight: 900,
-                    color: metaColor,
-                    letterSpacing: '0.2em',
-                    textTransform: 'uppercase'
-                }}>
-                    VERIFIED_GOOGLE
-                </div>
-            </div>
-
-            {/* Right Column: Testimonial */}
-            <div style={{ flex: 1, position: 'relative' }}>
-                <p style={{
-                    fontSize: '13px',
-                    lineHeight: 1.5,
-                    color: textColor,
-                    fontFamily: 'var(--font-baskerville)',
-                    margin: 0,
-                    fontWeight: 500,
-                    fontStyle: 'italic'
-                }}>
+                </motion.div>
+                
+                <motion.p 
+                    variants={{
+                        hover: { color: '#000', x: 5 }
+                    }}
+                    style={{
+                        fontSize: '16px',
+                        lineHeight: 1.7,
+                        color: '#bbb',
+                        fontFamily: 'var(--font-tenor)',
+                        fontWeight: 300,
+                        margin: '0 0 40px',
+                        fontStyle: 'italic',
+                        transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
+                    }}
+                >
                     "{review.text}"
-                </p>
-
-                <div style={{
-                    position: 'absolute',
-                    bottom: '-25px',
-                    right: '-10px',
-                    fontSize: '7px',
-                    color: metaColor,
-                    letterSpacing: '0.3em',
-                    opacity: 0.6
-                }}>
-                    RPT — {review.initials}_{randomId || '...'}
-                </div>
+                </motion.p>
             </div>
+
+            <motion.div 
+                variants={{
+                    hover: { borderTopColor: 'rgba(0,0,0,0.1)', y: -5 }
+                }}
+                style={{ display: 'flex', alignItems: 'center', gap: '16px', borderTop: '1px solid rgba(255,255,255,0.04)', paddingTop: '32px', transition: 'all 0.4s' }}
+            >
+                <div style={{ width: '36px', height: '36px', borderRadius: '50%', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)' }}>
+                    <img src={review.image} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={review.name} />
+                </div>
+                <div>
+                    <motion.div 
+                        variants={{
+                            hover: { color: '#000' }
+                        }}
+                        style={{ 
+                            fontSize: '10px', 
+                            color: '#fff', 
+                            textTransform: 'uppercase', 
+                            letterSpacing: '0.2em', 
+                            fontWeight: 700,
+                            marginBottom: '2px',
+                            transition: 'color 0.4s'
+                        }}>
+                        {review.name}
+                    </motion.div>
+                    <motion.div 
+                        variants={{
+                            hover: { color: 'rgba(0,0,0,0.4)' }
+                        }}
+                        style={{ fontSize: '8px', color: '#555', letterSpacing: '0.1em', transition: 'color 0.4s' }}>
+                        {review.location}
+                    </motion.div>
+                </div>
+            </motion.div>
+
+            {/* Spotlight Effect Overlay */}
+            <motion.div
+                variants={{
+                    hover: { opacity: 0.15, scale: 2 }
+                }}
+                initial={{ opacity: 0, scale: 1 }}
+                style={{
+                    position: 'absolute',
+                    top: '-50%',
+                    left: '-50%',
+                    width: '200%',
+                    height: '200%',
+                    background: 'radial-gradient(circle at center, #fff 0%, transparent 60%)',
+                    pointerEvents: 'none',
+                    zIndex: 0
+                }}
+            />
         </motion.div>
     )
 }
