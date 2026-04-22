@@ -18,7 +18,8 @@ export default async function AdminOrdersPage() {
             created_at,
             cod_charge,
             shipping_cost,
-            profiles(full_name, phone)
+            profiles(first_name, last_name, full_name, phone),
+            order_items(quantity, products(name))
         `)
         .order('created_at', { ascending: false })
 
@@ -57,7 +58,7 @@ export default async function AdminOrdersPage() {
                     <table className="w-full text-left">
                         <thead>
                             <tr className="bg-[#fcfcfc] border-b border-gray-100">
-                                {['Manifest ID', 'Clientele', 'Timeline', 'Valuation', 'Liquidity', 'Status', 'Process'].map((h) => (
+                                {['Manifest ID', 'Clientele', 'Inventory Manifest', 'Timeline', 'Valuation', 'Liquidity', 'Status', 'Process'].map((h) => (
                                     <th key={h} className="px-8 py-5 text-[10px] font-bold tracking-widest uppercase text-gray-400 whitespace-nowrap">
                                         {h}
                                     </th>
@@ -76,10 +77,19 @@ export default async function AdminOrdersPage() {
                                         </td>
                                         <td className="px-8 py-6">
                                             <div className="text-xs font-medium tracking-wide text-gray-900">
-                                                {profile?.full_name ?? 'Anonymous Client'}
+                                                {profile?.first_name ? `${profile.first_name} ${profile.last_name || ''}` : profile?.full_name ?? 'Anonymous Client'}
                                             </div>
                                             <div className="text-[9px] text-gray-400 uppercase tracking-widest mt-1">
-                                                {profile?.phone ?? 'NO PHONE RECORD'}
+                                                {profile?.phone || 'NO PHONE RECORD'}
+                                            </div>
+                                        </td>
+                                        <td className="px-8 py-6">
+                                            <div className="text-[10px] text-gray-500 font-light leading-tight">
+                                                {order.order_items?.map((item: any, i: number) => (
+                                                    <span key={i} className="block">
+                                                        {item.quantity}× {item.products?.name}
+                                                    </span>
+                                                ))}
                                             </div>
                                         </td>
                                         <td className="px-8 py-6">

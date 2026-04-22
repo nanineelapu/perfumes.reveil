@@ -35,6 +35,7 @@ export default async function AdminLayout({
                 </div>
                 {[
                     { href: '/admin', label: 'Dashboard' },
+                    { href: '/admin/users', label: 'User Registry' },
                     { href: '/admin/products', label: 'Products' },
                     { href: '/admin/orders', label: 'Orders' },
                     { href: '/admin/carousel', label: 'Carousel' },
@@ -48,6 +49,19 @@ export default async function AdminLayout({
                         {label}
                     </Link>
                 ))}
+
+                <div style={{ marginTop: 'auto', padding: '16px 8px' }}>
+                    <form action="/api/auth/signout" method="post">
+                        <button type="submit" style={{
+                            width: '100%', padding: '10px', borderRadius: '8px',
+                            background: 'rgba(255,255,255,0.05)', color: '#ff4d4d',
+                            border: '1px solid rgba(255,77,77,0.2)', cursor: 'pointer',
+                            fontSize: '12px', fontWeight: 600, textAlign: 'left'
+                        }}>
+                            Logout Session
+                        </button>
+                    </form>
+                </div>
             </aside>
 
             {/* Main content */}

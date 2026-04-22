@@ -5,12 +5,13 @@ import { cn } from '@/lib/utils'
 export default async function AdminDashboard() {
     const supabase = await createClient()
 
-    const [{ count: productCount }, { count: orderCount }, { data: recentOrders }] =
+    const [{ count: productCount }, { count: orderCount }, { count: userCount }, { data: recentOrders }] =
         await Promise.all([
             supabase.from('products').select('*', { count: 'exact', head: true }),
             supabase.from('orders').select('*', { count: 'exact', head: true }),
+            supabase.from('profiles').select('*', { count: 'exact', head: true }),
             supabase.from('orders')
-                .select('id, total, status, created_at, profiles(full_name)')
+                .select('id, total, status, created_at, profiles(first_name, last_name, full_name)')
                 .order('created_at', { ascending: false })
                 .limit(5),
         ])
@@ -32,11 +33,14 @@ export default async function AdminDashboard() {
                     </div>
                     
                     <div className="flex flex-wrap gap-4 w-full xl:w-auto">
+                        <Link href="/admin/users" className="flex-1 md:flex-none text-center px-8 py-4 border-2 border-black bg-black text-white text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-white hover:text-black transition-all duration-300">
+                            User Registry
+                        </Link>
                         <Link href="/admin/products" className="flex-1 md:flex-none text-center px-8 py-4 border-2 border-black bg-black text-white text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-white hover:text-black transition-all duration-300">
-                            Go to Products
+                            Products
                         </Link>
                         <Link href="/admin/orders" className="flex-1 md:flex-none text-center px-8 py-4 border-2 border-black bg-black text-white text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-white hover:text-black transition-all duration-300">
-                            Go to Orders
+                            Orders
                         </Link>
                         <Link href="/admin/carousel" className="flex-1 md:flex-none text-center px-8 py-4 border-2 border-black bg-black text-white text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-white hover:text-black transition-all duration-300">
                             Go to Carousel
@@ -47,9 +51,9 @@ export default async function AdminDashboard() {
                 {/* Stats Grid - High Contrast */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
                     {[
-                        { label: 'Inventory Count', value: productCount ?? 0, detail: 'Total Active Products' },
-                        { label: 'Transaction Count', value: orderCount ?? 0, detail: 'Processed Orders' },
-                        { label: 'Pipeline Status', value: recentOrders?.filter(o => o.status === 'pending').length ?? 0, detail: 'Awaiting Attention' },
+                        { label: 'Active Users', value: userCount ?? 0, detail: 'Registered Profiles' },
+                        { label: 'Inventory Count', value: productCount ?? 0, detail: 'Active Products' },
+                        { label: 'Transaction Count', value: orderCount ?? 0, detail: 'Total Orders' },
                     ].map((stat) => (
                         <div key={stat.label} className="group relative border-2 border-black p-12 hover:bg-black hover:text-white transition-all duration-500 cursor-default">
                             <div className="space-y-3">
@@ -88,7 +92,7 @@ export default async function AdminDashboard() {
                                         </td>
                                         <td className="px-8 py-8">
                                             <span className="text-[11px] font-bold tracking-widest uppercase text-black">
-                                                {(order.profiles as any)?.full_name ?? 'Guest'}
+                                                {(order.profiles as any)?.first_name ? `${(order.profiles as any).first_name} ${(order.profiles as any).last_name}` : (order.profiles as any)?.full_name ?? 'Guest'}
                                             </span>
                                         </td>
                                         <td className="px-8 py-8 text-sm font-light text-black tracking-tight">

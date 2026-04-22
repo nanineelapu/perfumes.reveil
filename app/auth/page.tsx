@@ -78,6 +78,7 @@ export default function AuthPage() {
                         first_name: formData.firstName,
                         last_name: formData.lastName,
                         email: formData.email,
+                        phone: formattedPhone,
                         updated_at: new Date().toISOString(),
                     })
 
