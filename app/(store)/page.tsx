@@ -54,7 +54,7 @@ export default async function HomePage() {
     {
       id: 'floral-collection',
       title: 'Explore Meena',
-      image_url: '', // Black background fallback
+      image_url: 'https://images.unsplash.com/photo-1590736704728-f4730bb30770?auto=format&fit=crop&q=80&w=1600',
       link: '/products/floral',
       display_order: 3
     },

@@ -183,7 +183,8 @@ function SlideMedia({ slide, isActive, emblaApi }: { slide: Slide, isActive: boo
                         style={{
                             position: 'absolute', inset: 0, width: '100%', height: '100%',
                             objectFit: 'cover', filter: 'brightness(0.3)',
-                            opacity: isLoaded ? 0 : 1, transition: 'opacity 1s ease'
+                            opacity: (slide.video_url && isLoaded) ? 0 : 1, 
+                            transition: 'opacity 1s ease'
                         }}
                     />
                 )}
