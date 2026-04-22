@@ -1,7 +1,7 @@
 'use client'
 import { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Star, Quote } from 'lucide-react'
+import { Star } from 'lucide-react'
 
 const reviews = [
     {
@@ -31,20 +31,6 @@ const reviews = [
         text: "Reveil has mastered the art of minimalism in design but absolute complexity in scent.",
         initials: "AI",
         image: "https://images.unsplash.com/photo-1548142813-c348350df52b?auto=format&fit=crop&q=80&w=200"
-    },
-    {
-        name: "Vikram Singh",
-        location: "Jaipur",
-        text: "A truly international luxury experience right here in India. The packaging itself is a work of art.",
-        initials: "VS",
-        image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=200"
-    },
-    {
-        name: "Meera Kapoor",
-        location: "Hyderabad",
-        text: "The presentation is impeccable. It feels like unboxing a piece of high fashion rather than just a perfume.",
-        initials: "MK",
-        image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=200"
     }
 ]
 
@@ -52,206 +38,172 @@ export function ReviewsSection() {
     return (
         <section
             style={{
-                background: '#050505',
-                padding: '120px 80px',
+                background: '#050505', // Noir background
+                padding: '80px 80px',
                 position: 'relative',
                 overflow: 'hidden'
             }}
         >
-            <div style={{ maxWidth: '100vw', margin: '0 auto', padding: '0 0 0 80px', position: 'relative' }}>
-                
-                {/* Minimalist Header */}
-                <div style={{ marginBottom: '60px', textAlign: 'left' }}>
-                    <motion.div
+            <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+
+                {/* Header: Customer Insights Style */}
+                <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+                    <motion.h2
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        transition={{ duration: 1 }}
-                    >
-                        <span style={{ 
-                            fontSize: '9px', 
-                            textTransform: 'uppercase', 
-                            letterSpacing: '0.8em', 
-                            color: '#d4af37',
-                            marginBottom: '16px',
-                            display: 'block'
-                        }}>
-                            Archive Reflections
-                        </span>
-                        <h2 style={{
-                            fontSize: 'clamp(32px, 4vw, 42px)',
-                            fontFamily: 'var(--font-baskerville)',
-                            color: '#fff',
-                            fontWeight: 400,
+                        style={{
+                            fontSize: 'clamp(28px, 4vw, 48px)',
+                            fontFamily: 'var(--font-tenor)',
+                            fontWeight: 900,
+                            letterSpacing: '-0.02em',
+                            textTransform: 'uppercase',
                             margin: 0,
-                            letterSpacing: '-0.01em'
-                        }}>
-                            Refined <span style={{ fontStyle: 'italic', color: '#d4af37' }}>Voices</span>
-                        </h2>
-                    </motion.div>
+                            color: '#fff',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '15px'
+                        }}
+                    >
+                        CLIENT <span style={{ color: '#d4af37', fontWeight: 300, fontStyle: 'italic' }}>REFLECTIONS</span>
+                    </motion.h2>
                 </div>
 
-                {/* Draggable Carousel Container */}
-                <motion.div 
-                    style={{
-                        display: 'flex',
-                        gap: '24px',
-                        cursor: 'grab',
-                        paddingBottom: '40px',
-                        overflowX: 'auto',
-                        msOverflowStyle: 'none',
-                        scrollbarWidth: 'none',
-                        paddingRight: '80px'
-                    }}
-                    whileTap={{ cursor: 'grabbing' }}
-                >
+                {/* 2-Column Grid of Asymmetric Cards */}
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(2, 1fr)',
+                    gap: '40px'
+                }}>
                     {reviews.map((review, i) => (
-                        <ReviewCard key={i} review={review} index={i} />
+                        <ReviewCard key={i} review={review} index={i} isDark={i % 2 === 0} />
                     ))}
-                </motion.div>
+                </div>
 
-                {/* Google Meta Info - Offset */}
-                <motion.div 
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 0.3 }}
-                    viewport={{ once: true }}
-                    style={{
-                        marginTop: '40px',
-                        paddingRight: '80px',
-                        fontSize: '8px',
-                        letterSpacing: '0.5em',
-                        textTransform: 'uppercase',
-                        color: '#fff',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'flex-start',
-                        gap: '20px'
-                    }}
-                >
-                    <div style={{ width: '40px', height: '1px', background: '#fff' }} />
-                    VERIFIED 4.9 RATING — ARCHIVAL FEEDBACK
-                </motion.div>
+                {/* Footer Stats */}
+                <div style={{
+                    marginTop: '60px',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    gap: '120px',
+                    borderTop: '1px solid rgba(255,255,255,0.05)',
+                    paddingTop: '40px'
+                }}>
+                    <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: '28px', fontWeight: 900, color: '#fff', marginBottom: '4px' }}>4.7</div>
+                        <div style={{ fontSize: '8px', letterSpacing: '0.3em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', fontWeight: 700 }}>Google Score Aggregate</div>
+                    </div>
+                    <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: '28px', fontWeight: 900, color: '#fff', marginBottom: '4px' }}>10K+</div>
+                        <div style={{ fontSize: '8px', letterSpacing: '0.3em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', fontWeight: 700 }}>Active Monthly Logged Data</div>
+                    </div>
+                </div>
             </div>
         </section>
     )
 }
 
-function ReviewCard({ review, index }: { review: any, index: number }) {
+function ReviewCard({ review, index, isDark }: { review: any, index: number, isDark: boolean }) {
+    const [randomId] = useState(Math.floor(Math.random() * 900 + 100))
+
     return (
         <motion.div
-            initial="initial"
-            whileInView="animate"
+            initial={{ opacity: 0, x: index % 2 === 0 ? -30 : 30 }}
+            whileInView={{ opacity: 1, x: 0 }}
             whileHover="hover"
             viewport={{ once: true }}
             variants={{
-                initial: { opacity: 0, x: 20 },
-                animate: { opacity: 1, x: 0, transition: { duration: 0.8, delay: index * 0.1 } },
-                hover: { 
+                hover: {
                     backgroundColor: '#d4af37',
-                    borderColor: '#d4af37',
-                    transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] }
+                    scale: 1.02,
+                    transition: { duration: 0.4, ease: "easeOut" }
                 }
             }}
             style={{
-                flexShrink: 0,
-                width: '340px',
-                background: 'rgba(255,255,255,0.015)',
-                border: '1px solid rgba(255,255,255,0.04)',
-                padding: '40px',
-                borderRadius: '2px',
+                background: isDark ? '#111111' : '#fff', // Use specific #111111 for dark cards
+                border: '1px solid rgba(255,255,255,0.05)',
+                padding: '30px 40px',
+                borderRadius: '60px 4px 60px 4px', // Slightly smaller asymmetric pill
                 display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                height: '420px',
+                alignItems: 'center',
+                gap: '30px',
+                minHeight: '180px',
                 cursor: 'pointer',
                 position: 'relative',
-                overflow: 'hidden',
-                transition: 'border-color 0.4s'
+                boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
+                transition: 'background-color 0.4s, color 0.4s'
             }}
         >
-            <div>
-                <motion.div 
-                    variants={{
-                        hover: { color: '#000', scale: 1.1 }
-                    }}
-                    style={{ display: 'flex', gap: '4px', marginBottom: '32px', color: '#d4af37' }}
-                >
-                    {[...Array(5)].map((_, i) => (
-                        <Star key={i} size={11} fill="currentColor" color="currentColor" strokeWidth={3} />
-                    ))}
-                </motion.div>
-                
-                <motion.p 
-                    variants={{
-                        hover: { color: '#000', x: 5 }
-                    }}
+            {/* Left: Identity */}
+            <div style={{
+                width: '180px',
+                flexShrink: 0,
+                borderRight: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'}`,
+                paddingRight: '30px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                textAlign: 'center'
+            }}>
+                <motion.div
+                    variants={{ hover: { color: '#000' } }}
                     style={{
-                        fontSize: '16px',
-                        lineHeight: 1.7,
-                        color: '#bbb',
+                        fontSize: '14px',
+                        fontWeight: 900,
+                        color: isDark ? '#fff' : '#d4af37',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.1em',
+                        marginBottom: '10px',
+                        lineHeight: 1.2
+                    }}>
+                    {review.name}
+                </motion.div>
+                <div style={{ display: 'flex', gap: '2px', marginBottom: '10px' }}>
+                    {[...Array(5)].map((_, i) => (
+                        <motion.div key={i} variants={{ hover: { color: '#000' } }}>
+                            <Star size={10} fill={isDark ? '#d4af37' : '#d4af37'} color="currentColor" strokeWidth={3} />
+                        </motion.div>
+                    ))}
+                </div>
+                <div style={{
+                    fontSize: '7px',
+                    fontWeight: 800,
+                    letterSpacing: '0.2em',
+                    textTransform: 'uppercase',
+                    color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.3)'
+                }}>
+                    VERIFIED_GOOGLE
+                </div>
+            </div>
+
+            {/* Right: Review Text */}
+            <div style={{ flex: 1, position: 'relative' }}>
+                <motion.p
+                    variants={{ hover: { color: '#000' } }}
+                    style={{
+                        fontSize: '15px',
+                        lineHeight: 1.6,
+                        color: isDark ? '#fff' : '#000',
                         fontFamily: 'var(--font-tenor)',
                         fontWeight: 300,
-                        margin: '0 0 40px',
-                        fontStyle: 'italic',
-                        transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
+                        margin: 0,
+                        fontStyle: 'italic'
                     }}
                 >
                     "{review.text}"
                 </motion.p>
-            </div>
-
-            <motion.div 
-                variants={{
-                    hover: { borderTopColor: 'rgba(0,0,0,0.1)', y: -5 }
-                }}
-                style={{ display: 'flex', alignItems: 'center', gap: '16px', borderTop: '1px solid rgba(255,255,255,0.04)', paddingTop: '32px', transition: 'all 0.4s' }}
-            >
-                <div style={{ width: '36px', height: '36px', borderRadius: '50%', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)' }}>
-                    <img src={review.image} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={review.name} />
-                </div>
-                <div>
-                    <motion.div 
-                        variants={{
-                            hover: { color: '#000' }
-                        }}
-                        style={{ 
-                            fontSize: '10px', 
-                            color: '#fff', 
-                            textTransform: 'uppercase', 
-                            letterSpacing: '0.2em', 
-                            fontWeight: 700,
-                            marginBottom: '2px',
-                            transition: 'color 0.4s'
-                        }}>
-                        {review.name}
-                    </motion.div>
-                    <motion.div 
-                        variants={{
-                            hover: { color: 'rgba(0,0,0,0.4)' }
-                        }}
-                        style={{ fontSize: '8px', color: '#555', letterSpacing: '0.1em', transition: 'color 0.4s' }}>
-                        {review.location}
-                    </motion.div>
-                </div>
-            </motion.div>
-
-            {/* Spotlight Effect Overlay */}
-            <motion.div
-                variants={{
-                    hover: { opacity: 0.15, scale: 2 }
-                }}
-                initial={{ opacity: 0, scale: 1 }}
-                style={{
+                <div style={{
                     position: 'absolute',
-                    top: '-50%',
-                    left: '-50%',
-                    width: '200%',
-                    height: '200%',
-                    background: 'radial-gradient(circle at center, #fff 0%, transparent 60%)',
-                    pointerEvents: 'none',
-                    zIndex: 0
-                }}
-            />
+                    bottom: '-30px',
+                    right: 0,
+                    fontSize: '8px',
+                    color: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)',
+                    letterSpacing: '0.2em'
+                }}>
+                    RPT — {review.initials}_{randomId}
+                </div>
+            </div>
         </motion.div>
     )
 }

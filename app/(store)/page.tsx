@@ -4,7 +4,6 @@ import ProductGrid from '@/components/store/ProductGrid'
 import { PhilosophySection, NotesSection, BrandShowcaseSection, ReveilCollectionSection } from '@/components/store/EditorialSections'
 import { NewsletterSection } from '@/components/store/NewsletterSection'
 import { ReviewsSection } from '@/components/store/ReviewsSection'
-import { FacilitySection } from '@/components/store/FacilitySection'
 
 
 export default async function HomePage() {
@@ -130,9 +129,6 @@ export default async function HomePage() {
 
       {/* Grid of Featured Products */}
       <ProductGrid items={trending ?? []} />
-
-      {/* Facility / Studio Section */}
-      <FacilitySection />
 
       {/* Testimonials */}
       <ReviewsSection />
