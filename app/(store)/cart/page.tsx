@@ -11,7 +11,7 @@ export default function CartPage() {
     const [totals, setTotals] = useState({ subtotal: 0, shipping: 0, total: 0 })
     const [loading, setLoading] = useState(true)
     const [updatingId, setUpdatingId] = useState<string | null>(null)
-    
+
     const router = useRouter()
     const supabase = createClient()
 
