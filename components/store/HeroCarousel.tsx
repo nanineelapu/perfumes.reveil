@@ -145,31 +145,6 @@ function SlideMedia({ slide, isActive, emblaApi }: { slide: Slide, isActive: boo
     return (
         <div style={{ position: 'relative', height: '100vh', width: '100%', overflow: 'hidden', background: '#000' }}>
 
-            {/* Minimalist circular luxury loader */}
-            <AnimatePresence>
-                {!isLoaded && isActive && (
-                    <motion.div
-                        exit={{ opacity: 0 }}
-                        style={{
-                            position: 'absolute', inset: 0,
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            zIndex: 5, background: '#000'
-                        }}
-                    >
-                        <motion.div
-                            animate={{ rotate: 360 }}
-                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                            style={{
-                                width: '40px', height: '40px',
-                                border: '2px solid rgba(212,175,55,0.1)',
-                                borderTop: '2px solid #d4af37',
-                                borderRadius: '50%'
-                            }}
-                        />
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
             {/* Background Media */}
             <motion.div
                 animate={{

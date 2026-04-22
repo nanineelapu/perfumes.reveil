@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import localFont from 'next/font/local'
 import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
-import Preloader from "@/components/store/Preloader";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -52,7 +51,6 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="antialiased selection:bg-black selection:text-white" suppressHydrationWarning>
-        <Preloader />
         <SmoothScroll>{children}</SmoothScroll>
       </body>
     </html>

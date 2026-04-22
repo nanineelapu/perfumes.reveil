@@ -206,7 +206,7 @@ export default function EditProductPage(props: { params: Params }) {
                 <div className="space-y-8">
                     <section className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm space-y-8">
                         <div className="space-y-4">
-                            <label className="text-[10px] font-bold tracking-widest uppercase text-gray-400 block">Valuation (INR)</label>
+                            <label className="text-[10px] font-bold tracking-widest uppercase text-gray-400 block">Valuation (₹)</label>
                             <div className="relative">
                                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-light text-sm">₹</span>
                                 <input

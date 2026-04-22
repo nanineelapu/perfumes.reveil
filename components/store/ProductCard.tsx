@@ -256,7 +256,7 @@ export default function ProductCard({ product }: { product: Product }) {
                         fontFamily: 'var(--font-tenor)'
                     }}>
                         <span style={{ fontSize: '14px', fontWeight: 500, color: '#d4af37' }}>
-                            {product.price} INR
+                            ₹ {product.price}
                         </span>
                         <span style={{
                             fontSize: '9px',

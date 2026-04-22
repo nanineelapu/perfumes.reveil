@@ -96,12 +96,12 @@ export function PhilosophySection() {
                             {"Elevated perfumes crafted with natural extraits and made with artisanal care. Timeless and sensory experiences.".split(' ').map((word, i) => (
                                 <motion.span
                                     key={i}
-                                    initial={{ opacity: 0, y: 40, filter: 'blur(10px)' }}
-                                    whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
                                     viewport={{ once: true }}
                                     transition={{
-                                        duration: 1.2,
-                                        delay: i * 0.05,
+                                        duration: 0.8,
+                                        delay: i * 0.03,
                                         ease: [0.215, 0.61, 0.355, 1]
                                     }}
                                     style={{ display: 'inline-block', marginRight: '0.25em' }}
@@ -130,9 +130,7 @@ export function PhilosophySection() {
                                 OUR STORY
                             </Link>
                         </motion.div>
-                    </div>
-
-                    {/* Right Side Image (Refined Size) */}
+                    </div>                    {/* Right Side Image (Subtle Boutique Size) */}
                     <motion.div
                         initial={{ opacity: 0, x: 20 }}
                         whileInView={{ opacity: 1, x: 0 }}
@@ -140,23 +138,24 @@ export function PhilosophySection() {
                         transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
                         style={{
                             position: 'relative',
-                            height: 'clamp(260px, 24vw, 340px)',
+                            height: 'clamp(290px, 28vw, 380px)',
                             width: '100%',
-                            borderRadius: '2px',
-                            overflow: 'hidden',
-                            boxShadow: '0 30px 90px rgba(0,0,0,0.07)'
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            overflow: 'hidden'
                         }}
                     >
                         <img
                             src="https://lhnamtkpjkrawgql.public.blob.vercel-storage.com/Untitled%20%281%29.png"
                             alt="Reveil Artistry"
-                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'contain',
+                                filter: 'contrast(1.05) brightness(0.98)'
+                            }}
                         />
-                        {/* Soft Overlay */}
-                        <div style={{
-                            position: 'absolute', inset: 0,
-                            background: 'linear-gradient(to top, rgba(0,0,0,0.03) 0%, transparent 100%)'
-                        }} />
                     </motion.div>
                 </div>
             </div>
@@ -629,7 +628,7 @@ export function ReveilCollectionSection() {
                                 padding: '48px',
                                 background: 'rgba(0,0,0,0.2)',
                                 border: '1px solid rgba(255,255,255,0.08)',
-                                backdropFilter: 'blur(50px)',
+                                backdropFilter: 'blur(10px)',
                                 borderRadius: '4px',
                                 boxShadow: '0 30px 60px rgba(0,0,0,0.5)',
                                 justifySelf: 'end'

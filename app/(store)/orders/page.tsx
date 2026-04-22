@@ -104,15 +104,15 @@ export default function OrdersPage() {
                     <div style={{ marginBottom: '32px', opacity: 0.3 }}>
                         <ShoppingBag size={64} strokeWidth={1} style={{ margin: '0 auto', color: '#d4af37' }} />
                     </div>
-                    <h2 style={{ fontSize: '28px', fontFamily: 'var(--font-baskerville)', marginBottom: '16px', fontWeight: 300 }}>Authentication Required</h2>
-                    <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '14px', lineHeight: 1.6, marginBottom: '32px', letterSpacing: '0.02em' }}>Please synchronize your profile to access your personal collection archive.</p>
+                    <h2 style={{ fontSize: '28px', fontFamily: 'var(--font-baskerville)', marginBottom: '16px', fontWeight: 300 }}>Welcome Back</h2>
+                    <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '14px', lineHeight: 1.6, marginBottom: '32px', letterSpacing: '0.02em' }}>Access your exclusive fragrance collection and orders.</p>
                     <Link href="/auth" style={{
                         background: '#d4af37', color: '#000', padding: '18px 48px',
                         borderRadius: '2px', textDecoration: 'none', fontSize: '11px',
                         fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.4em',
                         display: 'inline-block', boxShadow: '0 10px 30px rgba(212,175,55,0.1)'
                     }}>
-                        Initialize Access
+                        Continue to Your Account
                     </Link>
                 </div>
             </main>

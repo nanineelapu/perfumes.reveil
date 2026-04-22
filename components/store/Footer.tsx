@@ -152,7 +152,7 @@ export function Footer() {
                             "Luxury is not a status, <br /> it is a sensory journey."
                         </p>
                         <div style={{ color: '#444', fontSize: '10px', letterSpacing: '0.1em' }}>
-                            LONDON — PARIS — MUMBAI
+                            ODISHA — BRAHMAPUR — ANDHRA PRADESH
                         </div>
                     </div>
                 </div>
