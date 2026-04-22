@@ -21,6 +21,14 @@ export default function HeroCarousel({ slides }: { slides: Slide[] }) {
         startIndex: 0
     })
     const [current, setCurrent] = useState(0)
+    const [isMobile, setIsMobile] = useState(false)
+
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 768)
+        checkMobile()
+        window.addEventListener('resize', checkMobile)
+        return () => window.removeEventListener('resize', checkMobile)
+    }, [])
 
     useEffect(() => {
         if (!emblaApi) return
@@ -68,6 +76,7 @@ export default function HeroCarousel({ slides }: { slides: Slide[] }) {
                             slide={slide}
                             isActive={current === i}
                             emblaApi={emblaApi}
+                            isMobile={isMobile}
                         />
                     </div>
                 ))}
@@ -76,8 +85,13 @@ export default function HeroCarousel({ slides }: { slides: Slide[] }) {
             {/* Premium Dash Indicators & Navigation */}
             {slides.length > 1 && (
                 <div style={{
-                    position: 'absolute', bottom: '60px', left: '120px',
-                    display: 'flex', alignItems: 'center', gap: '32px', zIndex: 10
+                    position: 'absolute',
+                    bottom: isMobile ? '40px' : '60px',
+                    left: isMobile ? '24px' : '120px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: isMobile ? '20px' : '32px',
+                    zIndex: 10
                 }}>
                     <div style={{ display: 'flex', gap: '8px' }}>
                         {slides.map((_, i) => (
@@ -85,8 +99,8 @@ export default function HeroCarousel({ slides }: { slides: Slide[] }) {
                                 key={i}
                                 onClick={() => scrollTo(i)}
                                 style={{
-                                    width: i === current ? '60px' : '15px',
-                                    height: '4px',
+                                    width: i === current ? (isMobile ? '40px' : '60px') : '15px',
+                                    height: '3px',
                                     background: i === current ? '#fff' : 'rgba(255,255,255,0.2)',
                                     border: 'none', cursor: 'pointer', padding: 0,
                                     borderRadius: '10px',
@@ -96,7 +110,12 @@ export default function HeroCarousel({ slides }: { slides: Slide[] }) {
                         ))}
                     </div>
 
-                    <div style={{ display: 'flex', gap: '16px', borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '32px' }}>
+                    <div style={{
+                        display: 'flex',
+                        gap: isMobile ? '8px' : '16px',
+                        borderLeft: isMobile ? 'none' : '1px solid rgba(255,255,255,0.1)',
+                        paddingLeft: isMobile ? '0' : '32px'
+                    }}>
                         <button
                             onClick={scrollPrev}
                             style={{
@@ -107,7 +126,7 @@ export default function HeroCarousel({ slides }: { slides: Slide[] }) {
                             onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
                             onMouseLeave={(e) => e.currentTarget.style.opacity = '0.5'}
                         >
-                            <ChevronLeft size={20} strokeWidth={1.5} />
+                            <ChevronLeft size={isMobile ? 18 : 20} strokeWidth={1.5} />
                         </button>
                         <button
                             onClick={scrollNext}
@@ -119,7 +138,7 @@ export default function HeroCarousel({ slides }: { slides: Slide[] }) {
                             onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
                             onMouseLeave={(e) => e.currentTarget.style.opacity = '0.5'}
                         >
-                            <ChevronRight size={20} strokeWidth={1.5} />
+                            <ChevronRight size={isMobile ? 18 : 20} strokeWidth={1.5} />
                         </button>
                     </div>
                 </div>
@@ -128,7 +147,7 @@ export default function HeroCarousel({ slides }: { slides: Slide[] }) {
     )
 }
 
-function SlideMedia({ slide, isActive, emblaApi }: { slide: Slide, isActive: boolean, emblaApi: any }) {
+function SlideMedia({ slide, isActive, emblaApi, isMobile }: { slide: Slide, isActive: boolean, emblaApi: any, isMobile: boolean }) {
     const [isLoaded, setIsLoaded] = useState(false)
 
     // Multi-layered loading strategy for maximum reliability
@@ -182,8 +201,10 @@ function SlideMedia({ slide, isActive, emblaApi }: { slide: Slide, isActive: boo
                         alt=""
                         style={{
                             position: 'absolute', inset: 0, width: '100%', height: '100%',
-                            objectFit: 'cover', filter: 'brightness(0.3)',
-                            opacity: (slide.video_url && isLoaded) ? 0 : 1, 
+                            objectFit: 'cover',
+                            objectPosition: isMobile ? '75% center' : 'center',
+                            filter: 'brightness(0.3)',
+                            opacity: (slide.video_url && isLoaded) ? 0 : 1,
                             transition: 'opacity 1s ease'
                         }}
                     />
@@ -230,11 +251,12 @@ function SlideMedia({ slide, isActive, emblaApi }: { slide: Slide, isActive: boo
             {/* Content Overlay */}
             <div style={{
                 position: 'absolute', inset: 0,
-                display: 'flex', alignItems: 'center', justifyContent: 'flex-start', padding: '0 120px',
+                display: 'flex', alignItems: 'center', justifyContent: 'flex-start',
+                padding: isMobile ? '0 24px' : '0 120px',
                 textAlign: 'left', zIndex: 2,
                 pointerEvents: isActive ? 'auto' : 'none'
             }}>
-                <div style={{ maxWidth: '900px' }}>
+                <div style={{ maxWidth: isMobile ? '100%' : '900px' }}>
                     <motion.div
                         initial="initial"
                         animate={(isActive && isLoaded) ? "animate" : "initial"}
@@ -247,7 +269,7 @@ function SlideMedia({ slide, isActive, emblaApi }: { slide: Slide, isActive: boo
                             }
                         }}
                     >
-                        <div style={{ overflow: 'hidden', marginBottom: '24px' }}>
+                        <div style={{ overflow: 'hidden', marginBottom: isMobile ? '16px' : '24px' }}>
                             <motion.div
                                 variants={{
                                     initial: { clipPath: 'inset(100% 0% 0% 0%)', y: '100%' },
@@ -255,7 +277,10 @@ function SlideMedia({ slide, isActive, emblaApi }: { slide: Slide, isActive: boo
                                 }}
                                 transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
                                 style={{
-                                    fontSize: '11px', fontWeight: 400, letterSpacing: '0.8em', color: '#d4af37',
+                                    fontSize: isMobile ? '10px' : '11px',
+                                    fontWeight: 400,
+                                    letterSpacing: isMobile ? '0.5em' : '0.8em',
+                                    color: '#d4af37',
                                     textTransform: 'uppercase',
                                     fontFamily: 'var(--font-baskerville)'
                                 }}
@@ -267,9 +292,9 @@ function SlideMedia({ slide, isActive, emblaApi }: { slide: Slide, isActive: boo
                         {slide.title && (
                             <h2 style={{
                                 color: '#fff',
-                                fontSize: (slide.title?.toLowerCase().includes('collection') || slide.title?.toLowerCase().includes('stones')) ? 'clamp(28px, 5.5vw, 84px)' : 'clamp(32px, 6vw, 100px)',
+                                fontSize: isMobile ? 'clamp(32px, 10vw, 48px)' : ((slide.title?.toLowerCase().includes('collection') || slide.title?.toLowerCase().includes('stones')) ? 'clamp(28px, 5.5vw, 84px)' : 'clamp(32px, 6vw, 100px)'),
                                 fontWeight: 900,
-                                margin: '0 0 40px',
+                                margin: isMobile ? '0 0 24px' : '0 0 40px',
                                 lineHeight: 1.1,
                                 fontFamily: 'var(--font-baskerville)',
                                 letterSpacing: '-0.03em',
@@ -310,20 +335,23 @@ function SlideMedia({ slide, isActive, emblaApi }: { slide: Slide, isActive: boo
                             >
                                 <motion.a
                                     href={slide.link || "/products"}
-                                    whileHover={{
+                                    whileHover={!isMobile ? {
                                         backgroundColor: '#d4af37',
                                         color: '#000',
                                         borderRadius: '0px',
                                         scale: 1.05,
                                         letterSpacing: '0.4em'
-                                    }}
+                                    } : {}}
                                     whileTap={{ scale: 0.95 }}
                                     transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                                     style={{
-                                        display: 'inline-block', padding: '18px 48px',
+                                        display: 'inline-block',
+                                        padding: isMobile ? '14px 32px' : '18px 48px',
                                         background: '#fff', color: '#000',
-                                        borderRadius: '100px', fontWeight: 700, fontSize: '11px',
-                                        textTransform: 'uppercase', letterSpacing: '0.3em',
+                                        borderRadius: '100px', fontWeight: 700,
+                                        fontSize: isMobile ? '10px' : '11px',
+                                        textTransform: 'uppercase',
+                                        letterSpacing: isMobile ? '0.2em' : '0.3em',
                                         textDecoration: 'none',
                                         boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
                                         border: '1px solid transparent'
