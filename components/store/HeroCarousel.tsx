@@ -143,7 +143,7 @@ function SlideMedia({ slide, isActive, emblaApi }: { slide: Slide, isActive: boo
     }, [slide.id])
 
     return (
-        <div style={{ position: 'relative', height: '100vh', width: '100%', overflow: 'hidden', background: '#050505' }}>
+        <div style={{ position: 'relative', height: '100vh', width: '100%', overflow: 'hidden', background: '#000000' }}>
 
             {/* Premium Placeholder State */}
             {!isLoaded && (
@@ -176,15 +176,17 @@ function SlideMedia({ slide, isActive, emblaApi }: { slide: Slide, isActive: boo
                 style={{ height: '100%', width: '100%', position: 'relative' }}
             >
                 {/* Visual Placeholder (Poster) - Always there for instant reveal */}
-                <img
-                    src={slide.image_url}
-                    alt=""
-                    style={{
-                        position: 'absolute', inset: 0, width: '100%', height: '100%',
-                        objectFit: 'cover', filter: 'brightness(0.35)',
-                        opacity: isLoaded ? 0 : 1, transition: 'opacity 1s ease'
-                    }}
-                />
+                {slide.image_url && (
+                    <img
+                        src={slide.image_url}
+                        alt=""
+                        style={{
+                            position: 'absolute', inset: 0, width: '100%', height: '100%',
+                            objectFit: 'cover', filter: 'brightness(0.3)',
+                            opacity: isLoaded ? 0 : 1, transition: 'opacity 1s ease'
+                        }}
+                    />
+                )}
 
                 {slide.video_url && (
                     <video
@@ -202,7 +204,7 @@ function SlideMedia({ slide, isActive, emblaApi }: { slide: Slide, isActive: boo
                             width: '100%',
                             height: '100%',
                             objectFit: 'cover',
-                            filter: 'brightness(0.25) contrast(1.15)',
+                            filter: 'brightness(0.2) contrast(1.1)',
                             opacity: isLoaded ? 1 : 0,
                             transition: 'opacity 0.8s ease'
                         }}

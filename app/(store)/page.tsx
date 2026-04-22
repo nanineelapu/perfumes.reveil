@@ -46,7 +46,7 @@ export default async function HomePage() {
     {
       id: 'intro-video',
       title: 'The Art of Scent',
-      image_url: 'https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&q=80',
+      image_url: '/images/hero-1.png',
       video_url: 'https://lhnamtkpjkrawgql.public.blob.vercel-storage.com/Ai%20Enhancer-Ultra%20Hd-Luxury%20Perfume%20Bottle%20Animationonline-Video-Cutter.Com2-Ezgif.Com-Reverse-Video.mp4',
       link: '/products',
       display_order: -1
@@ -54,7 +54,7 @@ export default async function HomePage() {
     {
       id: 'floral-collection',
       title: 'Explore Meena',
-      image_url: 'https://images.unsplash.com/photo-1590736704728-f4730bb30770?auto=format&fit=crop&q=80&w=1600',
+      image_url: '', // Black background fallback
       link: '/products/floral',
       display_order: 3
     },

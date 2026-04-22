@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { cn } from '@/lib/utils'
+import Link from 'next/link'
 
 export default async function UsersPage() {
     const supabase = await createClient()

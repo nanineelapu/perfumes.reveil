@@ -47,177 +47,123 @@ export default function ProductExperiencePage() {
     )
 
     return (
-        <main style={{ background: '#050505', minHeight: '100vh', color: '#fff', position: 'relative', overflowX: 'hidden' }}>
-            
-            {/* Background Grid Accent */}
-            <div style={{
-                position: 'fixed', inset: 0,
-                backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.02) 1px, transparent 0)',
-                backgroundSize: '30px 30px',
-                zIndex: 0,
-                pointerEvents: 'none'
-            }} />
+        <main style={{ background: '#000', minHeight: '100vh', color: '#fff', position: 'relative', padding: '120px 100px 60px' }}>
 
-            {/* Navigation Header */}
-            <div style={{
-                position: 'fixed', top: 0, width: '100%',
-                padding: '40px 60px',
-                display: 'flex', justifyContent: 'space-between',
-                zIndex: 100, backdropFilter: 'blur(10px)',
-                borderBottom: '1px solid rgba(255,255,255,0.03)'
-            }}>
-                <Link href="/products" style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#666', textDecoration: 'none', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.2em', fontFamily: 'var(--font-tenor)' }}>
-                    <ArrowLeft size={14} /> Back to Archive
-                </Link>
-                <div style={{ color: '#d4af37', fontFamily: 'var(--font-tenor)', fontSize: '10px', letterSpacing: '0.4em' }}>
-                    REF — {product.id.toString().padStart(4, '0')}
-                </div>
-            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.1fr', gap: '80px', alignItems: 'stretch', height: '75vh', minHeight: '600px' }}>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', minHeight: '100vh' }}>
-                
-                {/* Left: Cinematic Visuals */}
-                <section style={{ position: 'relative', overflow: 'hidden', padding: '120px 0 0' }}>
-                    <motion.div 
-                        initial={{ scale: 1.1, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-                        style={{ width: '100%', height: '100%', position: 'relative' }}
-                    >
-                        <img 
-                            src={product.images?.[0] || 'https://images.unsplash.com/photo-1547887538-e3a2f32cb1cc?auto=format&fit=crop&q=80&w=1200'} 
-                            style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.7)' }}
-                            alt={product.name}
-                        />
-                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(5,5,5,0.2) 0%, rgba(5,5,5,0) 50%, rgba(5,5,5,0.8) 100%)' }} />
-                    </motion.div>
+                {/* Left: Balanced Image Container */}
+                <motion.section
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 1.2 }}
+                    style={{ position: 'relative', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)', background: '#050505' }}
+                >
+                    <img
+                        src={product.images?.[0] || 'https://images.unsplash.com/photo-1547887538-e3a2f32cb1cc?auto=format&fit=crop&q=80&w=1200'}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        alt={product.name}
+                    />
+                    {/* Subtle Overlay */}
+                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 40%)' }} />
+                </motion.section>
 
-                    {/* Technical Tag Overlay */}
-                    <div style={{ position: 'absolute', bottom: '60px', left: '60px', borderLeft: '1px solid #d4af37', paddingLeft: '24px' }}>
-                        <div style={{ fontSize: '9px', color: '#666', letterSpacing: '0.5em', textTransform: 'uppercase', marginBottom: '8px', fontFamily: 'var(--font-tenor)' }}>Status</div>
-                        <div style={{ fontSize: '12px', color: '#fff', letterSpacing: '0.1em', fontFamily: 'var(--font-tenor)' }}>STABLE_ARCHIVE</div>
-                    </div>
-                </section>
-
-                {/* Right: Immersive Details */}
-                <section style={{ 
-                    padding: '160px 80px 100px', 
-                    background: '#050505',
-                    borderLeft: '1px solid rgba(255,255,255,0.05)',
-                    position: 'relative',
-                    zIndex: 10
+                {/* Right: Theme-Based Content (Matching Height) */}
+                <section style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    padding: '40px 0'
                 }}>
                     <motion.div
-                        initial={{ opacity: 0, x: 30 }}
+                        initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 1, delay: 0.3 }}
+                        transition={{ duration: 1.2, delay: 0.2 }}
                     >
-                        <div style={{ fontSize: '10px', color: '#d4af37', letterSpacing: '0.6em', textTransform: 'uppercase', marginBottom: '24px', fontFamily: 'var(--font-tenor)' }}>
-                            {product.category || 'Laboratory Fragment'}
+                        {/* Inline Navigation */}
+                        <div style={{ marginBottom: '40px' }}>
+                            <Link href="/products" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#d4af37', textDecoration: 'none', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.3em', fontFamily: 'var(--font-tenor)', opacity: 0.8, transition: 'opacity 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '1'} onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}>
+                                <ArrowLeft size={14} /> Return to Products
+                            </Link>
                         </div>
-                        
-                        <h1 style={{ 
-                            fontSize: 'clamp(40px, 5vw, 72px)', 
-                            fontFamily: 'var(--font-cormorant)', 
-                            fontWeight: 300,
-                            lineHeight: 1,
+
+                        <div style={{ fontSize: '11px', color: '#d4af37', letterSpacing: '0.5em', textTransform: 'uppercase', marginBottom: '20px', fontFamily: 'var(--font-tenor)', fontWeight: 600 }}>
+                            {product.category || 'PARFUM'}
+                        </div>
+
+                        <h1 style={{
+                            fontSize: 'clamp(32px, 4vw, 56px)',
+                            fontFamily: 'var(--font-baskerville)',
+                            fontWeight: 400,
+                            lineHeight: 1.1,
                             margin: '0 0 24px',
-                            letterSpacing: '-0.02em'
+                            letterSpacing: '-0.01em'
                         }}>
                             {product.name}
                         </h1>
 
-                        <div style={{ fontSize: '24px', color: '#fff', fontFamily: 'var(--font-tenor)', marginBottom: '48px', opacity: 0.8 }}>
+                        <div style={{ fontSize: '20px', color: '#fff', fontFamily: 'var(--font-tenor)', marginBottom: '32px', fontWeight: 300 }}>
                             ₹{product.price.toLocaleString()}
                         </div>
 
-                        <p style={{ 
-                            fontSize: '15px', 
-                            lineHeight: 1.8, 
-                            color: '#999', 
-                            marginBottom: '64px',
-                            fontFamily: 'var(--font-tenor)',
-                            maxWidth: '500px'
-                        }}>
+                        <p style={{ fontSize: '14px', lineHeight: 1.7, color: '#888', fontFamily: 'var(--font-tenor)', maxWidth: '480px', marginBottom: '48px', fontWeight: 300 }}>
                             {product.description || 'Accessing encrypted olfactory data. This composition is part of the REVEIL Laboratory Archive, designed for high-end olfactory resonance.'}
                         </p>
 
-                        {/* Scent Profile Breakdown */}
-                        <div style={{ marginBottom: '64px' }}>
-                            <div style={{ fontSize: '10px', color: '#444', letterSpacing: '0.4em', textTransform: 'uppercase', marginBottom: '32px', fontFamily: 'var(--font-tenor)' }}>Perspective Profile</div>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px' }}>
-                                {[
-                                    { label: 'TOP', note: product.scent_profile?.top || 'Citrus Drift', icon: <Wind size={16} /> },
-                                    { label: 'HEART', note: product.scent_profile?.heart || 'Oudh Resin', icon: <Droplets size={16} /> },
-                                    { label: 'BASE', note: product.scent_profile?.base || 'White Musk', icon: <Clock size={16} /> }
-                                ].map((note, i) => (
-                                    <div key={i} style={{ padding: '24px', border: '1px solid rgba(255,255,255,0.03)', background: 'rgba(255,255,255,0.01)' }}>
-                                        <div style={{ color: '#d4af37', marginBottom: '16px' }}>{note.icon}</div>
-                                        <div style={{ fontSize: '8px', color: '#444', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px', fontFamily: 'var(--font-tenor)' }}>{note.label}</div>
-                                        <div style={{ fontSize: '12px', color: '#fff', fontFamily: 'var(--font-tenor)' }}>{note.note}</div>
-                                    </div>
-                                ))}
+                        {/* Olfactory Notes Grid */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '32px', marginBottom: '48px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '32px' }}>
+                            {[
+                                { l: 'TOP', v: product.scent_profile?.top || '-' },
+                                { l: 'HEART', v: product.scent_profile?.heart || '-' },
+                                { l: 'BASE', v: product.scent_profile?.base || '-' }
+                            ].map((note, i) => (
+                                <div key={i}>
+                                    <div style={{ fontSize: '9px', color: '#d4af37', letterSpacing: '0.3em', marginBottom: '10px', fontWeight: 600 }}>{note.l}</div>
+                                    <div style={{ fontSize: '12px', color: '#fff', fontFamily: 'var(--font-tenor)' }}>{note.v}</div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Technical Meta */}
+                        <div style={{ display: 'flex', gap: '48px', marginBottom: '56px' }}>
+                            <div>
+                                <div style={{ fontSize: '9px', color: '#d4af37', textTransform: 'uppercase', marginBottom: '10px', letterSpacing: '0.2em', fontWeight: 600 }}>Volume</div>
+                                <div style={{ fontSize: '12px', color: '#fff' }}>{product.technical_specs?.volume || '100ML'}</div>
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '9px', color: '#d4af37', textTransform: 'uppercase', marginBottom: '10px', letterSpacing: '0.2em', fontWeight: 600 }}>Longevity</div>
+                                <div style={{ fontSize: '12px', color: '#fff' }}>{product.technical_specs?.longevity || '12 HRS+'}</div>
                             </div>
                         </div>
 
-                        {/* Technical Specs */}
-                        <div style={{ display: 'flex', gap: '48px', marginBottom: '64px', padding: '32px', border: '1px solid rgba(255,255,255,0.03)' }}>
-                            <div>
-                                <div style={{ fontSize: '8px', color: '#444', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px', fontFamily: 'var(--font-tenor)' }}>Volume</div>
-                                <div style={{ fontSize: '12px', color: '#fff', fontFamily: 'var(--font-tenor)' }}>{product.technical_specs?.volume || '100ML'}</div>
-                            </div>
-                            <div>
-                                <div style={{ fontSize: '8px', color: '#444', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px', fontFamily: 'var(--font-tenor)' }}>Longevity</div>
-                                <div style={{ fontSize: '12px', color: '#fff', fontFamily: 'var(--font-tenor)' }}>{product.technical_specs?.longevity || '12 HRS+'}</div>
-                            </div>
-                            <div>
-                                <div style={{ fontSize: '8px', color: '#444', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px', fontFamily: 'var(--font-tenor)' }}>Intensity</div>
-                                <div style={{ fontSize: '12px', color: '#fff', fontFamily: 'var(--font-tenor)' }}>EXTRAIT DE PARFUM</div>
-                            </div>
-                        </div>
-
-                        {/* Action Buttons */}
+                        {/* Actions */}
                         <div style={{ display: 'flex', gap: '20px' }}>
                             <motion.button
-                                whileHover={{ scale: 1.02, backgroundColor: '#fff', color: '#000' }}
+                                whileHover={{ backgroundColor: '#fff', color: '#000' }}
                                 whileTap={{ scale: 0.98 }}
                                 style={{
-                                    flex: 1.5,
-                                    background: 'transparent',
-                                    border: '1px solid #fff',
-                                    color: '#fff',
-                                    padding: '24px',
-                                    fontSize: '11px',
-                                    fontWeight: 700,
-                                    textTransform: 'uppercase',
-                                    letterSpacing: '0.4em',
-                                    cursor: 'pointer',
-                                    fontFamily: 'var(--font-tenor)',
-                                    transition: 'all 0.4s'
+                                    flex: 1, background: 'transparent', border: '1px solid #fff', color: '#fff',
+                                    padding: '20px', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.4em', cursor: 'pointer', transition: 'all 0.3s'
                                 }}
                             >
-                                ACQUIRE_FRAGMENT
+                                ACQUIRE_PRODUCT
                             </motion.button>
                             <motion.button
-                                whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.05)' }}
-                                whileTap={{ scale: 0.95 }}
+                                whileHover={{ backgroundColor: 'rgba(255,255,255,0.05)' }}
                                 style={{
-                                    flex: 0.5,
-                                    background: 'transparent',
-                                    border: '1px solid rgba(255,255,255,0.1)',
-                                    color: '#fff',
-                                    padding: '24px',
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
+                                    width: '60px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#fff',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer'
                                 }}
                             >
-                                <ShoppingBag size={20} strokeWidth={1} />
+                                <ShoppingBag size={18} strokeWidth={1} />
                             </motion.button>
                         </div>
                     </motion.div>
                 </section>
+            </div>
+
+            {/* Bottom Meta */}
+            <div style={{ position: 'absolute', bottom: '40px', left: '100px', opacity: 0.2, fontSize: '9px', letterSpacing: '0.3em' }}>
+                ID: {product.id.toString().padStart(4, '0')} — STUDIO_REVEIL_FRAGMENT
             </div>
         </main>
     )
