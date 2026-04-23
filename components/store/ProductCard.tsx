@@ -330,7 +330,7 @@ export default function ProductCard({ product }: { product: Product }) {
                                         initial: { y: 0, opacity: 1 },
                                         hover: { y: -20, opacity: 0 }
                                     } : {}}
-                                    style={{ display: 'block' }}
+                                    style={{ display: 'block', color: isMobile ? '#000' : 'inherit' }}
                                 >
                                     {adding ? '...' : 'BUY'}
                                 </motion.span>
@@ -395,7 +395,7 @@ export default function ProductCard({ product }: { product: Product }) {
                                     initial: { y: 0, opacity: 1 },
                                     hover: { y: -20, opacity: 0 }
                                 } : {}}
-                                style={{ display: 'block' }}
+                                style={{ display: 'block', color: isMobile ? '#000' : 'inherit' }}
                             >
                                 {adding ? '...' : 'CART'}
                             </motion.span>
