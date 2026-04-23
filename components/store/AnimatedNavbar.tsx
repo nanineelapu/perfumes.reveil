@@ -299,103 +299,124 @@ export function AnimatedNavbar() {
                 )}
             </div>
 
-            {/* Mobile Menu Overlay */}
+            {/* Mobile Menu Overlay - High-End Redesign */}
             <AnimatePresence>
                 {isMobile && isMobileMenuOpen && (
                     <motion.div
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                        initial={{ x: '100%' }}
+                        animate={{ x: 0 }}
+                        exit={{ x: '100%' }}
+                        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                         style={{
-                            position: 'fixed',
-                            top: '76px', // Header height
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            background: '#050505',
-                            zIndex: 90,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            padding: '40px 24px',
-                            gap: '24px'
+                            position: 'fixed', inset: 0,
+                            background: '#050505', zIndex: 110,
+                            display: 'flex', flexDirection: 'column',
+                            padding: '120px 40px 60px'
                         }}
                     >
+                        {/* Decorative Background Element */}
                         <motion.div
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.1 }}
-                        >
-                            <Link
-                                href="/products"
-                                onClick={() => setIsMobileMenuOpen(false)}
-                                style={{
-                                    fontSize: '24px',
-                                    fontFamily: 'var(--font-baskerville)',
-                                    color: textColor,
-                                    textDecoration: 'none',
-                                    display: 'block',
-                                    letterSpacing: '0.02em',
-                                    fontWeight: 500
-                                }}
-                            >
-                                Collection
-                            </Link>
-                        </motion.div>
+                            initial={{ scaleX: 0 }}
+                            animate={{ scaleX: 1 }}
+                            transition={{ duration: 0.8, delay: 0.2, ease: "circOut" }}
+                            style={{
+                                position: 'absolute', top: 0, right: 0, bottom: 0,
+                                width: '2px', background: 'linear-gradient(to bottom, transparent, #d4af37, transparent)',
+                                opacity: 0.3
+                            }}
+                        />
 
-                        <motion.div
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.2 }}
-                        >
-                            <Link
-                                href="/orders"
-                                onClick={() => setIsMobileMenuOpen(false)}
-                                style={{
-                                    fontSize: '24px',
-                                    fontFamily: 'var(--font-baskerville)',
-                                    color: textColor,
-                                    textDecoration: 'none',
-                                    display: 'block',
-                                    letterSpacing: '0.02em',
-                                    fontWeight: 500
-                                }}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+                            {/* Brand Logo in Overlay */}
+                            <motion.div
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.2 }}
+                                style={{ marginBottom: '32px', marginLeft: '-20px' }}
                             >
-                                My Orders
-                            </Link>
-                        </motion.div>
+                                <img
+                                    src="https://lhnamtkpjkrawgql.public.blob.vercel-storage.com/Untitled%20%282%29.webp"
+                                    alt="Reveil Logo"
+                                    style={{ height: '44px', width: 'auto' }}
+                                />
+                            </motion.div>
 
-                        <motion.div
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.3 }}
-                        >
-                            <Link
-                                href="/auth"
-                                onClick={() => setIsMobileMenuOpen(false)}
-                                style={{
-                                    fontSize: '24px',
-                                    fontFamily: 'var(--font-baskerville)',
-                                    color: textColor,
-                                    textDecoration: 'none',
-                                    display: 'block',
-                                    letterSpacing: '0.02em',
-                                    fontWeight: 500
-                                }}
-                            >
-                                My Account
-                            </Link>
-                        </motion.div>
-
-                        <div style={{ marginTop: 'auto', borderTop: '1px solid rgba(212,175,55,0.1)', paddingTop: '32px' }}>
-                            <div style={{ color: '#666', fontSize: '10px', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: '16px' }}>
-                                Studio Archive
-                            </div>
-                            <div style={{ color: '#fff', fontSize: '14px', fontFamily: 'var(--font-tenor)', lineHeight: 1.6 }}>
-                                Explore the art of scent. <br />
-                                Handcrafted excellence since 2024.
-                            </div>
+                            {[
+                                { name: 'Shop', href: '/products' },
+                                { name: 'Orders', href: '/orders' },
+                                { name: 'My Account', href: '/auth' }
+                            ].map((link, i) => (
+                                <motion.div
+                                    key={link.name}
+                                    initial={{ opacity: 0, y: 30, rotateX: -30 }}
+                                    animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                                    transition={{
+                                        duration: 0.8,
+                                        delay: 0.1 * i + 0.3,
+                                        ease: [0.16, 1, 0.3, 1]
+                                    }}
+                                >
+                                    <Link
+                                        href={link.href}
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                        style={{
+                                            fontSize: 'clamp(24px, 8vw, 32px)',
+                                            fontFamily: 'var(--font-baskerville)',
+                                            color: textColor,
+                                            textDecoration: 'none',
+                                            display: 'block',
+                                            letterSpacing: '0.02em',
+                                            fontWeight: 300,
+                                            lineHeight: 1
+                                        }}
+                                    >
+                                        <motion.span
+                                            whileTap={{ x: 20, color: '#fff' }}
+                                            style={{ display: 'inline-block' }}
+                                        >
+                                            {link.name}
+                                        </motion.span>
+                                    </Link>
+                                </motion.div>
+                            ))}
                         </div>
+
+                        {/* Mobile Footer Info */}
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.8, duration: 1 }}
+                            style={{ marginTop: 'auto', borderTop: '1px solid rgba(212,175,55,0.05)', paddingTop: '40px' }}
+                        >
+                            <div style={{
+                                color: '#444', fontSize: '8px', letterSpacing: '0.4em',
+                                textTransform: 'uppercase', marginBottom: '20px'
+                            }}>
+                                Studio Archive — 2024
+                            </div>
+                            <p style={{
+                                color: '#888', fontSize: '13px', fontFamily: 'var(--font-tenor)',
+                                lineHeight: 1.8, maxWidth: '240px'
+                            }}>
+                                Crafting a new legacy in scent. <br />
+                                Explore the architecture of perfume.
+                            </p>
+                        </motion.div>
+
+                        {/* Close button inside overlay for better UX */}
+                        <motion.button
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.5 }}
+                            style={{
+                                position: 'absolute', top: '40px', right: '40px',
+                                background: 'transparent', border: 'none', color: '#fff',
+                                cursor: 'pointer', padding: '10px'
+                            }}
+                        >
+                            <X size={32} strokeWidth={1} />
+                        </motion.button>
                     </motion.div>
                 )}
             </AnimatePresence>

@@ -1,5 +1,5 @@
 'use client'
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from 'framer-motion'
 import { CheckCircle } from 'lucide-react'
 
@@ -7,7 +7,15 @@ export function NewsletterSection() {
     const [email, setEmail] = useState('')
     const [isSubmitted, setIsSubmitted] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [isMobile, setIsMobile] = useState(false)
     const containerRef = useRef(null)
+
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 1024)
+        checkMobile()
+        window.addEventListener('resize', checkMobile)
+        return () => window.removeEventListener('resize', checkMobile)
+    }, [])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -45,8 +53,8 @@ export function NewsletterSection() {
             ref={containerRef}
             className="relative overflow-hidden bg-white text-[#1a1a1a]"
             style={{
-                padding: '80px 80px',
-                minHeight: '50vh',
+                padding: isMobile ? '60px 20px' : '80px 80px',
+                minHeight: isMobile ? 'auto' : '50vh',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
@@ -78,15 +86,16 @@ export function NewsletterSection() {
             <motion.div
                 style={{
                     position: 'absolute',
-                    width: '350px',
-                    height: '350px',
+                    width: isMobile ? '220px' : '350px',
+                    height: isMobile ? '220px' : '350px',
                     border: '1px solid #d4af3715',
                     borderRadius: '50%',
                     zIndex: 0,
                     rotate: circleRotate,
                     translateX: circleX,
-                    left: '5%',
-                    top: '-10%'
+                    left: isMobile ? '50%' : '5%',
+                    x: isMobile ? '-50%' : '0',
+                    top: isMobile ? '-10%' : '-10%'
                 }}
             />
 
@@ -94,18 +103,18 @@ export function NewsletterSection() {
             <div className="relative z-10 w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
                 {/* Left Column: Heading */}
-                <div className="flex flex-col items-start text-left">
+                <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
                     <motion.span
                         initial={{ opacity: 0, x: -20 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.8 }}
                         style={{
-                            fontSize: '10px',
+                            fontSize: isMobile ? '8px' : '9px',
                             color: '#d4af37',
-                            letterSpacing: '0.8em',
+                            letterSpacing: isMobile ? '0.5em' : '0.8em',
                             textTransform: 'uppercase',
-                            marginBottom: '20px',
+                            marginBottom: isMobile ? '12px' : '20px',
                             fontWeight: 600,
                             fontFamily: 'var(--font-baskerville)'
                         }}
@@ -119,7 +128,7 @@ export function NewsletterSection() {
                         viewport={{ once: true }}
                         transition={{ duration: 0.8, delay: 0.2 }}
                         style={{
-                            fontSize: 'clamp(45px, 7vw, 90px)',
+                            fontSize: isMobile ? 'clamp(32px, 10vw, 42px)' : 'clamp(45px, 7vw, 90px)',
                             fontWeight: 800,
                             lineHeight: 0.85,
                             margin: 0,
@@ -129,13 +138,14 @@ export function NewsletterSection() {
                         }}
                     >
                         JOIN <br />
-                        <span style={{
+                        <motion.span style={{
                             color: 'transparent',
-                            WebkitTextStroke: '1.5px #1a1a1a',
-                            fontFamily: 'var(--font-baskerville)'
+                            WebkitTextStroke: isMobile ? '0.8px #1a1a1a' : '1.5px #1a1a1a',
+                            fontFamily: 'var(--font-baskerville)',
+                            display: 'inline-block'
                         }}>
                             REVEIL
-                        </span>
+                        </motion.span>
                     </motion.h2>
 
                     <motion.div
@@ -145,30 +155,30 @@ export function NewsletterSection() {
                         transition={{ duration: 1.5, ease: "circOut", delay: 0.5 }}
                         style={{
                             height: '1px',
-                            width: '100px',
+                            width: '80px',
                             background: '#d4af37',
-                            marginTop: '32px',
-                            originX: 0
+                            marginTop: '24px',
+                            originX: 0.5
                         }}
                     />
                 </div>
 
                 {/* Right Column: Info & Form */}
-                <div className="flex flex-col items-start lg:items-end text-left lg:text-right">
+                <div className="flex flex-col items-center lg:items-end text-center lg:text-right">
                     <motion.p
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.8, delay: 0.4 }}
                         style={{
-                            fontSize: '17px',
+                            fontSize: isMobile ? '13px' : '17px',
                             color: '#666',
                             fontFamily: 'var(--font-baskerville)',
                             fontStyle: 'italic',
                             fontWeight: 400,
-                            lineHeight: 1.6,
-                            maxWidth: '400px',
-                            marginBottom: '40px',
+                            lineHeight: 1.5,
+                            maxWidth: isMobile ? '100%' : '400px',
+                            marginBottom: isMobile ? '24px' : '40px',
                             letterSpacing: '-0.01em'
                         }}
                     >
@@ -196,10 +206,10 @@ export function NewsletterSection() {
                                         placeholder="ENTER YOUR EMAIL"
                                         style={{
                                             fontFamily: 'var(--font-baskerville)',
-                                            fontSize: '11px',
+                                            fontSize: isMobile ? '10px' : '11px',
                                             paddingRight: '48px'
                                         }}
-                                        className="w-full bg-transparent border-b border-[#ddd] py-5 focus:border-[#d4af37] outline-none transition-colors duration-500 tracking-[0.3em]"
+                                        className="w-full bg-transparent border-b border-[#ddd] py-4 focus:border-[#d4af37] outline-none transition-colors duration-500 tracking-[0.3em]"
                                     />
                                     <motion.button
                                         type="submit"
@@ -225,18 +235,18 @@ export function NewsletterSection() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 style={{
-                                    textAlign: 'right',
+                                    textAlign: isMobile ? 'center' : 'right',
                                     color: '#d4af37',
                                     fontFamily: 'var(--font-baskerville)'
                                 }}
                             >
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '12px', marginBottom: '8px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: isMobile ? 'center' : 'flex-end', gap: '12px', marginBottom: '8px' }}>
                                     <CheckCircle size={16} />
                                     <span style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.4em' }}>Subscription Confirmed</span>
                                 </div>
-                                <h4 style={{ fontSize: '18px', color: '#1a1a1a', fontWeight: 600, letterSpacing: '-0.02em' }}>
+                                <h4 style={{ fontSize: isMobile ? '16px' : '18px', color: '#1a1a1a', fontWeight: 600, letterSpacing: '-0.02em' }}>
                                     Thank you for choosing REVEIL. <br />
-                                    <span style={{ color: '#666', fontSize: '14px', fontWeight: 400 }}>We will contact you soon.</span>
+                                    <span style={{ color: '#666', fontSize: isMobile ? '12px' : '14px', fontWeight: 400 }}>We will contact you soon.</span>
                                 </h4>
                             </motion.div>
                         )}
@@ -252,12 +262,12 @@ export function NewsletterSection() {
                 transition={{ duration: 1, delay: 1 }}
                 style={{
                     position: 'absolute',
-                    bottom: '40px',
-                    right: '40px',
-                    fontSize: '9px',
+                    bottom: isMobile ? '20px' : '40px',
+                    right: isMobile ? '12px' : '40px',
+                    fontSize: isMobile ? '7px' : '9px',
                     color: '#c4a64f',
                     writingMode: 'vertical-rl',
-                    letterSpacing: '0.8em',
+                    letterSpacing: isMobile ? '0.4em' : '0.8em',
                     textTransform: 'uppercase',
                     fontFamily: 'var(--font-baskerville)',
                     opacity: 0.4

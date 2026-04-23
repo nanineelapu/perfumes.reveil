@@ -70,10 +70,10 @@ export function PhilosophySection() {
             <div style={{ maxWidth: '1400px', margin: '0 auto', width: '100%', position: 'relative', zIndex: 1 }}>
                 <div style={{
                     display: 'grid',
-                    gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(300px, 1fr))',
+                    gridTemplateColumns: isMobile ? '1.5fr 0.5fr' : 'repeat(auto-fit, minmax(300px, 1fr))',
                     alignItems: 'center',
-                    gap: isMobile ? '40px' : 'clamp(30px, 6vw, 60px)',
-                    textAlign: isMobile ? 'center' : 'left'
+                    gap: isMobile ? '24px' : 'clamp(30px, 6vw, 60px)',
+                    textAlign: isMobile ? 'left' : 'left'
                 }}>
                     <div style={{ maxWidth: isMobile ? '100%' : '700px', display: 'flex', flexDirection: 'column', alignItems: isMobile ? 'center' : 'flex-start' }}>
                         <motion.div
@@ -82,28 +82,28 @@ export function PhilosophySection() {
                             viewport={{ once: true }}
                             transition={{ duration: 1 }}
                             style={{
-                                fontSize: '9px',
+                                fontSize: isMobile ? '9px' : '9px',
                                 textTransform: 'uppercase',
-                                letterSpacing: '0.8em',
-                                marginBottom: 'clamp(20px, 3vw, 32px)',
+                                letterSpacing: isMobile ? '0.6em' : '0.8em',
+                                marginBottom: isMobile ? '16px' : '32px',
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '12px',
+                                gap: '8px',
                                 color: '#d4af37'
                             }}
                         >
-                            The Creative Process <span style={{ width: '30px', height: '1px', background: '#d4af37' }} />
+                            Process <span style={{ width: isMobile ? '20px' : '30px', height: '1px', background: '#d4af37' }} />
                         </motion.div>
 
                         <h2 style={{
-                            fontSize: 'clamp(22px, 3.2vw, 38px)',
+                            fontSize: isMobile ? '18px' : 'clamp(22px, 3.2vw, 38px)',
                             fontFamily: 'var(--font-baskerville)',
-                            lineHeight: 1.2,
+                            lineHeight: 1.4,
                             fontWeight: 400,
                             letterSpacing: '-0.01em',
                             margin: 0,
                             color: '#1a1a1a',
-                            maxWidth: '680px'
+                            maxWidth: isMobile ? '100%' : '680px'
                         }}>
                             {"Elevated perfumes crafted with natural extraits and made with artisanal care. Timeless and sensory experiences.".split(' ').map((word, i) => (
                                 <motion.span
@@ -128,10 +128,10 @@ export function PhilosophySection() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 1.5, delay: 1 }}
-                            style={{ marginTop: 'clamp(32px, 5vw, 48px)' }}
+                            style={{ marginTop: isMobile ? '24px' : '48px' }}
                         >
                             <Link href="/about" style={{
-                                fontSize: '10px',
+                                fontSize: isMobile ? '9px' : '10px',
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.4em',
                                 color: '#1a1a1a',
@@ -151,7 +151,7 @@ export function PhilosophySection() {
                         transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
                         style={{
                             position: 'relative',
-                            height: isMobile ? '180px' : 'clamp(290px, 28vw, 380px)',
+                            height: isMobile ? '120px' : 'clamp(290px, 28vw, 380px)',
                             width: '100%',
                             display: 'flex',
                             alignItems: 'center',
@@ -163,8 +163,8 @@ export function PhilosophySection() {
                             src="https://lhnamtkpjkrawgql.public.blob.vercel-storage.com/Untitled%20%281%29.png"
                             alt="Reveil Artistry"
                             style={{
-                                width: isMobile ? '70%' : '100%',
-                                height: isMobile ? '70%' : '100%',
+                                width: isMobile ? '100%' : '100%',
+                                height: isMobile ? '100%' : '100%',
                                 objectFit: 'contain',
                                 filter: 'contrast(1.05) brightness(0.98)'
                             }}
@@ -230,7 +230,7 @@ export function NotesSection() {
 
     return (
         <section ref={containerRef} style={{
-            padding: isMobile ? '60px 24px' : '80px 80px',
+            padding: isMobile ? '40px 24px' : '80px 80px',
             background: '#0a0a0a',
             position: 'relative',
             overflow: 'hidden'
@@ -259,19 +259,17 @@ export function NotesSection() {
                     )}
 
                     <div style={{ flex: 1 }}>
-                        {!isMobile && (
-                            <span
-                                style={{
-                                    fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1em',
-                                    color: '#fff', display: 'block', marginBottom: '12px', opacity: 0.5
-                                }}
-                            >
-                                Curated Series
-                            </span>
-                        )}
+                        <span
+                            style={{
+                                fontSize: isMobile ? '9px' : '12px', textTransform: 'uppercase', letterSpacing: isMobile ? '0.6em' : '1em',
+                                color: '#fff', display: 'block', marginBottom: '12px', opacity: 0.5
+                            }}
+                        >
+                            Curated Series
+                        </span>
                         <h2
                             style={{
-                                fontSize: isMobile ? 'clamp(28px, 8vw, 36px)' : 'clamp(24px, 4vw, 48px)',
+                                fontSize: isMobile ? 'clamp(22px, 6vw, 28px)' : 'clamp(24px, 4vw, 48px)',
                                 fontFamily: 'var(--font-baskerville)',
                                 color: '#fff', margin: 0, letterSpacing: '-0.02em',
                                 lineHeight: 1
@@ -316,7 +314,7 @@ export function NotesSection() {
                             key={item.name}
                             style={{
                                 position: 'relative',
-                                height: isMobile ? '420px' : '380px',
+                                height: isMobile ? '340px' : '380px',
                                 minWidth: isMobile ? '280px' : 'auto',
                                 flex: isMobile ? '0 0 auto' : 'auto',
                                 overflow: 'hidden',
@@ -490,25 +488,28 @@ export function BrandShowcaseSection() {
             <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
 
                 {/* Minimalist Heading */}
-                <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+                <div style={{ textAlign: 'center', marginBottom: isMobile ? '40px' : '60px' }}>
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
                     >
-                        <span style={{
-                            fontSize: '9px', textTransform: 'uppercase', letterSpacing: '1.2em',
-                            color: '#d4af37', display: 'block', marginBottom: '16px',
-                            fontFamily: 'var(--font-baskerville)'
-                        }}>
-                            Exquisite Curation
-                        </span>
+                        {!isMobile && (
+                            <span style={{
+                                fontSize: '9px', textTransform: 'uppercase', letterSpacing: '1.2em',
+                                color: '#d4af37', display: 'block', marginBottom: '16px',
+                                fontFamily: 'var(--font-baskerville)'
+                            }}>
+                                Exquisite Curation
+                            </span>
+                        )}
                         <h2 style={{
-                            fontSize: isMobile ? '20px' : 'clamp(24px, 4vw, 36px)',
+                            fontSize: isMobile ? '18px' : 'clamp(24px, 4vw, 36px)',
                             fontFamily: 'var(--font-baskerville)',
-                            color: '#fff', margin: 0, letterSpacing: '0.1em',
-                            textTransform: 'uppercase'
+                            color: '#fff', margin: 0, letterSpacing: isMobile ? '0.15em' : '0.1em',
+                            textTransform: 'uppercase',
+                            whiteSpace: isMobile ? 'nowrap' : 'normal'
                         }}>
                             THE PREMIER <span style={{ color: '#d4af37' }}>CURATION</span>
                         </h2>
@@ -518,8 +519,8 @@ export function BrandShowcaseSection() {
                 {/* Grid - 6 Distinct Cards */}
                 <div style={{
                     display: 'grid',
-                    gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(6, 1fr)',
-                    gap: isMobile ? '8px' : '16px'
+                    gridTemplateColumns: isMobile ? 'repeat(3, 1fr)' : 'repeat(6, 1fr)',
+                    gap: isMobile ? '6px' : '16px'
                 }}>
                     {brands.map((brand, i) => (
                         <motion.div
@@ -534,7 +535,7 @@ export function BrandShowcaseSection() {
                             }}
                             style={{
                                 position: 'relative',
-                                height: isMobile ? '120px' : '180px',
+                                height: isMobile ? '100px' : '180px',
                                 background: 'rgba(255,255,255,0.02)',
                                 border: '1px solid rgba(255,255,255,0.04)',
                                 borderRadius: '1px',
@@ -555,8 +556,8 @@ export function BrandShowcaseSection() {
                                             variants={{ hover: { scale: 1.1 } }}
                                             src={brand.logo}
                                             style={{
-                                                width: '80%',
-                                                height: '80%',
+                                                width: isMobile ? '90%' : '80%',
+                                                height: isMobile ? '90%' : '80%',
                                                 objectFit: 'contain',
                                                 filter: 'brightness(0.7) grayscale(0.5)',
                                                 transition: 'all 0.4s ease'
@@ -598,6 +599,8 @@ export function BrandShowcaseSection() {
                         </motion.div>
                     ))}
                 </div>
+
+                {/* Mobile Sub-label (Bottom) */}
             </div>
         </section>
     )
@@ -647,7 +650,7 @@ export function ReveilCollectionSection() {
     return (
         <section ref={containerRef} style={{
             background: '#050505',
-            padding: isMobile ? '60px 20px' : '100px 80px',
+            padding: isMobile ? '40px 20px' : '100px 80px',
             position: 'relative',
             overflow: 'hidden'
         }}>
@@ -668,7 +671,7 @@ export function ReveilCollectionSection() {
                     justifyContent: 'center',
                     boxShadow: '0 80px 160px rgba(0,0,0,1)',
                     border: '1px solid rgba(255,255,255,0.05)',
-                    padding: isMobile ? '40px 0' : '0'
+                    padding: isMobile ? '24px 0' : '0'
                 }}
             >
                 <motion.div

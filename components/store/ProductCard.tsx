@@ -13,15 +13,20 @@ export default function ProductCard({ product }: { product: Product }) {
     const router = useRouter()
     const supabase = createClient()
 
+    const [adding, setAdding] = useState(false)
+    const [isMobile, setIsMobile] = useState(false)
+
     useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 1024)
+        checkMobile()
+        window.addEventListener('resize', checkMobile)
         const checkUser = async () => {
             const { data: { user } } = await supabase.auth.getUser()
             setUser(user)
         }
         checkUser()
+        return () => window.removeEventListener('resize', checkMobile)
     }, [])
-
-    const [adding, setAdding] = useState(false)
 
     const handleAction = async (e: React.MouseEvent, type: 'cart' | 'buy' | 'view') => {
         e.preventDefault()
@@ -72,7 +77,7 @@ export default function ProductCard({ product }: { product: Product }) {
                 position: 'relative',
                 cursor: 'pointer',
                 borderRadius: '8px',
-                padding: '12px',
+                padding: isMobile ? '8px' : '12px',
                 border: '1px solid rgba(255,255,255,0.03)',
                 overflow: 'hidden',
                 transition: 'all 0.6s cubic-bezier(0.22, 1, 0.36, 1)'
@@ -163,7 +168,7 @@ export default function ProductCard({ product }: { product: Product }) {
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'flex-end',
-                        padding: '30px',
+                        padding: isMobile ? '12px' : '30px',
                         background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 60%)'
                     }}
                 >
@@ -175,9 +180,9 @@ export default function ProductCard({ product }: { product: Product }) {
                                 textAlign: 'center',
                                 background: '#fff',
                                 color: '#000',
-                                padding: '16px 0',
+                                padding: isMobile ? '10px 0' : '16px 0',
                                 textDecoration: 'none',
-                                fontSize: '10px',
+                                fontSize: isMobile ? '8px' : '10px',
                                 fontWeight: 900,
                                 letterSpacing: '0.4em',
                                 textTransform: 'uppercase',
@@ -195,8 +200,8 @@ export default function ProductCard({ product }: { product: Product }) {
                                 backdropFilter: 'blur(10px)',
                                 color: '#fff',
                                 border: '1px solid rgba(255,255,255,0.1)',
-                                padding: '14px 0',
-                                fontSize: '9px',
+                                padding: isMobile ? '10px 0' : '14px 0',
+                                fontSize: isMobile ? '8px' : '9px',
                                 fontWeight: 700,
                                 letterSpacing: '0.2em',
                                 textTransform: 'uppercase',
@@ -204,35 +209,35 @@ export default function ProductCard({ product }: { product: Product }) {
                                 opacity: adding ? 0.6 : 1
                             }}
                         >
-                            {adding ? 'SYNCHRONIZING...' : 'ADD TO CART'}
+                            {adding ? (isMobile ? '...' : 'SYNCHRONIZING...') : 'ADD TO CART'}
                         </button>
                     </div>
                 </motion.div>
 
                 {/* Vertical Batch ID */}
                 <div style={{
-                    position: 'absolute', top: '30px', right: '30px',
-                    fontSize: '8px', color: '#d4af37',
+                    position: 'absolute', top: isMobile ? '12px' : '30px', right: isMobile ? '12px' : '30px',
+                    fontSize: isMobile ? '6px' : '8px', color: '#d4af37',
                     letterSpacing: '0.4em', textTransform: 'uppercase',
                     fontWeight: 900, zIndex: 3, writingMode: 'vertical-rl',
                     opacity: hovered ? 0.2 : 0.6, transition: '0.5s'
                 }}>
-                    BATCH — REF.{product.id.toString().padStart(3, '0')}
+                    {isMobile ? `B-${product.id}` : `BATCH — REF.${product.id.toString().padStart(3, '0')}`}
                 </div>
             </motion.div>
 
             {/* Typography Section */}
-            <div style={{ padding: '24px 0', textAlign: 'left' }}>
+            <div style={{ padding: isMobile ? '12px 0' : '24px 0', textAlign: 'left' }}>
                 <Link href={`/products/${product.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                     <div style={{
-                        fontSize: '8px', color: '#666',
+                        fontSize: isMobile ? '7px' : '8px', color: '#666',
                         letterSpacing: '0.6em', marginBottom: '8px',
                         fontWeight: 400, textTransform: 'uppercase',
                         display: 'flex', alignItems: 'center', gap: '8px',
                         fontFamily: 'var(--font-tenor)'
                     }}>
                         <div style={{
-                            width: hovered ? '30px' : '0px',
+                            width: (hovered && !isMobile) ? '30px' : '0px',
                             height: '1px',
                             background: '#d4af37',
                             transition: 'width 0.6s cubic-bezier(0.22, 1, 0.36, 1)'
@@ -240,7 +245,7 @@ export default function ProductCard({ product }: { product: Product }) {
                         {product.category}
                     </div>
                     <h3 style={{
-                        margin: '0 0 8px', fontSize: '18px', fontWeight: 300,
+                        margin: '0 0 8px', fontSize: isMobile ? '14px' : '18px', fontWeight: 300,
                         color: '#fff', fontFamily: 'var(--font-cormorant)',
                         letterSpacing: '0.02em', textTransform: 'none' // Allows admin casing
                     }}>
@@ -251,15 +256,15 @@ export default function ProductCard({ product }: { product: Product }) {
                     <div style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '12px',
-                        marginBottom: '20px',
+                        gap: isMobile ? '8px' : '12px',
+                        marginBottom: isMobile ? '12px' : '20px',
                         fontFamily: 'var(--font-tenor)'
                     }}>
-                        <span style={{ fontSize: '14px', fontWeight: 500, color: '#d4af37' }}>
+                        <span style={{ fontSize: isMobile ? '12px' : '14px', fontWeight: 500, color: '#d4af37' }}>
                             ₹ {product.price}
                         </span>
                         <span style={{
-                            fontSize: '9px',
+                            fontSize: isMobile ? '7px' : '9px',
                             color: '#d4af37',
                             padding: '2px 8px',
                             border: '1px solid rgba(212,175,55,0.3)',
@@ -274,33 +279,100 @@ export default function ProductCard({ product }: { product: Product }) {
                 {/* Integrated Static Controls for Accessibility - Theme Focused */}
                 <div style={{
                     display: 'flex',
-                    gap: '12px', // Sophisticated gap
-                    marginTop: '20px',
+                    flexDirection: isMobile ? 'row' : 'row', // Side by side for both
+                    gap: isMobile ? '6px' : '12px',
+                    marginTop: isMobile ? '12px' : '20px',
                     background: 'transparent'
                 }}>
                     <div onClick={(e) => handleAction(e, 'buy')} style={{ flex: 1 }}>
                         <motion.button
                             disabled={adding}
-                            whileHover="hover"
+                            whileTap={isMobile ? { scale: 0.95 } : {}}
+                            whileHover={!isMobile ? "hover" : ""}
                             initial="initial"
                             style={{
                                 width: '100%',
-                                background: 'rgba(255,255,255,0.02)',
-                                color: '#d4af37', // Gold text by default
-                                border: '1px solid rgba(212,175,55,0.2)', // Subtle gold border
-                                padding: '14px 0',
-                                fontSize: '8px',
-                                fontWeight: 700,
-                                letterSpacing: '0.3em',
+                                background: isMobile ? '#d4af37' : 'rgba(255,255,255,0.02)',
+                                color: isMobile ? '#000' : '#d4af37',
+                                border: isMobile ? 'none' : '1px solid rgba(212,175,55,0.2)',
+                                padding: isMobile ? '6px 0' : '14px 0',
+                                fontSize: isMobile ? '9px' : '8px',
+                                fontWeight: 900,
+                                letterSpacing: isMobile ? '0.1em' : '0.3em',
                                 textTransform: 'uppercase',
                                 cursor: adding ? 'not-allowed' : 'pointer',
                                 fontFamily: 'var(--font-tenor)',
                                 position: 'relative',
                                 overflow: 'hidden',
-                                borderRadius: '1px'
+                                borderRadius: '2px'
                             }}
                         >
-                            {/* Hover Background Slide */}
+                            {!isMobile && (
+                                <motion.div
+                                    variants={{
+                                        initial: { y: '100%' },
+                                        hover: { y: 0 }
+                                    }}
+                                    transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                                    style={{ position: 'absolute', inset: 0, background: '#d4af37', zIndex: 0 }}
+                                />
+                            )}
+
+                            <motion.div
+                                variants={!isMobile ? {
+                                    initial: { color: '#d4af37' },
+                                    hover: { color: '#000' }
+                                } : {}}
+                                style={{ position: 'relative', zIndex: 1, color: isMobile ? '#000' : 'inherit' }}
+                            >
+                                <motion.span
+                                    variants={!isMobile ? {
+                                        initial: { y: 0, opacity: 1 },
+                                        hover: { y: -20, opacity: 0 }
+                                    } : {}}
+                                    style={{ display: 'block' }}
+                                >
+                                    {adding ? '...' : 'BUY'}
+                                </motion.span>
+                                {!isMobile && (
+                                    <motion.span
+                                        variants={{
+                                            initial: { y: 20, opacity: 0 },
+                                            hover: { y: 0, opacity: 1 }
+                                        }}
+                                        style={{ position: 'absolute', left: 0, right: 0, top: 0 }}
+                                    >
+                                        {adding ? '...' : 'BUY'}
+                                    </motion.span>
+                                )}
+                            </motion.div>
+                        </motion.button>
+                    </div>
+
+                    <motion.button
+                        disabled={adding}
+                        onClick={(e) => handleAction(e, 'cart')}
+                        whileTap={isMobile ? { scale: 0.95 } : {}}
+                        whileHover={!isMobile ? "hover" : ""}
+                        initial="initial"
+                        style={{
+                            flex: 1,
+                            background: isMobile ? '#fff' : 'rgba(255,255,255,0.02)',
+                            color: isMobile ? '#000' : '#d4af37',
+                            border: isMobile ? 'none' : '1px solid rgba(212,175,55,0.2)',
+                            padding: isMobile ? '6px 0' : '14px 0',
+                            fontSize: isMobile ? '9px' : '8px',
+                            fontWeight: 900,
+                            letterSpacing: isMobile ? '0.1em' : '0.3em',
+                            textTransform: 'uppercase',
+                            cursor: adding ? 'not-allowed' : 'pointer',
+                            fontFamily: 'var(--font-tenor)',
+                            position: 'relative',
+                            overflow: 'hidden',
+                            borderRadius: '2px'
+                        }}
+                    >
+                        {!isMobile && (
                             <motion.div
                                 variants={{
                                     initial: { y: '100%' },
@@ -309,23 +381,25 @@ export default function ProductCard({ product }: { product: Product }) {
                                 transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                                 style={{ position: 'absolute', inset: 0, background: '#d4af37', zIndex: 0 }}
                             />
+                        )}
 
-                            <motion.div
-                                variants={{
-                                    initial: { color: '#d4af37' },
-                                    hover: { color: '#000' }
-                                }}
-                                style={{ position: 'relative', zIndex: 1 }}
+                        <motion.div
+                            variants={!isMobile ? {
+                                initial: { color: '#d4af37' },
+                                hover: { color: '#000' }
+                            } : {}}
+                            style={{ position: 'relative', zIndex: 1, color: isMobile ? '#000' : 'inherit' }}
+                        >
+                            <motion.span
+                                variants={!isMobile ? {
+                                    initial: { y: 0, opacity: 1 },
+                                    hover: { y: -20, opacity: 0 }
+                                } : {}}
+                                style={{ display: 'block' }}
                             >
-                                <motion.span
-                                    variants={{
-                                        initial: { y: 0, opacity: 1 },
-                                        hover: { y: -20, opacity: 0 }
-                                    }}
-                                    style={{ display: 'block' }}
-                                >
-                                    {adding ? '...' : 'BUY NOW'}
-                                </motion.span>
+                                {adding ? '...' : 'CART'}
+                            </motion.span>
+                            {!isMobile && (
                                 <motion.span
                                     variants={{
                                         initial: { y: 20, opacity: 0 },
@@ -333,69 +407,9 @@ export default function ProductCard({ product }: { product: Product }) {
                                     }}
                                     style={{ position: 'absolute', left: 0, right: 0, top: 0 }}
                                 >
-                                    {adding ? '...' : 'BUY NOW'}
+                                    {adding ? '...' : 'CART'}
                                 </motion.span>
-                            </motion.div>
-                        </motion.button>
-                    </div>
-
-                    <motion.button
-                        disabled={adding}
-                        onClick={(e) => handleAction(e, 'cart')}
-                        whileHover="hover"
-                        initial="initial"
-                        style={{
-                            flex: 1,
-                            background: 'rgba(255,255,255,0.02)',
-                            color: '#d4af37',
-                            border: '1px solid rgba(212,175,55,0.2)',
-                            padding: '14px 0',
-                            fontSize: '8px',
-                            fontWeight: 700,
-                            letterSpacing: '0.3em',
-                            textTransform: 'uppercase',
-                            cursor: adding ? 'not-allowed' : 'pointer',
-                            fontFamily: 'var(--font-tenor)',
-                            position: 'relative',
-                            overflow: 'hidden',
-                            borderRadius: '1px'
-                        }}
-                    >
-                        {/* Hover Background Slide */}
-                        <motion.div
-                            variants={{
-                                initial: { y: '100%' },
-                                hover: { y: 0 }
-                            }}
-                            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                            style={{ position: 'absolute', inset: 0, background: '#d4af37', zIndex: 0 }}
-                        />
-
-                        <motion.div
-                            variants={{
-                                initial: { color: '#d4af37' },
-                                hover: { color: '#000' }
-                            }}
-                            style={{ position: 'relative', zIndex: 1 }}
-                        >
-                            <motion.span
-                                variants={{
-                                    initial: { y: 0, opacity: 1 },
-                                    hover: { y: -20, opacity: 0 }
-                                }}
-                                style={{ display: 'block' }}
-                            >
-                                {adding ? 'ADDING...' : 'ADD TO CART'}
-                            </motion.span>
-                            <motion.span
-                                variants={{
-                                    initial: { y: 20, opacity: 0 },
-                                    hover: { y: 0, opacity: 1 }
-                                }}
-                                style={{ position: 'absolute', left: 0, right: 0, top: 0 }}
-                            >
-                                {adding ? 'ADDING...' : 'ADD TO CART'}
-                            </motion.span>
+                            )}
                         </motion.div>
                     </motion.button>
                 </div>

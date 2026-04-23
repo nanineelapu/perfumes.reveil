@@ -1,4 +1,5 @@
 'use client'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import ProductCard from './ProductCard'
 import { Product, Collection } from '@/types/store'
@@ -6,6 +7,15 @@ import { AnimatedPageSection } from './AnimatedPageSection'
 
 
 export default function ProductGrid({ items }: { items: (Product | Collection)[] }) {
+    const [isMobile, setIsMobile] = useState(false)
+
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 1024)
+        checkMobile()
+        window.addEventListener('resize', checkMobile)
+        return () => window.removeEventListener('resize', checkMobile)
+    }, [])
+
     if (!items || items.length === 0) {
         return (
             <div style={{ textAlign: 'center', padding: '120px', color: '#666', background: '#050505' }}>
@@ -15,47 +25,65 @@ export default function ProductGrid({ items }: { items: (Product | Collection)[]
     }
 
     return (
-        <AnimatedPageSection delay={0.1} style={{ background: '#050505', padding: '100px 80px', position: 'relative', overflow: 'hidden' }}>
+        <AnimatedPageSection delay={0.1} style={{ background: '#050505', padding: isMobile ? '60px 20px' : '100px 80px', position: 'relative', overflow: 'hidden' }}>
             {/* Architectural Border Accents */}
             <div style={{ position: 'absolute', top: 0, left: '5%', right: '5%', height: '1px', background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.05), transparent)' }} />
 
             <div style={{ maxWidth: '1440px', margin: '0 auto', position: 'relative' }}>
                 <div style={{
                     display: 'flex',
+                    flexDirection: isMobile ? 'column' : 'row',
                     justifyContent: 'space-between',
-                    alignItems: 'flex-end',
-                    marginBottom: '80px',
-                    gap: '30px'
+                    alignItems: isMobile ? 'center' : 'flex-end',
+                    marginBottom: isMobile ? '40px' : '80px',
+                    gap: isMobile ? '20px' : '30px',
+                    textAlign: isMobile ? 'center' : 'left'
                 }}>
-                    <div style={{ display: 'flex', gap: '30px' }}>
+                    <div style={{ display: 'flex', gap: isMobile ? '16px' : '30px', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'center' : 'flex-start' }}>
                         {/* Vertical Meta Branding */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingRight: '25px', borderRight: '1px solid rgba(255,255,255,0.1)' }}>
-                            <div style={{
-                                writingMode: 'vertical-rl', transform: 'rotate(180deg)',
-                                fontSize: '10px', fontWeight: 900, color: '#d4af37',
-                                letterSpacing: '0.4em', textTransform: 'uppercase',
-                            }}>
-                                EST. 2024
+                        {!isMobile && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingRight: '25px', borderRight: '1px solid rgba(255,255,255,0.1)' }}>
+                                <div style={{
+                                    writingMode: 'vertical-rl', transform: 'rotate(180deg)',
+                                    fontSize: '10px', fontWeight: 900, color: '#d4af37',
+                                    letterSpacing: '0.4em', textTransform: 'uppercase',
+                                }}>
+                                    EST. 2024
+                                </div>
                             </div>
-                        </div>
+                        )}
 
                         <motion.div
-                            initial={{ opacity: 0, x: -20 }}
-                            whileInView={{ opacity: 1, x: 0 }}
+                            initial={{ opacity: 0, x: isMobile ? 0 : -20, y: isMobile ? 20 : 0 }}
+                            whileInView={{ opacity: 1, x: 0, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 1 }}
+                            style={{ display: 'flex', flexDirection: 'column', alignItems: isMobile ? 'center' : 'flex-start' }}
                         >
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', opacity: 0.6, marginBottom: '24px' }}>
-                                <span style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.6em', textTransform: 'uppercase', color: '#fff' }}>CURATED SELECTION</span>
-                            </div>
+                            {isMobile && (
+                                <div style={{
+                                    fontSize: '8px', fontWeight: 900, color: '#d4af37',
+                                    letterSpacing: '0.4em', textTransform: 'uppercase',
+                                    marginBottom: '16px'
+                                }}>
+                                    EST. 2024
+                                </div>
+                            )}
+
                             <h2 style={{
-                                fontSize: 'clamp(24px, 4vw, 42px)',
+                                fontSize: isMobile ? '20px' : 'clamp(24px, 4vw, 42px)',
                                 fontFamily: 'var(--font-baskerville)',
                                 color: '#fff', margin: 0, lineHeight: 1,
-                                letterSpacing: '0.02em', textTransform: 'uppercase'
+                                letterSpacing: '0.02em', textTransform: 'uppercase',
+                                whiteSpace: isMobile ? 'nowrap' : 'normal',
+                                marginBottom: isMobile ? '12px' : '24px'
                             }}>
                                 TRENDING <span style={{ color: '#d4af37' }}>CURATION</span>
                             </h2>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', opacity: 0.6 }}>
+                                <span style={{ fontSize: isMobile ? '8px' : '10px', fontWeight: 900, letterSpacing: '0.6em', textTransform: 'uppercase', color: '#fff' }}>CURATED SELECTION</span>
+                            </div>
                         </motion.div>
                     </div>
 
@@ -67,9 +95,9 @@ export default function ProductGrid({ items }: { items: (Product | Collection)[]
                         style={{ maxWidth: '400px' }}
                     >
                         <p style={{
-                            fontSize: '15px', color: '#777', fontWeight: 300,
+                            fontSize: isMobile ? '13px' : '15px', color: '#777', fontWeight: 300,
                             lineHeight: 1.6, margin: 0, fontFamily: 'var(--font-baskerville)',
-                            textAlign: 'right', letterSpacing: '0.02em', fontStyle: 'italic'
+                            textAlign: isMobile ? 'center' : 'right', letterSpacing: '0.02em', fontStyle: 'italic'
                         }}>
                             Discover the scents defining the modern luxury landscape.
                         </p>
@@ -79,8 +107,8 @@ export default function ProductGrid({ items }: { items: (Product | Collection)[]
                 {/* Grid with Tighter Scaling */}
                 <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                    gap: '50px 30px',
+                    gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(auto-fill, minmax(280px, 1fr))',
+                    gap: isMobile ? '24px 12px' : '50px 30px',
                 }}>
                     {items.map((item, i) => {
                         const product: Product = 'image_url' in item ? {

@@ -1,5 +1,5 @@
 'use client'
-import { useState, useRef, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Star } from 'lucide-react'
 
@@ -8,95 +8,104 @@ const reviews = [
         name: "Arjun Mehta",
         location: "Mumbai",
         text: "The Oudh Noir is absolutely mesmerizing. It has this unique depth that I haven't found anywhere else.",
-        initials: "AM",
-        image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=200"
+        initials: "AM"
     },
     {
         name: "Sanya Malhotra",
         location: "Delhi",
         text: "I was skeptical about ordering online, but the scent trail of Velvet Rose exceeded everything.",
-        initials: "SM",
-        image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200"
+        initials: "SM"
     },
     {
         name: "Rohan Varma",
         location: "Bangalore",
         text: "Exceptional longevity. I applied Saffron Silk in the morning and could still catch it by dinner.",
-        initials: "RV",
-        image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200"
+        initials: "RV"
     },
     {
         name: "Ananya Iyer",
         location: "Chennai",
         text: "Reveil has mastered the art of minimalism in design but absolute complexity in scent.",
-        initials: "AI",
-        image: "https://images.unsplash.com/photo-1548142813-c348350df52b?auto=format&fit=crop&q=80&w=200"
+        initials: "AI"
     }
 ]
 
 export function ReviewsSection() {
+    const [isMobile, setIsMobile] = useState(false)
+
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 1024)
+        checkMobile()
+        window.addEventListener('resize', checkMobile)
+        return () => window.removeEventListener('resize', checkMobile)
+    }, [])
+
     return (
         <section
             style={{
-                background: '#050505', // Noir background
-                padding: '80px 80px',
+                background: '#050505',
+                padding: isMobile ? '60px 20px' : '100px 80px',
                 position: 'relative',
                 overflow: 'hidden'
             }}
         >
             <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
 
-                {/* Header: Customer Insights Style */}
-                <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+                {/* Header */}
+                <div style={{ textAlign: 'center', marginBottom: isMobile ? '40px' : '80px' }}>
                     <motion.h2
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         style={{
-                            fontSize: 'clamp(28px, 4vw, 48px)',
+                            fontSize: isMobile ? '20px' : 'clamp(32px, 5vw, 56px)',
                             fontFamily: 'var(--font-tenor)',
                             fontWeight: 900,
                             letterSpacing: '-0.02em',
                             textTransform: 'uppercase',
                             margin: 0,
                             color: '#fff',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '15px'
                         }}
                     >
                         CLIENT <span style={{ color: '#d4af37', fontWeight: 300, fontStyle: 'italic' }}>REFLECTIONS</span>
                     </motion.h2>
                 </div>
 
-                {/* 2-Column Grid of Asymmetric Cards */}
+                {/* Grid - 2 Column for both Mobile and Desktop as per reference */}
                 <div style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(2, 1fr)',
-                    gap: '40px'
+                    gap: isMobile ? '16px' : '40px',
                 }}>
                     {reviews.map((review, i) => (
-                        <ReviewCard key={i} review={review} index={i} isDark={i % 2 === 0} />
+                        <ReviewCard key={i} review={review} index={i} isDark={i % 2 === 0} isMobile={isMobile} />
                     ))}
                 </div>
 
-                {/* Footer Stats */}
+                {/* Footer Stats - Matching Reference Layout */}
                 <div style={{
-                    marginTop: '60px',
+                    marginTop: isMobile ? '40px' : '100px',
                     display: 'flex',
                     justifyContent: 'center',
-                    gap: '120px',
+                    alignItems: 'center',
+                    gap: isMobile ? '12px' : '60px',
                     borderTop: '1px solid rgba(255,255,255,0.05)',
-                    paddingTop: '40px'
+                    paddingTop: isMobile ? '30px' : '60px'
                 }}>
-                    <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: '28px', fontWeight: 900, color: '#fff', marginBottom: '4px' }}>4.7</div>
-                        <div style={{ fontSize: '8px', letterSpacing: '0.3em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', fontWeight: 700 }}>Google Score Aggregate</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : '15px' }}>
+                        <div style={{ fontSize: isMobile ? '24px' : '48px', fontWeight: 900, color: '#fff', fontFamily: 'monospace' }}>4.7</div>
+                        <div style={{ fontSize: '7px', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', fontWeight: 700, textAlign: 'left', lineHeight: 1.4 }}>
+                            GOOGLE <br /> SCORE <br /> AGGREGATE
+                        </div>
                     </div>
-                    <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: '28px', fontWeight: 900, color: '#fff', marginBottom: '4px' }}>10K+</div>
-                        <div style={{ fontSize: '8px', letterSpacing: '0.3em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', fontWeight: 700 }}>Active Monthly Logged Data</div>
+
+                    <div style={{ width: '1px', height: isMobile ? '30px' : '40px', background: 'rgba(255,255,255,0.1)' }} />
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : '15px' }}>
+                        <div style={{ fontSize: isMobile ? '24px' : '48px', fontWeight: 900, color: '#fff', fontFamily: 'monospace' }}>2K+</div>
+                        <div style={{ fontSize: '7px', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', fontWeight: 700, textAlign: 'left', lineHeight: 1.4 }}>
+                            MONTHLY <br /> ACTIVE <br /> VISITORS
+                        </div>
                     </div>
                 </div>
             </div>
@@ -104,105 +113,82 @@ export function ReviewsSection() {
     )
 }
 
-function ReviewCard({ review, index, isDark }: { review: any, index: number, isDark: boolean }) {
+function ReviewCard({ review, index, isDark, isMobile }: { review: any, index: number, isDark: boolean, isMobile: boolean }) {
     const [randomId] = useState(Math.floor(Math.random() * 900 + 100))
+    const accentColor = '#d4af37' // Luxury gold accent
 
     return (
         <motion.div
-            initial={{ opacity: 0, x: index % 2 === 0 ? -30 : 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            whileHover="hover"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            variants={{
-                hover: {
-                    backgroundColor: '#d4af37',
-                    scale: 1.02,
-                    transition: { duration: 0.4, ease: "easeOut" }
-                }
-            }}
+            transition={{ delay: index * 0.1 }}
             style={{
-                background: isDark ? '#111111' : '#fff', // Use specific #111111 for dark cards
-                border: '1px solid rgba(255,255,255,0.05)',
-                padding: '30px 40px',
-                borderRadius: '60px 4px 60px 4px', // Slightly smaller asymmetric pill
-                display: 'flex',
-                alignItems: 'center',
-                gap: '30px',
-                minHeight: '180px',
-                cursor: 'pointer',
-                position: 'relative',
-                boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
-                transition: 'background-color 0.4s, color 0.4s'
-            }}
-        >
-            {/* Left: Identity */}
-            <div style={{
-                width: '180px',
-                flexShrink: 0,
-                borderRight: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'}`,
-                paddingRight: '30px',
+                background: isDark ? '#080808' : '#fcfcfc',
+                padding: isMobile ? '12px 16px' : '16px 40px',
+                borderRadius: isMobile ? '30px 4px 30px 4px' : '60px 4px 60px 4px',
                 display: 'flex',
                 flexDirection: 'column',
-                alignItems: 'center',
-                textAlign: 'center'
-            }}>
-                <motion.div
-                    variants={{ hover: { color: '#000' } }}
-                    style={{
-                        fontSize: '14px',
-                        fontWeight: 900,
-                        color: isDark ? '#fff' : '#d4af37',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.1em',
-                        marginBottom: '10px',
-                        lineHeight: 1.2
-                    }}>
+                gap: isMobile ? '12px' : '10px',
+                position: 'relative',
+                boxShadow: isDark ? '0 10px 30px rgba(0,0,0,0.5)' : '0 10px 30px rgba(0,0,0,0.05)',
+                border: '1px solid rgba(255,255,255,0.03)'
+            }}
+        >
+            {/* Header Area */}
+            <div>
+                <h3 style={{
+                    fontSize: isMobile ? '10px' : '16px',
+                    fontWeight: 900,
+                    color: accentColor,
+                    textTransform: 'uppercase',
+                    margin: '0 0 8px',
+                    letterSpacing: '0.05em'
+                }}>
                     {review.name}
-                </motion.div>
-                <div style={{ display: 'flex', gap: '2px', marginBottom: '10px' }}>
+                </h3>
+                <div style={{ display: 'flex', gap: '4px', marginBottom: '8px' }}>
                     {[...Array(5)].map((_, i) => (
-                        <motion.div key={i} variants={{ hover: { color: '#000' } }}>
-                            <Star size={10} fill={isDark ? '#d4af37' : '#d4af37'} color="currentColor" strokeWidth={3} />
-                        </motion.div>
+                        <Star key={i} size={isMobile ? 8 : 12} fill={accentColor} color={accentColor} />
                     ))}
                 </div>
                 <div style={{
                     fontSize: '7px',
-                    fontWeight: 800,
+                    fontWeight: 700,
                     letterSpacing: '0.2em',
-                    textTransform: 'uppercase',
-                    color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.3)'
+                    color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
+                    textTransform: 'uppercase'
                 }}>
                     VERIFIED_GOOGLE
                 </div>
             </div>
 
-            {/* Right: Review Text */}
-            <div style={{ flex: 1, position: 'relative' }}>
-                <motion.p
-                    variants={{ hover: { color: '#000' } }}
-                    style={{
-                        fontSize: '15px',
-                        lineHeight: 1.6,
-                        color: isDark ? '#fff' : '#000',
-                        fontFamily: 'var(--font-tenor)',
-                        fontWeight: 300,
-                        margin: 0,
-                        fontStyle: 'italic'
-                    }}
-                >
-                    "{review.text}"
-                </motion.p>
-                <div style={{
-                    position: 'absolute',
-                    bottom: '-30px',
-                    right: 0,
-                    fontSize: '8px',
-                    color: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)',
-                    letterSpacing: '0.2em'
+            {/* Separator */}
+            <div style={{ height: '1px', background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', width: '100%' }} />
+
+            {/* Review Content */}
+            <div style={{ flex: 1 }}>
+                <p style={{
+                    fontSize: isMobile ? '10px' : '15px',
+                    lineHeight: 1.5,
+                    color: isDark ? '#fff' : '#1a1a1a',
+                    fontFamily: 'var(--font-tenor)',
+                    fontWeight: 300,
+                    margin: 0,
                 }}>
-                    RPT — {review.initials}_{randomId}
-                </div>
+                    "{review.text}"
+                </p>
+            </div>
+
+            {/* Batch ID Footer */}
+            <div style={{
+                textAlign: 'right',
+                fontSize: '8px',
+                color: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+                letterSpacing: '0.2em',
+                fontFamily: 'monospace'
+            }}>
+                RPT — {review.initials}_{randomId}
             </div>
         </motion.div>
     )
