@@ -1,17 +1,28 @@
 'use client'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { AnimatedNavbar } from '@/components/store/AnimatedNavbar'
 import { StayConnected } from '@/components/store/StayConnected'
 import { Truck, Box, MapPin, Clock, CreditCard } from 'lucide-react'
+import { Footer } from '@/components/store/Footer'
 
 export default function ShippingPage() {
+    const [isMobile, setIsMobile] = useState(false)
+
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 1024)
+        checkMobile()
+        window.addEventListener('resize', checkMobile)
+        return () => window.removeEventListener('resize', checkMobile)
+    }, [])
+
     return (
         <main style={{ background: '#ffffff', color: '#050505', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
             <AnimatedNavbar />
 
             {/* Header Section */}
-            <section style={{ 
-                padding: '180px 40px 60px', 
+            <section style={{
+                padding: isMobile ? '140px 24px 60px' : '180px 40px 60px',
                 textAlign: 'center',
                 background: '#fafafa',
                 borderBottom: '1px solid #eee'
@@ -21,8 +32,8 @@ export default function ShippingPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 1 }}
                 >
-                    <h1 style={{ 
-                        fontSize: 'clamp(32px, 5vw, 64px)', 
+                    <h1 style={{
+                        fontSize: isMobile ? '36px' : 'clamp(32px, 5vw, 64px)',
                         fontFamily: 'var(--font-baskerville)',
                         fontWeight: 900,
                         color: '#050505',
@@ -30,9 +41,9 @@ export default function ShippingPage() {
                     }}>
                         Shipping <span style={{ color: '#d4af37' }}>&</span> Delivery
                     </h1>
-                    <p style={{ 
-                        fontSize: '11px', 
-                        letterSpacing: '0.4em', 
+                    <p style={{
+                        fontSize: '11px',
+                        letterSpacing: '0.4em',
                         textTransform: 'uppercase',
                         color: '#aaa',
                         fontWeight: 500
@@ -43,8 +54,12 @@ export default function ShippingPage() {
             </section>
 
             {/* Feature Row */}
-            <section style={{ padding: '60px 40px', maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
+            <section style={{ padding: isMobile ? '40px 24px' : '60px 40px', maxWidth: '1200px', margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)',
+                    gap: isMobile ? '16px' : '20px'
+                }}>
                     {[
                         { icon: Truck, title: 'Free Shipping', text: 'On orders above ₹400' },
                         { icon: CreditCard, title: 'COD Available', text: 'Pay at your doorstep' },
@@ -57,16 +72,16 @@ export default function ShippingPage() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: i * 0.1 }}
-                            style={{ 
-                                padding: '30px 20px', textAlign: 'center', 
-                                background: '#fff', border: '1px solid #eee', 
+                            style={{
+                                padding: isMobile ? '20px 10px' : '30px 20px', textAlign: 'center',
+                                background: '#fff', border: '1px solid #eee',
                                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px'
                             }}
                         >
                             <item.icon size={20} color="#d4af37" strokeWidth={1.5} />
                             <div>
-                                <h4 style={{ fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '8px' }}>{item.title}</h4>
-                                <p style={{ fontSize: '13px', color: '#888' }}>{item.text}</p>
+                                <h4 style={{ fontSize: isMobile ? '10px' : '12px', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '8px' }}>{item.title}</h4>
+                                <p style={{ fontSize: isMobile ? '11px' : '13px', color: '#888' }}>{item.text}</p>
                             </div>
                         </motion.div>
                     ))}
@@ -74,15 +89,15 @@ export default function ShippingPage() {
             </section>
 
             {/* Detailed Content */}
-            <section style={{ padding: '40px 40px 100px', maxWidth: '900px', margin: '0 auto', flex: 1 }}>
+            <section style={{ padding: isMobile ? '40px 24px 80px' : '40px 40px 100px', maxWidth: '900px', margin: '0 auto', flex: 1, width: '100%', boxSizing: 'border-box' }}>
                 <motion.div
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
                     viewport={{ once: true }}
-                    style={{ lineHeight: 1.8, fontSize: '16px', color: '#444' }}
+                    style={{ lineHeight: 1.8, fontSize: isMobile ? '15px' : '16px', color: '#444' }}
                 >
-                    <div style={{ marginBottom: '60px' }}>
-                        <h2 style={{ fontFamily: 'var(--font-baskerville)', fontSize: '28px', color: '#050505', marginBottom: '24px' }}>General Guidelines</h2>
+                    <div style={{ marginBottom: isMobile ? '40px' : '60px' }}>
+                        <h2 style={{ fontFamily: 'var(--font-baskerville)', fontSize: isMobile ? '28px' : '32px', color: '#050505', marginBottom: '24px' }}>General Guidelines</h2>
                         <p style={{ marginBottom: '20px' }}>
                             The REVEIL website is operated by **Trimurty Enterprises**. We are committed to delivering your signature scents within the promised period and in accordance with this policy.
                         </p>
@@ -91,8 +106,8 @@ export default function ShippingPage() {
                         </p>
                     </div>
 
-                    <div style={{ marginBottom: '60px' }}>
-                        <h2 style={{ fontFamily: 'var(--font-baskerville)', fontSize: '28px', color: '#050505', marginBottom: '24px' }}>Shipping Cost & Updates</h2>
+                    <div style={{ marginBottom: isMobile ? '40px' : '60px' }}>
+                        <h2 style={{ fontFamily: 'var(--font-baskerville)', fontSize: isMobile ? '28px' : '32px', color: '#050505', marginBottom: '24px' }}>Shipping Cost & Updates</h2>
                         <p style={{ marginBottom: '20px' }}>
                             Shipping and handling rates vary based on product size, volume, and destination. The exact cost is calculated and shown at the final checkout window.
                         </p>
@@ -108,7 +123,7 @@ export default function ShippingPage() {
                         </ul>
                     </div>
 
-                    <div style={{ padding: '40px', background: '#fafafa', border: '1px solid #eee' }}>
+                    <div style={{ padding: isMobile ? '30px 24px' : '40px', background: '#fafafa', border: '1px solid #eee' }}>
                         <h3 style={{ fontFamily: 'var(--font-baskerville)', fontSize: '20px', color: '#ec4899', marginBottom: '15px' }}>Important Note</h3>
                         <p style={{ fontSize: '14px', fontStyle: 'italic' }}>
                             "To ensure timely delivery, please double-check your shipping address before finalizing your order. Once placed, the delivery destination cannot be altered in our system."

@@ -1,7 +1,7 @@
 "use client"
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { CheckCircle } from 'lucide-react'
 
 interface StayConnectedProps {
@@ -12,6 +12,14 @@ export function StayConnected({ theme = 'light' }: StayConnectedProps) {
     const [email, setEmail] = useState('')
     const [isSubmitted, setIsSubmitted] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [isMobile, setIsMobile] = useState(false)
+
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 1024)
+        checkMobile()
+        window.addEventListener('resize', checkMobile)
+        return () => window.removeEventListener('resize', checkMobile)
+    }, [])
 
     const isLight = theme === 'light'
     const bgColor = isLight ? '#fafafa' : '#0a0a0a'
@@ -34,10 +42,11 @@ export function StayConnected({ theme = 'light' }: StayConnectedProps) {
 
     return (
         <section style={{ 
-            padding: '80px 40px', 
+            padding: isMobile ? '60px 20px' : '80px 40px', 
             background: bgColor, 
             textAlign: 'center',
-            borderTop: `1px solid ${borderColor}`
+            borderTop: `1px solid ${borderColor}`,
+            overflow: 'hidden'
         }}>
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -47,7 +56,7 @@ export function StayConnected({ theme = 'light' }: StayConnectedProps) {
                 style={{ maxWidth: '600px', margin: '0 auto' }}
             >
                 <h3 style={{ 
-                    fontSize: '24px', 
+                    fontSize: isMobile ? '20px' : '24px', 
                     fontWeight: 900, 
                     letterSpacing: '0.2em', 
                     color: textColor,
@@ -58,11 +67,12 @@ export function StayConnected({ theme = 'light' }: StayConnectedProps) {
                     Stay Connected
                 </h3>
                 <p style={{ 
-                    fontSize: '14px', 
+                    fontSize: isMobile ? '12px' : '14px', 
                     color: subColor, 
-                    marginBottom: '40px',
+                    marginBottom: isMobile ? '30px' : '40px',
                     fontFamily: 'var(--font-baskerville)',
-                    fontStyle: 'italic'
+                    fontStyle: 'italic',
+                    padding: isMobile ? '0 10px' : '0'
                 }}>
                     Join Our News Letter to receive latest Fashion news.
                 </p>
@@ -74,10 +84,12 @@ export function StayConnected({ theme = 'light' }: StayConnectedProps) {
                             onSubmit={handleSubmit}
                             style={{ 
                                 display: 'flex', 
+                                flexDirection: isMobile ? 'column' : 'row',
                                 background: isLight ? '#fff' : '#000', 
                                 border: `1px solid ${borderColor}`,
-                                padding: '8px',
-                                boxShadow: isLight ? '0 10px 30px rgba(0,0,0,0.03)' : 'none'
+                                padding: isMobile ? '4px' : '8px',
+                                boxShadow: isLight ? '0 10px 30px rgba(0,0,0,0.03)' : 'none',
+                                gap: isMobile ? '10px' : '0'
                             }}
                         >
                             <input 
@@ -91,28 +103,31 @@ export function StayConnected({ theme = 'light' }: StayConnectedProps) {
                                     background: 'transparent', 
                                     border: 'none', 
                                     outline: 'none', 
-                                    padding: '12px 20px',
+                                    padding: isMobile ? '15px' : '12px 20px',
                                     color: textColor,
-                                    fontSize: '14px'
+                                    fontSize: '14px',
+                                    width: '100%',
+                                    boxSizing: 'border-box'
                                 }}
                             />
                             <motion.button
                                 type="submit"
                                 disabled={isSubmitting}
-                                whileHover={{ scale: 1.02, backgroundColor: textColor, color: isLight ? '#fff' : '#000' }}
+                                whileHover={!isMobile ? { scale: 1.02, backgroundColor: textColor, color: isLight ? '#fff' : '#000' } : {}}
                                 whileTap={{ scale: 0.98 }}
                                 style={{ 
                                     background: subColor, 
                                     color: '#000', 
                                     border: 'none', 
-                                    padding: '0 30px',
+                                    padding: isMobile ? '15px' : '0 30px',
                                     fontWeight: 900,
                                     fontSize: '11px',
                                     textTransform: 'uppercase',
                                     letterSpacing: '0.2em',
                                     cursor: isSubmitting ? 'not-allowed' : 'pointer',
                                     transition: 'all 0.3s',
-                                    opacity: isSubmitting ? 0.7 : 1
+                                    opacity: isSubmitting ? 0.7 : 1,
+                                    width: isMobile ? '100%' : 'auto'
                                 }}
                             >
                                 {isSubmitting ? '...' : 'Subscribe'}
@@ -130,10 +145,10 @@ export function StayConnected({ theme = 'light' }: StayConnectedProps) {
                             }}
                         >
                             <CheckCircle size={32} style={{ margin: '0 auto 12px' }} />
-                            <h4 style={{ fontSize: '18px', color: textColor, fontWeight: 700 }}>
+                            <h4 style={{ fontSize: isMobile ? '16px' : '18px', color: textColor, fontWeight: 700 }}>
                                 Thank you for choosing REVEIL.
                             </h4>
-                            <p style={{ fontSize: '14px', opacity: 0.7 }}>We will contact you soon.</p>
+                            <p style={{ fontSize: isMobile ? '12px' : '14px', opacity: 0.7 }}>We will contact you soon.</p>
                         </motion.div>
                     )}
                 </AnimatePresence>

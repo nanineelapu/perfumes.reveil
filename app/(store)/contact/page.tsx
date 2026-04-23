@@ -192,13 +192,14 @@ export default function ContactPage() {
                                 </button>
                             </motion.div>
                         ) : (
-                            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '32px' : '40px' }}>
+                            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '32px' : '40px', width: '100%', boxSizing: 'border-box' }}>
                                 <div style={{ 
                                     display: 'grid', 
                                     gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', 
-                                    gap: isMobile ? '32px' : '32px' 
+                                    gap: isMobile ? '32px' : '32px',
+                                    width: '100%'
                                 }}>
-                                    <div style={{ position: 'relative' }}>
+                                    <div style={{ position: 'relative', width: '100%' }}>
                                         <input
                                             type="text"
                                             placeholder="Name"
@@ -207,11 +208,12 @@ export default function ContactPage() {
                                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                             style={{
                                                 width: '100%', background: 'transparent', border: 'none', borderBottom: '1px solid #eee',
-                                                padding: '12px 0', color: '#050505', fontSize: '15px', outline: 'none'
+                                                padding: '12px 0', color: '#050505', fontSize: '15px', outline: 'none',
+                                                boxSizing: 'border-box'
                                             }}
                                         />
                                     </div>
-                                    <div style={{ position: 'relative' }}>
+                                    <div style={{ position: 'relative', width: '100%' }}>
                                         <input
                                             type="email"
                                             placeholder="Email"
@@ -220,13 +222,14 @@ export default function ContactPage() {
                                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                             style={{
                                                 width: '100%', background: 'transparent', border: 'none', borderBottom: '1px solid #eee',
-                                                padding: '12px 0', color: '#050505', fontSize: '15px', outline: 'none'
+                                                padding: '12px 0', color: '#050505', fontSize: '15px', outline: 'none',
+                                                boxSizing: 'border-box'
                                             }}
                                         />
                                     </div>
                                 </div>
 
-                                <div style={{ position: 'relative' }}>
+                                <div style={{ position: 'relative', width: '100%' }}>
                                     <input
                                         type="tel"
                                         placeholder="Phone Number"
@@ -235,12 +238,13 @@ export default function ContactPage() {
                                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                         style={{
                                             width: '100%', background: 'transparent', border: 'none', borderBottom: '1px solid #eee',
-                                            padding: '12px 0', color: '#050505', fontSize: '15px', outline: 'none'
+                                            padding: '12px 0', color: '#050505', fontSize: '15px', outline: 'none',
+                                            boxSizing: 'border-box'
                                         }}
                                     />
                                 </div>
 
-                                <div style={{ position: 'relative' }}>
+                                <div style={{ position: 'relative', width: '100%' }}>
                                     <textarea
                                         rows={1}
                                         placeholder="Message"
@@ -250,7 +254,7 @@ export default function ContactPage() {
                                         style={{
                                             width: '100%', background: 'transparent', border: 'none', borderBottom: '1px solid #eee',
                                             padding: '12px 0', color: '#050505', fontSize: '15px', outline: 'none',
-                                            resize: 'none'
+                                            resize: 'none', boxSizing: 'border-box'
                                         }}
                                     />
                                 </div>
@@ -271,7 +275,9 @@ export default function ContactPage() {
                                         fontWeight: 900, fontSize: isMobile ? '10px' : '12px', letterSpacing: '0.4em',
                                         textTransform: 'uppercase', transition: 'all 0.4s',
                                         opacity: isSubmitting ? 0.7 : 1,
-                                        marginTop: isMobile ? '10px' : '0'
+                                        marginTop: isMobile ? '10px' : '0',
+                                        width: '100%',
+                                        boxSizing: 'border-box'
                                     }}
                                 >
                                     {isSubmitting ? 'Sending...' : 'Send Message'}
@@ -282,9 +288,8 @@ export default function ContactPage() {
                     </motion.div>
                 </div>
             </div>
-            
+
             <StayConnected theme="dark" />
-            <Footer />
         </main>
     )
 }

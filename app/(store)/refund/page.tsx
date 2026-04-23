@@ -164,7 +164,6 @@ export default function RefundPage() {
             </section>
 
             <StayConnected theme="light" />
-            <Footer />
         </main>
     )
 }

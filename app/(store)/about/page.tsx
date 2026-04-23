@@ -206,7 +206,6 @@ export default function AboutPage() {
             </section>
 
             <StayConnected theme="dark" />
-            <Footer />
         </main>
     )
 }

@@ -102,7 +102,6 @@ export default function TermsPage() {
             </section>
 
             <StayConnected theme="light" />
-            <Footer />
         </main>
     )
 }
