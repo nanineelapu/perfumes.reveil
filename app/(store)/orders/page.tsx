@@ -1,12 +1,13 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Truck, CheckCircle, ChevronRight, Download, HelpCircle, Loader2, ShoppingBag } from 'lucide-react'
+import { Truck, CheckCircle, ChevronRight, Download, HelpCircle, Loader2, ShoppingBag, Star } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Footer } from '@/components/store/Footer'
 import { getAutomaticStatus } from '@/lib/utils/order-status'
+import { ReviewModal } from '@/components/store/ReviewModal'
 
 interface OrderItem {
     id: string
@@ -34,6 +35,8 @@ export default function OrdersPage() {
     const [loading, setLoading] = useState(true)
     const [user, setUser] = useState<any>(null)
     const [isMobile, setIsMobile] = useState(false)
+    const [reviewingProduct, setReviewingProduct] = useState<any>(null)
+    const [activeOrderId, setActiveOrderId] = useState<string | undefined>()
 
     useEffect(() => {
         const fetchOrders = async () => {
@@ -247,9 +250,38 @@ export default function OrdersPage() {
                                                             <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', margin: '8px 0 0', fontFamily: 'var(--font-baskerville)', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Qty: {item.quantity} — <span style={{ color: '#d4af37' }}>₹{item.price.toLocaleString()}</span></p>
                                                         </div>
                                                     </div>
-                                                    <Link href={`/products/${item.products?.slug}`} style={{ background: 'none', border: 'none', color: '#d4af37', fontSize: '9px', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', textTransform: 'uppercase', letterSpacing: '0.3em', fontFamily: 'var(--font-baskerville)', textDecoration: 'none', alignSelf: isMobile ? 'flex-end' : 'center' }}>
-                                                        REPLENISH <ChevronRight size={14} strokeWidth={3} />
-                                                    </Link>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'flex-end' }}>
+                                                        <Link href={`/products/${item.products?.slug}`} style={{ background: 'none', border: 'none', color: '#d4af37', fontSize: '9px', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', textTransform: 'uppercase', letterSpacing: '0.3em', fontFamily: 'var(--font-baskerville)', textDecoration: 'none', alignSelf: isMobile ? 'flex-end' : 'center' }}>
+                                                            REPLENISH <ChevronRight size={14} strokeWidth={3} />
+                                                        </Link>
+                                                        
+                                                        {autoStatus === 'delivered' && (
+                                                            <button 
+                                                                onClick={() => {
+                                                                    setReviewingProduct({ id: (item.products as any).id, name: item.products.name })
+                                                                    setActiveOrderId(order.id)
+                                                                }}
+                                                                style={{ 
+                                                                    background: 'rgba(212,175,55,0.1)', 
+                                                                    border: '1px solid rgba(212,175,55,0.2)', 
+                                                                    color: '#d4af37', 
+                                                                    fontSize: '8px', 
+                                                                    fontWeight: 800, 
+                                                                    cursor: 'pointer', 
+                                                                    display: 'flex', 
+                                                                    alignItems: 'center', 
+                                                                    gap: '8px', 
+                                                                    textTransform: 'uppercase', 
+                                                                    letterSpacing: '0.2em', 
+                                                                    fontFamily: 'var(--font-baskerville)', 
+                                                                    padding: '8px 16px',
+                                                                    borderRadius: '2px'
+                                                                }}
+                                                            >
+                                                                <Star size={12} fill="#d4af37" /> Share Experience
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             ))}
                                         </div>
@@ -341,6 +373,16 @@ export default function OrdersPage() {
                 </div>
 
             </div>
+            
+            {reviewingProduct && (
+                <ReviewModal
+                    isOpen={!!reviewingProduct}
+                    onClose={() => setReviewingProduct(null)}
+                    product={reviewingProduct}
+                    orderId={activeOrderId}
+                />
+            )}
+
             <Footer />
         </main>
     )

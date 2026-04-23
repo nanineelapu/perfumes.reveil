@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
+import { Heart, Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Product } from '@/types/store'
 
@@ -14,6 +15,8 @@ export default function ProductCard({ product }: { product: Product }) {
     const supabase = createClient()
 
     const [adding, setAdding] = useState(false)
+    const [wishlisting, setWishlisting] = useState(false)
+    const [wishlisted, setWishlisted] = useState(false)
     const [isMobile, setIsMobile] = useState(false)
 
     useEffect(() => {
@@ -23,6 +26,17 @@ export default function ProductCard({ product }: { product: Product }) {
         const checkUser = async () => {
             const { data: { user } } = await supabase.auth.getUser()
             setUser(user)
+            
+            if (user) {
+                // Check if wishlisted
+                const { data } = await supabase
+                    .from('wishlists')
+                    .select('id')
+                    .eq('user_id', user.id)
+                    .eq('product_id', product.id)
+                    .single()
+                if (data) setWishlisted(true)
+            }
         }
         checkUser()
         return () => window.removeEventListener('resize', checkMobile)
@@ -61,6 +75,35 @@ export default function ProductCard({ product }: { product: Product }) {
             console.error('Cart error:', error)
         } finally {
             setAdding(false)
+        }
+    }
+
+    const toggleWishlist = async (e: React.MouseEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
+
+        if (!user) {
+            router.push('/auth')
+            return
+        }
+
+        setWishlisting(true)
+        try {
+            if (wishlisted) {
+                const res = await fetch(`/api/wishlist?product_id=${product.id}`, { method: 'DELETE' })
+                if (res.ok) setWishlisted(false)
+            } else {
+                const res = await fetch('/api/wishlist', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ product_id: product.id })
+                })
+                if (res.ok) setWishlisted(true)
+            }
+        } catch (error) {
+            console.error('Wishlist error:', error)
+        } finally {
+            setWishlisting(false)
         }
     }
 
@@ -224,6 +267,42 @@ export default function ProductCard({ product }: { product: Product }) {
                 }}>
                     {isMobile ? `B-${product.id}` : `BATCH — REF.${product.id.toString().padStart(3, '0')}`}
                 </div>
+
+                {/* Wishlist Toggle Overlay */}
+                <motion.button
+                    onClick={toggleWishlist}
+                    disabled={wishlisting}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    style={{
+                        position: 'absolute',
+                        top: isMobile ? '12px' : '24px',
+                        left: isMobile ? '12px' : '24px',
+                        zIndex: 10,
+                        background: 'rgba(0,0,0,0.3)',
+                        backdropFilter: 'blur(10px)',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        width: isMobile ? '32px' : '40px',
+                        height: isMobile ? '32px' : '40px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: '50%',
+                        cursor: 'pointer',
+                        color: wishlisted ? '#d4af37' : '#fff',
+                        transition: 'all 0.3s ease'
+                    }}
+                >
+                    {wishlisting ? (
+                        <Loader2 size={isMobile ? 14 : 18} className="animate-spin" />
+                    ) : (
+                        <Heart 
+                            size={isMobile ? 16 : 20} 
+                            fill={wishlisted ? '#d4af37' : 'transparent'} 
+                            strokeWidth={wishlisted ? 0 : 1.5}
+                        />
+                    )}
+                </motion.button>
             </motion.div>
 
             {/* Typography Section */}

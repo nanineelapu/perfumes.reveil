@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { notifyGoogleOfChange } from '@/lib/utils/indexing'
 
 // Service role client — bypasses RLS for public catalogue reads
 function getServiceClient() {
@@ -110,6 +111,14 @@ export async function POST(request: Request) {
 
     if (error) {
         return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    // 7. Notify Google Indexing API
+    try {
+        const baseUrl = 'https://reveil-perfumes.com'; // PRODUCTION_URL
+        await notifyGoogleOfChange(`${baseUrl}/products/${data.slug}`);
+    } catch (err) {
+        console.error('Failed to notify Google Indexing API:', err);
     }
 
     return NextResponse.json(data, { status: 201 })

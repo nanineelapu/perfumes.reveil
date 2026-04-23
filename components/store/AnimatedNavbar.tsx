@@ -2,7 +2,7 @@
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence, Variants } from 'framer-motion'
 import Link from 'next/link'
-import { ShoppingBag, User, Menu, X } from 'lucide-react'
+import { ShoppingBag, User, Menu, X, Heart } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
 export function AnimatedNavbar() {
@@ -168,6 +168,34 @@ export function AnimatedNavbar() {
                                 </Link>
                             </motion.div>
 
+                            <motion.div variants={itemVariants}>
+                                <Link href="/wishlist" style={{ textDecoration: 'none' }}>
+                                    <motion.span
+                                        whileHover="hover"
+                                        style={{
+                                            color: textColor, display: 'block', fontSize: '13px',
+                                            letterSpacing: '0.15em', fontWeight: 500,
+                                            fontFamily: 'var(--font-baskerville)',
+                                            position: 'relative',
+                                            padding: '4px 0'
+                                        }}
+                                    >
+                                        Wishlist
+                                        <motion.div
+                                            variants={{
+                                                hover: { scaleX: 1, opacity: 1 }
+                                            }}
+                                            initial={{ scaleX: 0, opacity: 0 }}
+                                            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                                            style={{
+                                                position: 'absolute', bottom: 0, left: 0, right: 0,
+                                                height: '1px', background: textColor, originX: 0.5
+                                            }}
+                                        />
+                                    </motion.span>
+                                </Link>
+                            </motion.div>
+
                             <motion.div
                                 variants={itemVariants}
                                 onMouseEnter={() => setIsAccountHovered(true)}
@@ -219,7 +247,7 @@ export function AnimatedNavbar() {
                                             }}
                                         >
                                             <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                                <Link href="/auth" style={{
+                                                <Link href="/auth?mode=login" style={{
                                                     padding: '12px 24px',
                                                     color: '#fff',
                                                     textDecoration: 'none',
@@ -235,7 +263,7 @@ export function AnimatedNavbar() {
                                                     Log In
                                                 </Link>
                                                 <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', margin: '0 24px' }} />
-                                                <Link href="/auth" style={{
+                                                <Link href="/auth?mode=signup" style={{
                                                     padding: '12px 24px',
                                                     color: '#fff',
                                                     textDecoration: 'none',
@@ -344,7 +372,9 @@ export function AnimatedNavbar() {
                             {[
                                 { name: 'Shop', href: '/products' },
                                 { name: 'Orders', href: '/orders' },
-                                { name: 'My Account', href: '/auth' }
+                                { name: 'Wishlist', href: '/wishlist' },
+                                { name: 'Login', href: '/auth?mode=login' },
+                                { name: 'Register', href: '/auth?mode=signup' }
                             ].map((link, i) => (
                                 <motion.div
                                     key={link.name}

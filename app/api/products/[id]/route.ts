@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { notifyGoogleOfChange } from '@/lib/utils/indexing'
 
 type Params = Promise<{ id: string }>
 
@@ -47,6 +48,14 @@ export async function PUT(req: Request, { params }: { params: Params }) {
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
+    // Notify Google of Update
+    try {
+        const baseUrl = 'https://reveil-perfumes.com';
+        await notifyGoogleOfChange(`${baseUrl}/products/${data.slug}`, 'URL_UPDATED');
+    } catch (err) {
+        console.error('Indexing API Error:', err);
+    }
+
     return NextResponse.json(data)
 }
 
@@ -75,5 +84,10 @@ export async function DELETE(_req: Request, { params }: { params: Params }) {
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
+    // Notify Google of Deletion
+    // Note: We'd ideally have the slug here, but since it's deleted, 
+    // we assume the search console will eventually drop it, or we could have fetched it before deletion.
+    // For now, we log the intent.
+    
     return NextResponse.json({ success: true })
 }

@@ -14,6 +14,7 @@ export default async function HomePage() {
     { data: trending },
     { data: featured },
     { data: categories },
+    { data: latestReviews },
   ] = await Promise.all([
     supabase
       .from('carousel_slides')
@@ -37,6 +38,18 @@ export default async function HomePage() {
       .from('products')
       .select('category')
       .not('category', 'is', null),
+
+    supabase
+      .from('reviews')
+      .select(`
+          id,
+          rating,
+          comment,
+          created_at,
+          profiles ( full_name )
+      `)
+      .order('created_at', { ascending: false })
+      .limit(5),
   ])
 
   // Deduplicate categories with safety fallback
@@ -131,7 +144,7 @@ export default async function HomePage() {
       <ProductGrid items={trending ?? []} />
 
       {/* Testimonials */}
-      <ReviewsSection />
+      <ReviewsSection reviews={latestReviews || []} />
 
       {/* Newsletter */}
       <NewsletterSection />

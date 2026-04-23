@@ -23,11 +23,20 @@ export default function CartPage() {
                 return
             }
             const data = await res.json()
-            setCartItems(data.items || [])
+            const items = data.items || []
+            const subtotal = items.reduce((sum: number, item: any) => {
+                return sum + ((item.products as any)?.price ?? 0) * item.quantity
+            }, 0)
+
+            // FREE SHIPPING LOGIC: Free if subtotal >= 250, else ₹50
+            const shipping = subtotal >= 250 ? 0 : 50
+            const total = subtotal + shipping
+
+            setCartItems(items)
             setTotals({
-                subtotal: data.subtotal,
-                shipping: data.shipping,
-                total: data.total
+                subtotal: subtotal,
+                shipping: shipping,
+                total: total
             })
         } catch (error) {
             console.error('Fetch error:', error)
@@ -101,6 +110,42 @@ export default function CartPage() {
                         Your <span style={{ color: '#d4af37', fontStyle: 'italic', fontWeight: 400 }}>Basket</span>
                     </h1>
                 </header>
+
+                {/* Free Shipping Progress */}
+                {cartItems.length > 0 && (
+                    <motion.div 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        style={{ 
+                            marginBottom: '48px', 
+                            background: 'rgba(212,175,55,0.03)', 
+                            border: '1px solid rgba(212,175,55,0.1)',
+                            padding: '24px 32px',
+                            borderRadius: '2px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '12px'
+                        }}
+                    >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <Truck size={16} color="#d4af37" />
+                                <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: totals.subtotal >= 250 ? '#16a34a' : '#fff' }}>
+                                    {totals.subtotal >= 250 ? 'Complimentary Delivery unlocked' : `Add ₹${(250 - totals.subtotal).toLocaleString()} more for free shipping`}
+                                </span>
+                            </div>
+                            <span style={{ fontSize: '10px', color: '#666', letterSpacing: '0.1em' }}>THRESHOLD: ₹250</span>
+                        </div>
+                        <div style={{ width: '100%', height: '2px', background: 'rgba(255,255,255,0.05)', position: 'relative', overflow: 'hidden' }}>
+                            <motion.div 
+                                initial={{ width: 0 }}
+                                animate={{ width: `${Math.min((totals.subtotal / 250) * 100, 100)}%` }}
+                                transition={{ duration: 1, ease: "easeOut" }}
+                                style={{ height: '100%', background: '#d4af37', position: 'absolute', left: 0, top: 0 }}
+                            />
+                        </div>
+                    </motion.div>
+                )}
 
                 {cartItems.length > 0 ? (
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '60px', alignItems: 'start' }}>

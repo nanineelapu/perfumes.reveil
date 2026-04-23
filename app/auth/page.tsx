@@ -3,19 +3,29 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { Smartphone, Lock, ArrowRight, Loader2, CheckCircle2, ChevronLeft, ShieldCheck } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Suspense } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Home } from 'lucide-react'
 
-export default function AuthPage() {
+function AuthPageContent() {
     const router = useRouter()
+    const searchParams = useSearchParams()
+    const modeParam = searchParams.get('mode') as 'login' | 'signup' | null
     const supabase = createClient()
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [message, setMessage] = useState<string | null>(null)
     const [otpSent, setOtpSent] = useState(false)
     const [isMobile, setIsMobile] = useState(false)
+    const [authMode, setAuthMode] = useState<'login' | 'signup'>(modeParam || 'login')
+
+    useEffect(() => {
+        if (modeParam) {
+            setAuthMode(modeParam)
+        }
+    }, [modeParam])
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 1024)
@@ -23,6 +33,11 @@ export default function AuthPage() {
         window.addEventListener('resize', checkMobile)
         return () => window.removeEventListener('resize', checkMobile)
     }, [])
+
+    useEffect(() => {
+        setError(null)
+        setMessage(null)
+    }, [authMode])
 
     // Form States
     const [formData, setFormData] = useState({
@@ -46,6 +61,16 @@ export default function AuthPage() {
         setMessage(null)
 
         try {
+            // Basic validation
+            if (!formData.phone) {
+                throw new Error('Mobile number is required')
+            }
+            if (authMode === 'signup') {
+                if (!formData.firstName || !formData.lastName || !formData.email || !formData.password) {
+                    throw new Error('Please provide all registration details')
+                }
+            }
+
             const formattedPhone = formData.phone.startsWith('+') ? formData.phone : `+91${formData.phone}`
             const { error: otpError } = await supabase.auth.signInWithOtp({
                 phone: formattedPhone,
@@ -79,20 +104,37 @@ export default function AuthPage() {
             if (verifyError) throw verifyError
 
             if (data.user) {
-                const { error: profileError } = await supabase
-                    .from('profiles')
-                    .upsert({
-                        id: data.user.id,
-                        first_name: formData.firstName,
-                        last_name: formData.lastName,
-                        email: formData.email,
-                        phone: formattedPhone,
-                        updated_at: new Date().toISOString(),
-                    })
+                if (authMode === 'signup') {
+                    const { error: profileError } = await supabase
+                        .from('profiles')
+                        .upsert({
+                            id: data.user.id,
+                            first_name: formData.firstName,
+                            last_name: formData.lastName,
+                            email: formData.email,
+                            phone: formattedPhone,
+                            updated_at: new Date().toISOString(),
+                        })
 
-                if (profileError) console.error("Profile sync error:", profileError)
+                    if (profileError) console.error("Profile sync error:", profileError)
+                } else {
+                    // In login mode, we might want to check if the profile exists
+                    const { data: profile } = await supabase
+                        .from('profiles')
+                        .select('id')
+                        .eq('id', data.user.id)
+                        .single()
+
+                    if (!profile) {
+                        setMessage('Account found, but profile details missing. Redirecting to complete profile...')
+                        // Optionally redirect to a profile completion page or just let them in
+                    }
+                }
+
                 setMessage('Entry Granted. Synchronizing profile...')
-                setTimeout(() => router.push('/'), 1200)
+                setTimeout(() => {
+                    window.location.href = '/'
+                }, 1200)
             }
         } catch (err: any) {
             setError(err.message || 'Invalid sequence.')
@@ -182,7 +224,7 @@ export default function AuthPage() {
             }}>
                 {/* Back to Home Button at top left of form container area */}
                 <div style={{ position: 'absolute', top: isMobile ? '20px' : '40px', left: isMobile ? '20px' : '40px' }}>
-                    <Link href="/" style={{
+                    <Link href="/" prefetch={false} style={{
                         display: 'flex', alignItems: 'center', gap: '10px',
                         color: 'rgba(0,0,0,0.4)', textDecoration: 'none',
                         fontSize: isMobile ? '9px' : '11px', fontWeight: 500, letterSpacing: '0.2em',
@@ -221,10 +263,10 @@ export default function AuthPage() {
                     {/* Welcome Typography */}
                     <div style={{ marginBottom: isMobile ? '20px' : '32px' }}>
                         <h2 style={{ fontSize: isMobile ? '26px' : '38px', color: '#000', fontWeight: 300, marginBottom: '4px', letterSpacing: '0.01em' }}>
-                            Welcome to <span style={{ color: '#d4af37', fontWeight: 400 }}>Reveil</span>
+                            {authMode === 'login' ? 'Welcome to ' : 'Join '} <span style={{ color: '#d4af37', fontWeight: 400 }}>Reveil</span>
                         </h2>
                         <p style={{ color: 'rgba(0,0,0,0.4)', fontSize: isMobile ? '11px' : '13px', fontWeight: 400, letterSpacing: '0.05em' }}>
-                            {otpSent ? 'SECURE SEQUENCE REQUIRED' : 'Get Your Handy Perfumes Here'}
+                            {otpSent ? 'SECURE SEQUENCE REQUIRED' : (authMode === 'login' ? 'Sync your collection via mobile' : 'Create your aesthetic profile')}
                         </p>
                     </div>
 
@@ -259,39 +301,39 @@ export default function AuthPage() {
                                             />
                                             <Smartphone size={isMobile ? 16 : 18} style={{ color: '#d4af37', opacity: 0.6 }} />
                                         </motion.div>
-                                    </div>
-
-                                    {/* Identity Profile Fields Grid */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '12px' : '20px', textAlign: 'left' }}>
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: isMobile ? '16px' : '32px' }}>
-                                            <motion.div
-                                                whileHover={{ borderBottomColor: '#000' }}
-                                                style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
-                                                <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>First Name</label>
-                                                <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} required style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
-                                            </motion.div>
-                                            <motion.div
-                                                whileHover={{ borderBottomColor: '#000' }}
-                                                style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
-                                                <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Last Name</label>
-                                                <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} required style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
-                                            </motion.div>
+                                    </div>                                     {/* Identity Profile Fields Grid */}
+                                    {authMode === 'signup' && (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '12px' : '20px', textAlign: 'left' }}>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: isMobile ? '16px' : '32px' }}>
+                                                <motion.div
+                                                    whileHover={{ borderBottomColor: '#000' }}
+                                                    style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
+                                                    <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>First Name</label>
+                                                    <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} required style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
+                                                </motion.div>
+                                                <motion.div
+                                                    whileHover={{ borderBottomColor: '#000' }}
+                                                    style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
+                                                    <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Last Name</label>
+                                                    <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} required style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
+                                                </motion.div>
+                                            </div>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: isMobile ? '16px' : '32px' }}>
+                                                <motion.div
+                                                    whileHover={{ borderBottomColor: '#000' }}
+                                                    style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
+                                                    <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Email</label>
+                                                    <input type="email" name="email" value={formData.email} onChange={handleChange} required style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
+                                                </motion.div>
+                                                <motion.div
+                                                    whileHover={{ borderBottomColor: '#000' }}
+                                                    style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
+                                                    <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Password</label>
+                                                    <input type="password" name="password" value={formData.password} onChange={handleChange} required style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
+                                                </motion.div>
+                                            </div>
                                         </div>
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: isMobile ? '16px' : '32px' }}>
-                                            <motion.div
-                                                whileHover={{ borderBottomColor: '#000' }}
-                                                style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
-                                                <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Email</label>
-                                                <input type="email" name="email" value={formData.email} onChange={handleChange} required style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
-                                            </motion.div>
-                                            <motion.div
-                                                whileHover={{ borderBottomColor: '#000' }}
-                                                style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
-                                                <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Password</label>
-                                                <input type="password" name="password" value={formData.password} onChange={handleChange} required style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
-                                            </motion.div>
-                                        </div>
-                                    </div>
+                                    )}
                                 </>
                             ) : (
                                 <div style={{ textAlign: 'left' }}>
@@ -351,6 +393,17 @@ export default function AuthPage() {
                         </div>
                     </form>
 
+                    {/* Mode Toggle */}
+                    {!otpSent && (
+                        <div style={{ marginTop: '24px', fontSize: '12px', color: 'rgba(0,0,0,0.5)', letterSpacing: '0.02em' }}>
+                            {authMode === 'login' ? (
+                                <p>New to REVEIL? <span onClick={() => setAuthMode('signup')} style={{ color: '#d4af37', fontWeight: 600, cursor: 'pointer', borderBottom: '1px solid #d4af37' }}>Create Account</span></p>
+                            ) : (
+                                <p>Already have an account? <span onClick={() => setAuthMode('login')} style={{ color: '#d4af37', fontWeight: 600, cursor: 'pointer', borderBottom: '1px solid #d4af37' }}>Login Here</span></p>
+                            )}
+                        </div>
+                    )}
+
                     {/* Status Feedback */}
                     {error && <p style={{ color: '#ff4d4d', fontSize: '11px', marginTop: '16px', letterSpacing: '0.02em', fontWeight: 500 }}>{error}</p>}
                     {message && <p style={{ color: '#d4af37', fontSize: '11px', marginTop: '16px', letterSpacing: '0.02em', fontWeight: 500 }}>{message}</p>}
@@ -378,5 +431,13 @@ export default function AuthPage() {
                 }
             `}</style>
         </main>
+    )
+}
+
+export default function AuthPage() {
+    return (
+        <Suspense fallback={<div style={{ background: '#fafafa', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Loader2 className="animate-spin" size={32} color="#d4af37" /></div>}>
+            <AuthPageContent />
+        </Suspense>
     )
 }

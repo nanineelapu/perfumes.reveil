@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { sendOrderDeliveredEmail } from '@/lib/utils/email'
 
 type Params = Promise<{ id: string }>
 
@@ -69,6 +71,40 @@ export async function PATCH(request: Request, { params }: { params: Params }) {
         .single()
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+    // If order was marked as delivered, send the invoice email
+    if (status === 'delivered') {
+        try {
+            // 1. Fetch full order details including products and customer info
+            const { data: fullOrder } = await supabase
+                .from('orders')
+                .select(`
+                    *,
+                    profiles ( full_name, phone ),
+                    order_items (
+                        id, quantity, price,
+                        products ( id, name )
+                    )
+                `)
+                .eq('id', id)
+                .single();
+
+            if (fullOrder) {
+                // 2. Fetch user's email from auth.users using admin client
+                const adminClient = createAdminClient();
+                const { data: { user: orderUser }, error: userError } = await adminClient.auth.admin.getUserById(fullOrder.user_id);
+                
+                const customerEmail = orderUser?.email || 'naniatworkmail@gmail.com'; // Fallback to provided address
+                
+                // 3. Dispatch the premium email
+                await sendOrderDeliveredEmail(fullOrder, customerEmail);
+            }
+        } catch (emailErr) {
+            console.error('Failed to send delivery email:', emailErr);
+            // We don't return an error here because the order update itself succeeded
+        }
+    }
+
     return NextResponse.json(data)
 }
 
