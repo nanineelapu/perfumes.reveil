@@ -1,0 +1,117 @@
+/**
+ * Shiprocket API Service
+ * Handles authentication, order creation, and tracking.
+ */
+
+const SHIPROCKET_API_BASE = 'https://apiv2.shiprocket.in/v1/external';
+
+interface ShiprocketConfig {
+    email?: string;
+    password?: string;
+}
+
+export class ShiprocketService {
+    private static token: string | null = null;
+    private static tokenExpiry: number | null = null;
+
+    /**
+     * Authenticates with Shiprocket and returns a Bearer token.
+     * Tokens are valid for 24 hours.
+     */
+    private static async getToken(): Promise<string> {
+        // Return cached token if valid (with 5 min buffer)
+        if (this.token && this.tokenExpiry && Date.now() < this.tokenExpiry - 300000) {
+            return this.token;
+        }
+
+        const email = process.env.SHIPROCKET_EMAIL;
+        const password = process.env.SHIPROCKET_PASSWORD;
+
+        if (!email || !password) {
+            throw new Error('SHIPROCKET_EMAIL or SHIPROCKET_PASSWORD not configured in environment.');
+        }
+
+        const response = await fetch(`${SHIPROCKET_API_BASE}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(`Shiprocket Auth Failed: ${data.message || response.statusText}`);
+        }
+
+        this.token = data.token;
+        // Shiprocket tokens typically last 10 days, but we refresh daily to be safe
+        this.tokenExpiry = Date.now() + 24 * 60 * 60 * 1000; 
+        
+        return this.token!;
+    }
+
+    /**
+     * Creates a custom order in Shiprocket.
+     * @param orderData Standard Shiprocket order object
+     */
+    static async createOrder(orderData: any) {
+        const token = await this.getToken();
+
+        const response = await fetch(`${SHIPROCKET_API_BASE}/orders/create/adhoc`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(orderData),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            console.error('Shiprocket Order Creation Error:', data);
+            throw new Error(data.message || 'Failed to create Shiprocket order');
+        }
+
+        return data;
+    }
+
+    /**
+     * Fetches tracking information using an AWB number.
+     */
+    static async getTracking(awbNumber: string) {
+        const token = await this.getToken();
+
+        const response = await fetch(`${SHIPROCKET_API_BASE}/courier/track/awb/${awbNumber}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to fetch tracking info');
+        }
+
+        return data;
+    }
+
+    /**
+     * Checks serviceability for a pincode.
+     */
+    static async checkServiceability(pincode: string, weight: number = 0.5) {
+        const token = await this.getToken();
+        
+        const response = await fetch(
+            `${SHIPROCKET_API_BASE}/courier/serviceability?delivery_postcode=${pincode}&weight=${weight}&cod=1`, 
+            {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${token}` }
+            }
+        );
+
+        return await response.json();
+    }
+}

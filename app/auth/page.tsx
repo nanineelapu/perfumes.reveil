@@ -216,14 +216,14 @@ function AuthPageContent() {
                 display: 'flex',
                 alignItems: isMobile ? 'flex-start' : 'center',
                 justifyContent: 'center',
-                padding: isMobile ? '60px 16px 24px' : '24px',
+                padding: isMobile ? '60px 16px 24px' : '40px 24px',
                 position: 'relative',
                 zIndex: 10,
-                height: isMobile ? '100vh' : '100vh',
-                overflow: 'hidden'
+                minHeight: '100vh',
+                overflowY: 'auto'
             }}>
                 {/* Back to Home Button at top left of form container area */}
-                <div style={{ position: 'absolute', top: isMobile ? '20px' : '40px', left: isMobile ? '20px' : '40px' }}>
+                <div style={{ position: 'absolute', top: isMobile ? '20px' : '24px', left: isMobile ? '20px' : '40px' }}>
                     <Link href="/" prefetch={false} style={{
                         display: 'flex', alignItems: 'center', gap: '10px',
                         color: 'rgba(0,0,0,0.4)', textDecoration: 'none',
@@ -271,7 +271,7 @@ function AuthPageContent() {
                     </div>
 
                     <form onSubmit={otpSent ? handleFinalVerify : handleInitialSubmit}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '16px' : '20px' }}>
 
                             {!otpSent ? (
                                 <>

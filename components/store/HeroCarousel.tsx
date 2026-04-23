@@ -162,7 +162,7 @@ function SlideMedia({ slide, isActive, emblaApi, isMobile }: { slide: Slide, isA
     }, [slide.id])
 
     return (
-        <div style={{ position: 'relative', height: '100vh', width: '100%', overflow: 'hidden', background: '#000000' }}>
+        <div style={{ position: 'relative', height: isMobile ? '85vh' : '100vh', width: '100%', overflow: 'hidden', background: '#000000' }}>
 
             {/* Premium Placeholder State */}
             {!isLoaded && (

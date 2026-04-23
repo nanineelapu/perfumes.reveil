@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { sendOrderDeliveredEmail } from '@/lib/utils/email'
+import { sendOrderConfirmationSMS, sendOrderDeliveredSMS } from '@/lib/utils/sms'
 
 type Params = Promise<{ id: string }>
 
@@ -98,10 +99,36 @@ export async function PATCH(request: Request, { params }: { params: Params }) {
                 
                 // 3. Dispatch the premium email
                 await sendOrderDeliveredEmail(fullOrder, customerEmail);
+
+                // 4. Dispatch the SMS
+                if (fullOrder.profiles?.phone) {
+                    await sendOrderDeliveredSMS(fullOrder.profiles.phone, id);
+                }
             }
         } catch (emailErr) {
-            console.error('Failed to send delivery email:', emailErr);
+            console.error('Failed to send delivery notifications:', emailErr);
             // We don't return an error here because the order update itself succeeded
+        }
+    }
+
+    // If order was confirmed, send confirmation SMS
+    if (status === 'confirmed') {
+        try {
+            const { data: fullOrder } = await supabase
+                .from('orders')
+                .select('*, profiles(full_name, phone)')
+                .eq('id', id)
+                .single();
+
+            if (fullOrder?.profiles?.phone) {
+                await sendOrderConfirmationSMS(
+                    fullOrder.profiles.phone, 
+                    id, 
+                    fullOrder.profiles.full_name || 'Valued Customer'
+                );
+            }
+        } catch (smsErr) {
+            console.error('Failed to send confirmation SMS:', smsErr);
         }
     }
 

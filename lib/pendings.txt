@@ -1,0 +1,16 @@
+How to activate Msg91:
+Add these keys to your .env.local once you receive them from the client:
+
+env
+MSG91_AUTH_KEY=your_msg91_auth_key
+MSG91_FLOW_ID_CONFIRMED=your_flow_id_for_confirmation
+MSG91_FLOW_ID_DELIVERED=your_flow_id_for_delivery
+Modified Files:
+
+
+sms.ts
+ (New Msg91 service)
+
+route.ts
+ (Added SMS triggers to order status updates)
+Regarding Login OTP: Since you are using Supabase Auth for OTP, please note that Supabase natively supports Twilio but not Msg91. To use Msg91 for logins, we will need to set up a custom Supabase Edge Function as a proxy. Let me know if you would like me to set that up next!
