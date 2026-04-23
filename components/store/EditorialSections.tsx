@@ -671,7 +671,8 @@ export function ReveilCollectionSection() {
                     justifyContent: 'center',
                     boxShadow: '0 80px 160px rgba(0,0,0,1)',
                     border: '1px solid rgba(255,255,255,0.05)',
-                    padding: isMobile ? '24px 0' : '0'
+                    padding: isMobile ? '60px 0' : '0',
+                    background: isMobile ? '#000' : 'transparent'
                 }}
             >
                 <motion.div
@@ -712,25 +713,36 @@ export function ReveilCollectionSection() {
                     }}>
                         <motion.div style={{ y: titleY, position: 'relative' }}>
                             <span style={{
-                                fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1.4em',
-                                color: '#d4af37', display: 'block', marginBottom: '28px',
-                                fontFamily: 'var(--font-baskerville)'
+                                fontSize: isMobile ? '8px' : '10px', textTransform: 'uppercase', letterSpacing: isMobile ? '0.4em' : '1.4em',
+                                color: '#d4af37', display: 'block', marginBottom: isMobile ? '16px' : '28px',
+                                fontFamily: 'var(--font-baskerville)', opacity: 0.8,
+                                whiteSpace: 'nowrap'
                             }}>
                                 L U X U R Y — E D I T I O N
                             </span>
                             <h2 style={{
-                                fontSize: 'clamp(40px, 6vw, 80px)',
+                                fontSize: isMobile ? '32px' : 'clamp(40px, 6vw, 80px)',
                                 fontFamily: 'var(--font-baskerville)',
-                                color: '#fff', margin: 0, lineHeight: 0.85,
-                                letterSpacing: '-0.02em', textTransform: 'uppercase'
+                                color: '#fff', margin: 0, lineHeight: isMobile ? 1.2 : 0.85,
+                                letterSpacing: '-0.01em', textTransform: 'uppercase'
                             }}>
                                 REVEIL <br />
-                                <span style={{ color: 'transparent', WebkitTextStroke: '1.2px rgba(255,255,255,0.5)', fontFamily: 'var(--font-baskerville)', fontStyle: 'italic', fontWeight: 400 }}>Collection</span>
+                                <span style={{ 
+                                    color: isMobile ? '#fff' : 'transparent', 
+                                    WebkitTextStroke: isMobile ? 'none' : '1.2px rgba(255,255,255,0.5)', 
+                                    fontFamily: 'var(--font-baskerville)', 
+                                    fontStyle: 'italic', fontWeight: 400,
+                                    fontSize: isMobile ? '28px' : 'inherit',
+                                    display: 'block',
+                                    marginTop: isMobile ? '2px' : '0'
+                                }}>Collection</span>
                             </h2>
                             <motion.div
                                 style={{
-                                    x: labelX, opacity: 0.08, fontSize: '180px', fontWeight: 900,
-                                    position: 'absolute', top: '-50px', left: '-20px',
+                                    x: isMobile ? 0 : labelX, 
+                                    opacity: isMobile ? 0.03 : 0.08, 
+                                    fontSize: isMobile ? '100px' : '180px', fontWeight: 900,
+                                    position: 'absolute', top: isMobile ? '15px' : '-50px', left: isMobile ? '0px' : '-20px',
                                     pointerEvents: 'none', whiteSpace: 'nowrap', zIndex: -1, color: '#fff'
                                 }}
                             >
@@ -744,14 +756,15 @@ export function ReveilCollectionSection() {
                             viewport={{ once: true }}
                             transition={{ duration: 1.2 }}
                             style={{
-                                padding: isMobile ? '32px 24px' : '48px',
-                                background: 'rgba(0,0,0,0.2)',
+                                padding: isMobile ? '32px 20px' : '48px',
+                                background: isMobile ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.2)',
                                 border: '1px solid rgba(255,255,255,0.08)',
-                                backdropFilter: 'blur(10px)',
-                                borderRadius: '4px',
-                                boxShadow: '0 30px 60px rgba(0,0,0,0.5)',
+                                backdropFilter: 'blur(15px)',
+                                borderRadius: isMobile ? '12px' : '4px',
+                                boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
                                 justifySelf: isMobile ? 'center' : 'end',
-                                width: isMobile ? '100%' : 'auto'
+                                width: isMobile ? '100%' : 'auto',
+                                marginTop: isMobile ? '32px' : '0'
                             }}
                         >
                             <h3 style={{
