@@ -75,8 +75,8 @@ export function Footer() {
                         width: '100%',
                         marginBottom: isMobile ? '40px' : '32px'
                     }}>
-                        <div style={{ marginBottom: isMobile ? '0' : '32px' }}>
-                            <img src="https://lhnamtkpjkrawgql.public.blob.vercel-storage.com/Untitled%20%282%29.webp" alt="Reveil" style={{ height: isMobile ? '40px' : '100px', width: 'auto' }} />
+                        <div style={{ marginBottom: isMobile ? '0' : '32px', marginLeft: isMobile ? '0' : '-15px' }}>
+                            <img src="https://lhnamtkpjkrawgql.public.blob.vercel-storage.com/Untitled%20%282%29.webp" alt="Reveil" style={{ height: isMobile ? '40px' : '60px', width: 'auto' }} />
                         </div>
                         
                         {!isMobile && (
