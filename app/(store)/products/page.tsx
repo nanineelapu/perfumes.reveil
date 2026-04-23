@@ -17,6 +17,7 @@ function ShopContent() {
 
     const [products, setProducts] = useState<Product[]>([])
     const [loading, setLoading] = useState(true)
+    const [isMobile, setIsMobile] = useState(false)
     const [selectedCategory, setSelectedCategory] = useState("ALL")
     const [searchQuery, setSearchQuery] = useState(initialSearch)
     const [isFilterOpen, setIsFilterOpen] = useState(false)
@@ -43,6 +44,11 @@ function ShopContent() {
             }
         }
         fetchProducts()
+
+        const checkMobile = () => setIsMobile(window.innerWidth < 1024)
+        checkMobile()
+        window.addEventListener('resize', checkMobile)
+        return () => window.removeEventListener('resize', checkMobile)
     }, [])
 
     const categories = ["ALL", "Perfumes", "DEODRANTS", "ATTARS", "AIRFRESHNER", "Reveil Fragrance"]
@@ -92,7 +98,7 @@ function ShopContent() {
 
             {/* Cinematic Header Section */}
             <section style={{
-                padding: '60px 0 40px',
+                padding: isMobile ? '100px 0 20px' : '60px 0 40px',
                 position: 'relative',
                 overflow: 'hidden',
                 background: 'linear-gradient(to bottom, #0a0a0a, #050505)',
@@ -106,7 +112,7 @@ function ShopContent() {
                     maskImage: 'linear-gradient(to bottom, black, transparent)'
                 }} />
 
-                <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 60px', position: 'relative' }}>
+                <div style={{ maxWidth: '1400px', margin: '0 auto', padding: isMobile ? '0 24px' : '0 60px', position: 'relative' }}>
 
                     {/* Cinematic Background Series Watermark */}
                     <div style={{
@@ -125,7 +131,17 @@ function ShopContent() {
                         02
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative', zIndex: 1, paddingTop: '10px' }}>
+                    <div style={{ 
+                        display: 'flex', 
+                        flexDirection: isMobile ? 'row' : 'column', 
+                        alignItems: isMobile ? 'flex-end' : 'center', 
+                        justifyContent: isMobile ? 'space-between' : 'center',
+                        position: 'relative', 
+                        zIndex: 1, 
+                        paddingTop: isMobile ? '0' : '10px',
+                        width: '100%',
+                        gap: isMobile ? '12px' : '0'
+                    }}>
 
                         {/* Title - The Gold Reveal Reveal Typography */}
                         <motion.div
@@ -133,11 +149,14 @@ function ShopContent() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 2, ease: [0.16, 1, 0.3, 1] }}
-                            style={{ textAlign: 'center' }}
+                            style={{ 
+                                textAlign: isMobile ? 'left' : 'center',
+                                flex: isMobile ? '1' : 'none'
+                            }}
                         >
-                            <h1 style={{ margin: 0, paddingBottom: '16px' }}>
+                            <h1 style={{ margin: 0, paddingBottom: isMobile ? '0' : '16px' }}>
                                 <span style={{
-                                    fontSize: 'clamp(40px, 8vw, 80px)',
+                                    fontSize: isMobile ? '32px' : 'clamp(40px, 8vw, 80px)',
                                     fontFamily: 'var(--font-cormorant)',
                                     fontWeight: 300,
                                     letterSpacing: '-0.04em',
@@ -148,46 +167,92 @@ function ShopContent() {
                                     Re<span style={{ color: '#d4af37', fontWeight: 400 }}>veil</span>
                                 </span>
                             </h1>
+                        </motion.div>
 
-                            <div style={{
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            whileInView={{ opacity: 1 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 1.5, delay: 0.5 }}
+                            style={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                justifyContent: 'center',
+                                justifyContent: isMobile ? 'flex-end' : 'center',
                                 gap: '32px',
-                                marginTop: '4px'
+                                marginTop: isMobile ? '0' : '4px',
+                                paddingBottom: isMobile ? '4px' : '0'
+                            }}
+                        >
+                            {!isMobile && <div style={{ width: '40px', height: '1px', background: 'rgba(212,175,55,0.2)' }} />}
+                            <span style={{
+                                fontSize: isMobile ? '8px' : 'clamp(8px, 0.9vw, 11px)',
+                                fontFamily: 'var(--font-tenor)',
+                                letterSpacing: isMobile ? '0.3em' : '1.4em',
+                                color: 'rgba(255,255,255,0.2)',
+                                textTransform: 'uppercase',
+                                marginRight: isMobile ? '0' : '-1.4em',
+                                fontWeight: 500
                             }}>
-                                <div style={{ width: '40px', height: '1px', background: 'rgba(212,175,55,0.2)' }} />
-                                <span style={{
-                                    fontSize: 'clamp(8px, 0.9vw, 11px)',
-                                    fontFamily: 'var(--font-tenor)',
-                                    letterSpacing: '1.4em',
-                                    color: 'rgba(255,255,255,0.2)',
-                                    textTransform: 'uppercase',
-                                    marginRight: '-1.4em',
-                                    fontWeight: 500
-                                }}>
-                                    Studio Archive
-                                </span>
-                                <div style={{ width: '40px', height: '1px', background: 'rgba(212,175,55,0.2)' }} />
-                            </div>
+                                Studio Archive
+                            </span>
+                            {!isMobile && <div style={{ width: '40px', height: '1px', background: 'rgba(212,175,55,0.2)' }} />}
                         </motion.div>
 
                     </div>
                 </div>
             </section>
 
+            {/* Mobile Category Scroller */}
+            {isMobile && (
+                <div style={{
+                    position: 'sticky',
+                    top: '70px',
+                    zIndex: 50,
+                    background: 'rgba(5,5,5,0.95)',
+                    backdropFilter: 'blur(10px)',
+                    borderBottom: '1px solid rgba(255,255,255,0.05)',
+                    padding: '12px 0 16px',
+                    overflowX: 'auto',
+                    scrollbarWidth: 'none',
+                    display: 'flex',
+                    gap: '24px',
+                    paddingLeft: '24px',
+                    paddingRight: '24px'
+                }}>
+                    {categories.map(cat => (
+                        <button
+                            key={cat}
+                            onClick={() => setSelectedCategory(cat)}
+                            style={{
+                                background: 'none',
+                                border: 'none',
+                                color: selectedCategory === cat ? '#d4af37' : '#444',
+                                fontSize: '11px',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.2em',
+                                whiteSpace: 'nowrap',
+                                transition: '0.3s',
+                                fontWeight: selectedCategory === cat ? 800 : 500
+                            }}
+                        >
+                            {cat}
+                        </button>
+                    ))}
+                </div>
+            )}
+
             <div style={{ display: 'flex', minHeight: '100vh', position: 'relative' }}>
 
                 {/* Left Side: Professional Sidebar - Locked in position */}
                 <aside style={{
-                    width: '380px',
-                    padding: '60px',
+                    width: isMobile ? '0' : '380px',
+                    padding: isMobile ? '0' : '60px',
+                    display: isMobile ? 'none' : 'flex',
                     background: 'transparent',
                     borderRight: '1px solid rgba(255,255,255,0.05)',
                     position: 'sticky',
                     top: '80px',
                     height: 'calc(100vh - 80px)',
-                    display: 'flex',
                     flexDirection: 'column',
                     gap: '64px',
                     overflowY: 'auto',
@@ -303,9 +368,9 @@ function ShopContent() {
                     {/* Sticky Gallery Controls - Synchronized with Sidebar Lockdown */}
                     <div style={{
                         position: 'sticky',
-                        top: '80px',
+                        top: isMobile ? '120px' : '80px',
                         zIndex: 10,
-                        padding: '40px 80px',
+                        padding: isMobile ? '20px 24px' : '40px 80px',
                         background: 'rgba(5,5,5,0.85)',
                         backdropFilter: 'blur(20px)',
                         borderBottom: '1px solid rgba(255,255,255,0.03)',
@@ -314,17 +379,30 @@ function ShopContent() {
                         alignItems: 'center'
                     }}>
                         <div>
-                            <span style={{ fontSize: '10px', color: '#555', letterSpacing: '0.2em' }}>
-                                {loading ? 'SCANNING ARCHIVE...' : `DISPLAYING ${filteredAndSortedProducts.length} FRAGMENTS`}
+                            <span style={{ fontSize: isMobile ? '8px' : '10px', color: '#555', letterSpacing: '0.2em' }}>
+                                {loading ? 'SCANNING ARCHIVE...' : `ARCHIVE: ${filteredAndSortedProducts.length} FRAGMENTS`}
                             </span>
                         </div>
-                        <div style={{ display: 'flex', gap: '24px' }}>
-                            <LayoutGrid size={16} opacity={0.3} style={{ cursor: 'pointer' }} />
-                            <List size={16} opacity={0.3} style={{ cursor: 'pointer' }} />
+                        <div style={{ display: 'flex', gap: '16px' }}>
+                            {isMobile && (
+                                <button 
+                                    onClick={() => setIsFilterOpen(true)}
+                                    style={{ background: 'none', border: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}
+                                >
+                                    <Filter size={14} color="#d4af37" />
+                                    <span style={{ fontSize: '9px', color: '#fff', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Filter</span>
+                                </button>
+                            )}
+                            {!isMobile && (
+                                <>
+                                    <LayoutGrid size={16} opacity={0.3} style={{ cursor: 'pointer' }} />
+                                    <List size={16} opacity={0.3} style={{ cursor: 'pointer' }} />
+                                </>
+                            )}
                         </div>
                     </div>
 
-                    <div style={{ padding: '40px 80px 80px' }}>
+                    <div style={{ padding: isMobile ? '24px 16px 80px' : '40px 80px 80px' }}>
 
                         <AnimatePresence mode="wait">
                             {loading ? (
@@ -346,8 +424,8 @@ function ShopContent() {
                                     exit={{ opacity: 0 }}
                                     style={{
                                         display: 'grid',
-                                        gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                                        gap: '64px 40px'
+                                        gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(auto-fill, minmax(300px, 1fr))',
+                                        gap: isMobile ? '24px 12px' : '64px 40px'
                                     }}
                                 >
                                     {filteredAndSortedProducts.map((product, idx) => (
@@ -389,11 +467,14 @@ function ShopContent() {
                             animate={{ x: 0 }}
                             exit={{ x: '100%' }}
                             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-                            style={{
-                                position: 'fixed', top: 0, right: 0, bottom: 0, width: '450px',
+                             style={{
+                                position: 'fixed', top: 0, right: 0, bottom: 0, 
+                                width: isMobile ? '100%' : '450px',
                                 background: '#0a0a0a', borderLeft: '1px solid #222', zIndex: 110,
-                                padding: '80px 60px', boxShadow: '-20px 0 80px rgba(0,0,0,0.8)',
-                                display: 'flex', flexDirection: 'column', gap: '64px'
+                                padding: isMobile ? '40px 24px' : '80px 60px', 
+                                boxShadow: '-20px 0 80px rgba(0,0,0,0.8)',
+                                display: 'flex', flexDirection: 'column', gap: isMobile ? '40px' : '64px',
+                                overflowY: 'auto'
                             }}
                         >
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

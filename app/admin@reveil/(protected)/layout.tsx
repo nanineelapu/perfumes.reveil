@@ -10,7 +10,7 @@ export default async function AdminLayout({
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
-    if (!user) redirect('/admin/login')
+    if (!user) redirect('/admin@reveil/login')
 
     // TEMPORARILY DISABLED ROLE CHECK TO RESTORE ACCESS
     /*
@@ -34,13 +34,13 @@ export default async function AdminLayout({
                     Admin Panel
                 </div>
                 {[
-                    { href: '/admin', label: 'Dashboard' },
-                    { href: '/admin/users', label: 'User Registry' },
-                    { href: '/admin/products', label: 'Products' },
-                    { href: '/admin/orders', label: 'Orders' },
-                    { href: '/admin/carousel', label: 'Carousel' },
-                    { href: '/admin/collections', label: 'Collections' },
-                    { href: '/admin/trending', label: 'Trending' },
+                    { href: '/admin@reveil', label: 'Dashboard' },
+                    { href: '/admin@reveil/users', label: 'User Registry' },
+                    { href: '/admin@reveil/products', label: 'Products' },
+                    { href: '/admin@reveil/orders', label: 'Orders' },
+                    { href: '/admin@reveil/carousel', label: 'Carousel' },
+                    { href: '/admin@reveil/collections', label: 'Collections' },
+                    { href: '/admin@reveil/trending', label: 'Trending' },
                 ].map(({ href, label }) => (
                     <Link key={href} href={href} style={{
                         padding: '10px 12px', borderRadius: '8px', color: '#ccc',

@@ -15,6 +15,14 @@ export default function AuthPage() {
     const [error, setError] = useState<string | null>(null)
     const [message, setMessage] = useState<string | null>(null)
     const [otpSent, setOtpSent] = useState(false)
+    const [isMobile, setIsMobile] = useState(false)
+
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 1024)
+        checkMobile()
+        window.addEventListener('resize', checkMobile)
+        return () => window.removeEventListener('resize', checkMobile)
+    }, [])
 
     // Form States
     const [formData, setFormData] = useState({
@@ -164,25 +172,26 @@ export default function AuthPage() {
             <div style={{
                 flex: 1,
                 display: 'flex',
-                alignItems: 'center',
+                alignItems: isMobile ? 'flex-start' : 'center',
                 justifyContent: 'center',
-                padding: '24px',
+                padding: isMobile ? '60px 16px 24px' : '24px',
                 position: 'relative',
                 zIndex: 10,
-                minHeight: '100vh'
+                height: isMobile ? '100vh' : '100vh',
+                overflow: 'hidden'
             }}>
                 {/* Back to Home Button at top left of form container area */}
-                <div style={{ position: 'absolute', top: '40px', left: '40px' }}>
+                <div style={{ position: 'absolute', top: isMobile ? '20px' : '40px', left: isMobile ? '20px' : '40px' }}>
                     <Link href="/" style={{
                         display: 'flex', alignItems: 'center', gap: '10px',
                         color: 'rgba(0,0,0,0.4)', textDecoration: 'none',
-                        fontSize: '11px', fontWeight: 500, letterSpacing: '0.2em',
+                        fontSize: isMobile ? '9px' : '11px', fontWeight: 500, letterSpacing: '0.2em',
                         textTransform: 'uppercase', transition: 'all 0.3s ease'
                     }}
                         onMouseEnter={(e) => e.currentTarget.style.color = '#d4af37'}
                         onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(0,0,0,0.4)'}
                     >
-                        <Home size={14} style={{ marginBottom: '1px' }} />
+                        <Home size={isMobile ? 12 : 14} style={{ marginBottom: '1px' }} />
                         <span style={{ lineHeight: 1 }}>Back to Home</span>
                     </Link>
                 </div>
@@ -192,9 +201,9 @@ export default function AuthPage() {
                     animate={{ opacity: 1, scale: 1 }}
                     style={{
                         width: '100%',
-                        maxWidth: '650px',
+                        maxWidth: isMobile ? '400px' : '650px',
                         background: '#ffffff',
-                        padding: '48px 60px',
+                        padding: isMobile ? '24px 20px' : '48px 60px',
                         borderRadius: '8px',
                         boxShadow: '0 40px 120px rgba(0,0,0,0.04)',
                         textAlign: 'center',
@@ -202,19 +211,19 @@ export default function AuthPage() {
                     }}
                 >
                     {/* Brand Logo Header */}
-                    <div style={{ marginBottom: '40px' }}>
-                        <h1 style={{ fontSize: '24px', color: '#000', fontWeight: 300, letterSpacing: '0.3em', textTransform: 'uppercase', margin: 0 }}>
+                    <div style={{ marginBottom: isMobile ? '24px' : '40px' }}>
+                        <h1 style={{ fontSize: isMobile ? '18px' : '24px', color: '#000', fontWeight: 300, letterSpacing: '0.3em', textTransform: 'uppercase', margin: 0 }}>
                             REVEIL
                         </h1>
-                        <div style={{ height: '1.5px', width: '30px', background: '#d4af37', margin: '12px auto', opacity: 0.5 }} />
+                        <div style={{ height: '1.5px', width: '30px', background: '#d4af37', margin: isMobile ? '8px auto' : '12px auto', opacity: 0.5 }} />
                     </div>
 
                     {/* Welcome Typography */}
-                    <div style={{ marginBottom: '32px' }}>
-                        <h2 style={{ fontSize: '38px', color: '#000', fontWeight: 300, marginBottom: '8px', letterSpacing: '0.01em' }}>
+                    <div style={{ marginBottom: isMobile ? '20px' : '32px' }}>
+                        <h2 style={{ fontSize: isMobile ? '26px' : '38px', color: '#000', fontWeight: 300, marginBottom: '4px', letterSpacing: '0.01em' }}>
                             Welcome to <span style={{ color: '#d4af37', fontWeight: 400 }}>Reveil</span>
                         </h2>
-                        <p style={{ color: 'rgba(0,0,0,0.4)', fontSize: '13px', fontWeight: 400, letterSpacing: '0.05em' }}>
+                        <p style={{ color: 'rgba(0,0,0,0.4)', fontSize: isMobile ? '11px' : '13px', fontWeight: 400, letterSpacing: '0.05em' }}>
                             {otpSent ? 'SECURE SEQUENCE REQUIRED' : 'Get Your Handy Perfumes Here'}
                         </p>
                     </div>
@@ -226,14 +235,14 @@ export default function AuthPage() {
                                 <>
                                     {/* Phone Section */}
                                     <div style={{ textAlign: 'left' }}>
-                                        <label style={{ fontSize: '10px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '8px', display: 'block', letterSpacing: '0.15em' }}>Enter your mobile number</label>
+                                        <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '6px', display: 'block', letterSpacing: '0.15em' }}>Mobile Number</label>
                                         <motion.div
                                             whileHover={{ background: 'linear-gradient(145deg, #ffffff, #f9f9f9)', borderColor: '#000' }}
                                             style={{
                                                 background: '#fff',
                                                 border: '1px solid rgba(0,0,0,0.08)',
                                                 borderRadius: '4px',
-                                                padding: '20px 24px',
+                                                padding: isMobile ? '14px 16px' : '20px 24px',
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 gap: '16px',
@@ -246,40 +255,40 @@ export default function AuthPage() {
                                                 value={formData.phone}
                                                 onChange={handleChange}
                                                 required
-                                                style={{ flex: 1, border: 'none', background: 'none', fontSize: '16px', color: '#000', outline: 'none' }}
+                                                style={{ flex: 1, border: 'none', background: 'none', fontSize: isMobile ? '14px' : '16px', color: '#000', outline: 'none' }}
                                             />
-                                            <Smartphone size={18} style={{ color: '#d4af37', opacity: 0.6 }} />
+                                            <Smartphone size={isMobile ? 16 : 18} style={{ color: '#d4af37', opacity: 0.6 }} />
                                         </motion.div>
                                     </div>
 
                                     {/* Identity Profile Fields Grid */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', textAlign: 'left' }}>
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '12px' : '20px', textAlign: 'left' }}>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: isMobile ? '16px' : '32px' }}>
                                             <motion.div
                                                 whileHover={{ borderBottomColor: '#000' }}
-                                                style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '6px', transition: 'border-color 0.3s' }}>
-                                                <label style={{ fontSize: '10px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>First Name</label>
-                                                <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} required style={{ width: '100%', border: 'none', background: 'none', fontSize: '14px', outline: 'none', color: '#000' }} />
+                                                style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
+                                                <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>First Name</label>
+                                                <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} required style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
                                             </motion.div>
                                             <motion.div
                                                 whileHover={{ borderBottomColor: '#000' }}
-                                                style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '6px', transition: 'border-color 0.3s' }}>
-                                                <label style={{ fontSize: '10px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Last Name</label>
-                                                <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} required style={{ width: '100%', border: 'none', background: 'none', fontSize: '14px', outline: 'none', color: '#000' }} />
+                                                style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
+                                                <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Last Name</label>
+                                                <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} required style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
                                             </motion.div>
                                         </div>
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: isMobile ? '16px' : '32px' }}>
                                             <motion.div
                                                 whileHover={{ borderBottomColor: '#000' }}
-                                                style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '6px', transition: 'border-color 0.3s' }}>
-                                                <label style={{ fontSize: '10px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Email</label>
-                                                <input type="email" name="email" value={formData.email} onChange={handleChange} required style={{ width: '100%', border: 'none', background: 'none', fontSize: '14px', outline: 'none', color: '#000' }} />
+                                                style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
+                                                <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Email</label>
+                                                <input type="email" name="email" value={formData.email} onChange={handleChange} required style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
                                             </motion.div>
                                             <motion.div
                                                 whileHover={{ borderBottomColor: '#000' }}
-                                                style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '6px', transition: 'border-color 0.3s' }}>
-                                                <label style={{ fontSize: '10px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Password</label>
-                                                <input type="password" name="password" value={formData.password} onChange={handleChange} required style={{ width: '100%', border: 'none', background: 'none', fontSize: '14px', outline: 'none', color: '#000' }} />
+                                                style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
+                                                <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Password</label>
+                                                <input type="password" name="password" value={formData.password} onChange={handleChange} required style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
                                             </motion.div>
                                         </div>
                                     </div>
@@ -320,8 +329,8 @@ export default function AuthPage() {
                                     background: '#d4af37',
                                     color: '#000',
                                     border: 'none',
-                                    padding: '20px',
-                                    fontSize: '11px',
+                                    padding: isMobile ? '16px' : '20px',
+                                    fontSize: isMobile ? '10px' : '11px',
                                     fontWeight: 800,
                                     textTransform: 'uppercase',
                                     letterSpacing: '0.5em',
@@ -331,7 +340,7 @@ export default function AuthPage() {
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     gap: '12px',
-                                    marginTop: '8px',
+                                    marginTop: isMobile ? '4px' : '8px',
                                     transition: 'background-color 0.3s ease'
                                 }}
                             >
@@ -347,8 +356,8 @@ export default function AuthPage() {
                     {message && <p style={{ color: '#d4af37', fontSize: '11px', marginTop: '16px', letterSpacing: '0.02em', fontWeight: 500 }}>{message}</p>}
 
                     {/* Footer Legal Section */}
-                    <div style={{ marginTop: '48px', paddingTop: '20px', borderTop: '1px solid rgba(0,0,0,0.04)', textAlign: 'center' }}>
-                        <p style={{ fontSize: '10px', color: 'rgba(0,0,0,0.3)', lineHeight: 1.6, letterSpacing: '0.05em' }}>
+                    <div style={{ marginTop: isMobile ? '24px' : '48px', paddingTop: isMobile ? '16px' : '20px', borderTop: '1px solid rgba(0,0,0,0.04)', textAlign: 'center' }}>
+                        <p style={{ fontSize: '9px', color: 'rgba(0,0,0,0.3)', lineHeight: 1.6, letterSpacing: '0.05em' }}>
                             IDENTITY ENCRYPTION ENABLED — STUDIO ARCHIVE 2026<br />
                             SECURE ACCESS NODE: REVEIL-AUTH-01
                         </p>

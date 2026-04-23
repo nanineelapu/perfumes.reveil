@@ -24,7 +24,7 @@ export default function AdminLogin() {
             return
         }
 
-        router.push('/admin')
+        router.push('/admin@reveil')
         router.refresh()
     }
 
