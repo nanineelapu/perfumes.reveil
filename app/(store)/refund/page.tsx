@@ -22,8 +22,8 @@ export default function RefundPage() {
             <AnimatedNavbar />
 
             {/* Header Section */}
-            <section style={{ 
-                padding: isMobile ? '140px 24px 60px' : '180px 40px 60px', 
+            <section style={{
+                padding: isMobile ? '140px 24px 60px' : '180px 40px 60px',
                 textAlign: 'center',
                 background: '#fafafa',
                 borderBottom: '1px solid #eee'
@@ -33,8 +33,8 @@ export default function RefundPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 1 }}
                 >
-                    <h1 style={{ 
-                        fontSize: isMobile ? '36px' : 'clamp(32px, 5vw, 64px)', 
+                    <h1 style={{
+                        fontSize: isMobile ? '36px' : 'clamp(32px, 5vw, 64px)',
                         fontFamily: 'var(--font-baskerville)',
                         fontWeight: 900,
                         color: '#050505',
@@ -42,9 +42,9 @@ export default function RefundPage() {
                     }}>
                         Refund <span style={{ color: '#d4af37' }}>&</span> Returns
                     </h1>
-                    <p style={{ 
-                        fontSize: isMobile ? '9px' : '11px', 
-                        letterSpacing: isMobile ? '0.2em' : '0.4em', 
+                    <p style={{
+                        fontSize: isMobile ? '9px' : '11px',
+                        letterSpacing: isMobile ? '0.2em' : '0.4em',
                         textTransform: 'uppercase',
                         color: '#aaa',
                         fontWeight: 500
@@ -55,17 +55,17 @@ export default function RefundPage() {
             </section>
 
             {/* Policy Content */}
-            <section style={{ 
-                padding: isMobile ? '60px 24px' : '80px 40px', 
-                maxWidth: '1000px', 
-                margin: '0 auto', 
-                flex: 1 
+            <section style={{
+                padding: isMobile ? '60px 24px' : '80px 40px',
+                maxWidth: '1000px',
+                margin: '0 auto',
+                flex: 1
             }}>
-                <div style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', 
-                    gap: isMobile ? '24px' : '60px', 
-                    marginBottom: isMobile ? '60px' : '80px' 
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+                    gap: isMobile ? '24px' : '60px',
+                    marginBottom: isMobile ? '60px' : '80px'
                 }}>
                     <motion.div
                         initial={{ opacity: 0, x: isMobile ? 0 : -20, y: isMobile ? 20 : 0 }}
@@ -89,7 +89,7 @@ export default function RefundPage() {
                         <ShieldCheck size={22} color="#d4af37" style={{ marginBottom: '16px' }} />
                         <h3 style={{ fontFamily: 'var(--font-baskerville)', fontSize: '18px', marginBottom: '12px' }}>Damage & Defects</h3>
                         <p style={{ fontSize: '14px', color: '#666', lineHeight: 1.6 }}>
-                            We accept returns specifically for manufacturing defects or items damaged during transit. 
+                            We accept returns specifically for manufacturing defects or items damaged during transit.
                         </p>
                     </motion.div>
                 </div>
@@ -100,13 +100,13 @@ export default function RefundPage() {
                     viewport={{ once: true }}
                     style={{ lineHeight: 1.8, fontSize: isMobile ? '15px' : '16px', color: '#444' }}
                 >
-                    <h2 style={{ 
-                        fontFamily: 'var(--font-baskerville)', 
-                        fontSize: isMobile ? '28px' : '32px', 
-                        color: '#050505', 
-                        marginBottom: isMobile ? '24px' : '32px' 
+                    <h2 style={{
+                        fontFamily: 'var(--font-baskerville)',
+                        fontSize: isMobile ? '28px' : '32px',
+                        color: '#050505',
+                        marginBottom: isMobile ? '24px' : '32px'
                     }}>The Process</h2>
-                    
+
                     <p style={{ marginBottom: '24px' }}>
                         To begin a return, please contact the **REVEIL Concierge** via WhatsApp or Email. Kindly provide your order number and photographic evidence of the damage.
                     </p>
@@ -126,35 +126,35 @@ export default function RefundPage() {
                         ))}
                     </ul>
 
-                    <div style={{ 
-                        textAlign: 'center', 
-                        padding: isMobile ? '40px 20px' : '60px', 
-                        background: '#fafafa', 
+                    <div style={{
+                        textAlign: 'center',
+                        padding: isMobile ? '40px 20px' : '60px',
+                        background: '#fafafa',
                         border: '1px dashed #ddd',
                         marginBottom: isMobile ? '40px' : '0'
                     }}>
-                        <h4 style={{ 
-                            fontSize: '10px', 
-                            letterSpacing: '0.2em', 
-                            textTransform: 'uppercase', 
-                            color: '#aaa', 
-                            marginBottom: '24px' 
+                        <h4 style={{
+                            fontSize: '10px',
+                            letterSpacing: '0.2em',
+                            textTransform: 'uppercase',
+                            color: '#aaa',
+                            marginBottom: '24px'
                         }}>Contact Concierge</h4>
-                        <div style={{ 
-                            display: 'flex', 
+                        <div style={{
+                            display: 'flex',
                             flexDirection: isMobile ? 'column' : 'row',
-                            justifyContent: 'center', 
-                            gap: isMobile ? '24px' : '40px' 
+                            justifyContent: 'center',
+                            gap: isMobile ? '24px' : '40px'
                         }}>
-                            <a href="mailto:refreshub@yahoo.com" style={{ 
-                                color: '#050505', 
-                                textDecoration: 'none', 
+                            <a href="mailto:refreshub@yahoo.com" style={{
+                                color: '#050505',
+                                textDecoration: 'none',
                                 fontWeight: 600,
                                 fontSize: isMobile ? '16px' : 'inherit'
                             }}>Email Support</a>
-                            <a href="https://wa.me/917873789595" style={{ 
-                                color: '#050505', 
-                                textDecoration: 'none', 
+                            <a href="https://wa.me/917873789595" style={{
+                                color: '#050505',
+                                textDecoration: 'none',
                                 fontWeight: 600,
                                 fontSize: isMobile ? '16px' : 'inherit'
                             }}>WhatsApp Us</a>

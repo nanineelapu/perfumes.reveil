@@ -11,7 +11,15 @@ export default function ProductExperiencePage() {
     const { slug } = useParams()
     const [product, setProduct] = useState<Product | null>(null)
     const [loading, setLoading] = useState(true)
+    const [isMobile, setIsMobile] = useState(false)
     const supabase = createClient()
+
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 1024)
+        checkMobile()
+        window.addEventListener('resize', checkMobile)
+        return () => window.removeEventListener('resize', checkMobile)
+    }, [])
 
     useEffect(() => {
         async function fetchProduct() {
@@ -47,16 +55,37 @@ export default function ProductExperiencePage() {
     )
 
     return (
-        <main style={{ background: '#000', minHeight: '100vh', color: '#fff', position: 'relative', padding: '120px 100px 60px' }}>
+        <main style={{
+            background: '#000',
+            minHeight: '100vh',
+            color: '#fff',
+            position: 'relative',
+            padding: isMobile ? '100px 24px 60px' : '120px 100px 60px'
+        }}>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.1fr', gap: '80px', alignItems: 'stretch', height: '75vh', minHeight: '600px' }}>
+            <div style={{
+                display: 'flex',
+                flexDirection: isMobile ? 'column' : 'row',
+                gap: isMobile ? '40px' : '80px',
+                alignItems: isMobile ? 'flex-start' : 'stretch',
+                height: isMobile ? 'auto' : '75vh',
+                minHeight: isMobile ? 'auto' : '600px'
+            }}>
 
                 {/* Left: Balanced Image Container */}
                 <motion.section
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
+                    initial={{ opacity: 0, x: isMobile ? 0 : -20, y: isMobile ? 20 : 0 }}
+                    animate={{ opacity: 1, x: 0, y: 0 }}
                     transition={{ duration: 1.2 }}
-                    style={{ position: 'relative', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)', background: '#050505' }}
+                    style={{
+                        position: 'relative',
+                        overflow: 'hidden',
+                        border: '1px solid rgba(255,255,255,0.05)',
+                        background: '#050505',
+                        width: isMobile ? '100%' : '50%',
+                        aspectRatio: isMobile ? '4/5' : 'auto',
+                        flex: isMobile ? 'none' : 1
+                    }}
                 >
                     <img
                         src={product.images?.[0] || 'https://images.unsplash.com/photo-1547887538-e3a2f32cb1cc?auto=format&fit=crop&q=80&w=1200'}
@@ -71,46 +100,54 @@ export default function ProductExperiencePage() {
                 <section style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    justifyContent: 'center',
-                    padding: '40px 0'
+                    justifyContent: isMobile ? 'flex-start' : 'center',
+                    padding: isMobile ? '0' : '40px 0',
+                    flex: isMobile ? 'none' : 1.1
                 }}>
                     <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
+                        initial={{ opacity: 0, x: isMobile ? 0 : 20, y: isMobile ? 20 : 0 }}
+                        animate={{ opacity: 1, x: 0, y: 0 }}
                         transition={{ duration: 1.2, delay: 0.2 }}
                     >
                         {/* Inline Navigation */}
-                        <div style={{ marginBottom: '40px' }}>
+                        <div style={{ marginBottom: isMobile ? '24px' : '40px' }}>
                             <Link href="/products" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#d4af37', textDecoration: 'none', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.3em', fontFamily: 'var(--font-tenor)', opacity: 0.8, transition: 'opacity 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '1'} onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}>
                                 <ArrowLeft size={14} /> Return to Products
                             </Link>
                         </div>
 
-                        <div style={{ fontSize: '11px', color: '#d4af37', letterSpacing: '0.5em', textTransform: 'uppercase', marginBottom: '20px', fontFamily: 'var(--font-tenor)', fontWeight: 600 }}>
+                        <div style={{ fontSize: '11px', color: '#d4af37', letterSpacing: '0.5em', textTransform: 'uppercase', marginBottom: isMobile ? '12px' : '20px', fontFamily: 'var(--font-tenor)', fontWeight: 600 }}>
                             {product.category || 'PARFUM'}
                         </div>
 
                         <h1 style={{
-                            fontSize: 'clamp(32px, 4vw, 56px)',
+                            fontSize: isMobile ? '32px' : 'clamp(32px, 4vw, 56px)',
                             fontFamily: 'var(--font-baskerville)',
                             fontWeight: 400,
                             lineHeight: 1.1,
-                            margin: '0 0 24px',
+                            margin: isMobile ? '0 0 16px' : '0 0 24px',
                             letterSpacing: '-0.01em'
                         }}>
                             {product.name}
                         </h1>
 
-                        <div style={{ fontSize: '20px', color: '#fff', fontFamily: 'var(--font-tenor)', marginBottom: '32px', fontWeight: 300 }}>
+                        <div style={{ fontSize: isMobile ? '18px' : '20px', color: '#fff', fontFamily: 'var(--font-tenor)', marginBottom: isMobile ? '24px' : '32px', fontWeight: 300 }}>
                             ₹{product.price.toLocaleString()}
                         </div>
 
-                        <p style={{ fontSize: '14px', lineHeight: 1.7, color: '#888', fontFamily: 'var(--font-tenor)', maxWidth: '480px', marginBottom: '48px', fontWeight: 300 }}>
+                        <p style={{ fontSize: '14px', lineHeight: 1.7, color: '#888', fontFamily: 'var(--font-tenor)', maxWidth: '480px', marginBottom: isMobile ? '32px' : '48px', fontWeight: 300 }}>
                             {product.description || 'Accessing encrypted olfactory data. This composition is part of the REVEIL Laboratory Archive, designed for high-end olfactory resonance.'}
                         </p>
 
                         {/* Olfactory Notes Grid */}
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '32px', marginBottom: '48px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '32px' }}>
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: '1fr 1fr 1fr',
+                            gap: isMobile ? '16px' : '32px',
+                            marginBottom: isMobile ? '32px' : '48px',
+                            borderTop: '1px solid rgba(255,255,255,0.05)',
+                            paddingTop: '32px'
+                        }}>
                             {[
                                 { l: 'TOP', v: product.scent_profile?.top || '-' },
                                 { l: 'HEART', v: product.scent_profile?.heart || '-' },
@@ -124,7 +161,7 @@ export default function ProductExperiencePage() {
                         </div>
 
                         {/* Technical Meta */}
-                        <div style={{ display: 'flex', gap: '48px', marginBottom: '56px' }}>
+                        <div style={{ display: 'flex', gap: isMobile ? '32px' : '48px', marginBottom: isMobile ? '40px' : '56px' }}>
                             <div>
                                 <div style={{ fontSize: '9px', color: '#d4af37', textTransform: 'uppercase', marginBottom: '10px', letterSpacing: '0.2em', fontWeight: 600 }}>Volume</div>
                                 <div style={{ fontSize: '12px', color: '#fff' }}>{product.technical_specs?.volume || '100ML'}</div>
@@ -162,7 +199,16 @@ export default function ProductExperiencePage() {
             </div>
 
             {/* Bottom Meta */}
-            <div style={{ position: 'absolute', bottom: '40px', left: '100px', opacity: 0.2, fontSize: '9px', letterSpacing: '0.3em' }}>
+            <div style={{
+                position: isMobile ? 'relative' : 'absolute',
+                bottom: isMobile ? 'auto' : '40px',
+                left: isMobile ? 'auto' : '100px',
+                marginTop: isMobile ? '60px' : '0',
+                opacity: 0.2,
+                fontSize: '9px',
+                letterSpacing: '0.3em',
+                textAlign: isMobile ? 'center' : 'left'
+            }}>
                 ID: {product.id.toString().padStart(4, '0')} — STUDIO_REVEIL_FRAGMENT
             </div>
         </main>
