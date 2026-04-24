@@ -38,14 +38,14 @@ export default function AdminCategoriesPage() {
         try {
             const [cRes, pRes] = await Promise.all([
                 fetch('/api/categories'),
-                fetch('/api/products?limit=1000') // Fetch more for backend management
+                fetch('/api/products?limit=1000')
             ])
             const cData = await cRes.json()
             const pData = await pRes.json()
             
             if (Array.isArray(cData)) {
                 setCategories(cData)
-                if (cData.length > 0) setSelectedCategory(cData[0].name)
+                if (cData.length > 0 && !selectedCategory) setSelectedCategory(cData[0].name)
             }
             if (pData.products) setProducts(pData.products)
         } catch (error) {
@@ -66,14 +66,19 @@ export default function AdminCategoriesPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
             })
+            const result = await res.json()
+            
             if (res.ok) {
                 setIsCatModalOpen(false)
                 setEditingCat(null)
                 setCatForm({ name: '' })
-                fetchData()
+                await fetchData()
+            } else {
+                alert(`Error: ${result.error || 'Failed to save category'}`)
             }
         } catch (error) {
             console.error('Error saving category:', error)
+            alert('Failed to connect to the server')
         }
     }
 
@@ -104,7 +109,7 @@ export default function AdminCategoriesPage() {
             {/* Sidebar: Categories List */}
             <aside style={{ width: '300px', background: '#fff', borderRight: '1px solid #eee', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ padding: '24px', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h2 style={{ fontSize: '18px', fontWeight: 600, margin: 0 }}>Collections</h2>
+                    <h2 style={{ fontSize: '18px', fontWeight: 600, margin: 0 }}>Categories</h2>
                     <button 
                         onClick={() => { setEditingCat(null); setCatForm({ name: '' }); setIsCatModalOpen(true); }}
                         style={{ background: '#000', color: '#fff', border: 'none', padding: '6px', borderRadius: '4px', cursor: 'pointer' }}
@@ -135,7 +140,7 @@ export default function AdminCategoriesPage() {
                     ))}
                 </div>
                 <div style={{ padding: '16px', borderTop: '1px solid #eee' }}>
-                    <p style={{ fontSize: '11px', color: '#999', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Total Collections: {categories.length}</p>
+                    <p style={{ fontSize: '11px', color: '#999', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Total Categories: {categories.length}</p>
                 </div>
             </aside>
 
@@ -154,7 +159,7 @@ export default function AdminCategoriesPage() {
                                         }}
                                         style={{ background: 'none', border: 'none', color: '#3b82f6', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
                                     >
-                                        <Edit2 size={14} /> Rename Collection
+                                        <Edit2 size={14} /> Rename Category
                                     </button>
                                     <button 
                                         onClick={() => {
@@ -163,7 +168,7 @@ export default function AdminCategoriesPage() {
                                         }}
                                         style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
                                     >
-                                        <Trash2 size={14} /> Remove Collection
+                                        <Trash2 size={14} /> Remove Category
                                     </button>
                                 </div>
                             </div>
@@ -171,7 +176,7 @@ export default function AdminCategoriesPage() {
                                 <div style={{ position: 'relative' }}>
                                     <Search style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#999' }} size={16} />
                                     <input 
-                                        placeholder="Search products in this collection..."
+                                        placeholder="Search products in this category..."
                                         style={{ padding: '10px 16px 10px 40px', borderRadius: '8px', border: '1px solid #eee', width: '300px', outline: 'none', fontSize: '14px' }}
                                         value={searchQuery}
                                         onChange={e => setSearchQuery(e.target.value)}
@@ -233,7 +238,7 @@ export default function AdminCategoriesPage() {
                             {filteredProducts.length === 0 && (
                                 <div style={{ gridColumn: '1 / -1', padding: '100px', textAlign: 'center', color: '#999' }}>
                                     <Package size={48} style={{ margin: '0 auto 16px', opacity: 0.2 }} />
-                                    <p>No products found in this collection.</p>
+                                    <p>No products found in this category.</p>
                                 </div>
                             )}
                         </div>
@@ -241,7 +246,7 @@ export default function AdminCategoriesPage() {
                 ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#999' }}>
                         <Folder size={64} style={{ marginBottom: '24px', opacity: 0.1 }} />
-                        <h2>Select a collection to manage products</h2>
+                        <h2>Select a category to manage products</h2>
                     </div>
                 )}
             </main>
@@ -260,10 +265,10 @@ export default function AdminCategoriesPage() {
                             animate={{ scale: 1, opacity: 1 }}
                             style={{ background: '#fff', padding: '32px', borderRadius: '12px', width: '100%', maxWidth: '400px' }}
                         >
-                            <h2 style={{ margin: '0 0 24px' }}>{editingCat ? 'Rename Collection' : 'Create Collection'}</h2>
+                            <h2 style={{ margin: '0 0 24px' }}>{editingCat ? 'Rename Category' : 'Create Category'}</h2>
                             <form onSubmit={handleCatSubmit}>
                                 <div style={{ marginBottom: '24px' }}>
-                                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px' }}>Collection Name</label>
+                                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px' }}>Category Name</label>
                                     <input 
                                         style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '16px', outline: 'none' }} 
                                         value={catForm.name}
