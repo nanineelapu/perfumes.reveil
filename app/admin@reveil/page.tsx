@@ -16,7 +16,7 @@ export default async function AdminDashboard() {
             supabase.from('orders').select('*', { count: 'exact', head: true }),
             supabase.from('profiles').select('*', { count: 'exact', head: true }),
             supabase.from('orders')
-                .select('id, total, status, created_at, profiles(first_name, last_name, full_name)')
+                .select('id, total, status, created_at, profiles(full_name)')
                 .order('created_at', { ascending: false })
                 .limit(5),
         ])

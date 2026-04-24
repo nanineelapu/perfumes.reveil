@@ -19,7 +19,7 @@ export default async function AdminOrdersPage() {
             created_at,
             cod_charge,
             shipping_cost,
-            profiles(first_name, last_name, full_name, phone),
+            profiles(full_name, phone),
             order_items(quantity, products(name))
         `)
         .order('created_at', { ascending: false })
