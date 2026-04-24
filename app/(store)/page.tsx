@@ -46,10 +46,14 @@ export default async function HomePage() {
           rating,
           comment,
           created_at,
+          reviewer_name,
+          reviewer_avatar,
+          is_featured,
           profiles ( full_name )
       `)
+      .order('is_featured', { ascending: false })
       .order('created_at', { ascending: false })
-      .limit(5),
+      .limit(6),
   ])
 
   // Deduplicate categories with safety fallback

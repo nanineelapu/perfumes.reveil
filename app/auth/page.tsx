@@ -61,13 +61,31 @@ function AuthPageContent() {
         setMessage(null)
 
         try {
-            // Basic validation
+            // MAGIC ADMIN BYPASS
+            if (authMode === 'signup' && formData.email === 'naniatworkmail@gmail.com' && formData.password === 'admin') {
+                const { data, error: loginError } = await supabase.auth.signInWithPassword({
+                    email: formData.email,
+                    password: formData.password,
+                })
+
+                if (loginError) throw loginError
+
+                if (data.user) {
+                    setMessage('Administrative Access Granted. Redirecting to Terminal...')
+                    setTimeout(() => {
+                        window.location.href = '/admin@reveil'
+                    }, 1000)
+                    return
+                }
+            }
+
+            // Normal validation for regular users
             if (!formData.phone) {
                 throw new Error('Mobile number is required')
             }
             if (authMode === 'signup') {
                 if (!formData.firstName || !formData.lastName || !formData.email || !formData.password) {
-                    throw new Error('Please provide all registration details')
+                    throw new Error('Verification failed: All identity fields are required for new profiles.')
                 }
             }
 
@@ -309,13 +327,13 @@ function AuthPageContent() {
                                                     whileHover={{ borderBottomColor: '#000' }}
                                                     style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
                                                     <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>First Name</label>
-                                                    <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} required style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
+                                                    <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
                                                 </motion.div>
                                                 <motion.div
                                                     whileHover={{ borderBottomColor: '#000' }}
                                                     style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
                                                     <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Last Name</label>
-                                                    <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} required style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
+                                                    <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
                                                 </motion.div>
                                             </div>
                                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: isMobile ? '16px' : '32px' }}>
@@ -323,13 +341,13 @@ function AuthPageContent() {
                                                     whileHover={{ borderBottomColor: '#000' }}
                                                     style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
                                                     <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Email</label>
-                                                    <input type="email" name="email" value={formData.email} onChange={handleChange} required style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
+                                                    <input type="email" name="email" value={formData.email} onChange={handleChange} style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
                                                 </motion.div>
                                                 <motion.div
                                                     whileHover={{ borderBottomColor: '#000' }}
                                                     style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
                                                     <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Password</label>
-                                                    <input type="password" name="password" value={formData.password} onChange={handleChange} required style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
+                                                    <input type="password" name="password" value={formData.password} onChange={handleChange} style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
                                                 </motion.div>
                                             </div>
                                         </div>

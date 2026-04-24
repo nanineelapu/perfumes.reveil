@@ -1,9 +1,7 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-
-const CATEGORIES = ['Perfumes', 'DEODRANTS', 'ATTARS', 'AIRFRESHNER', 'Reveil Fragrance']
 
 export default function NewProductPage() {
     const router = useRouter()
@@ -11,6 +9,7 @@ export default function NewProductPage() {
     const [uploading, setUploading] = useState(false)
     const [error, setError] = useState('')
     const [images, setImages] = useState<string[]>([])
+    const [categories, setCategories] = useState<{id: string, name: string}[]>([])
 
     const [form, setForm] = useState({
         name: '',
@@ -22,6 +21,14 @@ export default function NewProductPage() {
         meta_title: '',
         meta_description: '',
     })
+
+    useEffect(() => {
+        fetch('/api/categories')
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data)) setCategories(data)
+            })
+    }, [])
 
     function handleChange(
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -216,9 +223,9 @@ export default function NewProductPage() {
                                 value={form.category} onChange={handleChange}
                             >
                                 <option value="">Select category</option>
-                                {CATEGORIES.map(c => (
-                                    <option key={c} value={c}>
-                                        {c.charAt(0).toUpperCase() + c.slice(1)}
+                                {categories.map(c => (
+                                    <option key={c.id} value={c.name}>
+                                        {c.name}
                                     </option>
                                 ))}
                             </select>

@@ -13,4 +13,7 @@ sms.ts
 
 route.ts
  (Added SMS triggers to order status updates)
-Regarding Login OTP: Since you are using Supabase Auth for OTP, please note that Supabase natively supports Twilio but not Msg91. To use Msg91 for logins, we will need to set up a custom Supabase Edge Function as a proxy. Let me know if you would like me to set that up next!
+Regarding Login OTP: Since you are using Supabase 
+Auth for OTP, please note that Supabase natively supports 
+Twilio but not Msg91. To use Msg91 for logins, 
+we will need to set up a custom Supabase Edge Function as a proxy. Let me know if you would like me to set that up next!

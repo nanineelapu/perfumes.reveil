@@ -2,13 +2,41 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import DeleteProductButton from '@/components/admin/DeleteProductButton'
 import { Button } from '@/components/ui/button'
+import CategoryFilter from '@/components/admin/CategoryFilter'
 
-export default async function AdminProductsPage() {
+export default async function AdminProductsPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ category?: string }>
+}) {
+    const params = await searchParams
+    const categoryFilter = params.category
+
     const supabase = await createClient()
-    const { data: products } = await supabase
-        .from('products')
-        .select('*')
-        .order('created_at', { ascending: false })
+
+    const [productsRes, categoriesRes] = await Promise.all([
+        supabase
+            .from('products')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .filter('category', categoryFilter ? 'eq' : 'neq', categoryFilter || 'dummy_non_existent'),
+        supabase
+            .from('categories')
+            .select('*')
+            .order('display_order', { ascending: true })
+    ])
+
+    // If no category filter, we need to redo the query without the filter or handle it differently
+    let products = productsRes.data
+    if (!categoryFilter) {
+        const { data } = await supabase
+            .from('products')
+            .select('*')
+            .order('created_at', { ascending: false })
+        products = data
+    }
+
+    const categories = categoriesRes.data || []
 
     return (
         <div className="max-w-6xl mx-auto space-y-8 text-gray-900">
@@ -21,11 +49,17 @@ export default async function AdminProductsPage() {
                         Manage your luxury collection inventory
                     </p>
                 </div>
-                <Link href="/admin@reveil/products/new">
-                    <Button size="sm" className="px-8">
-                        + New Fragrance
-                    </Button>
-                </Link>
+                <div className="flex items-center gap-4">
+                    <CategoryFilter 
+                        categories={categories} 
+                        currentCategory={categoryFilter} 
+                    />
+                    <Link href="/admin@reveil/products/new">
+                        <Button size="sm" className="px-8">
+                            + New Fragrance
+                        </Button>
+                    </Link>
+                </div>
             </div>
 
             <div className="bg-white border border-gray-100 shadow-sm rounded-2xl overflow-hidden mt-8">

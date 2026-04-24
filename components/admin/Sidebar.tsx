@@ -7,7 +7,9 @@ export function AdminSidebar() {
       <nav className="space-y-4">
         <Link href="/admin@reveil" className="block text-sm hover:text-accent transition-colors">Dashboard</Link>
         <Link href="/admin@reveil/products" className="block text-sm hover:text-accent transition-colors">Products</Link>
+        <Link href="/admin@reveil/categories" className="block text-sm hover:text-accent transition-colors">Categories</Link>
         <Link href="/admin@reveil/orders" className="block text-sm hover:text-accent transition-colors">Orders</Link>
+        <Link href="/admin@reveil/reviews" className="block text-sm hover:text-accent transition-colors">Reviews</Link>
         <Link href="/admin@reveil/settings" className="block text-sm hover:text-accent transition-colors">Settings</Link>
       </nav>
     </aside>

@@ -17,24 +17,26 @@ export default function EditProductPage(props: { params: Params }) {
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
     const [product, setProduct] = useState<any>(null)
+    const [categories, setCategories] = useState<{id: string, name: string}[]>([])
 
     useEffect(() => {
-        async function fetchProduct() {
+        async function fetchData() {
             setLoading(true)
-            const { data, error } = await supabase
+            const { data: pData } = await supabase
                 .from('products')
                 .select('*')
                 .eq('id', id)
                 .single()
+            
+            const cRes = await fetch('/api/categories')
+            const cData = await cRes.json()
 
-            if (error || !data) {
-                console.error('Error fetching product:', error)
-            } else {
-                setProduct(data)
-            }
+            if (pData) setProduct(pData)
+            if (Array.isArray(cData)) setCategories(cData)
+            
             setLoading(false)
         }
-        fetchProduct()
+        fetchData()
     }, [id, supabase])
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -156,11 +158,10 @@ export default function EditProductPage(props: { params: Params }) {
                                     defaultValue={product.category}
                                     className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-accent transition-all appearance-none font-medium"
                                 >
-                                    <option value="Perfumes">Perfumes</option>
-                                    <option value="DEODRANTS">DEODRANTS</option>
-                                    <option value="ATTARS">ATTARS</option>
-                                    <option value="AIRFRESHNER">AIRFRESHNER</option>
-                                    <option value="Reveil Fragrance">Reveil Fragrance</option>
+                                    <option value="">Select category</option>
+                                    {categories.map(c => (
+                                        <option key={c.id} value={c.name}>{c.name}</option>
+                                    ))}
                                 </select>
                             </div>
                         </div>

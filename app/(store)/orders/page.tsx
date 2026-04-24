@@ -255,7 +255,7 @@ export default function OrdersPage() {
                                                             REPLENISH <ChevronRight size={14} strokeWidth={3} />
                                                         </Link>
                                                         
-                                                        {autoStatus === 'delivered' && (
+                                                        {/* autoStatus === 'delivered' && (
                                                             <button 
                                                                 onClick={() => {
                                                                     setReviewingProduct({ id: (item.products as any).id, name: item.products.name })
@@ -280,7 +280,7 @@ export default function OrdersPage() {
                                                             >
                                                                 <Star size={12} fill="#d4af37" /> Share Experience
                                                             </button>
-                                                        )}
+                                                        ) */}
                                                     </div>
                                                 </div>
                                             ))}
