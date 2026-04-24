@@ -9,7 +9,7 @@ export default function SignOutButton() {
 
     async function handleSignOut() {
         await supabase.auth.signOut()
-        router.push('/admin/login')
+        router.push('/admin@reveil/login')
         router.refresh()
     }
 

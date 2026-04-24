@@ -71,7 +71,7 @@ export default async function UsersPage() {
                                             {profile.orders?.length || 0} ORDERS
                                         </span>
                                         {profile.orders?.length > 0 && (
-                                            <Link href={`/admin/orders?search=${profile.phone}`} className="text-[9px] text-[#d4af37] font-bold tracking-widest uppercase hover:underline">
+                                            <Link href={`/admin@reveil/orders?search=${profile.phone}`} className="text-[9px] text-[#d4af37] font-bold tracking-widest uppercase hover:underline">
                                                 View Volume
                                             </Link>
                                         )}

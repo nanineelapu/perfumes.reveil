@@ -125,7 +125,7 @@ export default function NewProductPage() {
             return
         }
 
-        router.push('/admin/products')
+        router.push('/admin@reveil/products')
         router.refresh()
     }
 
