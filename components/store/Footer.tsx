@@ -167,16 +167,17 @@ export function Footer() {
                                 </div>
                                 {['Login / Signup', 'My Profile', 'Orders', 'Address Book'].map(l => (
                                     <motion.div key={l} style={{ marginBottom: '12px' }}>
-                                        <a href="#" style={{
+                                        <Link href={l === 'Login / Signup' ? '/auth' : l === 'My Profile' ? '/profile' : l === 'Orders' ? '/orders' : '#'} style={{
                                             color: '#999', textDecoration: 'none', fontSize: '11px',
                                             fontFamily: 'var(--font-baskerville)'
                                         }}>
                                             <motion.span whileHover={{ x: 10, color: '#fff' }} style={{ display: 'inline-block' }}>
                                                 {l}
                                             </motion.span>
-                                        </a>
+                                        </Link>
                                     </motion.div>
                                 ))}
+
                             </div>
                         )}
                     </div>
@@ -192,16 +193,17 @@ export function Footer() {
                             </div>
                             {['Login / Signup', 'My Profile', 'Orders', 'Address Book', 'Track Order'].map(l => (
                                 <motion.div key={l} style={{ marginBottom: '16px' }}>
-                                    <a href="#" style={{
+                                    <Link href={l === 'Login / Signup' ? '/auth' : l === 'My Profile' ? '/profile' : l === 'Orders' ? '/orders' : '#'} style={{
                                         color: '#999', textDecoration: 'none', fontSize: '13px',
                                         fontFamily: 'var(--font-baskerville)'
                                     }}>
                                         <motion.span whileHover={{ x: 10, color: '#fff' }} style={{ display: 'inline-block' }}>
                                             {l}
                                         </motion.span>
-                                    </a>
+                                    </Link>
                                 </motion.div>
                             ))}
+
                         </div>
                     )}
 

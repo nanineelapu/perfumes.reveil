@@ -11,10 +11,10 @@ export async function POST(request: Request) {
 
         const result = await sendMSG91OTP(phone)
         
-        if (result.type === 'success') {
+        if (result.type === 'success' || result.request_id) {
             return NextResponse.json({ success: true, message: 'OTP dispatched successfully' })
         } else {
-            return NextResponse.json({ error: result.message || 'Failed to dispatch OTP' }, { status: 400 })
+            return NextResponse.json({ error: result.message || 'Invalid Flow ID or Template ID.' }, { status: 400 })
         }
     } catch (error: any) {
         return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 })

@@ -2,8 +2,12 @@
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence, Variants } from 'framer-motion'
 import Link from 'next/link'
-import { ShoppingBag, User, Menu, X, Heart } from 'lucide-react'
+import { ShoppingBag, User, Menu, X, Heart, Loader2, Trash2 } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import { supabase } from '@/lib/supabase/client'
+import { useRouter } from 'next/navigation'
+import type { User as SupabaseUser } from '@supabase/supabase-js'
+
 
 export function AnimatedNavbar() {
     const pathname = usePathname()
@@ -11,7 +15,23 @@ export function AnimatedNavbar() {
     const textColor = '#d4af37'
     const [isAccountHovered, setIsAccountHovered] = useState(false)
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+    const [isCartOpen, setIsCartOpen] = useState(false)
     const [isMobile, setIsMobile] = useState(false)
+    const [scrolled, setScrolled] = useState(false)
+    const [user, setUser] = useState<SupabaseUser | null>(null)
+    const [cartItems, setCartItems] = useState<any[]>([])
+    const [cartTotals, setCartTotals] = useState({ subtotal: 0, total: 0 })
+    const [isCartLoading, setIsCartLoading] = useState(false)
+    const router = useRouter()
+
+
+    useEffect(() => {
+        const handleScroll = () => {
+            setScrolled(window.scrollY > 20)
+        }
+        window.addEventListener('scroll', handleScroll)
+        return () => window.removeEventListener('scroll', handleScroll)
+    }, [])
 
     useEffect(() => {
         const checkMobile = () => {
@@ -19,17 +39,84 @@ export function AnimatedNavbar() {
         }
         checkMobile()
         window.addEventListener('resize', checkMobile)
-        return () => window.removeEventListener('resize', checkMobile)
+
+        // Auth state listener
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            setUser(session?.user ?? null)
+        })
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setUser(session?.user ?? null)
+        })
+
+        return () => {
+            window.removeEventListener('resize', checkMobile)
+            subscription.unsubscribe()
+        }
     }, [])
 
-    // Lock scroll when mobile menu is open
+    const handleLogout = async () => {
+        await supabase.auth.signOut()
+        router.push('/')
+        router.refresh()
+    }
+    const fetchCart = async () => {
+        if (!user) return
+        setIsCartLoading(true)
+        try {
+            const res = await fetch('/api/cart')
+            if (res.ok) {
+                const data = await res.json()
+                const items = data.items || []
+                const subtotal = items.reduce((sum: number, item: any) => {
+                    return sum + ((item.products as any)?.price ?? 0) * item.quantity
+                }, 0)
+                setCartItems(items)
+                setCartTotals({ subtotal, total: subtotal })
+            }
+        } catch (error) {
+            console.error('Cart fetch error:', error)
+        } finally {
+            setIsCartLoading(false)
+        }
+    }
+
+    const handleRemoveItem = async (itemId: string) => {
+        try {
+            const res = await fetch(`/api/cart/${itemId}`, {
+                method: 'DELETE'
+            })
+            if (res.ok) {
+                // Refresh cart locally for instant feedback
+                setCartItems(prev => {
+                    const updatedItems = prev.filter(item => item.id !== itemId)
+                    const subtotal = updatedItems.reduce((sum: number, item: any) => {
+                        return sum + ((item.products as any)?.price ?? 0) * item.quantity
+                    }, 0)
+                    setCartTotals({ subtotal, total: subtotal })
+                    return updatedItems
+                })
+            }
+        } catch (error) {
+            console.error('Remove error:', error)
+        }
+    }
+
     useEffect(() => {
-        if (isMobileMenuOpen) {
+        if (isCartOpen) {
+            fetchCart()
+        }
+    }, [isCartOpen, user])
+
+
+    // Lock scroll when mobile menu or cart is open
+    useEffect(() => {
+        if (isMobileMenuOpen || isCartOpen) {
             document.body.style.overflow = 'hidden'
         } else {
             document.body.style.overflow = 'unset'
         }
-    }, [isMobileMenuOpen])
+    }, [isMobileMenuOpen, isCartOpen])
 
     const containerVariants: Variants = {
         hidden: { opacity: 0 },
@@ -75,6 +162,18 @@ export function AnimatedNavbar() {
         }
     }
 
+    const capsuleStyle: React.CSSProperties = {
+        background: 'rgba(10, 10, 10, 0.6)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        borderRadius: '999px',
+        border: '1px solid rgba(212, 175, 55, 0.2)',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+        display: 'flex',
+        alignItems: 'center',
+        transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)'
+    }
+
     return (
         <motion.nav
             initial="hidden"
@@ -82,36 +181,68 @@ export function AnimatedNavbar() {
             variants={containerVariants}
             style={{
                 background: isMobileMenuOpen ? '#050505' : 'transparent',
-                position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
-                padding: isMobile ? '12px 20px 0' : '12px 75px 0',
-                transition: 'background 0.3s ease'
+                position: 'fixed', top: isMobileMenuOpen ? 0 : '20px', left: 0, right: 0, zIndex: 100,
+                padding: isMobile ? '0 20px' : '0 75px',
+                transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
             }}
         >
+
+
+
             <div style={{
                 maxWidth: '1400px', margin: '0 auto',
-                display: 'flex', height: '64px', alignItems: 'center', justifyContent: 'space-between',
+                display: 'flex',
+                height: '56px',
+                alignItems: 'center', justifyContent: 'space-between',
+                transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)'
             }}>
-                <motion.div variants={itemVariants} style={{ marginLeft: isMobile ? '-10px' : '-24px' }}>
+
+
+
+                <motion.div
+                    variants={itemVariants}
+                    style={{
+                        ...capsuleStyle,
+                        padding: '0 24px',
+                        height: '100%',
+                        marginLeft: isMobile ? '-5px' : '0'
+                    }}
+                >
+
+
+
                     <Link href="/" onClick={() => setIsMobileMenuOpen(false)} style={{
                         display: 'flex', alignItems: 'center', height: '100%'
                     }}>
                         <img
-                            src="https://lhnamtkpjkrawgql.public.blob.vercel-storage.com/PNG%20LOGO%20REVIL.webp"
+                            src="https://lhnamtkpjkrawgql.public.blob.vercel-storage.com/Untitled%20%282%29.webp"
                             alt="Reveil Logo"
                             style={{
-                                height: isMobile ? '100px' : '120px',
+                                height: isMobile ? '30px' : '40px',
                                 width: 'auto',
                                 filter: isDarkPage ? 'brightness(1.2)' : 'none',
-                                transition: 'filter 0.3s'
+                                transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)'
                             }}
+
                         />
+
+
+
                     </Link>
                 </motion.div>
 
+
+
                 {/* Desktop Navigation */}
                 {!isMobile && (
-                    <div style={{ display: 'flex', gap: '48px', alignItems: 'center' }}>
-                        <div style={{ display: 'flex', gap: '40px', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
+                        <div style={{
+                            ...capsuleStyle,
+                            padding: '6px 32px',
+                            gap: '40px'
+                        }}>
+
+
                             <motion.div variants={itemVariants}>
                                 <Link href="/products" style={{ textDecoration: 'none' }}>
                                     <motion.span
@@ -121,7 +252,7 @@ export function AnimatedNavbar() {
                                             letterSpacing: '0.15em', fontWeight: 500,
                                             fontFamily: 'var(--font-baskerville)',
                                             position: 'relative',
-                                            padding: '4px 0'
+                                            padding: '0'
                                         }}
                                     >
                                         Shop
@@ -149,8 +280,9 @@ export function AnimatedNavbar() {
                                             letterSpacing: '0.15em', fontWeight: 500,
                                             fontFamily: 'var(--font-baskerville)',
                                             position: 'relative',
-                                            padding: '4px 0'
+                                            padding: '0'
                                         }}
+
                                     >
                                         Orders
                                         <motion.div
@@ -177,8 +309,9 @@ export function AnimatedNavbar() {
                                             letterSpacing: '0.15em', fontWeight: 500,
                                             fontFamily: 'var(--font-baskerville)',
                                             position: 'relative',
-                                            padding: '4px 0'
+                                            padding: '0'
                                         }}
+
                                     >
                                         Wishlist
                                         <motion.div
@@ -212,7 +345,8 @@ export function AnimatedNavbar() {
                                         position: 'relative',
                                         padding: '4px 0'
                                     }}>
-                                    Account
+                                    {user ? 'Profile' : 'Account'}
+
                                     <motion.div
                                         variants={{
                                             hover: { scaleX: 1, opacity: 1 }
@@ -247,64 +381,127 @@ export function AnimatedNavbar() {
                                             }}
                                         >
                                             <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                                <Link href="/auth?mode=login" style={{
-                                                    padding: '12px 24px',
-                                                    color: '#fff',
-                                                    textDecoration: 'none',
-                                                    fontSize: '11px',
-                                                    letterSpacing: '0.2em',
-                                                    fontFamily: 'var(--font-baskerville)',
-                                                    textTransform: 'uppercase',
-                                                    transition: 'all 0.3s'
-                                                }}
-                                                    onMouseOver={(e) => e.currentTarget.style.color = textColor}
-                                                    onMouseOut={(e) => e.currentTarget.style.color = '#fff'}
-                                                >
-                                                    Log In
-                                                </Link>
-                                                <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', margin: '0 24px' }} />
-                                                <Link href="/auth?mode=signup" style={{
-                                                    padding: '12px 24px',
-                                                    color: '#fff',
-                                                    textDecoration: 'none',
-                                                    fontSize: '11px',
-                                                    letterSpacing: '0.2em',
-                                                    fontFamily: 'var(--font-baskerville)',
-                                                    textTransform: 'uppercase',
-                                                    transition: 'all 0.3s'
-                                                }}
-                                                    onMouseOver={(e) => e.currentTarget.style.color = textColor}
-                                                    onMouseOut={(e) => e.currentTarget.style.color = '#fff'}
-                                                >
-                                                    Sign Up
-                                                </Link>
+                                                {user ? (
+                                                    <>
+                                                        <Link href="/profile" style={{
+                                                            padding: '12px 24px',
+                                                            color: '#fff',
+                                                            textDecoration: 'none',
+                                                            fontSize: '11px',
+                                                            letterSpacing: '0.2em',
+                                                            fontFamily: 'var(--font-baskerville)',
+                                                            textTransform: 'uppercase',
+                                                            transition: 'all 0.3s'
+                                                        }}
+                                                            onMouseOver={(e) => e.currentTarget.style.color = textColor}
+                                                            onMouseOut={(e) => e.currentTarget.style.color = '#fff'}
+                                                        >
+                                                            My Profile
+                                                        </Link>
+                                                        <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', margin: '0 24px' }} />
+                                                        <button
+                                                            onClick={handleLogout}
+                                                            style={{
+                                                                padding: '12px 24px',
+                                                                color: '#fff',
+                                                                background: 'none',
+                                                                border: 'none',
+                                                                textAlign: 'left',
+                                                                cursor: 'pointer',
+                                                                fontSize: '11px',
+                                                                letterSpacing: '0.2em',
+                                                                fontFamily: 'var(--font-baskerville)',
+                                                                textTransform: 'uppercase',
+                                                                transition: 'all 0.3s'
+                                                            }}
+                                                            onMouseOver={(e) => e.currentTarget.style.color = '#ff4b4b'}
+                                                            onMouseOut={(e) => e.currentTarget.style.color = '#fff'}
+                                                        >
+                                                            Logout
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Link href="/auth?mode=login" style={{
+                                                            padding: '12px 24px',
+                                                            color: '#fff',
+                                                            textDecoration: 'none',
+                                                            fontSize: '11px',
+                                                            letterSpacing: '0.2em',
+                                                            fontFamily: 'var(--font-baskerville)',
+                                                            textTransform: 'uppercase',
+                                                            transition: 'all 0.3s'
+                                                        }}
+                                                            onMouseOver={(e) => e.currentTarget.style.color = textColor}
+                                                            onMouseOut={(e) => e.currentTarget.style.color = '#fff'}
+                                                        >
+                                                            Log In
+                                                        </Link>
+                                                        <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', margin: '0 24px' }} />
+                                                        <Link href="/auth?mode=signup" style={{
+                                                            padding: '12px 24px',
+                                                            color: '#fff',
+                                                            textDecoration: 'none',
+                                                            fontSize: '11px',
+                                                            letterSpacing: '0.2em',
+                                                            fontFamily: 'var(--font-baskerville)',
+                                                            textTransform: 'uppercase',
+                                                            transition: 'all 0.3s'
+                                                        }}
+                                                            onMouseOver={(e) => e.currentTarget.style.color = textColor}
+                                                            onMouseOut={(e) => e.currentTarget.style.color = '#fff'}
+                                                        >
+                                                            Sign Up
+                                                        </Link>
+                                                    </>
+                                                )}
                                             </div>
+
                                         </motion.div>
                                     )}
                                 </AnimatePresence>
                             </motion.div>
                         </div>
 
-                        <motion.div variants={itemVariants}>
-                            <Link href="/cart" style={{ color: textColor, display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+                        <motion.div
+                            variants={itemVariants}
+                            style={{
+                                ...capsuleStyle,
+                                padding: '18px 18px'
+                            }}
+                        >
+
+                            <button
+                                onClick={() => setIsCartOpen(true)}
+                                style={{ background: 'none', border: 'none', color: textColor, display: 'flex', alignItems: 'center', cursor: 'pointer', padding: 0 }}
+                            >
                                 <motion.div
                                     whileHover={{ scale: 1.15, color: '#fff' }}
                                     transition={{ type: 'spring', stiffness: 400, damping: 10 }}
                                 >
                                     <ShoppingBag size={20} strokeWidth={1} />
                                 </motion.div>
-                            </Link>
+                            </button>
                         </motion.div>
                     </div>
                 )}
 
+
                 {/* Mobile Navigation Controls */}
                 {isMobile && (
-                    <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
+                    <div style={{
+                        ...capsuleStyle,
+                        padding: '6px 12px',
+                        gap: '24px'
+                    }}>
+
                         <motion.div variants={itemVariants}>
-                            <Link href="/cart" onClick={() => setIsMobileMenuOpen(false)} style={{ color: textColor, display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+                            <button
+                                onClick={() => { setIsCartOpen(true); setIsMobileMenuOpen(false); }}
+                                style={{ background: 'none', border: 'none', color: textColor, display: 'flex', alignItems: 'center', cursor: 'pointer', padding: 0 }}
+                            >
                                 <ShoppingBag size={22} strokeWidth={1.5} />
-                            </Link>
+                            </button>
                         </motion.div>
                         <motion.div variants={itemVariants}>
                             <button
@@ -314,7 +511,7 @@ export function AnimatedNavbar() {
                                     border: 'none',
                                     color: textColor,
                                     cursor: 'pointer',
-                                    padding: '8px',
+                                    padding: '4px',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center'
@@ -325,6 +522,7 @@ export function AnimatedNavbar() {
                         </motion.div>
                     </div>
                 )}
+
             </div>
 
             {/* Mobile Menu Overlay - High-End Redesign */}
@@ -448,6 +646,235 @@ export function AnimatedNavbar() {
                             <X size={32} strokeWidth={1} />
                         </motion.button>
                     </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Cart Drawer Overlay */}
+            <AnimatePresence>
+                {isCartOpen && (
+                    <>
+                        {/* Backdrop */}
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsCartOpen(false)}
+                            style={{
+                                position: 'fixed', inset: 0,
+                                background: 'rgba(0,0,0,0.6)',
+                                backdropFilter: 'blur(4px)',
+                                zIndex: 200
+                            }}
+                        />
+
+                        {/* Drawer Content - Unique Luxury Design */}
+                        <motion.div
+                            initial={{ x: '100%' }}
+                            animate={{ x: 0 }}
+                            exit={{ x: '100%' }}
+                            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                            style={{
+                                position: 'fixed', top: 0, right: 0, bottom: 0,
+                                width: isMobile ? '100%' : '480px',
+                                background: 'linear-gradient(180deg, #0a0a0a 0%, #000000 100%)',
+                                zIndex: 201,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                boxShadow: '-40px 0 80px rgba(0,0,0,0.8)',
+                                borderLeft: '1px solid rgba(212,175,55,0.2)'
+                            }}
+                        >
+                            {/* Decorative Top Glow */}
+                            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(90deg, transparent, #d4af37, transparent)', opacity: 0.5 }} />
+
+                            {/* Drawer Header */}
+                            <div style={{ padding: '40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                    <h2 style={{
+                                        fontSize: '24px',
+                                        fontFamily: 'var(--font-baskerville)',
+                                        color: '#d4af37',
+                                        margin: 0,
+                                        fontWeight: 300,
+                                        letterSpacing: '0.1em',
+                                        textTransform: 'uppercase'
+                                    }}>
+                                        Atelier Basket
+                                    </h2>
+                                    <span style={{ fontSize: '9px', color: 'rgba(212,175,55,0.5)', letterSpacing: '0.3em', textTransform: 'uppercase' }}>
+                                        {cartItems.length} {cartItems.length === 1 ? 'Creation' : 'Creations'} Selected
+                                    </span>
+                                </div>
+                                <motion.button
+                                    whileHover={{ rotate: 90, scale: 1.1 }}
+                                    onClick={() => setIsCartOpen(false)}
+                                    style={{ background: 'rgba(212,175,55,0.05)', border: '1px solid rgba(212,175,55,0.2)', color: '#d4af37', cursor: 'pointer', padding: '12px', borderRadius: '50%', display: 'flex' }}
+                                >
+                                    <X size={20} strokeWidth={1} />
+                                </motion.button>
+                            </div>
+
+                            {/* Unique Floating Banner */}
+                            <div style={{ margin: '0 40px 20px', position: 'relative' }}>
+                                <div style={{
+                                    background: 'linear-gradient(90deg, rgba(212,175,55,0.1), transparent)',
+                                    padding: '12px 24px',
+                                    borderLeft: '2px solid #d4af37',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '12px'
+                                }}>
+                                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#d4af37', boxShadow: '0 0 10px #d4af37' }} />
+                                    <span style={{
+                                        color: '#fff',
+                                        fontSize: '9px',
+                                        fontWeight: 600,
+                                        letterSpacing: '0.2em',
+                                        textTransform: 'uppercase',
+                                        opacity: 0.8
+                                    }}>
+                                        Complimentary Shipping On All Atelier Orders
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Cart Items Area */}
+                            <div style={{ flex: 1, overflowY: 'auto', padding: '0 40px 40px', scrollbarWidth: 'none' }}>
+                                {isCartLoading ? (
+                                    <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <Loader2 className="animate-spin" size={32} color="#d4af37" />
+                                    </div>
+                                ) : cartItems.length > 0 ? (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                                        {cartItems.map((item) => (
+                                            <motion.div
+                                                key={item.id}
+                                                initial={{ opacity: 0, y: 20 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                style={{
+                                                    display: 'flex',
+                                                    gap: '24px',
+                                                    padding: '24px',
+                                                    background: 'rgba(255,255,255,0.02)',
+                                                    border: '1px solid rgba(212,175,55,0.05)',
+                                                    borderRadius: '4px',
+                                                    position: 'relative',
+                                                    overflow: 'hidden'
+                                                }}
+                                            >
+                                                {/* Decorative background number */}
+                                                <div style={{ position: 'absolute', right: '-10px', bottom: '-20px', fontSize: '100px', color: 'rgba(212,175,55,0.03)', fontFamily: 'var(--font-baskerville)', pointerEvents: 'none' }}>
+                                                    {item.quantity}
+                                                </div>
+
+                                                <div style={{ width: '100px', height: '130px', background: '#000', borderRadius: '2px', overflow: 'hidden', flexShrink: 0, border: '1px solid rgba(255,255,255,0.05)' }}>
+                                                    <img src={item.products.images?.[0]} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={item.products.name} />
+                                                </div>
+                                                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '8px' }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                        <h3 style={{ fontSize: '16px', fontFamily: 'var(--font-baskerville)', color: '#fff', margin: 0, fontWeight: 300, letterSpacing: '0.05em' }}>{item.products.name}</h3>
+                                                        <motion.button
+                                                            whileHover={{ scale: 1.1, color: '#ff4d4d' }}
+                                                            whileTap={{ scale: 0.9 }}
+                                                            onClick={() => handleRemoveItem(item.id)}
+                                                            style={{ background: 'none', border: 'none', color: 'rgba(212,175,55,0.4)', cursor: 'pointer', padding: '4px' }}
+                                                        >
+                                                            <Trash2 size={14} strokeWidth={1.5} />
+                                                        </motion.button>
+                                                    </div>
+                                                    <p style={{ fontSize: '9px', color: '#d4af37', margin: 0, letterSpacing: '0.2em', textTransform: 'uppercase', opacity: 0.6 }}>{item.products.category || 'Atelier Collection'}</p>
+                                                    <div style={{ marginTop: '12px', display: 'flex', alignItems: 'baseline', gap: '10px' }}>
+                                                        <span style={{ fontSize: '18px', color: '#fff', fontWeight: 300, fontFamily: 'var(--font-baskerville)' }}>₹{item.products.price.toLocaleString()}</span>
+                                                        <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)' }}>× {item.quantity}</span>
+                                                    </div>
+                                                </div>
+                                            </motion.div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '40px' }}>
+                                        <div style={{ position: 'relative' }}>
+                                            <ShoppingBag size={64} strokeWidth={0.5} color="rgba(212,175,55,0.1)" />
+                                            <motion.div
+                                                animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
+                                                transition={{ duration: 3, repeat: Infinity }}
+                                                style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle, rgba(212,175,55,0.2), transparent 70%)' }}
+                                            />
+                                        </div>
+                                        <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                            <p style={{ color: '#fff', fontSize: '14px', letterSpacing: '0.2em', textTransform: 'uppercase', margin: 0, fontWeight: 300 }}>Your basket is empty</p>
+                                            <p style={{ color: 'rgba(212,175,55,0.5)', fontSize: '10px', letterSpacing: '0.1em', margin: 0 }}>Select your first creation to begin</p>
+                                        </div>
+                                        <Link href="/products" onClick={() => setIsCartOpen(false)} style={{ textDecoration: 'none' }}>
+                                            <motion.button
+                                                whileHover={{ scale: 1.05, letterSpacing: '0.5em' }}
+                                                style={{
+                                                    background: 'linear-gradient(90deg, #d4af37, #f2d06b)',
+                                                    color: '#000',
+                                                    border: 'none',
+                                                    padding: '18px 50px',
+                                                    borderRadius: '0',
+                                                    fontSize: '10px',
+                                                    fontWeight: 900,
+                                                    textTransform: 'uppercase',
+                                                    letterSpacing: '0.3em',
+                                                    cursor: 'pointer',
+                                                    boxShadow: '0 10px 30px rgba(212,175,55,0.2)'
+                                                }}>
+                                                Enter Collection
+                                            </motion.button>
+                                        </Link>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Summary Area - Glass Footer */}
+                            <div style={{
+                                padding: '40px',
+                                borderTop: '1px solid rgba(212,175,55,0.1)',
+                                background: 'rgba(255,255,255,0.02)',
+                                backdropFilter: 'blur(20px)',
+                                position: 'relative'
+                            }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '32px' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                        <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.2em' }}>Estimated Value</span>
+                                        <span style={{ fontSize: '11px', color: '#d4af37', letterSpacing: '0.1em' }}>Including Complimentary Shipping</span>
+                                    </div>
+                                    <span style={{ fontSize: '28px', color: '#fff', fontWeight: 200, fontFamily: 'var(--font-baskerville)' }}>₹{cartTotals.subtotal.toLocaleString()}</span>
+                                </div>
+                                <Link href="/cart" onClick={() => setIsCartOpen(false)} style={{ textDecoration: 'none' }}>
+                                    <motion.button
+                                        whileHover={cartItems.length > 0 ? { y: -5, boxShadow: '0 15px 40px rgba(212,175,55,0.3)' } : {}}
+                                        disabled={cartItems.length === 0}
+                                        style={{
+                                            width: '100%',
+                                            background: cartItems.length > 0 ? 'linear-gradient(90deg, #d4af37, #f2d06b)' : 'rgba(255,255,255,0.05)',
+                                            color: cartItems.length > 0 ? '#000' : 'rgba(255,255,255,0.2)',
+                                            border: 'none',
+                                            padding: '24px',
+                                            borderRadius: '0',
+                                            fontSize: '12px',
+                                            fontWeight: 900,
+                                            textTransform: 'uppercase',
+                                            letterSpacing: '0.4em',
+                                            cursor: cartItems.length > 0 ? 'pointer' : 'not-allowed',
+                                            transition: 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)'
+                                        }}
+                                    >
+                                        Seal Transaction
+                                    </motion.button>
+                                </Link>
+
+                                {/* Additional Info */}
+                                <div style={{ marginTop: '24px', textAlign: 'center' }}>
+                                    <span style={{ fontSize: '8px', color: 'rgba(255,255,255,0.2)', letterSpacing: '0.4em', textTransform: 'uppercase' }}>
+                                        Secure Checkout Verified — Studio Archive 2024
+                                    </span>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </>
                 )}
             </AnimatePresence>
         </motion.nav>

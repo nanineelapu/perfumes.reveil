@@ -45,8 +45,8 @@ export class ShiprocketService {
 
         this.token = data.token;
         // Shiprocket tokens typically last 10 days, but we refresh daily to be safe
-        this.tokenExpiry = Date.now() + 24 * 60 * 60 * 1000; 
-        
+        this.tokenExpiry = Date.now() + 24 * 60 * 60 * 1000;
+
         return this.token!;
     }
 
@@ -103,9 +103,9 @@ export class ShiprocketService {
      */
     static async checkServiceability(pincode: string, weight: number = 0.5) {
         const token = await this.getToken();
-        
+
         const response = await fetch(
-            `${SHIPROCKET_API_BASE}/courier/serviceability?delivery_postcode=${pincode}&weight=${weight}&cod=1`, 
+            `${SHIPROCKET_API_BASE}/courier/serviceability?delivery_postcode=${pincode}&weight=${weight}&cod=1`,
             {
                 method: 'GET',
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -114,4 +114,30 @@ export class ShiprocketService {
 
         return await response.json();
     }
+}
+
+/**
+ * Helper for authenticated Shiprocket requests
+ */
+export async function shiprocketFetch(endpoint: string, options: RequestInit = {}) {
+    const email = process.env.SHIPROCKET_EMAIL;
+    const password = process.env.SHIPROCKET_PASSWORD;
+
+    // Login to get token
+    const authRes = await fetch(`${SHIPROCKET_API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+    });
+
+    const { token } = await authRes.json();
+
+    return fetch(`${SHIPROCKET_API_BASE}${endpoint}`, {
+        ...options,
+        headers: {
+            ...options.headers,
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        }
+    }).then(res => res.json());
 }

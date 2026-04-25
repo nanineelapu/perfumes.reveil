@@ -187,5 +187,13 @@ export async function POST(request: Request) {
         .eq('id', order.id)
         .single()
 
+    // 10. TRIGGER SHIPROCKET (Background)
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    fetch(`${baseUrl}/api/shiprocket/create-order`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: order.id }),
+    }).catch(err => console.error('Shiprocket Background Trigger Error:', err))
+
     return NextResponse.json(fullOrder, { status: 201 })
 }

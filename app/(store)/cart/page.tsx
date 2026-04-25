@@ -188,9 +188,29 @@ export default function CartPage() {
                                                     <span style={{ fontSize: '12px', fontWeight: 600, minWidth: '20px', textAlign: 'center' }}>{item.quantity}</span>
                                                     <button onClick={() => updateQuantity(item.id, item.quantity + 1)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer' }}><Plus size={10} /></button>
                                                 </div>
-                                                <button onClick={() => removeItem(item.id)} style={{ background: 'none', border: 'none', color: '#444', cursor: 'pointer', fontSize: '9px', fontWeight: 900, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                    <Trash2 size={12} /> Remove
-                                                </button>
+                                                <motion.button 
+                                                    whileHover={{ color: '#ff4d4d', scale: 1.05 }}
+                                                    whileTap={{ scale: 0.95 }}
+                                                    onClick={() => removeItem(item.id)} 
+                                                    style={{ 
+                                                        background: 'rgba(255,255,255,0.03)', 
+                                                        border: '1px solid rgba(255,255,255,0.05)', 
+                                                        color: 'rgba(255,255,255,0.4)', 
+                                                        cursor: 'pointer', 
+                                                        fontSize: '8px', 
+                                                        fontWeight: 800, 
+                                                        textTransform: 'uppercase', 
+                                                        display: 'flex', 
+                                                        alignItems: 'center', 
+                                                        gap: '8px',
+                                                        padding: '8px 16px',
+                                                        borderRadius: '2px',
+                                                        letterSpacing: '0.2em',
+                                                        transition: 'all 0.3s ease'
+                                                    }}
+                                                >
+                                                    <Trash2 size={10} strokeWidth={1.5} /> Remove Creation
+                                                </motion.button>
                                             </div>
                                         </div>
 

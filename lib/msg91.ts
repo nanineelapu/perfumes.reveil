@@ -2,18 +2,22 @@ export async function sendMSG91OTP(phone: string) {
     const authKey = process.env.MSG91_AUTH_KEY;
     const templateId = process.env.MSG91_TEMPLATE_ID;
     
-    // Remove '+' and make sure it's just the number with country code (e.g. 919999999999)
+    // MSG91 expects number without '+'
     const cleanPhone = phone.replace('+', '');
 
     try {
-        const response = await fetch(`https://control.msg91.com/api/v5/otp?template_id=${templateId}&mobile=${cleanPhone}&authkey=${authKey}`, {
+        const response = await fetch(`https://control.msg91.com/api/v5/otp?template_id=${templateId}&mobile=${cleanPhone}`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
+            headers: {
+                'authkey': authKey || '',
+                'Content-Type': 'application/json'
+            }
         });
-        return await response.json();
+        const data = await response.json();
+        return data;
     } catch (error) {
         console.error('MSG91 Send Error:', error);
-        throw error;
+        return { type: 'error', message: 'SMS Gateway connection failed' };
     }
 }
 

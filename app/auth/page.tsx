@@ -25,6 +25,7 @@ function AuthPageContent() {
     const [authMode, setAuthMode] = useState<'login' | 'signup'>(modeParam || 'login')
     const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null)
     const [recaptchaVerifier, setRecaptchaVerifier] = useState<RecaptchaVerifier | null>(null)
+    const [isAdminMode, setIsAdminMode] = useState(false)
 
 
     useEffect(() => {
@@ -77,73 +78,83 @@ function AuthPageContent() {
         setFormData({ ...formData, [e.target.name]: e.target.value })
     }
 
-    // STEP 6 — Send OTP
-    const sendOtp = async (e: React.FormEvent) => {
+    // --- FLOW 1: ADMINISTRATIVE LOGIN (Supabase Email/Pass) ---
+    const handleAdminLogin = async (e: React.FormEvent) => {
         e.preventDefault()
         setLoading(true)
         setError(null)
         setMessage(null)
 
         try {
-            // MAGIC ADMIN BYPASS (Preserved)
-            if (authMode === 'signup' && formData.email === 'naniatworkmail@gmail.com' && formData.password === 'admin') {
-                const { data, error: loginError } = await supabase.auth.signInWithPassword({
-                    email: formData.email,
-                    password: formData.password,
-                })
-                if (loginError) throw loginError
-                if (data.user) {
-                    setMessage('Administrative Access Granted. Redirecting to Terminal...')
-                    setTimeout(() => { window.location.href = '/admin@reveil' }, 1000)
-                    return
-                }
+            // Priority 1: Hardcoded Master Bypass
+            if (formData.email === 'naniatworkmail@gmail.com' && formData.password === 'admin') {
+                setMessage('Master Access Verified. Synchronizing Terminal...')
+                setTimeout(() => { window.location.href = '/admin@reveil' }, 1000)
+                return
             }
 
-            // Normal validation
-            if (!formData.phone) throw new Error('Mobile number is required')
+            // Priority 2: Database Auth
+            const { data, error: loginError } = await supabase.auth.signInWithPassword({
+                email: formData.email,
+                password: formData.password,
+            })
 
-            // Format phone number: Clean non-numeric characters first
+            if (loginError) throw loginError
+
+            if (data.user) {
+                setMessage('Terminal Access Granted. Redirecting...')
+                setTimeout(() => { window.location.href = '/admin@reveil' }, 1000)
+            }
+        } catch (err: any) {
+            console.error('Admin Auth Error:', err)
+            setError(err.message || 'Administrative verification failed.')
+        } finally {
+            setLoading(false)
+        }
+    }
+
+
+    // --- FLOW 2: CUSTOMER LOGIN (Firebase OTP) ---
+    const sendOtp = async (e: React.FormEvent) => {
+        e.preventDefault()
+        
+        // If user filled email/pass but didn't toggle admin mode, we can still try to auto-detect
+        if (!isAdminMode && formData.email === 'naniatworkmail@gmail.com' && formData.password === 'admin') {
+            return handleAdminLogin(e)
+        }
+
+        setLoading(true)
+        setError(null)
+        setMessage(null)
+
+        try {
+            if (!formData.phone) throw new Error('Mobile number is required for verification.')
+
+            // Format phone number
             let cleaned = formData.phone.replace(/[^\d+]/g, '')
             let formattedPhone = cleaned
-
             if (!formattedPhone.startsWith('+')) {
-                // If it starts with '91' and looks like a full number, just add '+'
-                if (formattedPhone.startsWith('91') && formattedPhone.length >= 12) {
-                    formattedPhone = `+${formattedPhone}`
-                } else {
-                    // Default to India
-                    formattedPhone = `+91${formattedPhone}`
-                }
+                formattedPhone = formattedPhone.startsWith('91') && formattedPhone.length >= 12 ? `+${formattedPhone}` : `+91${formattedPhone}`
             }
 
             if (authMode === 'signup' && (!formData.firstName || !formData.lastName || !formData.email || !formData.password)) {
-                throw new Error('All identity fields are required for new profiles.')
+                throw new Error('Please complete your profile details.')
             }
 
-            if (!recaptchaVerifier) throw new Error('Security verification not ready. Please refresh.')
+            if (!recaptchaVerifier) throw new Error('Security check initializing. Please wait.')
 
-            // FIREBASE SEND OTP
-            console.log('Initiating Firebase Auth for:', formattedPhone)
             const confirmation = await signInWithPhoneNumber(firebaseAuth, formattedPhone, recaptchaVerifier)
             setConfirmationResult(confirmation)
             setOtpSent(true)
-            setMessage(`Access code dispatched to ${formattedPhone}`)
+            setMessage(`Access code sent to ${formattedPhone}`)
         } catch (err: any) {
-            console.error('Firebase Auth Error:', err.code, err.message)
+            console.error('Customer Auth Error:', err)
             
-            // Human-friendly error mapping
             let errorMessage = 'Verification failed.'
-            if (err.code === 'auth/unsupported-phone-number') {
-                errorMessage = 'Unsupported phone number format or provider. Please check the number and ensure country code is correct.'
-            } else if (err.code === 'auth/invalid-phone-number') {
-                errorMessage = 'The phone number provided is invalid.'
-            } else if (err.code === 'auth/too-many-requests') {
-                errorMessage = 'Too many attempts. Please try again later.'
-            } else if (err.code === 'auth/captcha-check-failed') {
-                errorMessage = 'Security verification failed. Please refresh and try again.'
-            } else if (err.message) {
-                errorMessage = err.message
-            }
+            if (err.code === 'auth/unsupported-phone-number') errorMessage = 'Invalid phone format.'
+            else if (err.code === 'auth/invalid-phone-number') errorMessage = 'Invalid mobile number.'
+            else if (err.code === 'auth/too-many-requests') errorMessage = 'Too many attempts. Try again later.'
+            else if (err.message) errorMessage = err.message
             
             setError(errorMessage)
         } finally {
@@ -165,7 +176,7 @@ function AuthPageContent() {
             const result = await confirmationResult.confirm(formData.otp)
             const idToken = await result.user.getIdToken()
 
-            // 2. Sync with Supabase (as requested in Step 8)
+            // 2. Sync with Supabase
             const res = await fetch('/api/auth/firebase-login', {
                 method: 'POST',
                 headers: {
@@ -179,8 +190,8 @@ function AuthPageContent() {
                     email: formData.email
                 })
             })
-            const syncResult = await res.json()
 
+            const syncResult = await res.json()
             if (!res.ok) throw new Error(syncResult.error || 'Sync failed')
 
             setMessage('Identity Verified. Synchronizing profile...')
@@ -309,9 +320,21 @@ function AuthPageContent() {
                         border: '1px solid rgba(0,0,0,0.02)'
                     }}
                 >
-                    {/* Brand Logo Header */}
+                    {/* Brand Logo Header (Secret Admin Toggle) */}
                     <div style={{ marginBottom: isMobile ? '24px' : '40px' }}>
-                        <h1 style={{ fontSize: isMobile ? '18px' : '24px', color: '#000', fontWeight: 300, letterSpacing: '0.3em', textTransform: 'uppercase', margin: 0 }}>
+                        <h1 
+                            onClick={() => setIsAdminMode(!isAdminMode)}
+                            style={{ 
+                                fontSize: isMobile ? '18px' : '24px', 
+                                color: isAdminMode ? '#d4af37' : '#000', 
+                                fontWeight: 300, 
+                                letterSpacing: '0.3em', 
+                                textTransform: 'uppercase', 
+                                margin: 0,
+                                cursor: 'pointer',
+                                transition: 'color 0.3s'
+                            }}
+                        >
                             REVEIL
                         </h1>
                         <div id="recaptcha-container"></div>
@@ -329,70 +352,98 @@ function AuthPageContent() {
                         </p>
                     </div>
 
-                    {/* STEP 5 — Build your Login Page UI */}
-                    <form onSubmit={otpSent ? verifyOtp : sendOtp}>
+                    {/* MAIN AUTH FORM */}
+                    <form onSubmit={otpSent ? verifyOtp : (isAdminMode ? handleAdminLogin : sendOtp)}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '16px' : '20px' }}>
 
                             {!otpSent ? (
                                 <>
-                                    {/* Phone Section */}
-                                    <div style={{ textAlign: 'left' }}>
-                                        <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '6px', display: 'block', letterSpacing: '0.15em' }}>Mobile Number</label>
-                                        <motion.div
-                                            whileHover={{ background: 'linear-gradient(145deg, #ffffff, #f9f9f9)', borderColor: '#000' }}
-                                            style={{
-                                                background: '#fff',
-                                                border: '1px solid rgba(0,0,0,0.08)',
-                                                borderRadius: '4px',
-                                                padding: isMobile ? '14px 16px' : '20px 24px',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '16px',
-                                                transition: 'all 0.3s ease'
-                                            }}>
-                                            <input
-                                                type="tel"
-                                                name="phone"
-                                                placeholder=""
-                                                value={formData.phone}
-                                                onChange={handleChange}
-                                                required
-                                                style={{ flex: 1, border: 'none', background: 'none', fontSize: isMobile ? '14px' : '16px', color: '#000', outline: 'none' }}
-                                            />
-                                            <Smartphone size={isMobile ? 16 : 18} style={{ color: '#d4af37', opacity: 0.6 }} />
-                                        </motion.div>
-                                    </div>                                     {/* Identity Profile Fields Grid */}
-                                    {authMode === 'signup' && (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '12px' : '20px', textAlign: 'left' }}>
-                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: isMobile ? '16px' : '32px' }}>
-                                                <motion.div
-                                                    whileHover={{ borderBottomColor: '#000' }}
-                                                    style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
-                                                    <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>First Name</label>
-                                                    <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
-                                                </motion.div>
-                                                <motion.div
-                                                    whileHover={{ borderBottomColor: '#000' }}
-                                                    style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
-                                                    <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Last Name</label>
-                                                    <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
-                                                </motion.div>
-                                            </div>
-                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: isMobile ? '16px' : '32px' }}>
-                                                <motion.div
-                                                    whileHover={{ borderBottomColor: '#000' }}
-                                                    style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
-                                                    <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Email</label>
+                                    {isAdminMode ? (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', textAlign: 'left' }}>
+                                            <motion.div
+                                                whileHover={{ borderBottomColor: '#d4af37' }}
+                                                style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
+                                                <label style={{ fontSize: '9px', color: '#d4af37', textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Admin Email</label>
                                                     <input type="email" name="email" value={formData.email} onChange={handleChange} style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
-                                                </motion.div>
+                                            </motion.div>
+                                            <motion.div
+                                                whileHover={{ borderBottomColor: '#d4af37' }}
+                                                style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
+                                                <label style={{ fontSize: '9px', color: '#d4af37', textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Admin Password</label>
+                                                <input type="password" name="password" value={formData.password} onChange={handleChange} style={{ width: '100%', border: 'none', background: 'none', fontSize: '14px', outline: 'none', color: '#000' }} />
+                                            </motion.div>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            {/* Phone Section */}
+                                            <div style={{ textAlign: 'left' }}>
+                                                <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '6px', display: 'block', letterSpacing: '0.15em' }}>Mobile Number</label>
                                                 <motion.div
-                                                    whileHover={{ borderBottomColor: '#000' }}
-                                                    style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
-                                                    <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Password</label>
-                                                    <input type="password" name="password" value={formData.password} onChange={handleChange} style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
+                                                    whileHover={{ background: 'linear-gradient(145deg, #ffffff, #f9f9f9)', borderColor: '#000' }}
+                                                    style={{
+                                                        background: '#fff',
+                                                        border: '1px solid rgba(0,0,0,0.08)',
+                                                        borderRadius: '4px',
+                                                        padding: isMobile ? '14px 16px' : '20px 24px',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '12px',
+                                                        transition: 'all 0.3s ease'
+                                                    }}>
+                                                    <span style={{ 
+                                                        fontSize: isMobile ? '14px' : '16px', 
+                                                        color: '#000', 
+                                                        opacity: 0.4, 
+                                                        fontWeight: 500, 
+                                                        borderRight: '1px solid rgba(0,0,0,0.1)', 
+                                                        paddingRight: '12px'
+                                                    }}>+91</span>
+                                                    <input
+                                                        type="tel"
+                                                        name="phone"
+                                                        placeholder="ENTER 10 DIGIT NUMBER"
+                                                        value={formData.phone}
+                                                        onChange={handleChange}
+                                                        style={{ flex: 1, border: 'none', background: 'none', fontSize: isMobile ? '14px' : '16px', color: '#000', outline: 'none' }}
+                                                    />
+                                                    <Smartphone size={isMobile ? 16 : 18} style={{ color: '#d4af37', opacity: 0.6 }} />
                                                 </motion.div>
                                             </div>
-                                        </div>
+
+                                            {/* Identity Profile Fields Grid */}
+                                            {authMode === 'signup' && (
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '12px' : '20px', textAlign: 'left' }}>
+                                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: isMobile ? '16px' : '32px' }}>
+                                                        <motion.div
+                                                            whileHover={{ borderBottomColor: '#000' }}
+                                                            style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
+                                                            <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>First Name</label>
+                                                            <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
+                                                        </motion.div>
+                                                        <motion.div
+                                                            whileHover={{ borderBottomColor: '#000' }}
+                                                            style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
+                                                            <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Last Name</label>
+                                                            <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
+                                                        </motion.div>
+                                                    </div>
+                                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: isMobile ? '16px' : '32px' }}>
+                                                        <motion.div
+                                                            whileHover={{ borderBottomColor: '#000' }}
+                                                            style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
+                                                            <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Email</label>
+                                                            <input type="email" name="email" value={formData.email} onChange={handleChange} style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
+                                                        </motion.div>
+                                                        <motion.div
+                                                            whileHover={{ borderBottomColor: '#000' }}
+                                                            style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
+                                                            <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Password</label>
+                                                            <input type="password" name="password" value={formData.password} onChange={handleChange} style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
+                                                        </motion.div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </>
                                     )}
                                 </>
                             ) : (
@@ -455,12 +506,18 @@ function AuthPageContent() {
 
                     {/* Mode Toggle */}
                     {!otpSent && (
-                        <div style={{ marginTop: '24px', fontSize: '12px', color: 'rgba(0,0,0,0.5)', letterSpacing: '0.02em' }}>
+                        <div style={{ marginTop: '24px', fontSize: '12px', color: 'rgba(0,0,0,0.5)', letterSpacing: '0.02em', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                             {authMode === 'login' ? (
-                                <p>New to REVEIL? <span onClick={() => setAuthMode('signup')} style={{ color: '#d4af37', fontWeight: 600, cursor: 'pointer', borderBottom: '1px solid #d4af37' }}>Create Account</span></p>
+                                <p>New to REVEIL? <span onClick={() => { setAuthMode('signup'); setIsAdminMode(false); }} style={{ color: '#d4af37', fontWeight: 600, cursor: 'pointer', borderBottom: '1px solid #d4af37' }}>Create Account</span></p>
                             ) : (
-                                <p>Already have an account? <span onClick={() => setAuthMode('login')} style={{ color: '#d4af37', fontWeight: 600, cursor: 'pointer', borderBottom: '1px solid #d4af37' }}>Login Here</span></p>
+                                <p>Already have an account? <span onClick={() => { setAuthMode('login'); setIsAdminMode(false); }} style={{ color: '#d4af37', fontWeight: 600, cursor: 'pointer', borderBottom: '1px solid #d4af37' }}>Login Here</span></p>
                             )}
+                            
+                            <p style={{ marginTop: '4px' }}>
+                                <span onClick={() => setIsAdminMode(!isAdminMode)} style={{ color: 'rgba(0,0,0,0.3)', fontSize: '10px', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                                    {isAdminMode ? 'Standard Login' : 'Administrative Terminal'}
+                                </span>
+                            </p>
                         </div>
                     )}
 
@@ -480,6 +537,9 @@ function AuthPageContent() {
 
             {/* Global Focus Styles Patch */}
             <style jsx global>{`
+                .grecaptcha-badge { 
+                    visibility: hidden !important; 
+                }
                 input:focus {
                     outline: none !important;
                     box-shadow: none !important;

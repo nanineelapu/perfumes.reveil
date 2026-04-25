@@ -5,17 +5,30 @@ import * as admin from 'firebase-admin'
 // Initialize Firebase Admin (only once)
 if (!admin.apps.length) {
     try {
-        admin.initializeApp({
-            credential: admin.credential.cert({
-                projectId: process.env.FIREBASE_PROJECT_ID,
-                clientEmail: process.env.FIREBASE_SERVICE_ACCOUNT_CLIENT_EMAIL,
-                privateKey: process.env.FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-            }),
-        });
+        const projectId = process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+        const clientEmail = process.env.FIREBASE_SERVICE_ACCOUNT_CLIENT_EMAIL;
+        const privateKey = process.env.FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY?.replace(/\\n/g, '\n');
+
+        if (projectId && clientEmail && privateKey) {
+            admin.initializeApp({
+                credential: admin.credential.cert({
+                    projectId,
+                    clientEmail,
+                    privateKey,
+                }),
+            });
+        } else {
+            // Fallback for development if only projectId is available
+            admin.initializeApp({
+                projectId: projectId
+            });
+            console.warn('Firebase Admin initialized without Service Account. Token verification will fail.');
+        }
     } catch (error) {
         console.error('Firebase Admin Init Error:', error);
     }
 }
+
 
 export async function POST(request: Request) {
     try {

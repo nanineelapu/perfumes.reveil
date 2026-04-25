@@ -25,6 +25,7 @@ interface Order {
     created_at: string
     status: string
     total: number
+    awb_code?: string
     order_items: OrderItem[]
 }
 
@@ -56,6 +57,7 @@ export default function OrdersPage() {
                     total,
                     status,
                     created_at,
+                    awb_code,
                     order_items (
                         id,
                         quantity,
@@ -175,7 +177,7 @@ export default function OrdersPage() {
                                     key={order.id}
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: idx * 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                                    transition={{ delay: idx * 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] as const }}
                                     style={{
                                         background: '#111',
                                         border: '1px solid rgba(255,255,255,0.05)',
@@ -305,22 +307,51 @@ export default function OrdersPage() {
                                                 <HelpCircle size={14} /> Assistance
                                             </button>
                                         </div>
-                                        <button style={{
-                                            background: '#fff',
-                                            color: '#000',
-                                            border: 'none',
-                                            padding: isMobile ? '16px' : '14px 40px',
-                                            borderRadius: '2px',
-                                            fontSize: '9px',
-                                            fontWeight: 900,
-                                            textTransform: 'uppercase',
-                                            letterSpacing: '0.4em',
-                                            cursor: 'pointer',
-                                            fontFamily: 'var(--font-baskerville)',
-                                            width: isMobile ? '100%' : 'auto'
-                                        }}>
-                                            Track Shipment
-                                        </button>
+                                        {order.awb_code ? (
+                                            <Link 
+                                                href={`/track/${order.awb_code}`}
+                                                style={{
+                                                    background: '#fff',
+                                                    color: '#000',
+                                                    textDecoration: 'none',
+                                                    padding: isMobile ? '16px' : '14px 40px',
+                                                    borderRadius: '2px',
+                                                    fontSize: '9px',
+                                                    fontWeight: 900,
+                                                    textTransform: 'uppercase',
+                                                    letterSpacing: '0.4em',
+                                                    cursor: 'pointer',
+                                                    fontFamily: 'var(--font-baskerville)',
+                                                    width: isMobile ? '100%' : 'auto',
+                                                    textAlign: 'center',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center'
+                                                }}
+                                            >
+                                                Track Journey
+                                            </Link>
+                                        ) : (
+                                            <button 
+                                                disabled
+                                                style={{
+                                                    background: 'rgba(255,255,255,0.05)',
+                                                    color: 'rgba(255,255,255,0.2)',
+                                                    border: '1px solid rgba(255,255,255,0.05)',
+                                                    padding: isMobile ? '16px' : '14px 40px',
+                                                    borderRadius: '2px',
+                                                    fontSize: '9px',
+                                                    fontWeight: 900,
+                                                    textTransform: 'uppercase',
+                                                    letterSpacing: '0.4em',
+                                                    cursor: 'not-allowed',
+                                                    fontFamily: 'var(--font-baskerville)',
+                                                    width: isMobile ? '100%' : 'auto'
+                                                }}
+                                            >
+                                                Processing Dispatch
+                                            </button>
+                                        )}
                                     </div>
                                 </motion.div>
                             )

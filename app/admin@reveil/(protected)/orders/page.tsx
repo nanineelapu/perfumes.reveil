@@ -3,6 +3,8 @@ import Link from 'next/link'
 import OrderStatusBadge from '@/components/admin/OrderStatusBadge'
 import StatusUpdateMenu from '@/components/admin/StatusUpdateMenu'
 import { cn } from '@/lib/utils'
+import { Truck } from 'lucide-react'
+import FulfillButton from '../../../../components/admin/FulfillButton'
 import { getAutomaticStatus } from '@/lib/utils/order-status'
 
 export default async function AdminOrdersPage() {
@@ -19,6 +21,10 @@ export default async function AdminOrdersPage() {
             created_at,
             cod_charge,
             shipping_cost,
+            awb_code,
+            label_url,
+            courier_name,
+            shiprocket_order_id,
             profiles(full_name, phone),
             order_items(quantity, products(name))
         `)
@@ -50,7 +56,7 @@ export default async function AdminOrdersPage() {
 
             {error && (
                 <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-500 text-xs tracking-wide animate-in fade-in slide-in-from-top-2">
-                   ERROR: UNABLE TO SYNCHRONIZE ORDERS — {error.message.toUpperCase()}
+                    ERROR: UNABLE TO SYNCHRONIZE ORDERS — {error.message.toUpperCase()}
                 </div>
             )}
 
@@ -64,6 +70,7 @@ export default async function AdminOrdersPage() {
                                         {h}
                                     </th>
                                 ))}
+                                <th className="px-8 py-5 text-[10px] font-bold tracking-widest uppercase text-gray-400 whitespace-nowrap">Logistics Manifest</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
@@ -135,6 +142,47 @@ export default async function AdminOrdersPage() {
                                                 <StatusUpdateMenu orderId={order.id} currentStatus={order.status ?? 'pending'} />
                                             </div>
                                         </td>
+                                        <td className="px-8 py-6">
+                                            <div className="flex flex-col gap-2 min-w-[140px]">
+                                                {order.shiprocket_order_id ? (
+                                                    <>
+                                                        {order.awb_code && (
+                                                            <Link
+                                                                href={`/track/${order.awb_code}`}
+                                                                target="_blank"
+                                                                className="text-[10px] font-bold tracking-wider text-indigo-600 hover:text-indigo-800 flex items-center gap-1.5"
+                                                            >
+                                                                <Truck size={12} /> {order.awb_code}
+                                                            </Link>
+                                                        )}
+                                                        {order.label_url && (
+                                                            <a
+                                                                href={order.label_url}
+                                                                target="_blank"
+                                                                className="text-[9px] font-bold tracking-widest uppercase text-emerald-600 hover:text-emerald-800 flex items-center gap-1.5"
+                                                            >
+                                                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Print Label
+                                                            </a>
+                                                        )}
+                                                        {order.courier_name && (
+                                                            <span className="text-[9px] text-gray-400 uppercase tracking-tighter italic">
+                                                                via {order.courier_name}
+                                                            </span>
+                                                        )}
+                                                        {!order.awb_code && (
+                                                            <span className="text-[9px] text-amber-600 font-bold tracking-widest uppercase">
+                                                                Awaiting Courier
+                                                            </span>
+                                                        )}
+                                                    </>
+                                                ) : (
+                                                    <FulfillButton
+                                                        orderId={order.id}
+                                                        isFulfilled={!!order.shiprocket_order_id}
+                                                    />
+                                                )}
+                                            </div>
+                                        </td>
                                     </tr>
                                 )
                             })}
@@ -145,7 +193,7 @@ export default async function AdminOrdersPage() {
                 {(!orders || orders.length === 0) && (
                     <div className="py-32 text-center">
                         <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-200">
-                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-6 h-6">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-6 h-6">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
                             </svg>
                         </div>
