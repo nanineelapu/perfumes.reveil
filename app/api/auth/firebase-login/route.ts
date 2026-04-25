@@ -23,11 +23,12 @@ export async function POST(request: Request) {
         const authHeader = request.headers.get('Authorization')
         let idToken = ''
         
+        const body = await request.json().catch(() => ({}))
+        
         if (authHeader?.startsWith('Bearer ')) {
             idToken = authHeader.split('Bearer ')[1]
         } else {
-            // Fallback to body if header is missing (for compatibility)
-            const body = await request.json().catch(() => ({}))
+            // Fallback to body if header is missing
             idToken = body.idToken
         }
 
@@ -35,7 +36,6 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Missing authentication token.' }, { status: 401 })
         }
 
-        const body = await request.json().catch(() => ({}))
         const { isSignup, firstName, lastName, email: providedEmail } = body
 
         // 1. Verify Firebase ID Token

@@ -102,10 +102,18 @@ function AuthPageContent() {
             // Normal validation
             if (!formData.phone) throw new Error('Mobile number is required')
 
-            // Format phone number (ensure +91 if not present and no other country code)
-            let formattedPhone = formData.phone.trim()
+            // Format phone number: Clean non-numeric characters first
+            let cleaned = formData.phone.replace(/[^\d+]/g, '')
+            let formattedPhone = cleaned
+
             if (!formattedPhone.startsWith('+')) {
-                formattedPhone = `+91${formattedPhone}`
+                // If it starts with '91' and looks like a full number, just add '+'
+                if (formattedPhone.startsWith('91') && formattedPhone.length >= 12) {
+                    formattedPhone = `+${formattedPhone}`
+                } else {
+                    // Default to India
+                    formattedPhone = `+91${formattedPhone}`
+                }
             }
 
             if (authMode === 'signup' && (!formData.firstName || !formData.lastName || !formData.email || !formData.password)) {
@@ -115,13 +123,29 @@ function AuthPageContent() {
             if (!recaptchaVerifier) throw new Error('Security verification not ready. Please refresh.')
 
             // FIREBASE SEND OTP
+            console.log('Initiating Firebase Auth for:', formattedPhone)
             const confirmation = await signInWithPhoneNumber(firebaseAuth, formattedPhone, recaptchaVerifier)
             setConfirmationResult(confirmation)
             setOtpSent(true)
             setMessage(`Access code dispatched to ${formattedPhone}`)
         } catch (err: any) {
-            console.error('Firebase Auth Error:', err)
-            setError(err.message || 'Verification failed.')
+            console.error('Firebase Auth Error:', err.code, err.message)
+            
+            // Human-friendly error mapping
+            let errorMessage = 'Verification failed.'
+            if (err.code === 'auth/unsupported-phone-number') {
+                errorMessage = 'Unsupported phone number format or provider. Please check the number and ensure country code is correct.'
+            } else if (err.code === 'auth/invalid-phone-number') {
+                errorMessage = 'The phone number provided is invalid.'
+            } else if (err.code === 'auth/too-many-requests') {
+                errorMessage = 'Too many attempts. Please try again later.'
+            } else if (err.code === 'auth/captcha-check-failed') {
+                errorMessage = 'Security verification failed. Please refresh and try again.'
+            } else if (err.message) {
+                errorMessage = err.message
+            }
+            
+            setError(errorMessage)
         } finally {
             setLoading(false)
         }
