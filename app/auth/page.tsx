@@ -8,6 +8,9 @@ import { Suspense } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Home } from 'lucide-react'
+import { auth as firebaseAuth } from '@/lib/firebase'
+import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from 'firebase/auth'
+
 
 function AuthPageContent() {
     const router = useRouter()
@@ -20,6 +23,9 @@ function AuthPageContent() {
     const [otpSent, setOtpSent] = useState(false)
     const [isMobile, setIsMobile] = useState(false)
     const [authMode, setAuthMode] = useState<'login' | 'signup'>(modeParam || 'login')
+    const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null)
+    const [recaptchaVerifier, setRecaptchaVerifier] = useState<RecaptchaVerifier | null>(null)
+
 
     useEffect(() => {
         if (modeParam) {
@@ -39,6 +45,24 @@ function AuthPageContent() {
         setMessage(null)
     }, [authMode])
 
+    // Initialize Recaptcha
+    useEffect(() => {
+        if (!recaptchaVerifier && typeof window !== 'undefined') {
+            try {
+                const verifier = new RecaptchaVerifier(firebaseAuth, 'recaptcha-container', {
+                    size: 'invisible',
+                    callback: () => {
+                        console.log('Recaptcha verified')
+                    }
+                })
+                setRecaptchaVerifier(verifier)
+            } catch (err) {
+                console.error('Recaptcha init error:', err)
+            }
+        }
+    }, [recaptchaVerifier])
+
+
     // Form States
     const [formData, setFormData] = useState({
         firstName: '',
@@ -53,113 +77,104 @@ function AuthPageContent() {
         setFormData({ ...formData, [e.target.name]: e.target.value })
     }
 
-    // Handle sending OTP
-    const handleInitialSubmit = async (e: React.FormEvent) => {
+    // STEP 6 — Send OTP
+    const sendOtp = async (e: React.FormEvent) => {
         e.preventDefault()
         setLoading(true)
         setError(null)
         setMessage(null)
 
         try {
-            // MAGIC ADMIN BYPASS
+            // MAGIC ADMIN BYPASS (Preserved)
             if (authMode === 'signup' && formData.email === 'naniatworkmail@gmail.com' && formData.password === 'admin') {
                 const { data, error: loginError } = await supabase.auth.signInWithPassword({
                     email: formData.email,
                     password: formData.password,
                 })
-
                 if (loginError) throw loginError
-
                 if (data.user) {
                     setMessage('Administrative Access Granted. Redirecting to Terminal...')
-                    setTimeout(() => {
-                        window.location.href = '/admin@reveil'
-                    }, 1000)
+                    setTimeout(() => { window.location.href = '/admin@reveil' }, 1000)
                     return
                 }
             }
 
-            // Normal validation for regular users
-            if (!formData.phone) {
-                throw new Error('Mobile number is required')
+            // Normal validation
+            if (!formData.phone) throw new Error('Mobile number is required')
+
+            // Format phone number (ensure +91 if not present and no other country code)
+            let formattedPhone = formData.phone.trim()
+            if (!formattedPhone.startsWith('+')) {
+                formattedPhone = `+91${formattedPhone}`
             }
-            if (authMode === 'signup') {
-                if (!formData.firstName || !formData.lastName || !formData.email || !formData.password) {
-                    throw new Error('Verification failed: All identity fields are required for new profiles.')
-                }
+
+            if (authMode === 'signup' && (!formData.firstName || !formData.lastName || !formData.email || !formData.password)) {
+                throw new Error('All identity fields are required for new profiles.')
             }
 
-            const formattedPhone = formData.phone.startsWith('+') ? formData.phone : `+91${formData.phone}`
-            const { error: otpError } = await supabase.auth.signInWithOtp({
-                phone: formattedPhone,
-            })
+            if (!recaptchaVerifier) throw new Error('Security verification not ready. Please refresh.')
 
-            if (otpError) throw otpError
-
+            // FIREBASE SEND OTP
+            const confirmation = await signInWithPhoneNumber(firebaseAuth, formattedPhone, recaptchaVerifier)
+            setConfirmationResult(confirmation)
             setOtpSent(true)
             setMessage(`Access code dispatched to ${formattedPhone}`)
         } catch (err: any) {
+            console.error('Firebase Auth Error:', err)
             setError(err.message || 'Verification failed.')
         } finally {
             setLoading(false)
         }
     }
 
-    // Phase 2: Verify OTP & Sync Profile
-    const handleFinalVerify = async (e: React.FormEvent) => {
+
+    // STEP 7 — Verify OTP
+    const verifyOtp = async (e: React.FormEvent) => {
         e.preventDefault()
         setLoading(true)
         setError(null)
 
         try {
-            const formattedPhone = formData.phone.startsWith('+') ? formData.phone : `+91${formData.phone}`
-            const { data, error: verifyError } = await supabase.auth.verifyOtp({
-                phone: formattedPhone,
-                token: formData.otp,
-                type: 'sms',
+            if (!confirmationResult) throw new Error('Verification session expired. Please retry.')
+
+            // 1. Verify OTP with Firebase
+            const result = await confirmationResult.confirm(formData.otp)
+            const idToken = await result.user.getIdToken()
+
+            // 2. Sync with Supabase (as requested in Step 8)
+            const res = await fetch('/api/auth/firebase-login', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${idToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    isSignup: authMode === 'signup',
+                    firstName: formData.firstName,
+                    lastName: formData.lastName,
+                    email: formData.email
+                })
             })
+            const syncResult = await res.json()
 
-            if (verifyError) throw verifyError
+            if (!res.ok) throw new Error(syncResult.error || 'Sync failed')
 
-            if (data.user) {
-                if (authMode === 'signup') {
-                    const { error: profileError } = await supabase
-                        .from('profiles')
-                        .upsert({
-                            id: data.user.id,
-                            first_name: formData.firstName,
-                            last_name: formData.lastName,
-                            email: formData.email,
-                            phone: formattedPhone,
-                            updated_at: new Date().toISOString(),
-                        })
+            setMessage('Identity Verified. Synchronizing profile...')
 
-                    if (profileError) console.error("Profile sync error:", profileError)
-                } else {
-                    // In login mode, we might want to check if the profile exists
-                    const { data: profile } = await supabase
-                        .from('profiles')
-                        .select('id')
-                        .eq('id', data.user.id)
-                        .single()
-
-                    if (!profile) {
-                        setMessage('Account found, but profile details missing. Redirecting to complete profile...')
-                        // Optionally redirect to a profile completion page or just let them in
-                    }
-                }
-
-                setMessage('Entry Granted. Synchronizing profile...')
-                setTimeout(() => {
-                    window.location.href = '/'
-                }, 1200)
+            // Redirect using the login URL generated by our backend
+            if (syncResult.loginUrl) {
+                window.location.href = syncResult.loginUrl
+            } else {
+                window.location.href = '/'
             }
         } catch (err: any) {
+            console.error('OTP Verification Error:', err)
             setError(err.message || 'Invalid sequence.')
         } finally {
             setLoading(false)
         }
     }
+
 
 
     return (
@@ -275,7 +290,9 @@ function AuthPageContent() {
                         <h1 style={{ fontSize: isMobile ? '18px' : '24px', color: '#000', fontWeight: 300, letterSpacing: '0.3em', textTransform: 'uppercase', margin: 0 }}>
                             REVEIL
                         </h1>
+                        <div id="recaptcha-container"></div>
                         <div style={{ height: '1.5px', width: '30px', background: '#d4af37', margin: isMobile ? '8px auto' : '12px auto', opacity: 0.5 }} />
+
                     </div>
 
                     {/* Welcome Typography */}
@@ -288,7 +305,8 @@ function AuthPageContent() {
                         </p>
                     </div>
 
-                    <form onSubmit={otpSent ? handleFinalVerify : handleInitialSubmit}>
+                    {/* STEP 5 — Build your Login Page UI */}
+                    <form onSubmit={otpSent ? verifyOtp : sendOtp}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '16px' : '20px' }}>
 
                             {!otpSent ? (
@@ -372,7 +390,7 @@ function AuthPageContent() {
                                         <button type="button" onClick={() => setOtpSent(false)} style={{ background: 'none', border: 'none', color: 'rgba(0,0,0,0.4)', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                             <ChevronLeft size={14} /> Back
                                         </button>
-                                        <button type="button" onClick={handleInitialSubmit} style={{ background: 'none', border: 'none', color: '#000', fontSize: '11px', fontWeight: 800, cursor: 'pointer' }}>
+                                        <button type="button" onClick={sendOtp} style={{ background: 'none', border: 'none', color: '#000', fontSize: '11px', fontWeight: 800, cursor: 'pointer' }}>
                                             Missing OTP? <span style={{ color: '#d4af37' }}>Resend</span>
                                         </button>
                                     </div>
