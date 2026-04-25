@@ -30,7 +30,7 @@ export async function POST(request: Request) {
   
   try {
     const body = await request.json()
-    console.log('Incoming Webhook Payload:', body)
+    console.log('Incoming Delivery Webhook Payload:', body)
 
     const awb    = body.awb
     const status = body.current_status
@@ -60,7 +60,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ ok: true })
   } catch (err: any) {
-    console.error('Shiprocket Webhook Error:', err)
+    console.error('Delivery Webhook Error:', err)
     // Always return 200 during testing if the crash was just a parsing error
     return NextResponse.json({ ok: true, warning: 'Payload parse error' })
   }
