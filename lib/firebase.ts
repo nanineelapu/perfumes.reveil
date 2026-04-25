@@ -8,10 +8,15 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase
-const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+// Initialize Firebase only if config is available to prevent build errors
+let app;
+let auth: any;
 
-// Enable testing mode (removes captcha for test numbers only)
-// Note: This must be true for test numbers defined in Firebase console to work without captcha
-auth.settings.appVerificationDisabledForTesting = true;
+if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
+    app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    // Enable testing mode
+    auth.settings.appVerificationDisabledForTesting = true;
+}
+
+export { auth };

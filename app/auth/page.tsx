@@ -48,7 +48,7 @@ function AuthPageContent() {
 
     // Initialize Recaptcha
     useEffect(() => {
-        if (!recaptchaVerifier && typeof window !== 'undefined') {
+        if (!recaptchaVerifier && typeof window !== 'undefined' && firebaseAuth) {
             try {
                 const verifier = new RecaptchaVerifier(firebaseAuth, 'recaptcha-container', {
                     size: 'invisible',
@@ -128,6 +128,7 @@ function AuthPageContent() {
         setMessage(null)
 
         try {
+            if (!firebaseAuth) throw new Error('Authentication system is currently offline. Please contact support.')
             if (!formData.phone) throw new Error('Mobile number is required for verification.')
 
             // Format phone number
