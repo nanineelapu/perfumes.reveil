@@ -59,6 +59,48 @@ export default async function HomePage() {
   // Deduplicate categories with safety fallback
   const uniqueCategories = [...new Set((categories || []).map(p => p.category))] as string[]
 
+  const homepageJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'REVEIL',
+    url: 'https://perfumesreveil.vercel.app',
+    description: 'Premium perfumes and luxury fragrances from the REVEIL Studio Archive.',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: 'https://perfumesreveil.vercel.app/products?search={search_term_string}',
+      },
+      'query-input': 'required name=search_term_string',
+    },
+  }
+
+  const organizationJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'REVEIL (Trimurty Enterprises)',
+    url: 'https://perfumesreveil.vercel.app',
+    logo: 'https://perfumesreveil.vercel.app/logo.png',
+    contactPoint: {
+      '@type': 'ContactPoint',
+      telephone: '+91-7008879914',
+      contactType: 'customer service',
+      availableLanguage: 'English',
+    },
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: 'Marthapeta street, Near sano Bazar, near sidherswar kalyan mandap',
+      addressLocality: 'Ganjam',
+      addressRegion: 'Odisha',
+      postalCode: '760009',
+      addressCountry: 'IN'
+    },
+    sameAs: [
+      'https://instagram.com/reveil_perfumes',
+      'https://facebook.com/reveil.perfumes',
+    ],
+  }
+
   const allSlides = [
     {
       id: 'intro-video',
@@ -131,28 +173,38 @@ export default async function HomePage() {
   ]
 
   return (
-    <main style={{ background: '#050505', color: '#fff', overflowX: 'hidden' }}>
-      {/* Hero section */}
-      <HeroCarousel slides={allSlides} />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(homepageJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+      />
+      <main style={{ background: '#050505', color: '#fff', overflowX: 'hidden' }}>
+        {/* Hero section */}
+        <HeroCarousel slides={allSlides} />
 
-      {/* Editorial Content */}
-      <PhilosophySection />
+        {/* Editorial Content */}
+        <PhilosophySection />
 
-      <NotesSection />
+        <NotesSection />
 
-      <BrandShowcaseSection />
+        <BrandShowcaseSection />
 
-      <ReveilCollectionSection />
+        <ReveilCollectionSection />
 
-      {/* Grid of Featured Products */}
-      <ProductGrid items={trending ?? []} />
+        {/* Grid of Featured Products */}
+        <ProductGrid items={trending ?? []} />
 
-      {/* Testimonials */}
-      <ReviewsSection reviews={latestReviews || []} />
+        {/* Testimonials */}
+        <ReviewsSection reviews={latestReviews || []} />
 
-      {/* Newsletter */}
-      <NewsletterSection />
+        {/* Newsletter */}
+        <NewsletterSection />
 
-    </main>
+      </main>
+    </>
   )
 }

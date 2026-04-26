@@ -1,14 +1,15 @@
 import { MetadataRoute } from 'next'
-import { createClient } from '@/lib/supabase/client'
+import { createClient } from '@/lib/supabase/server'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const supabase = createClient()
-    const baseUrl = 'https://reveil-perfumes.com' // Replace with your production URL
+    const supabase = await createClient()
+    const baseUrl = 'https://perfumesreveil.vercel.app'
 
     // 1. Fetch all product slugs
     const { data: products } = await supabase
         .from('products')
         .select('slug, updated_at')
+        .order('updated_at', { ascending: false })
 
     const productEntries: MetadataRoute.Sitemap = (products || []).map((product) => ({
         url: `${baseUrl}/products/${product.slug}`,
@@ -17,7 +18,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.8,
     }))
 
-    // 2. Static pages
+    // 2. Category pages
+    const categories = ['PERFUMES', 'DEODRANTS', 'ATTARS', 'AIRFRESHNER']
+    const categoryEntries: MetadataRoute.Sitemap = categories.map(cat => ({
+        url: `${baseUrl}/products?category=${cat}`,
+        lastModified: new Date(),
+        changeFrequency: 'daily',
+        priority: 0.7,
+    }))
+
+    // 3. Main Static pages
     const staticEntries: MetadataRoute.Sitemap = [
         {
             url: baseUrl,
@@ -32,18 +42,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             priority: 0.9,
         },
         {
-            url: `${baseUrl}/about`,
+            url: `${baseUrl}/wishlist`,
             lastModified: new Date(),
-            changeFrequency: 'monthly',
+            changeFrequency: 'weekly',
             priority: 0.5,
-        },
-        {
-            url: `${baseUrl}/contact`,
-            lastModified: new Date(),
-            changeFrequency: 'monthly',
-            priority: 0.5,
-        },
+        }
     ]
 
-    return [...staticEntries, ...productEntries]
+    return [...staticEntries, ...categoryEntries, ...productEntries]
 }
