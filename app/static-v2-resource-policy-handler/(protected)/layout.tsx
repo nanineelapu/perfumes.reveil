@@ -10,7 +10,7 @@ export default async function AdminLayout({
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
-    if (!user) redirect('/admin@reveil/login')
+    if (!user) redirect('/static-v2-resource-policy-handler/login')
 
     // TEMPORARILY DISABLED ROLE CHECK TO RESTORE ACCESS
     /*
@@ -34,15 +34,15 @@ export default async function AdminLayout({
                     Admin Panel
                 </div>
                 {[
-                    { href: '/admin@reveil', label: 'Dashboard' },
-                    { href: '/admin@reveil/users', label: 'User Registry' },
-                    { href: '/admin@reveil/orders', label: 'Orders' },
-                    { href: '/admin@reveil/products', label: 'Products' },
-                    { href: '/admin@reveil/categories', label: 'Categories' },
-                    { href: '/admin@reveil/reviews', label: 'Reviews' },
-                    { href: '/admin@reveil/carousel', label: 'Carousel' },
-                    { href: '/admin@reveil/collections', label: 'Collections' },
-                    { href: '/admin@reveil/trending', label: 'Trending' },
+                    { href: '/static-v2-resource-policy-handler', label: 'Dashboard' },
+                    { href: '/static-v2-resource-policy-handler/users', label: 'User Registry' },
+                    { href: '/static-v2-resource-policy-handler/orders', label: 'Orders' },
+                    { href: '/static-v2-resource-policy-handler/products', label: 'Products' },
+                    { href: '/static-v2-resource-policy-handler/categories', label: 'Categories' },
+                    { href: '/static-v2-resource-policy-handler/reviews', label: 'Reviews' },
+                    { href: '/static-v2-resource-policy-handler/carousel', label: 'Carousel' },
+                    { href: '/static-v2-resource-policy-handler/collections', label: 'Collections' },
+                    { href: '/static-v2-resource-policy-handler/trending', label: 'Trending' },
                 ].map(({ href, label }) => (
                     <Link key={href} href={href} style={{
                         padding: '10px 12px', borderRadius: '8px', color: '#ccc',

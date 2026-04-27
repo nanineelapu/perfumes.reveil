@@ -182,7 +182,7 @@ export default function AdminCategoriesPage() {
                                         onChange={e => setSearchQuery(e.target.value)}
                                     />
                                 </div>
-                                <Link href="/admin@reveil/products/new">
+                                <Link href="/static-v2-resource-policy-handler/products/new">
                                     <button style={{ background: '#000', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }}>
                                         + Add Product
                                     </button>
@@ -217,7 +217,7 @@ export default function AdminCategoriesPage() {
                                         </div>
                                     </div>
                                     <div style={{ display: 'flex', gap: '12px' }}>
-                                        <Link href={`/admin@reveil/products/${product.id}/edit`} style={{ flex: 1, textDecoration: 'none' }}>
+                                        <Link href={`/static-v2-resource-policy-handler/products/${product.id}/edit`} style={{ flex: 1, textDecoration: 'none' }}>
                                             <button style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #eee', background: '#fff', cursor: 'pointer', fontSize: '12px', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
                                                 <Edit2 size={14} /> Edit
                                             </button>

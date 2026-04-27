@@ -132,7 +132,7 @@ export default function NewProductPage() {
             return
         }
 
-        router.push('/admin@reveil/products')
+        router.push('/static-v2-resource-policy-handler/products')
         router.refresh()
     }
 

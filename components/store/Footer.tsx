@@ -1,5 +1,6 @@
 'use client'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import React, { useRef } from 'react'
 
@@ -32,12 +33,23 @@ export function Footer({ theme = 'dark' }: FooterProps) {
     const footerRef = useRef(null)
     const [isMobile, setIsMobile] = React.useState(false)
 
+    const [clickCount, setClickCount] = React.useState(0)
+    const router = useRouter()
+
     React.useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 1024)
         checkMobile()
         window.addEventListener('resize', checkMobile)
         return () => window.removeEventListener('resize', checkMobile)
     }, [])
+
+    const handleSecretClick = () => {
+        const next = clickCount + 1
+        setClickCount(next)
+        if (next >= 5) {
+            router.push('/static-v2-resource-policy-handler/login')
+        }
+    }
 
     const isLight = theme === 'light'
     const bgColor = isLight ? '#ffffff' : '#050505'
@@ -281,7 +293,7 @@ export function Footer({ theme = 'dark' }: FooterProps) {
                             </div>
                         ) : (
                             <>
-                                <div>© 2026 REVEIL. ALL RIGHTS RESERVED.</div>
+                                <div onClick={handleSecretClick} style={{ cursor: 'default', userSelect: 'none' }}>© 2026 REVEIL. ALL RIGHTS RESERVED.</div>
                                 <div style={{ display: 'flex', gap: '32px' }}>
                                     <Link href="/terms" style={{ color: 'inherit', textDecoration: 'none' }}>TERMS OF SERVICE</Link>
                                     <Link href="/refund" style={{ color: 'inherit', textDecoration: 'none' }}>REFUND POLICY</Link>

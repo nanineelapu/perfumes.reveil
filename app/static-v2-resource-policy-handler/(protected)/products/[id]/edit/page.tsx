@@ -69,7 +69,7 @@ export default function EditProductPage(props: { params: Params }) {
             })
 
             if (res.ok) {
-                router.push('/admin@reveil/products')
+                router.push('/static-v2-resource-policy-handler/products')
                 router.refresh()
             } else {
                 const err = await res.json()
@@ -95,7 +95,7 @@ export default function EditProductPage(props: { params: Params }) {
         return (
             <div className="text-center py-20">
                 <h2 className="text-2xl font-light text-gray-500 uppercase tracking-widest">Fragrance Not Found</h2>
-                <Link href="/admin@reveil/products" className="text-accent text-sm mt-4 inline-block underline underline-offset-4 font-bold tracking-widest uppercase">
+                <Link href="/static-v2-resource-policy-handler/products" className="text-accent text-sm mt-4 inline-block underline underline-offset-4 font-bold tracking-widest uppercase">
                     Return to Collection
                 </Link>
             </div>
@@ -107,7 +107,7 @@ export default function EditProductPage(props: { params: Params }) {
             {/* Header */}
             <div className="flex items-center justify-between mb-10">
                 <div className="flex items-center gap-6">
-                    <Link href="/admin@reveil/products" className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                    <Link href="/static-v2-resource-policy-handler/products" className="p-2 hover:bg-gray-100 rounded-full transition-colors">
                         <ArrowLeft className="w-5 h-5 text-gray-400" />
                     </Link>
                     <div>
@@ -270,7 +270,7 @@ export default function EditProductPage(props: { params: Params }) {
                         onClick={() => {
                             if (confirm('Are you sure you want to retire this fragrance?')) {
                                 fetch(`/api/products/${id}`, { method: 'DELETE' })
-                                    .then(() => router.push('/admin@reveil/products'))
+                                    .then(() => router.push('/static-v2-resource-policy-handler/products'))
                             }
                         }}
                         className="w-full border border-red-50/50 bg-red-50/20 text-red-500 rounded-2xl py-4 font-bold text-[9px] tracking-widest uppercase hover:bg-red-50 transition-all flex items-center justify-center gap-2"

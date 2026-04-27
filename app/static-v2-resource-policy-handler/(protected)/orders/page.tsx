@@ -134,7 +134,7 @@ export default async function AdminOrdersPage() {
                                         <td className="px-8 py-6">
                                             <div className="flex items-center gap-6">
                                                 <Link
-                                                    href={`/admin@reveil/orders/${order.id}`}
+                                                    href={`/static-v2-resource-policy-handler/orders/${order.id}`}
                                                     className="text-[10px] font-bold tracking-widest uppercase text-gray-900 hover:text-accent transition-colors underline underline-offset-4"
                                                 >
                                                     Details

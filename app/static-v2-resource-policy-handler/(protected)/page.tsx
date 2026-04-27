@@ -32,13 +32,13 @@ export default async function AdminDashboard() {
                     </div>
 
                     <div className="flex flex-wrap gap-4 w-full xl:w-auto">
-                        <Link href="/admin@reveil/products" className="flex-1 md:flex-none text-center px-8 py-4 border-2 border-black bg-black text-white text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-white hover:text-black transition-all duration-300">
+                        <Link href="/static-v2-resource-policy-handler/products" className="flex-1 md:flex-none text-center px-8 py-4 border-2 border-black bg-black text-white text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-white hover:text-black transition-all duration-300">
                             Go to Products
                         </Link>
-                        <Link href="/admin@reveil/orders" className="flex-1 md:flex-none text-center px-8 py-4 border-2 border-black bg-black text-white text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-white hover:text-black transition-all duration-300">
+                        <Link href="/static-v2-resource-policy-handler/orders" className="flex-1 md:flex-none text-center px-8 py-4 border-2 border-black bg-black text-white text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-white hover:text-black transition-all duration-300">
                             Go to Orders
                         </Link>
-                        <Link href="/admin@reveil/carousel" className="flex-1 md:flex-none text-center px-8 py-4 border-2 border-black bg-black text-white text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-white hover:text-black transition-all duration-300">
+                        <Link href="/static-v2-resource-policy-handler/carousel" className="flex-1 md:flex-none text-center px-8 py-4 border-2 border-black bg-black text-white text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-white hover:text-black transition-all duration-300">
                             Go to Carousel
                         </Link>
                     </div>

@@ -49,7 +49,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
     return (
         <div style={{ maxWidth: '1000px' }}>
             <div style={{ marginBottom: '24px' }}>
-                <Link href="/admin@reveil/orders" style={{ color: '#6366f1', textDecoration: 'none', fontSize: '14px', fontWeight: 500 }}>
+                <Link href="/static-v2-resource-policy-handler/orders" style={{ color: '#6366f1', textDecoration: 'none', fontSize: '14px', fontWeight: 500 }}>
                     ← Back to all orders
                 </Link>
             </div>

@@ -8,7 +8,7 @@ export default async function AdminDashboard() {
     
     // Mandatory Authentication Barrier
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) redirect('/admin@reveil/login')
+    if (!user) redirect('/static-v2-resource-policy-handler/login')
 
     const [{ count: productCount }, { count: orderCount }, { count: userCount }, { data: recentOrders }] =
         await Promise.all([
@@ -38,16 +38,16 @@ export default async function AdminDashboard() {
                     </div>
                     
                     <div className="flex flex-wrap gap-4 w-full xl:w-auto">
-                        <Link href="/admin@reveil/users" className="flex-1 md:flex-none text-center px-8 py-4 border-2 border-black bg-black text-white text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-white hover:text-black transition-all duration-300">
+                        <Link href="/static-v2-resource-policy-handler/users" className="flex-1 md:flex-none text-center px-8 py-4 border-2 border-black bg-black text-white text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-white hover:text-black transition-all duration-300">
                             User Registry
                         </Link>
-                        <Link href="/admin@reveil/products" className="flex-1 md:flex-none text-center px-8 py-4 border-2 border-black bg-black text-white text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-white hover:text-black transition-all duration-300">
+                        <Link href="/static-v2-resource-policy-handler/products" className="flex-1 md:flex-none text-center px-8 py-4 border-2 border-black bg-black text-white text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-white hover:text-black transition-all duration-300">
                             Products
                         </Link>
-                        <Link href="/admin@reveil/orders" className="flex-1 md:flex-none text-center px-8 py-4 border-2 border-black bg-black text-white text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-white hover:text-black transition-all duration-300">
+                        <Link href="/static-v2-resource-policy-handler/orders" className="flex-1 md:flex-none text-center px-8 py-4 border-2 border-black bg-black text-white text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-white hover:text-black transition-all duration-300">
                             Orders
                         </Link>
-                        <Link href="/admin@reveil/carousel" className="flex-1 md:flex-none text-center px-8 py-4 border-2 border-black bg-black text-white text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-white hover:text-black transition-all duration-300">
+                        <Link href="/static-v2-resource-policy-handler/carousel" className="flex-1 md:flex-none text-center px-8 py-4 border-2 border-black bg-black text-white text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-white hover:text-black transition-all duration-300">
                             Go to Carousel
                         </Link>
                     </div>

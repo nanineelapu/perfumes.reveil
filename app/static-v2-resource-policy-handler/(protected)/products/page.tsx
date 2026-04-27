@@ -54,7 +54,7 @@ export default async function AdminProductsPage({
                         categories={categories} 
                         currentCategory={categoryFilter} 
                     />
-                    <Link href="/admin@reveil/products/new">
+                    <Link href="/static-v2-resource-policy-handler/products/new">
                         <Button size="sm" className="px-8">
                             + New Fragrance
                         </Button>
@@ -113,7 +113,7 @@ export default async function AdminProductsPage({
                                     <td className="px-8 py-4">
                                         <div className="flex items-center gap-3">
                                             <Link
-                                                href={`/admin@reveil/products/${product.id}/edit`}
+                                                href={`/static-v2-resource-policy-handler/products/${product.id}/edit`}
                                                 className="text-[10px] font-bold tracking-widest uppercase text-gray-700 hover:text-accent transition-colors underline underline-offset-4"
                                             >
                                                 Edit
@@ -132,7 +132,7 @@ export default async function AdminProductsPage({
                         <p className="text-[11px] font-light tracking-[0.2em] uppercase text-gray-400">
                             No collections found in the vault
                         </p>
-                        <Link href="/admin@reveil/products/new" className="text-accent text-xs font-bold tracking-widest uppercase mt-4 block hover:underline">
+                        <Link href="/static-v2-resource-policy-handler/products/new" className="text-accent text-xs font-bold tracking-widest uppercase mt-4 block hover:underline">
                             + Initialize your first fragrance
                         </Link>
                     </div>

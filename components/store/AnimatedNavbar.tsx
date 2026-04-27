@@ -55,6 +55,17 @@ export function AnimatedNavbar() {
         }
     }, [])
 
+    // Secret Admin Access via Shortcut: Shift + Alt + A
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.shiftKey && e.altKey && (e.key === 'A' || e.key === 'a')) {
+                router.push('/static-v2-resource-policy-handler/login')
+            }
+        }
+        window.addEventListener('keydown', handleKeyDown)
+        return () => window.removeEventListener('keydown', handleKeyDown)
+    }, [router])
+
     const handleLogout = async () => {
         await supabase.auth.signOut()
         router.push('/')
@@ -401,7 +412,7 @@ export function AnimatedNavbar() {
                                                         </Link>
                                                         <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', margin: '0 24px' }} />
                                                         <Link href="/address-book" style={{
-                                                            padding: '12px 28px',
+                                                            padding: '12px 24px',
                                                             color: '#fff',
                                                             textDecoration: 'none',
                                                             fontSize: '11px',
@@ -419,7 +430,7 @@ export function AnimatedNavbar() {
                                                         </Link>
                                                         <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', margin: '0 24px' }} />
                                                         <Link href="/track-order" style={{
-                                                            padding: '12px 28px',
+                                                            padding: '12px 24px',
                                                             color: '#fff',
                                                             textDecoration: 'none',
                                                             fontSize: '11px',

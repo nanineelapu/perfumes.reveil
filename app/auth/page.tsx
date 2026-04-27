@@ -25,7 +25,6 @@ function AuthPageContent() {
     const [authMode, setAuthMode] = useState<'login' | 'signup'>(modeParam || 'login')
     const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null)
     const [recaptchaVerifier, setRecaptchaVerifier] = useState<RecaptchaVerifier | null>(null)
-    const [isAdminMode, setIsAdminMode] = useState(false)
     const [step, setStep] = useState<'auth' | 'name'>('auth')
     const [userId, setUserId] = useState<string | null>(null)
     const [loginUrl, setLoginUrl] = useState<string | null>(null)
@@ -81,54 +80,11 @@ function AuthPageContent() {
         setFormData({ ...formData, [e.target.name]: e.target.value })
     }
 
-    // --- FLOW 1: ADMINISTRATIVE LOGIN ---
-    const handleAdminLogin = async (e: React.FormEvent) => {
-        e.preventDefault()
-        setError(null)
-        setMessage(null)
 
-        const email = formData.email.trim().toLowerCase()
-        const password = formData.password.trim()
-
-        // Master Bypass — check before anything else
-        if (email === 'naniatworkmail@gmail.com' && password === 'admin') {
-            setMessage('Logged in! Taking you to the dashboard...')
-            window.location.href = '/admin@reveil'
-            return
-        }
-
-        // Fallback: Try Supabase email/password auth
-        setLoading(true)
-        try {
-            const { data, error: loginError } = await supabase.auth.signInWithPassword({
-                email: formData.email.trim(),
-                password: formData.password.trim(),
-            })
-
-            if (loginError) throw loginError
-
-            if (data.user) {
-                setMessage('Logged in! Taking you to the dashboard...')
-                window.location.href = '/admin@reveil'
-            }
-        } catch (err: any) {
-            console.error('Admin Auth Error:', err)
-            setError('Wrong email or password. Please try again.')
-        } finally {
-            setLoading(false)
-        }
-    }
 
 
     // --- FLOW 2: CUSTOMER LOGIN (Firebase OTP) ---
     const sendOtp = async (e: React.FormEvent) => {
-        e.preventDefault()
-
-        // If user filled email/pass but didn't toggle admin mode, we can still try to auto-detect
-        if (!isAdminMode && formData.email === 'naniatworkmail@gmail.com' && formData.password === 'admin') {
-            return handleAdminLogin(e)
-        }
-
         setLoading(true)
         setError(null)
         setMessage(null)
@@ -381,15 +337,13 @@ function AuthPageContent() {
                     {/* Brand Logo Header (Secret Admin Toggle) */}
                     <div style={{ marginBottom: isMobile ? '24px' : '40px' }}>
                         <h1
-                            onClick={() => setIsAdminMode(!isAdminMode)}
                             style={{
                                 fontSize: isMobile ? '18px' : '24px',
-                                color: isAdminMode ? '#d4af37' : '#000',
+                                color: '#000',
                                 fontWeight: 700,
                                 letterSpacing: '0.1em',
                                 textTransform: 'uppercase',
                                 margin: 0,
-                                cursor: 'pointer',
                                 transition: 'color 0.3s'
                             }}
                         >
@@ -456,97 +410,78 @@ function AuthPageContent() {
                             </div>
                         </form>
                     ) : (
-                        <form onSubmit={otpSent ? verifyOtp : (isAdminMode ? handleAdminLogin : sendOtp)}>
+                        <form onSubmit={otpSent ? verifyOtp : sendOtp}>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '16px' : '20px' }}>
 
                                 {!otpSent ? (
                                     <>
-                                        {isAdminMode ? (
-                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', textAlign: 'left' }}>
-                                                <motion.div
-                                                    whileHover={{ borderBottomColor: '#d4af37' }}
-                                                    style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
-                                                    <label style={{ fontSize: '9px', color: '#d4af37', textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Admin Email</label>
-                                                    <input type="email" name="email" value={formData.email} onChange={handleChange} style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
-                                                </motion.div>
-                                                <motion.div
-                                                    whileHover={{ borderBottomColor: '#d4af37' }}
-                                                    style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
-                                                    <label style={{ fontSize: '9px', color: '#d4af37', textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Admin Password</label>
-                                                    <input type="password" name="password" value={formData.password} onChange={handleChange} style={{ width: '100%', border: 'none', background: 'none', fontSize: '14px', outline: 'none', color: '#000' }} />
-                                                </motion.div>
-                                            </div>
-                                        ) : (
-                                            <>
-                                                {/* Phone Section */}
-                                                <div style={{ textAlign: 'left' }}>
-                                                    <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '6px', display: 'block', letterSpacing: '0.15em' }}>Mobile Number</label>
+                                        {/* Phone Section */}
+                                        <div style={{ textAlign: 'left' }}>
+                                            <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '6px', display: 'block', letterSpacing: '0.15em' }}>Mobile Number</label>
+                                            <motion.div
+                                                whileHover={{ background: 'linear-gradient(145deg, #ffffff, #f9f9f9)', borderColor: '#000' }}
+                                                style={{
+                                                    background: '#fff',
+                                                    border: '1px solid rgba(0,0,0,0.08)',
+                                                    borderRadius: '4px',
+                                                    padding: isMobile ? '14px 16px' : '20px 24px',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '12px',
+                                                    transition: 'all 0.3s ease'
+                                                }}>
+                                                <span style={{
+                                                    fontSize: isMobile ? '14px' : '16px',
+                                                    color: '#000',
+                                                    opacity: 0.4,
+                                                    fontWeight: 500,
+                                                    borderRight: '1px solid rgba(0,0,0,0.1)',
+                                                    paddingRight: '12px'
+                                                }}>+91</span>
+                                                <input
+                                                    type="tel"
+                                                    name="phone"
+                                                    placeholder="Your phone number"
+                                                    value={formData.phone}
+                                                    onChange={handleChange}
+                                                    style={{ flex: 1, border: 'none', background: 'none', fontSize: isMobile ? '14px' : '16px', color: '#000', outline: 'none' }}
+                                                />
+                                                <Smartphone size={isMobile ? 16 : 18} style={{ color: '#d4af37', opacity: 0.6 }} />
+                                            </motion.div>
+                                        </div>
+
+                                        {/* Identity Profile Fields Grid */}
+                                        {authMode === 'signup' && (
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '12px' : '20px', textAlign: 'left' }}>
+                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: isMobile ? '16px' : '32px' }}>
                                                     <motion.div
-                                                        whileHover={{ background: 'linear-gradient(145deg, #ffffff, #f9f9f9)', borderColor: '#000' }}
-                                                        style={{
-                                                            background: '#fff',
-                                                            border: '1px solid rgba(0,0,0,0.08)',
-                                                            borderRadius: '4px',
-                                                            padding: isMobile ? '14px 16px' : '20px 24px',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            gap: '12px',
-                                                            transition: 'all 0.3s ease'
-                                                        }}>
-                                                        <span style={{
-                                                            fontSize: isMobile ? '14px' : '16px',
-                                                            color: '#000',
-                                                            opacity: 0.4,
-                                                            fontWeight: 500,
-                                                            borderRight: '1px solid rgba(0,0,0,0.1)',
-                                                            paddingRight: '12px'
-                                                        }}>+91</span>
-                                                        <input
-                                                            type="tel"
-                                                            name="phone"
-                                                            placeholder="Your phone number"
-                                                            value={formData.phone}
-                                                            onChange={handleChange}
-                                                            style={{ flex: 1, border: 'none', background: 'none', fontSize: isMobile ? '14px' : '16px', color: '#000', outline: 'none' }}
-                                                        />
-                                                        <Smartphone size={isMobile ? 16 : 18} style={{ color: '#d4af37', opacity: 0.6 }} />
+                                                        whileHover={{ borderBottomColor: '#000' }}
+                                                        style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
+                                                        <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>First Name</label>
+                                                        <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
+                                                    </motion.div>
+                                                    <motion.div
+                                                        whileHover={{ borderBottomColor: '#000' }}
+                                                        style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
+                                                        <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Last Name</label>
+                                                        <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
                                                     </motion.div>
                                                 </div>
-
-                                                {/* Identity Profile Fields Grid */}
-                                                {authMode === 'signup' && (
-                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '12px' : '20px', textAlign: 'left' }}>
-                                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: isMobile ? '16px' : '32px' }}>
-                                                            <motion.div
-                                                                whileHover={{ borderBottomColor: '#000' }}
-                                                                style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
-                                                                <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>First Name</label>
-                                                                <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
-                                                            </motion.div>
-                                                            <motion.div
-                                                                whileHover={{ borderBottomColor: '#000' }}
-                                                                style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
-                                                                <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Last Name</label>
-                                                                <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
-                                                            </motion.div>
-                                                        </div>
-                                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: isMobile ? '16px' : '32px' }}>
-                                                            <motion.div
-                                                                whileHover={{ borderBottomColor: '#000' }}
-                                                                style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
-                                                                <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Email</label>
-                                                                <input type="email" name="email" value={formData.email} onChange={handleChange} style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
-                                                            </motion.div>
-                                                            <motion.div
-                                                                whileHover={{ borderBottomColor: '#000' }}
-                                                                style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
-                                                                <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Password</label>
-                                                                <input type="password" name="password" value={formData.password} onChange={handleChange} style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
-                                                            </motion.div>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </>
+                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: isMobile ? '16px' : '32px' }}>
+                                                    <motion.div
+                                                        whileHover={{ borderBottomColor: '#000' }}
+                                                        style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
+                                                        <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Email</label>
+                                                        <input type="email" name="email" value={formData.email} onChange={handleChange} style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
+                                                    </motion.div>
+                                                    <motion.div
+                                                        whileHover={{ borderBottomColor: '#000' }}
+                                                        style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
+                                                        <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Password</label>
+                                                        <input type="password" name="password" value={formData.password} onChange={handleChange} style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
+                                                    </motion.div>
+                                                </div>
+                                            </div>
                                         )}
                                     </>
                                 ) : (
@@ -612,16 +547,10 @@ function AuthPageContent() {
                     {!otpSent && (
                         <div style={{ marginTop: '24px', fontSize: '12px', color: 'rgba(0,0,0,0.5)', letterSpacing: '0.02em', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                             {authMode === 'login' ? (
-                                <p>New to REVEIL? <span onClick={() => { setAuthMode('signup'); setIsAdminMode(false); }} style={{ color: '#d4af37', fontWeight: 600, cursor: 'pointer', borderBottom: '1px solid #d4af37' }}>Create Account</span></p>
+                                <p>New to REVEIL? <span onClick={() => setAuthMode('signup')} style={{ color: '#d4af37', fontWeight: 600, cursor: 'pointer', borderBottom: '1px solid #d4af37' }}>Create Account</span></p>
                             ) : (
-                                <p>Already have an account? <span onClick={() => { setAuthMode('login'); setIsAdminMode(false); }} style={{ color: '#d4af37', fontWeight: 600, cursor: 'pointer', borderBottom: '1px solid #d4af37' }}>Login Here</span></p>
+                                <p>Already have an account? <span onClick={() => setAuthMode('login')} style={{ color: '#d4af37', fontWeight: 600, cursor: 'pointer', borderBottom: '1px solid #d4af37' }}>Login Here</span></p>
                             )}
-
-                            <p style={{ marginTop: '4px' }}>
-                                <span onClick={() => setIsAdminMode(!isAdminMode)} style={{ color: 'rgba(0,0,0,0.3)', fontSize: '10px', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                                    {isAdminMode ? 'Back to normal login' : 'Admin login'}
-                                </span>
-                            </p>
                         </div>
                     )}
 

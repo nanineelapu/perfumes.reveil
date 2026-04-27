@@ -99,11 +99,11 @@ export function ProductContent({ product, initialReviews }: ProductContentProps)
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '24px' }}>
                             <div style={{ display: 'flex', gap: '2px' }}>
                                 {[1, 2, 3, 4, 5].map((s) => (
-                                    <Star 
-                                        key={s} 
-                                        size={10} 
-                                        fill={product.rating >= s ? '#d4af37' : 'transparent'} 
-                                        color={product.rating >= s ? '#d4af37' : 'rgba(255,255,255,0.2)'} 
+                                    <Star
+                                        key={s}
+                                        size={10}
+                                        fill={product.rating >= s ? '#d4af37' : 'transparent'}
+                                        color={product.rating >= s ? '#d4af37' : 'rgba(255,255,255,0.2)'}
                                     />
                                 ))}
                             </div>
