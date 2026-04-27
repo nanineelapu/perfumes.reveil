@@ -1,4 +1,5 @@
 'use client'
+
 import React from 'react'
 import { motion } from 'framer-motion'
 import { AnimatedNavbar } from '@/components/store/AnimatedNavbar'
@@ -15,198 +16,177 @@ export default function AboutPage() {
         return () => window.removeEventListener('resize', checkMobile)
     }, [])
 
+    const gold = '#d4af37'
+    const black = '#111111'
+    const gray = '#f4f4f4'
+    const textGray = '#666666'
+
     return (
-        <main style={{ background: '#050505', color: '#fff', minHeight: '100vh' }}>
+        <main style={{ background: '#ffffff', color: black, minHeight: '100vh', overflowX: 'hidden' }}>
             <AnimatedNavbar />
 
-            {/* Hero Section */}
+            {/* Editorial Hero Section */}
             <section style={{
-                padding: isMobile ? '140px 24px 60px' : '200px 40px 100px',
-                textAlign: 'center',
+                padding: isMobile ? '160px 24px 80px' : '220px 40px 120px',
+                background: '#ffffff',
                 position: 'relative',
-                overflow: 'hidden'
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                textAlign: 'center'
             }}>
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 0.03, scale: 1 }}
+                    transition={{ duration: 2 }}
+                    style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        fontSize: isMobile ? '80px' : '280px',
+                        fontWeight: 900,
+                        whiteSpace: 'nowrap',
+                        zIndex: 0,
+                        pointerEvents: 'none',
+                        fontFamily: 'var(--font-baskerville)'
+                    }}
+                >
+                    EST. 1999
+                </motion.div>
+
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 1 }}
+                    transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                    style={{ zIndex: 1 }}
                 >
+                    <span style={{
+                        fontSize: '12px',
+                        letterSpacing: '0.4em',
+                        textTransform: 'uppercase',
+                        color: gold,
+                        fontWeight: 600,
+                        display: 'block',
+                        marginBottom: '20px'
+                    }}>
+                        Discover Our World
+                    </span>
                     <h1 style={{
-                        fontSize: isMobile ? '48px' : 'clamp(40px, 8vw, 100px)',
+                        fontSize: isMobile ? '42px' : 'clamp(40px, 7vw, 90px)',
                         fontFamily: 'var(--font-baskerville)',
                         fontWeight: 400,
-                        letterSpacing: '0.1em',
                         lineHeight: 1.1,
-                        marginBottom: '24px',
-                        textTransform: 'uppercase'
+                        margin: '0 auto 32px',
+                        maxWidth: '900px'
                     }}>
-                        The <span style={{ color: '#d4af37' }}>Reveil</span> Story
+                        We believe a scent tells <br />
+                        <span style={{ fontStyle: 'italic', color: gold }}>your unique story.</span>
                     </h1>
-                    <p style={{
-                        fontSize: isMobile ? '10px' : '14px',
-                        letterSpacing: isMobile ? '0.3em' : '0.5em',
-                        textTransform: 'uppercase',
-                        color: '#888',
-                        maxWidth: '800px',
-                        margin: '0 auto'
-                    }}>
-                        Curating excellence since 1999
-                    </p>
-                </motion.div>
-            </section>
-
-            {/* Heritage Section */}
-            <section style={{ padding: isMobile ? '60px 24px' : '100px 40px', maxWidth: '1400px', margin: '0 auto' }}>
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
-                    gap: isMobile ? '40px' : '80px',
-                    alignItems: 'center'
-                }}>
-                    <motion.div
-                        initial={{ opacity: 0, x: isMobile ? 0 : -50, y: isMobile ? 20 : 0 }}
-                        whileInView={{ opacity: 1, x: 0, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 1 }}
-                    >
-                        <h2 style={{
-                            fontSize: isMobile ? '32px' : '48px',
-                            fontFamily: 'var(--font-baskerville)',
-                            marginBottom: '32px',
-                            color: '#d4af37'
-                        }}>Our Story</h2>
-                        <p style={{ fontSize: isMobile ? '16px' : '18px', lineHeight: 1.8, color: '#aaa', marginBottom: '24px' }}>
-                            Our journey began in 1999 as **Trimurty Enterprises**. What started as a passion for fine scents grew into a trusted presence in the world of fragrances. For over two decades, we have built a legacy of trust and quality.
-                        </p>
-                        <p style={{ fontSize: isMobile ? '16px' : '18px', lineHeight: 1.8, color: '#aaa' }}>
-                            Founder **Sri D. Laddu Kishore Patro** established our mission: to bring the most evocative olfactory narratives to every home.
-                        </p>
-                    </motion.div>
-
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 1.2 }}
-                        style={{
-                            position: 'relative',
-                            height: isMobile ? '350px' : '600px',
-                            background: '#111',
-                            overflow: 'hidden',
-                            order: isMobile ? -1 : 0
-                        }}
-                    >
-                        <img
-                            src="https://images.unsplash.com/photo-1541604193435-225878d06a83?auto=format&fit=crop&q=80"
-                            alt="Fragrance Creation"
-                            style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }}
-                        />
-                        <div style={{ position: 'absolute', inset: 0, boxShadow: 'inset 0 0 100px rgba(0,0,0,0.8)' }} />
-                    </motion.div>
-                </div>
-            </section>
-
-            {/* Quote Section */}
-            <section style={{
-                padding: isMobile ? '100px 24px' : '160px 40px',
-                textAlign: 'center',
-                background: 'linear-gradient(to bottom, #050505, #0a0a0a, #050505)',
-                borderTop: '1px solid rgba(255,255,255,0.03)',
-                borderBottom: '1px solid rgba(255,255,255,0.03)'
-            }}>
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    viewport={{ once: true }}
-                >
-                    <h3 style={{
-                        fontSize: isMobile ? '24px' : ' clamp(24px, 4vw, 54px)',
-                        fontFamily: 'var(--font-baskerville)',
-                        fontStyle: 'italic',
-                        color: '#fff',
-                        marginBottom: '20px',
-                        lineHeight: 1.4
-                    }}>
-                        "You are never fully dressed without Perfume."
-                    </h3>
-                    <div style={{ width: '40px', height: '1px', background: '#d4af37', margin: '32px auto' }} />
-                    <p style={{ fontSize: isMobile ? '9px' : '12px', letterSpacing: '0.4em', textTransform: 'uppercase', color: '#666' }}>
-                        The Reveil Philosophy
-                    </p>
+                    <div style={{ width: '60px', height: '1px', background: black, margin: '0 auto' }} />
                 </motion.div>
             </section>
 
             {/* Evolution Section */}
-            <section style={{ padding: isMobile ? '60px 24px' : '100px 40px', maxWidth: '1400px', margin: '0 auto' }}>
+            <section style={{ padding: isMobile ? '60px 24px' : '100px 80px', maxWidth: '1400px', margin: '0 auto' }}>
                 <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
-                    gap: isMobile ? '40px' : '80px',
+                    display: 'flex',
+                    flexDirection: isMobile ? 'column' : 'row-reverse',
+                    gap: isMobile ? '60px' : '100px',
                     alignItems: 'center'
                 }}>
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
+                        initial={{ opacity: 0, x: 30 }}
+                        whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
-                        transition={{ duration: 1.2 }}
-                        style={{ position: 'relative', height: isMobile ? '350px' : '500px', background: '#111', overflow: 'hidden' }}
-                    >
-                        <img
-                            src="https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&q=80"
-                            alt="Luxury Perfume"
-                            style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }}
-                        />
-                        <div style={{ position: 'absolute', inset: 0, boxShadow: 'inset 0 0 100px rgba(0,0,0,0.8)' }} />
-                    </motion.div>
-
-                    <motion.div
-                        initial={{ opacity: 0, x: isMobile ? 0 : 50, y: isMobile ? 20 : 0 }}
-                        whileInView={{ opacity: 1, x: 0, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 1 }}
+                        style={{ flex: 1 }}
                     >
                         <h2 style={{
-                            fontSize: isMobile ? '32px' : '48px',
+                            fontSize: isMobile ? '28px' : '42px',
                             fontFamily: 'var(--font-baskerville)',
-                            marginBottom: '32px',
-                            color: '#fff'
-                        }}>Digital <span style={{ color: '#d4af37' }}>Evolution</span></h2>
-                        <p style={{ fontSize: isMobile ? '16px' : '18px', lineHeight: 1.8, color: '#aaa', marginBottom: '24px' }}>
-                            In 2023, we embraced the future with **Refreshub.com**. This digital transition allows us to share the enchanting world of attars, deodorants, and perfumes with perfume lovers everywhere.
-                        </p>
-                        <p style={{ fontSize: isMobile ? '16px' : '18px', lineHeight: 1.8, color: '#aaa' }}>
-                            We curate the most prominent names in the industry—from Denver and Wild Stone to Secret Temptation—ensuring a symphony of scents that evoke pure delight.
-                        </p>
+                            marginBottom: '40px'
+                        }}>
+                            Going Digital
+                        </h2>
+                        <div style={{ fontSize: isMobile ? '16px' : '18px', lineHeight: 1.8, color: textGray }}>
+                            <p style={{ marginBottom: '24px' }}>
+                                In 2023, we took a big step. We launched <strong>Refreshub.com</strong> to reach more people across the country.
+                            </p>
+                            <p>
+                                Today, we bring you the best brands like Denver, Wild Stone, and Secret Temptation. We choose each item carefully to make sure you get only the best quality.
+                            </p>
+                        </div>
                     </motion.div>
+
+                    <div style={{ flex: 1.2, position: 'relative', width: '100%' }}>
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: '1fr 1fr',
+                            gap: '20px'
+                        }}>
+                            <motion.img
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                whileInView={{ opacity: 1, scale: 1 }}
+                                viewport={{ once: true }}
+                                src="https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&q=80"
+                                style={{ width: '100%', height: isMobile ? '200px' : '350px', objectFit: 'cover' }}
+                            />
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: 0.2 }}
+                                style={{ background: black, padding: '30px', display: 'flex', flexDirection: 'column', justifyContent: 'center', color: '#fff' }}
+                            >
+                                <h4 style={{ fontSize: '18px', fontFamily: 'var(--font-baskerville)', marginBottom: '12px', color: gold }}>Modern Choice</h4>
+                                <p style={{ fontSize: '12px', opacity: 0.7, lineHeight: 1.6 }}>Bringing luxury scents to your doorstep with just a click.</p>
+                            </motion.div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
-            {/* Connect Section */}
-            <section style={{
-                padding: isMobile ? '80px 24px' : '100px 40px',
-                textAlign: 'center',
-                borderTop: '1px solid rgba(255,255,255,0.03)'
-            }}>
-                <h2 style={{ fontFamily: 'var(--font-baskerville)', fontSize: isMobile ? '28px' : '32px', marginBottom: '40px' }}>Join the Journey</h2>
-                <div style={{
-                    display: 'flex',
-                    flexDirection: isMobile ? 'column' : 'row',
-                    justifyContent: 'center',
-                    gap: isMobile ? '32px' : '40px'
-                }}>
-                    <div>
-                        <p style={{ color: '#666', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px' }}>Email Us</p>
-                        <a href="mailto:refreshub@yahoo.com" style={{ color: '#d4af37', textDecoration: 'none', fontSize: isMobile ? '16px' : '18px' }}>refreshub@yahoo.com</a>
+            {/* Values / Why Us */}
+            <section style={{ padding: isMobile ? '80px 24px' : '120px 80px', background: '#fff' }}>
+                <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+                    <div style={{ textAlign: 'center', marginBottom: '80px' }}>
+                        <h2 style={{ fontSize: isMobile ? '32px' : '48px', fontFamily: 'var(--font-baskerville)', marginBottom: '16px' }}>Why Choose Us</h2>
+                        <div style={{ width: '40px', height: '2px', background: gold, margin: '0 auto' }} />
                     </div>
-                    <div>
-                        <p style={{ color: '#666', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px' }}>WhatsApp</p>
-                        <a href="https://wa.me/917873789595" style={{ color: '#d4af37', textDecoration: 'none', fontSize: isMobile ? '16px' : '18px' }}>+91 7873789595</a>
+
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 1fr',
+                        gap: '40px'
+                    }}>
+                        {[
+                            { title: 'Quality First', desc: 'We only sell original and high-quality perfumes that last long.' },
+                            { title: 'Trusted Legacy', desc: 'Over 25 years of experience in the fragrance industry.' },
+                            { title: 'Fast Delivery', desc: 'We make sure your favorite scent reaches you as fast as possible.' }
+                        ].map((v, i) => (
+                            <motion.div
+                                key={i}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: i * 0.1 }}
+                                style={{
+                                    padding: '40px',
+                                    border: `1px solid ${gray}`,
+                                    textAlign: 'center',
+                                    transition: 'border-color 0.3s'
+                                }}
+                            >
+                                <h4 style={{ fontSize: '20px', fontFamily: 'var(--font-baskerville)', marginBottom: '16px' }}>{v.title}</h4>
+                                <p style={{ fontSize: '14px', color: textGray, lineHeight: 1.6 }}>{v.desc}</p>
+                            </motion.div>
+                        ))}
                     </div>
                 </div>
             </section>
 
-            <StayConnected theme="dark" />
+            <StayConnected theme="light" />
+            <Footer theme="light" />
         </main>
     )
 }
-

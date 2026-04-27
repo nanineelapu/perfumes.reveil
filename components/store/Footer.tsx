@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import React, { useRef, useState, useEffect } from 'react'
+import React, { useRef } from 'react'
 
 const FacebookIcon = ({ size = 16 }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -24,7 +24,11 @@ const YoutubeIcon = ({ size = 16 }) => (
     </svg>
 )
 
-export function Footer() {
+interface FooterProps {
+    theme?: 'light' | 'dark'
+}
+
+export function Footer({ theme = 'dark' }: FooterProps) {
     const footerRef = useRef(null)
     const [isMobile, setIsMobile] = React.useState(false)
 
@@ -35,20 +39,28 @@ export function Footer() {
         return () => window.removeEventListener('resize', checkMobile)
     }, [])
 
+    const isLight = theme === 'light'
+    const bgColor = isLight ? '#ffffff' : '#050505'
+    const textColor = isLight ? '#111111' : '#ffffff'
+    const mutedTextColor = isLight ? '#666666' : '#888888'
+    const borderColor = isLight ? '#eeeeee' : 'rgba(255,255,255,0.03)'
+    const gold = '#d4af37'
+
     return (
         <footer ref={footerRef} style={{
-            background: '#050505',
+            background: bgColor,
             padding: isMobile ? '60px 0 20px' : '100px 0 0px',
             position: 'relative',
             overflow: 'hidden',
-            borderTop: '1px solid rgba(255,255,255,0.03)'
+            borderTop: `1px solid ${borderColor}`,
+            color: textColor
         }}>
-            {/* Ghost Background Branding - Hidden on mobile for height efficiency */}
+            {/* Ghost Background Branding */}
             {!isMobile && (
                 <div style={{
                     position: 'absolute', top: '60px', left: '50%',
                     transform: 'translateX(-50%)', fontSize: '15vw',
-                    fontFamily: 'var(--font-baskerville)', color: 'rgba(255,255,255,0.02)',
+                    fontFamily: 'var(--font-baskerville)', color: isLight ? 'rgba(0,0,0,0.02)' : 'rgba(255,255,255,0.02)',
                     userSelect: 'none', pointerEvents: 'none', whiteSpace: 'nowrap',
                     fontWeight: 900
                 }}>
@@ -66,7 +78,7 @@ export function Footer() {
                     alignItems: isMobile ? 'center' : 'flex-start'
                 }}>
 
-                    {/* Header Block - New Logo & Social Row for Mobile */}
+                    {/* Header Block */}
                     <div style={{
                         display: 'flex',
                         flexDirection: isMobile ? 'row' : 'column',
@@ -76,24 +88,26 @@ export function Footer() {
                         marginBottom: isMobile ? '40px' : '32px'
                     }}>
                         <div style={{ marginBottom: isMobile ? '0' : '32px', marginLeft: isMobile ? '0' : '-15px' }}>
-                            <img src="https://lhnamtkpjkrawgql.public.blob.vercel-storage.com/Untitled%20%282%29.webp" alt="Reveil" style={{ height: isMobile ? '40px' : '60px', width: 'auto' }} />
+                            <img 
+                                src="https://lhnamtkpjkrawgql.public.blob.vercel-storage.com/Untitled%20%282%29.webp" 
+                                alt="Reveil" 
+                                style={{ height: isMobile ? '40px' : '60px', width: 'auto', filter: isLight ? 'invert(1) brightness(0.2)' : 'none' }} 
+                            />
                         </div>
                         
                         {!isMobile && (
                             <>
                                 <p style={{
-                                    fontSize: isMobile ? '13px' : '14px', lineHeight: 1.9, color: '#888',
-                                    marginBottom: '20px', maxWidth: isMobile ? '100%' : '300px',
-                                    fontFamily: 'var(--font-baskerville)', fontWeight: 300,
-                                    textAlign: isMobile ? 'center' : 'left'
+                                    fontSize: '14px', lineHeight: 1.9, color: mutedTextColor,
+                                    marginBottom: '20px', maxWidth: '300px',
+                                    fontFamily: 'var(--font-baskerville)', fontWeight: 300
                                 }}>
                                     Curating the world's most evocative olfactory narratives.
                                 </p>
                                 <p style={{
-                                    fontSize: isMobile ? '11px' : '12px', lineHeight: 1.6, color: '#666',
-                                    marginBottom: '32px', maxWidth: isMobile ? '100%' : '300px',
-                                    fontFamily: 'var(--font-baskerville)',
-                                    textAlign: isMobile ? 'center' : 'left'
+                                    fontSize: '12px', lineHeight: 1.6, color: isLight ? '#999' : '#666',
+                                    marginBottom: '32px', maxWidth: '300px',
+                                    fontFamily: 'var(--font-baskerville)'
                                 }}>
                                     Trimurty Enterprises, Marthapeta Street,<br />
                                     Near Sano Bazar, Berhampur,<br />
@@ -110,14 +124,14 @@ export function Footer() {
                             ].map((s, idx) => (
                                 <motion.a
                                     key={idx} href={s.href}
-                                    whileHover={{ y: -5, borderColor: '#d4af37', color: '#d4af37' }}
+                                    whileHover={{ y: -5, borderColor: gold, color: gold }}
                                     style={{
                                         width: isMobile ? '36px' : '44px', height: isMobile ? '36px' : '44px',
                                         borderRadius: '50%',
-                                        background: isMobile ? '#d4af37' : 'transparent',
-                                        border: isMobile ? 'none' : '1px solid rgba(255,255,255,0.1)',
+                                        background: isMobile ? gold : 'transparent',
+                                        border: isMobile ? 'none' : `1px solid ${isLight ? '#eee' : 'rgba(255,255,255,0.1)'}`,
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        color: isMobile ? '#000' : '#666',
+                                        color: isMobile ? '#000' : isLight ? '#999' : '#666',
                                         transition: 'all 0.4s'
                                     }}
                                 >
@@ -127,30 +141,35 @@ export function Footer() {
                         </div>
                     </div>
 
-                    {/* Navigation Block - 2 Column Grid for Mobile */}
+                    {/* Navigation Block */}
                     <div style={{ 
                         display: isMobile ? 'grid' : 'block', 
                         gridTemplateColumns: isMobile ? '1fr 1fr' : 'none', 
                         width: '100%',
-                        borderTop: isMobile ? '1px solid rgba(255,255,255,0.03)' : 'none',
+                        borderTop: isMobile ? `1px solid ${borderColor}` : 'none',
                         paddingTop: isMobile ? '32px' : '0',
                         textAlign: isMobile ? 'center' : 'left'
                     }}>
                         <div>
                             <div style={{
-                                fontSize: isMobile ? '9px' : '10px', color: '#fff', fontWeight: 900,
+                                fontSize: isMobile ? '9px' : '10px', color: textColor, fontWeight: 900,
                                 letterSpacing: '0.3em', marginBottom: isMobile ? '24px' : '32px', textTransform: 'uppercase'
                             }}>
                                 COMPANY
                             </div>
-                            {['About Us', 'Contact Us', 'Terms and Conditions', 'Refund Policy'].map(l => (
-                                <motion.div key={l} style={{ marginBottom: isMobile ? '12px' : '16px' }}>
-                                    <Link href={l === 'About Us' ? '/about' : l === 'Contact Us' ? '/contact' : l === 'Terms and Conditions' ? '/terms' : l === 'Refund Policy' ? '/refund' : '#'} style={{
-                                        color: '#999', textDecoration: 'none', fontSize: isMobile ? '11px' : '13px',
+                            {[
+                                { name: 'About Us', href: '/about' },
+                                { name: 'Contact Us', href: '/contact' },
+                                { name: 'Terms and Conditions', href: '/terms' },
+                                { name: 'Refund Policy', href: '/refund' }
+                            ].map(l => (
+                                <motion.div key={l.name} style={{ marginBottom: isMobile ? '12px' : '16px' }}>
+                                    <Link href={l.href} style={{
+                                        color: isLight ? '#777' : '#999', textDecoration: 'none', fontSize: isMobile ? '11px' : '13px',
                                         fontFamily: 'var(--font-baskerville)'
                                     }}>
-                                        <motion.span whileHover={{ x: 10, color: '#fff' }} style={{ display: 'inline-block' }}>
-                                            {l}
+                                        <motion.span whileHover={{ x: 10, color: gold }} style={{ display: 'inline-block' }}>
+                                            {l.name}
                                         </motion.span>
                                     </Link>
                                 </motion.div>
@@ -160,70 +179,79 @@ export function Footer() {
                         {isMobile && (
                             <div>
                                 <div style={{
-                                    fontSize: '9px', color: '#fff', fontWeight: 900,
+                                    fontSize: '9px', color: textColor, fontWeight: 900,
                                     letterSpacing: '0.3em', marginBottom: '24px', textTransform: 'uppercase'
                                 }}>
                                     MY ACCOUNT
                                 </div>
-                                {['Login / Signup', 'My Profile', 'Orders', 'Address Book'].map(l => (
-                                    <motion.div key={l} style={{ marginBottom: '12px' }}>
-                                        <Link href={l === 'Login / Signup' ? '/auth' : l === 'My Profile' ? '/profile' : l === 'Orders' ? '/orders' : '#'} style={{
-                                            color: '#999', textDecoration: 'none', fontSize: '11px',
+                                {[
+                                    { name: 'Login / Signup', href: '/auth' },
+                                    { name: 'My Profile', href: '/profile' },
+                                    { name: 'Orders', href: '/orders' },
+                                    { name: 'Address Book', href: '/address-book' }
+                                ].map(l => (
+                                    <motion.div key={l.name} style={{ marginBottom: '12px' }}>
+                                        <Link href={l.href} style={{
+                                            color: isLight ? '#777' : '#999', textDecoration: 'none', fontSize: '11px',
                                             fontFamily: 'var(--font-baskerville)'
                                         }}>
-                                            <motion.span whileHover={{ x: 10, color: '#fff' }} style={{ display: 'inline-block' }}>
-                                                {l}
+                                            <motion.span whileHover={{ x: 10, color: gold }} style={{ display: 'inline-block' }}>
+                                                {l.name}
                                             </motion.span>
                                         </Link>
                                     </motion.div>
                                 ))}
-
                             </div>
                         )}
                     </div>
 
-                    {/* My Account Column (Desktop Only, Mobile is now part of the 2-col above) */}
+                    {/* My Account Column (Desktop Only) */}
                     {!isMobile && (
                         <div>
                             <div style={{
-                                fontSize: '10px', color: '#fff', fontWeight: 900,
+                                fontSize: '10px', color: textColor, fontWeight: 900,
                                 letterSpacing: '0.3em', marginBottom: '32px', textTransform: 'uppercase'
                             }}>
                                 MY ACCOUNT
                             </div>
-                            {['Login / Signup', 'My Profile', 'Orders', 'Address Book', 'Track Order'].map(l => (
-                                <motion.div key={l} style={{ marginBottom: '16px' }}>
-                                    <Link href={l === 'Login / Signup' ? '/auth' : l === 'My Profile' ? '/profile' : l === 'Orders' ? '/orders' : '#'} style={{
-                                        color: '#999', textDecoration: 'none', fontSize: '13px',
+                            {[
+                                { name: 'Login / Signup', href: '/auth' },
+                                { name: 'My Profile', href: '/profile' },
+                                { name: 'Orders', href: '/orders' },
+                                { name: 'My Addresses', href: '/address-book' },
+                                { name: 'Track Order', href: '/track-order' }
+                            ].map(l => (
+                                <motion.div key={l.name} style={{ marginBottom: '16px' }}>
+                                    <Link href={l.href} style={{
+                                        color: isLight ? '#777' : '#999', textDecoration: 'none', fontSize: '13px',
                                         fontFamily: 'var(--font-baskerville)'
                                     }}>
-                                        <motion.span whileHover={{ x: 10, color: '#fff' }} style={{ display: 'inline-block' }}>
-                                            {l}
+                                        <motion.span whileHover={{ x: 10, color: gold }} style={{ display: 'inline-block' }}>
+                                            {l.name}
                                         </motion.span>
                                     </Link>
                                 </motion.div>
                             ))}
-
                         </div>
                     )}
 
-                    {/* Subscription Anchor - Hidden on mobile to save height */}
+                    {/* Quote - Hidden on mobile */}
                     {!isMobile && (
-                        <div style={{ textAlign: isMobile ? 'center' : 'right' }}>
+                        <div style={{ textAlign: 'right' }}>
                             <div style={{
-                                fontSize: isMobile ? '8px' : '10px', color: '#d4af37', fontWeight: 900,
-                                letterSpacing: '0.4em', marginBottom: isMobile ? '24px' : '32px', textTransform: 'uppercase'
+                                fontSize: '10px', color: gold, fontWeight: 900,
+                                letterSpacing: '0.4em', marginBottom: '32px', textTransform: 'uppercase'
                             }}>
-                                ESTABLISHED IN 2024
+                                ESTABLISHED IN 1999
                             </div>
                             <p style={{
-                                fontSize: isMobile ? '16px' : '20px', fontFamily: 'var(--font-baskerville)',
-                                fontStyle: 'italic', color: '#fff', lineHeight: 1.4,
+                                fontSize: '20px', fontFamily: 'var(--font-baskerville)',
+                                fontStyle: 'italic', color: textColor, lineHeight: 1.4,
                                 marginBottom: '32px'
                             }}>
                                 "Luxury is not a status, <br /> it is a sensory journey."
                             </p>
-                            <div style={{ color: '#444', fontSize: '9px', letterSpacing: '0.1em' }}>
+                            <div style={{ color: isLight ? '#bbb' : '#444', fontSize: '9px', letterSpacing: '0.1em' }}>
                                 ODISHA — BRAHMAPUR — ANDHRA PRADESH
                             </div>
                         </div>
@@ -233,17 +261,17 @@ export function Footer() {
                 {/* Bottom Bar */}
                 <div style={{
                     marginTop: isMobile ? '32px' : '60px', paddingTop: isMobile ? '24px' : '40px', paddingBottom: '20px',
-                    borderTop: '1px solid rgba(255,255,255,0.03)',
+                    borderTop: `1px solid ${borderColor}`,
                     display: 'flex', flexDirection: isMobile ? 'column' : 'row',
                     justifyContent: 'space-between', alignItems: 'center',
                     gap: isMobile ? '24px' : '0',
-                    fontSize: '9px', color: '#444', letterSpacing: '0.2em',
+                    fontSize: '9px', color: isLight ? '#999' : '#444', letterSpacing: '0.2em',
                     textAlign: isMobile ? 'center' : 'left'
                 }}>
                     <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: 'center', gap: isMobile ? '16px' : '32px' }}>
                         {isMobile ? (
                             <div style={{
-                                fontSize: '10px', lineHeight: 1.6, color: '#666',
+                                fontSize: '10px', lineHeight: 1.6, color: isLight ? '#999' : '#666',
                                 textAlign: 'center', maxWidth: '280px',
                                 fontFamily: 'var(--font-baskerville)', letterSpacing: '0.05em'
                             }}>
@@ -255,18 +283,19 @@ export function Footer() {
                             <>
                                 <div>© 2026 REVEIL. ALL RIGHTS RESERVED.</div>
                                 <div style={{ display: 'flex', gap: '32px' }}>
-                                    <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>TERMS OF SERVICE</a>
+                                    <Link href="/terms" style={{ color: 'inherit', textDecoration: 'none' }}>TERMS OF SERVICE</Link>
+                                    <Link href="/refund" style={{ color: 'inherit', textDecoration: 'none' }}>REFUND POLICY</Link>
                                 </div>
                             </>
                         )}
                     </div>
 
                     {/* Payment Logos */}
-                    <div style={{ display: 'flex', gap: '24px', alignItems: 'center', opacity: 0.4, flexWrap: isMobile ? 'wrap' : 'nowrap', justifyContent: 'center' }}>
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" style={{ height: '10px', filter: 'brightness(0) invert(1)' }} />
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" style={{ height: '15px', filter: 'brightness(0) invert(1)' }} />
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c7/Google_Pay_Logo_%282020%29.svg" alt="GPay" style={{ height: '12px', filter: 'brightness(0) invert(1)' }} />
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/7/71/PhonePe_Logo.svg" alt="PhonePe" style={{ height: '14px', filter: 'brightness(0) invert(1)' }} />
+                    <div style={{ display: 'flex', gap: '24px', alignItems: 'center', opacity: isLight ? 0.8 : 0.4, flexWrap: isMobile ? 'wrap' : 'nowrap', justifyContent: 'center' }}>
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" style={{ height: '10px', filter: isLight ? 'none' : 'brightness(0) invert(1)' }} />
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" style={{ height: '15px', filter: isLight ? 'none' : 'brightness(0) invert(1)' }} />
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c7/Google_Pay_Logo_%282020%29.svg" alt="GPay" style={{ height: '12px', filter: isLight ? 'none' : 'brightness(0) invert(1)' }} />
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/7/71/PhonePe_Logo.svg" alt="PhonePe" style={{ height: '14px', filter: isLight ? 'none' : 'brightness(0) invert(1)' }} />
                     </div>
                 </div>
             </div>

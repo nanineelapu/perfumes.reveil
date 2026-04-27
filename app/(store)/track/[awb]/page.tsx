@@ -42,11 +42,11 @@ export default async function TrackingPage(props: {
     }
 
     const steps = [
-        { key: 'pending', label: 'Order Registered', icon: Clock },
-        { key: 'confirmed', label: 'Atelier Confirmed', icon: CheckCircle2 },
-        { key: 'shipped', label: 'In Transit', icon: Truck },
-        { key: 'out_for_delivery', label: 'Near Destination', icon: MapPin },
-        { key: 'delivered', label: 'Hand Delivered', icon: ShoppingBag },
+        { key: 'pending',           label: 'Order Placed',      icon: Clock },
+        { key: 'confirmed',         label: 'Confirmed',         icon: CheckCircle2 },
+        { key: 'shipped',           label: 'Shipped',           icon: Truck },
+        { key: 'out_for_delivery',  label: 'Out for Delivery',  icon: MapPin },
+        { key: 'delivered',         label: 'Delivered',         icon: ShoppingBag },
     ]
 
     const statusMap: Record<string, number> = {
@@ -77,7 +77,7 @@ export default async function TrackingPage(props: {
                         Tracking <span style={{ color: '#d4af37', fontStyle: 'italic' }}>#{order.id.slice(0, 8).toUpperCase()}</span>
                     </h1>
                     <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.3em', marginTop: '12px' }}>
-                        Studio Archive Logistics Portal
+                        Tracking your order
                     </p>
                 </div>
 
@@ -98,7 +98,7 @@ export default async function TrackingPage(props: {
                             <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '1px', background: 'linear-gradient(90deg, transparent, #d4af37, transparent)' }} />
                             
                             <h2 style={{ fontSize: '12px', color: '#d4af37', textTransform: 'uppercase', letterSpacing: '0.4em', marginBottom: '40px', textAlign: 'center' }}>
-                                Journey Progression
+                                Order Journey
                             </h2>
 
                             <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative', padding: '0 20px' }}>
@@ -146,7 +146,7 @@ export default async function TrackingPage(props: {
                         {/* Activity Log Section */}
                         {tracking?.activities?.length > 0 && (
                             <div style={{ padding: '20px 0' }}>
-                                <h3 style={{ fontSize: '14px', fontFamily: 'var(--font-baskerville)', color: '#d4af37', marginBottom: '32px', letterSpacing: '0.1em' }}>Logistics Activity</h3>
+                                <h3 style={{ fontSize: '14px', fontFamily: 'var(--font-baskerville)', color: '#d4af37', marginBottom: '32px', letterSpacing: '0.1em' }}>Delivery Updates</h3>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                     {tracking.activities.map((act: any, i: number) => (
                                         <div key={i} style={{ 
@@ -179,14 +179,14 @@ export default async function TrackingPage(props: {
                         
                         {/* Courier Details */}
                         <div style={{ padding: '32px', background: 'rgba(212,175,55,0.03)', border: '1px solid rgba(212,175,55,0.1)', borderRadius: '2px' }}>
-                            <h4 style={{ fontSize: '10px', color: '#d4af37', textTransform: 'uppercase', letterSpacing: '0.3em', marginBottom: '24px' }}>Fulfillment Partner</h4>
+                            <h4 style={{ fontSize: '10px', color: '#d4af37', textTransform: 'uppercase', letterSpacing: '0.3em', marginBottom: '24px' }}>Courier</h4>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                                 <div>
                                     <p style={{ fontSize: '9px', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', margin: '0 0 4px 0' }}>Courier</p>
                                     <p style={{ fontSize: '14px', margin: 0, fontWeight: 500 }}>{order.courier_name || 'Processing'}</p>
                                 </div>
                                 <div>
-                                    <p style={{ fontSize: '9px', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', margin: '0 0 4px 0' }}>AWB Master</p>
+                                    <p style={{ fontSize: '9px', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', margin: '0 0 4px 0' }}>Tracking Number</p>
                                     <p style={{ fontSize: '14px', margin: 0, fontWeight: 500, fontFamily: 'monospace', color: '#d4af37' }}>{order.awb_code}</p>
                                 </div>
                                 {tracking?.etd && (
@@ -200,7 +200,7 @@ export default async function TrackingPage(props: {
 
                         {/* Destination */}
                         <div style={{ padding: '32px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '2px' }}>
-                            <h4 style={{ fontSize: '10px', color: '#d4af37', textTransform: 'uppercase', letterSpacing: '0.3em', marginBottom: '24px' }}>Destination</h4>
+                            <h4 style={{ fontSize: '10px', color: '#d4af37', textTransform: 'uppercase', letterSpacing: '0.3em', marginBottom: '24px' }}>Delivering To</h4>
                             <p style={{ fontSize: '13px', lineHeight: 1.6, color: 'rgba(255,255,255,0.7)', margin: 0 }}>
                                 {address.name || 'Valued Client'}<br />
                                 {address.line1 || address.address}<br />
@@ -210,7 +210,7 @@ export default async function TrackingPage(props: {
 
                         {/* Items Preview */}
                         <div style={{ padding: '32px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '2px' }}>
-                            <h4 style={{ fontSize: '10px', color: '#d4af37', textTransform: 'uppercase', letterSpacing: '0.3em', marginBottom: '24px' }}>Creations</h4>
+                            <h4 style={{ fontSize: '10px', color: '#d4af37', textTransform: 'uppercase', letterSpacing: '0.3em', marginBottom: '24px' }}>Items in this order</h4>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                                 {order.order_items.map((item: any, i: number) => (
                                     <div key={i} style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>

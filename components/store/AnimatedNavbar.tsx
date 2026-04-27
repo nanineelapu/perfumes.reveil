@@ -370,14 +370,14 @@ export function AnimatedNavbar() {
                                             style={{
                                                 position: 'absolute',
                                                 top: '100%',
-                                                right: '0',
-                                                background: '#0a0a0a',
+                                                right: '-20px',
+                                                background: 'rgba(10, 10, 10, 0.85)',
+                                                backdropFilter: 'blur(12px)',
+                                                WebkitBackdropFilter: 'blur(12px)',
                                                 border: '1px solid rgba(212,175,55,0.2)',
                                                 padding: '16px 0',
-                                                minWidth: '160px',
-                                                borderRadius: '2px',
-                                                boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
-                                                marginTop: '4px'
+                                                marginTop: '4px',
+                                                whiteSpace: 'nowrap'
                                             }}
                                         >
                                             <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -391,12 +391,49 @@ export function AnimatedNavbar() {
                                                             letterSpacing: '0.2em',
                                                             fontFamily: 'var(--font-baskerville)',
                                                             textTransform: 'uppercase',
-                                                            transition: 'all 0.3s'
+                                                            transition: 'all 0.3s',
+                                                            display: 'block'
                                                         }}
                                                             onMouseOver={(e) => e.currentTarget.style.color = textColor}
                                                             onMouseOut={(e) => e.currentTarget.style.color = '#fff'}
                                                         >
                                                             My Profile
+                                                        </Link>
+                                                        <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', margin: '0 24px' }} />
+                                                        <Link href="/address-book" style={{
+                                                            padding: '12px 28px',
+                                                            color: '#fff',
+                                                            textDecoration: 'none',
+                                                            fontSize: '11px',
+                                                            letterSpacing: '0.2em',
+                                                            fontFamily: 'var(--font-baskerville)',
+                                                            textTransform: 'uppercase',
+                                                            transition: 'all 0.3s',
+                                                            display: 'block',
+                                                            whiteSpace: 'nowrap'
+                                                        }}
+                                                            onMouseOver={(e) => e.currentTarget.style.color = textColor}
+                                                            onMouseOut={(e) => e.currentTarget.style.color = '#fff'}
+                                                        >
+                                                            My Addresses
+                                                        </Link>
+                                                        <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', margin: '0 24px' }} />
+                                                        <Link href="/track-order" style={{
+                                                            padding: '12px 28px',
+                                                            color: '#fff',
+                                                            textDecoration: 'none',
+                                                            fontSize: '11px',
+                                                            letterSpacing: '0.2em',
+                                                            fontFamily: 'var(--font-baskerville)',
+                                                            textTransform: 'uppercase',
+                                                            transition: 'all 0.3s',
+                                                            display: 'block',
+                                                            whiteSpace: 'nowrap'
+                                                        }}
+                                                            onMouseOver={(e) => e.currentTarget.style.color = textColor}
+                                                            onMouseOut={(e) => e.currentTarget.style.color = '#fff'}
+                                                        >
+                                                            Track Order
                                                         </Link>
                                                         <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', margin: '0 24px' }} />
                                                         <button
@@ -412,7 +449,8 @@ export function AnimatedNavbar() {
                                                                 letterSpacing: '0.2em',
                                                                 fontFamily: 'var(--font-baskerville)',
                                                                 textTransform: 'uppercase',
-                                                                transition: 'all 0.3s'
+                                                                transition: 'all 0.3s',
+                                                                width: '100%'
                                                             }}
                                                             onMouseOver={(e) => e.currentTarget.style.color = '#ff4b4b'}
                                                             onMouseOut={(e) => e.currentTarget.style.color = '#fff'}
@@ -571,6 +609,8 @@ export function AnimatedNavbar() {
                                 { name: 'Shop', href: '/products' },
                                 { name: 'Orders', href: '/orders' },
                                 { name: 'Wishlist', href: '/wishlist' },
+                                { name: 'My Addresses', href: '/address-book' },
+                                { name: 'Track Order', href: '/track-order' },
                                 { name: 'Login', href: '/auth?mode=login' },
                                 { name: 'Register', href: '/auth?mode=signup' }
                             ].map((link, i) => (
@@ -699,10 +739,10 @@ export function AnimatedNavbar() {
                                         letterSpacing: '0.1em',
                                         textTransform: 'uppercase'
                                     }}>
-                                        Atelier Basket
+                                        Your Cart
                                     </h2>
                                     <span style={{ fontSize: '9px', color: 'rgba(212,175,55,0.5)', letterSpacing: '0.3em', textTransform: 'uppercase' }}>
-                                        {cartItems.length} {cartItems.length === 1 ? 'Creation' : 'Creations'} Selected
+                                        {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'}
                                     </span>
                                 </div>
                                 <motion.button
@@ -733,7 +773,7 @@ export function AnimatedNavbar() {
                                         textTransform: 'uppercase',
                                         opacity: 0.8
                                     }}>
-                                        Complimentary Shipping On All Atelier Orders
+                                        Free Shipping on All Orders
                                     </span>
                                 </div>
                             </div>
@@ -821,7 +861,7 @@ export function AnimatedNavbar() {
                                                     cursor: 'pointer',
                                                     boxShadow: '0 10px 30px rgba(212,175,55,0.2)'
                                                 }}>
-                                                Enter Collection
+                                                Shop Now
                                             </motion.button>
                                         </Link>
                                     </div>
@@ -869,7 +909,7 @@ export function AnimatedNavbar() {
                                 {/* Additional Info */}
                                 <div style={{ marginTop: '24px', textAlign: 'center' }}>
                                     <span style={{ fontSize: '8px', color: 'rgba(255,255,255,0.2)', letterSpacing: '0.4em', textTransform: 'uppercase' }}>
-                                        Secure Checkout Verified — Studio Archive 2024
+                                        Safe & secure checkout
                                     </span>
                                 </div>
                             </div>

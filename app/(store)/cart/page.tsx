@@ -92,7 +92,7 @@ export default function CartPage() {
         return (
             <div style={{ height: '100vh', background: '#050505', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '24px' }}>
                 <Loader2 className="animate-spin" size={32} color="#d4af37" />
-                <span style={{ fontSize: '10px', color: '#d4af37', letterSpacing: '0.4em', textTransform: 'uppercase' }}>Synchronizing Atelier Basket</span>
+                <span style={{ fontSize: '10px', color: '#d4af37', letterSpacing: '0.4em', textTransform: 'uppercase' }}>Loading your cart...</span>
             </div>
         )
     }
@@ -104,7 +104,7 @@ export default function CartPage() {
                 {/* Header */}
                 <header style={{ marginBottom: '60px', height: '110px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#d4af37', fontSize: '9px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.6em', marginBottom: '16px', fontFamily: 'var(--font-baskerville)' }}>
-                        STUDIO SELECTIONS <div style={{ width: '30px', height: '1px', background: 'rgba(212,175,55,0.3)' }} />
+                        YOUR ORDER <div style={{ width: '30px', height: '1px', background: 'rgba(212,175,55,0.3)' }} />
                     </motion.div>
                     <h1 style={{ fontSize: 'clamp(32px, 6vw, 64px)', fontFamily: 'var(--font-baskerville)', textTransform: 'uppercase', margin: 0, lineHeight: 1, fontWeight: 300 }}>
                         Your <span style={{ color: '#d4af37', fontStyle: 'italic', fontWeight: 400 }}>Basket</span>
@@ -131,7 +131,7 @@ export default function CartPage() {
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                 <Truck size={16} color="#d4af37" />
                                 <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: totals.subtotal >= 250 ? '#16a34a' : '#fff' }}>
-                                    {totals.subtotal >= 250 ? 'Complimentary Delivery unlocked' : `Add ₹${(250 - totals.subtotal).toLocaleString()} more for free shipping`}
+                                    {totals.subtotal >= 250 ? 'You got free delivery! 🎉' : `Add ₹${(250 - totals.subtotal).toLocaleString()} more for free shipping`}
                                 </span>
                             </div>
                             <span style={{ fontSize: '10px', color: '#666', letterSpacing: '0.1em' }}>THRESHOLD: ₹250</span>
@@ -209,7 +209,7 @@ export default function CartPage() {
                                                         transition: 'all 0.3s ease'
                                                     }}
                                                 >
-                                                    <Trash2 size={10} strokeWidth={1.5} /> Remove Creation
+                                                    <Trash2 size={10} strokeWidth={1.5} /> Remove
                                                 </motion.button>
                                             </div>
                                         </div>

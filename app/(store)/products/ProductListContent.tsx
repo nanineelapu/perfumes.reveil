@@ -86,9 +86,10 @@ export function ProductListContent() {
     }, [selectedCategory, searchQuery, products, selectedConcentrations, selectedStatus, sortBy])
 
     return (
-        <main style={{ background: '#050505', minHeight: '100vh', color: '#fff', overflowX: 'hidden' }}>
+        <main style={{ background: '#050505', height: '100vh', color: '#fff', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            {/* SECTION 1: TOP HERO (FIXED) */}
             <section style={{
-                padding: isMobile ? '100px 0 20px' : '60px 0 40px',
+                padding: isMobile ? '60px 0 10px' : '30px 0 10px',
                 position: 'relative',
                 overflow: 'hidden',
                 background: 'linear-gradient(to bottom, #0a0a0a, #050505)',
@@ -111,20 +112,22 @@ export function ProductListContent() {
                     </div>
 
                     <div style={{ 
-                        display: 'flex', flexDirection: isMobile ? 'row' : 'column', 
-                        alignItems: isMobile ? 'flex-end' : 'center', justifyContent: isMobile ? 'space-between' : 'center',
-                        position: 'relative', zIndex: 1, width: '100%'
+                        display: 'flex', flexDirection: 'column',
+                        alignItems: isMobile ? 'flex-start' : 'center',
+                        justifyContent: 'center',
+                        position: 'relative', zIndex: 1, width: '100%',
+                        gap: isMobile ? '6px' : '14px'
                     }}>
                         <motion.div
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 2, ease: [0.16, 1, 0.3, 1] }}
-                            style={{ textAlign: isMobile ? 'left' : 'center', flex: isMobile ? '1' : 'none' }}
+                            style={{ textAlign: isMobile ? 'left' : 'center' }}
                         >
-                            <h1 style={{ margin: 0, paddingBottom: isMobile ? '0' : '16px' }}>
+                            <h1 style={{ margin: 0 }}>
                                 <span style={{
                                     fontSize: isMobile ? '32px' : 'clamp(40px, 8vw, 80px)',
-                                    fontWeight: 300, letterSpacing: '-0.04em', color: '#fff', lineHeight: 0.8, display: 'block'
+                                    fontWeight: 300, letterSpacing: '-0.04em', color: '#fff', lineHeight: 0.85, display: 'block'
                                 }}>
                                     Re<span style={{ color: '#d4af37', fontWeight: 400 }}>veil</span>
                                 </span>
@@ -135,16 +138,17 @@ export function ProductListContent() {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ duration: 1.5, delay: 0.5 }}
-                            style={{ display: 'flex', alignItems: 'center', justifyContent: isMobile ? 'flex-end' : 'center', gap: '32px' }}
+                            style={{ display: 'flex', alignItems: 'center', justifyContent: isMobile ? 'flex-start' : 'center', gap: '16px' }}
                         >
-                            {!isMobile && <div style={{ width: '40px', height: '1px', background: 'rgba(212,175,55,0.2)' }} />}
+                            <div style={{ width: '24px', height: '1px', background: 'rgba(212,175,55,0.3)' }} />
                             <span style={{
-                                fontSize: isMobile ? '8px' : '11px', letterSpacing: isMobile ? '0.3em' : '1.4em',
-                                color: 'rgba(255,255,255,0.2)', textTransform: 'uppercase', marginRight: isMobile ? '0' : '-1.4em', fontWeight: 500
+                                fontSize: isMobile ? '8px' : '10px',
+                                letterSpacing: '0.35em',
+                                color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', fontWeight: 500
                             }}>
                                 Studio Archive
                             </span>
-                            {!isMobile && <div style={{ width: '40px', height: '1px', background: 'rgba(212,175,55,0.2)' }} />}
+                            <div style={{ width: '24px', height: '1px', background: 'rgba(212,175,55,0.3)' }} />
                         </motion.div>
                     </div>
                 </div>
@@ -172,41 +176,45 @@ export function ProductListContent() {
                 </div>
             )}
 
-            <div style={{ display: 'flex', minHeight: '100vh', position: 'relative' }}>
+            {/* SECTION 2 & 3 WRAPPER */}
+            <div style={{ display: 'flex', flex: 1, overflow: 'hidden', position: 'relative' }}>
+                {/* SECTION 2: SIDEBAR (FIXED/SCROLLABLE INDEPENDENTLY) */}
                 <aside style={{
-                    width: isMobile ? '0' : '380px', padding: isMobile ? '0' : '60px',
+                    width: isMobile ? '0' : '280px', padding: isMobile ? '0' : '40px 30px',
                     display: isMobile ? 'none' : 'flex', background: 'transparent', borderRight: '1px solid rgba(255,255,255,0.05)',
-                    position: 'sticky', top: '80px', height: 'calc(100vh - 80px)', flexDirection: 'column', gap: '64px', overflowY: 'auto', scrollbarWidth: 'none', zIndex: 20
+                    height: '100%', flexDirection: 'column', gap: '40px', overflowY: 'auto', scrollbarWidth: 'none', zIndex: 20,
+                    flexShrink: 0
                 }}>
                     <div>
-                        <span style={{ fontSize: '10px', fontWeight: 900, color: '#d4af37', letterSpacing: '0.6em', textTransform: 'uppercase', marginBottom: '24px', display: 'block' }}>Scan Database</span>
-                        <div style={{ position: 'relative', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '12px' }}>
-                            <Search size={14} style={{ position: 'absolute', left: 0, top: '4px', opacity: 0.2 }} />
+                        <span style={{ fontSize: '11px', fontWeight: 900, color: '#d4af37', letterSpacing: '0.4em', textTransform: 'uppercase', marginBottom: '16px', display: 'block' }}>Search</span>
+                        <div style={{ position: 'relative', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '14px' }}>
+                            <Search size={16} style={{ position: 'absolute', left: 0, top: '4px', opacity: 0.3 }} />
                             <input
                                 type="text"
-                                placeholder="IDENTIFY_OLFACTORY_FRAGMENT..."
+                                placeholder="Search products..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                style={{ background: 'transparent', border: 'none', color: '#fff', fontSize: '12px', paddingLeft: '32px', width: '100%', outline: 'none', letterSpacing: '0.1em' }}
+                                style={{ background: 'transparent', border: 'none', color: '#fff', fontSize: '13px', paddingLeft: '36px', width: '100%', outline: 'none', letterSpacing: '0.05em' }}
                             />
                         </div>
                     </div>
 
                     <div>
-                        <span style={{ fontSize: '10px', fontWeight: 900, color: '#d4af37', letterSpacing: '0.6em', textTransform: 'uppercase', marginBottom: '32px', display: 'block' }}>Classification</span>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <span style={{ fontSize: '11px', fontWeight: 900, color: '#d4af37', letterSpacing: '0.4em', textTransform: 'uppercase', marginBottom: '20px', display: 'block' }}>Category</span>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                             {categories.map((cat, idx) => (
                                 <button
                                     key={cat}
                                     onClick={() => setSelectedCategory(cat)}
                                     style={{
-                                        background: 'none', border: 'none', cursor: 'pointer', fontSize: '11px', textAlign: 'left',
-                                        color: selectedCategory === cat ? '#fff' : '#444', textTransform: 'uppercase', letterSpacing: '0.25em',
-                                        display: 'flex', alignItems: 'center', transition: 'all 0.4s ease', padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.02)'
-                                    }}
-                                >
-                                    <span style={{ fontSize: '8px', opacity: 0.5, width: '40px', fontWeight: 800 }}>0{idx + 1}</span>
-                                    <span style={{ position: 'relative', fontWeight: selectedCategory === cat ? 900 : 500, letterSpacing: selectedCategory === cat ? '0.4em' : '0.25em' }}>
+                                         background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', textAlign: 'left',
+                                         color: selectedCategory === cat ? '#fff' : '#555', textTransform: 'uppercase', letterSpacing: '0.15em',
+                                         display: 'flex', alignItems: 'center', transition: 'all 0.4s ease', padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.02)',
+                                         width: '100%'
+                                     }}
+                                 >
+                                     <span style={{ fontSize: '8px', opacity: 0.3, width: '28px', fontWeight: 700, fontFamily: 'var(--font-tenor)' }}>{String(idx + 1).padStart(2, '0')}</span>
+                                    <span style={{ position: 'relative', fontWeight: selectedCategory === cat ? 900 : 500, letterSpacing: selectedCategory === cat ? '0.3em' : '0.2em' }}>
                                         {cat}
                                         {selectedCategory === cat && (
                                             <motion.div layoutId="cat-underline" style={{ position: 'absolute', bottom: '-4px', left: 0, right: 0, height: '1px', background: '#d4af37' }} />
@@ -221,26 +229,26 @@ export function ProductListContent() {
                         <button
                             onClick={() => setIsFilterOpen(true)}
                             style={{
-                                width: '100%', background: 'transparent', border: '1px solid #222', padding: '16px',
-                                display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', borderRadius: '4px', transition: 'all 0.3s'
+                                width: '100%', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', padding: '12px 14px',
+                                display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', borderRadius: '1px', transition: 'all 0.3s'
                             }}
                         >
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <SlidersHorizontal size={14} color="#d4af37" />
-                                <span style={{ fontSize: '10px', fontWeight: 900, color: '#fff', letterSpacing: '0.3em', textTransform: 'uppercase' }}>Advanced Filters</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <SlidersHorizontal size={12} color="#d4af37" />
+                                <span style={{ fontSize: '9px', fontWeight: 800, color: '#fff', letterSpacing: '0.15em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Filters</span>
                             </div>
-                            <Plus size={12} color="#444" />
+                            <Plus size={10} color="#333" />
                         </button>
                     </div>
 
                     <div>
-                        <span style={{ fontSize: '9px', fontWeight: 900, color: '#d4af37', letterSpacing: '0.4em', textTransform: 'uppercase', marginBottom: '24px', display: 'block' }}>Refine by Density</span>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        <span style={{ fontSize: '11px', fontWeight: 900, color: '#d4af37', letterSpacing: '0.35em', textTransform: 'uppercase', marginBottom: '16px', display: 'block' }}>Fragrance Type</span>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                             {concentrations.map(c => (
-                                <label key={c} style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '11px', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', fontWeight: 800, letterSpacing: '0.05em' }}>
+                                <label key={c} style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '12px', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', fontWeight: 600, letterSpacing: '0.04em' }}>
                                     <input
                                         type="checkbox"
-                                        style={{ accentColor: '#d4af37' }}
+                                        style={{ accentColor: '#d4af37', width: '14px', height: '14px' }}
                                         checked={selectedConcentrations.includes(c)}
                                         onChange={(e) => {
                                             if (e.target.checked) setSelectedConcentrations([...selectedConcentrations, c])
@@ -253,22 +261,23 @@ export function ProductListContent() {
                         </div>
                     </div>
 
-                    <div style={{ marginTop: 'auto', padding: '24px', background: 'rgba(255,255,255,0.02)', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                        <p style={{ fontSize: '9px', color: '#555', lineHeight: 1.6, margin: 0, fontWeight: 700, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
-                            All fragments curated in legal compliance with international olfactory standards.
+                    <div style={{ marginTop: 'auto', padding: '20px', background: 'rgba(255,255,255,0.02)', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <p style={{ fontSize: '11px', color: '#555', lineHeight: 1.7, margin: 0, fontWeight: 600, letterSpacing: '0.02em' }}>
+                            All products are 100% genuine and safe to use.
                         </p>
                     </div>
                 </aside>
 
-                <section style={{ flex: 1, position: 'relative' }}>
+                {/* SECTION 3: PRODUCTS (PRIMARY SCROLL AREA) */}
+                <section style={{ flex: 1, position: 'relative', overflowY: 'auto', height: '100%', scrollBehavior: 'smooth' }}>
                     <div style={{
-                        position: 'sticky', top: isMobile ? '120px' : '80px', zIndex: 10,
-                        padding: isMobile ? '20px 24px' : '40px 80px', background: 'rgba(5,5,5,0.85)', backdropFilter: 'blur(20px)',
+                        position: 'sticky', top: '0', zIndex: 10,
+                        padding: isMobile ? '12px 24px' : '20px 80px', background: 'rgba(5,5,5,0.85)', backdropFilter: 'blur(20px)',
                         borderBottom: '1px solid rgba(255,255,255,0.03)', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                     }}>
                         <div>
                             <span style={{ fontSize: isMobile ? '8px' : '10px', color: '#555', letterSpacing: '0.2em' }}>
-                                {loading ? 'SCANNING ARCHIVE...' : `ARCHIVE: ${filteredAndSortedProducts.length} FRAGMENTS`}
+                                {loading ? 'Loading...' : `${filteredAndSortedProducts.length} product${filteredAndSortedProducts.length === 1 ? '' : 's'} found`}
                             </span>
                         </div>
                         <div style={{ display: 'flex', gap: '16px' }}>
@@ -287,7 +296,7 @@ export function ProductListContent() {
                         </div>
                     </div>
 
-                    <div style={{ padding: isMobile ? '24px 16px 80px' : '40px 80px 80px' }}>
+                    <div style={{ padding: isMobile ? '16px 16px 80px' : '20px 80px 80px' }}>
                         <AnimatePresence mode="wait">
                             {loading ? (
                                 <motion.div
@@ -323,7 +332,7 @@ export function ProductListContent() {
 
                         {!loading && filteredAndSortedProducts.length === 0 && (
                             <div style={{ textAlign: 'center', padding: '160px 0', border: '1px dashed rgba(255,255,255,0.05)' }}>
-                                <h3 style={{ fontSize: '14px', color: '#444', textTransform: 'uppercase', letterSpacing: '0.4em' }}>No results match your current classification</h3>
+                                <h3 style={{ fontSize: '14px', color: '#444', textTransform: 'uppercase', letterSpacing: '0.4em' }}>No products found. Try a different search or filter.</h3>
                             </div>
                         )}
                     </div>
@@ -345,18 +354,18 @@ export function ProductListContent() {
                             animate={{ x: 0 }}
                             exit={{ x: '100%' }}
                             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-                             style={{
-                                position: 'fixed', top: 0, right: 0, bottom: 0, 
+                            style={{
+                                position: 'fixed', top: 0, right: 0, bottom: 0,
                                 width: isMobile ? '100%' : '450px',
                                 background: '#0a0a0a', borderLeft: '1px solid #222', zIndex: 110,
-                                padding: isMobile ? '40px 24px' : '80px 60px', 
+                                padding: isMobile ? '40px 24px' : '80px 60px',
                                 boxShadow: '-20px 0 80px rgba(0,0,0,0.8)',
                                 display: 'flex', flexDirection: 'column', gap: isMobile ? '40px' : '64px',
                                 overflowY: 'auto'
                             }}
                         >
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <h2 style={{ fontSize: '12px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4em', color: '#fff' }}>Archive Filters</h2>
+                                <h2 style={{ fontSize: '12px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4em', color: '#fff' }}>Filters</h2>
                                 <button onClick={() => setIsFilterOpen(false)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.2em' }}>Close</button>
                             </div>
 
@@ -409,7 +418,7 @@ export function ProductListContent() {
                                     letterSpacing: '0.3em', fontSize: '10px', cursor: 'pointer'
                                 }}
                             >
-                                Apply Configuration
+                                Apply Filters
                             </button>
                         </motion.div>
                     </>

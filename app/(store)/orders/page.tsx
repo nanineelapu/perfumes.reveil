@@ -134,7 +134,35 @@ export default function OrdersPage() {
 
     return (
         <main style={{ background: '#050505', minHeight: '100vh', color: '#fff', paddingTop: isMobile ? '100px' : '160px', paddingBottom: '120px' }}>
-            <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 24px' }}>
+            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px', position: 'relative' }}>
+
+                {/* Side Architectural Details - Desktop Only */}
+                {!isMobile && (
+                    <>
+                        <div style={{ position: 'fixed', left: '40px', top: '50%', transform: 'translateY(-50%) rotate(-90deg)', transformOrigin: 'center', opacity: 0.1, pointerEvents: 'none' }}>
+                            <p style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '1em', color: '#fff', margin: 0, whiteSpace: 'nowrap', textTransform: 'uppercase' }}>
+                                REVEIL ORDERS / HISTORY
+                            </p>
+                        </div>
+                        <div style={{ position: 'fixed', right: '40px', top: '50%', transform: 'translateY(-50%) rotate(90deg)', transformOrigin: 'center', opacity: 0.1, pointerEvents: 'none' }}>
+                            <p style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '1em', color: '#fff', margin: 0, whiteSpace: 'nowrap', textTransform: 'uppercase' }}>
+                                REVEIL PERFUMES / SINCE 2024
+                            </p>
+                        </div>
+
+                        {/* Location Detail */}
+                        <div style={{ position: 'fixed', left: '40px', top: '100px', opacity: 0.05, fontSize: '8px', color: '#fff', letterSpacing: '0.2em' }}>
+                            BASED IN INDIA
+                        </div>
+                        <div style={{ position: 'fixed', right: '40px', bottom: '100px', opacity: 0.05, fontSize: '8px', color: '#fff', letterSpacing: '0.2em', textAlign: 'right' }}>
+                            SAFE & SECURE <br /> CHECKOUT
+                        </div>
+
+                        {/* Side Border Lines */}
+                        <div style={{ position: 'fixed', left: '80px', top: '15%', bottom: '15%', width: '1px', background: 'linear-gradient(to bottom, transparent, rgba(255,255,255,0.05), transparent)' }} />
+                        <div style={{ position: 'fixed', right: '80px', top: '15%', bottom: '15%', width: '1px', background: 'linear-gradient(to bottom, transparent, rgba(255,255,255,0.05), transparent)' }} />
+                    </>
+                )}
 
                 {/* Header */}
                 <header style={{ marginBottom: isMobile ? '60px' : '80px' }}>
@@ -143,7 +171,7 @@ export default function OrdersPage() {
                         animate={{ opacity: 1, y: 0 }}
                         style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#d4af37', fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.6em', marginBottom: '24px', fontFamily: 'var(--font-baskerville)' }}
                     >
-                        Archive Terminal <div style={{ width: '40px', height: '1px', background: 'rgba(212,175,55,0.2)' }} />
+                        ORDER HISTORY <div style={{ width: '40px', height: '1px', background: 'rgba(212,175,55,0.2)' }} />
                     </motion.div>
                     <h1 style={{
                         fontSize: isMobile ? '42px' : '64px',
@@ -163,7 +191,24 @@ export default function OrdersPage() {
                         fontFamily: 'var(--font-baskerville)',
                         fontStyle: 'italic',
                         fontWeight: 400
-                    }}>Tracking your olfactory journey through the Reveil archive.</p>
+                    }}>View and track all your past orders.</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginTop: '40px' }}>
+                        <div style={{
+                            padding: '8px 20px',
+                            background: 'rgba(212,175,55,0.05)',
+                            border: '1px solid rgba(212,175,55,0.1)',
+                            borderRadius: '2px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px'
+                        }}>
+                            <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#d4af37' }} />
+                            <span style={{ fontSize: '9px', fontWeight: 900, color: '#fff', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
+                                {orders.length.toString().padStart(2, '0')} Orders Found
+                            </span>
+                        </div>
+                        <div style={{ flex: 1, height: '1px', background: 'linear-gradient(to right, rgba(212,175,55,0.2), transparent)' }} />
+                    </div>
                 </header>
 
                 {/* Orders List */}
@@ -183,9 +228,24 @@ export default function OrdersPage() {
                                         border: '1px solid rgba(255,255,255,0.05)',
                                         borderRadius: '4px',
                                         overflow: 'hidden',
-                                        boxShadow: '0 30px 60px rgba(0,0,0,0.4)'
+                                        boxShadow: '0 30px 60px rgba(0,0,0,0.4)',
+                                        position: 'relative'
                                     }}
                                 >
+                                    {/* Order Index */}
+                                    <div style={{
+                                        position: 'absolute',
+                                        top: '24px',
+                                        right: '40px',
+                                        fontSize: '48px',
+                                        fontWeight: 900,
+                                        color: 'rgba(255,255,255,0.02)',
+                                        fontFamily: 'var(--font-tenor)',
+                                        pointerEvents: 'none',
+                                        zIndex: 0
+                                    }}>
+                                        #{String(orders.length - idx).padStart(2, '0')}
+                                    </div>
                                     {/* Order Info Bar */}
                                     <div style={{
                                         padding: isMobile ? '24px' : '24px 40px',
@@ -204,7 +264,7 @@ export default function OrdersPage() {
                                             justifyContent: 'space-between'
                                         }}>
                                             <div>
-                                                <p style={{ fontSize: '8px', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.3em', marginBottom: '6px', fontFamily: 'var(--font-baskerville)' }}>Ref ID</p>
+                                                <p style={{ fontSize: '8px', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.3em', marginBottom: '6px', fontFamily: 'var(--font-baskerville)' }}>Order ID</p>
                                                 <p style={{ fontSize: isMobile ? '12px' : '14px', fontWeight: 400, fontFamily: 'var(--font-baskerville)', color: '#fff', letterSpacing: '0.05em' }}>{order.id.slice(0, 8).toUpperCase()}</p>
                                             </div>
                                             <div>
@@ -212,7 +272,7 @@ export default function OrdersPage() {
                                                 <p style={{ fontSize: isMobile ? '12px' : '14px', fontWeight: 400, fontFamily: 'var(--font-baskerville)', color: '#fff' }}>{formatDate(order.created_at)}</p>
                                             </div>
                                             <div>
-                                                <p style={{ fontSize: '8px', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.3em', marginBottom: '6px', fontFamily: 'var(--font-baskerville)' }}>Amount</p>
+                                                <p style={{ fontSize: '8px', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.3em', marginBottom: '6px', fontFamily: 'var(--font-baskerville)' }}>Total</p>
                                                 <p style={{ fontSize: isMobile ? '12px' : '14px', fontWeight: 600, color: '#d4af37', fontFamily: 'var(--font-baskerville)' }}>₹{order.total.toLocaleString()}</p>
                                             </div>
                                         </div>
@@ -229,6 +289,18 @@ export default function OrdersPage() {
                                         }}>
                                             {statusStyles.icon}
                                             <span style={{ fontSize: '8px', fontWeight: 800, color: statusStyles.text, textTransform: 'uppercase', letterSpacing: '0.2em', fontFamily: 'var(--font-baskerville)' }}>{autoStatus}</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Visual Journey Bar */}
+                                    <div style={{ padding: '0 40px', marginTop: '-1px' }}>
+                                        <div style={{ height: '2px', width: '100%', background: 'rgba(255,255,255,0.05)', position: 'relative' }}>
+                                            <motion.div
+                                                initial={{ width: 0 }}
+                                                animate={{ width: autoStatus.toLowerCase() === 'delivered' ? '100%' : autoStatus.toLowerCase() === 'shipped' ? '66%' : '33%' }}
+                                                transition={{ duration: 1.5, ease: "circOut" }}
+                                                style={{ height: '100%', background: '#d4af37', position: 'absolute', top: 0, left: 0, boxShadow: '0 0 10px rgba(212,175,55,0.3)' }}
+                                            />
                                         </div>
                                     </div>
 
@@ -254,9 +326,9 @@ export default function OrdersPage() {
                                                     </div>
                                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'flex-end' }}>
                                                         <Link href={`/products/${item.products?.slug}`} style={{ background: 'none', border: 'none', color: '#d4af37', fontSize: '9px', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', textTransform: 'uppercase', letterSpacing: '0.3em', fontFamily: 'var(--font-baskerville)', textDecoration: 'none', alignSelf: isMobile ? 'flex-end' : 'center' }}>
-                                                            REPLENISH <ChevronRight size={14} strokeWidth={3} />
+                                                            BUY AGAIN <ChevronRight size={14} strokeWidth={3} />
                                                         </Link>
-                                                        
+
                                                         {/* autoStatus === 'delivered' && (
                                                             <button 
                                                                 onClick={() => {
@@ -301,14 +373,14 @@ export default function OrdersPage() {
                                     }}>
                                         <div style={{ display: 'flex', gap: '32px', justifyContent: isMobile ? 'center' : 'flex-end' }}>
                                             <button style={{ background: 'none', border: 'none', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '8px', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', fontFamily: 'var(--font-baskerville)' }}>
-                                                <Download size={14} /> Document
+                                                <Download size={14} /> Invoices
                                             </button>
                                             <button style={{ background: 'none', border: 'none', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '8px', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', fontFamily: 'var(--font-baskerville)' }}>
-                                                <HelpCircle size={14} /> Assistance
+                                                <HelpCircle size={14} /> Get Help
                                             </button>
                                         </div>
                                         {order.awb_code ? (
-                                            <Link 
+                                            <Link
                                                 href={`/track/${order.awb_code}`}
                                                 style={{
                                                     background: '#fff',
@@ -329,10 +401,10 @@ export default function OrdersPage() {
                                                     justifyContent: 'center'
                                                 }}
                                             >
-                                                Track Journey
+                                                Track Order
                                             </Link>
                                         ) : (
-                                            <button 
+                                            <button
                                                 disabled
                                                 style={{
                                                     background: 'rgba(255,255,255,0.05)',
@@ -349,7 +421,7 @@ export default function OrdersPage() {
                                                     width: isMobile ? '100%' : 'auto'
                                                 }}
                                             >
-                                                Processing Dispatch
+                                                Preparing Order
                                             </button>
                                         )}
                                     </div>
@@ -358,7 +430,7 @@ export default function OrdersPage() {
                         })
                     ) : (
                         <div style={{ textAlign: 'center', padding: '120px 0', background: '#111', border: '1px solid rgba(255,255,255,0.03)', borderRadius: '4px' }}>
-                            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '18px', fontFamily: 'var(--font-baskerville)', fontStyle: 'italic', letterSpacing: '0.05em' }}>No orders yet.</p>
+                            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '18px', fontFamily: 'var(--font-baskerville)', fontStyle: 'italic', letterSpacing: '0.05em' }}>You haven't placed any orders yet.</p>
                             <Link href="/products" style={{
                                 background: '#d4af37',
                                 color: '#000',
@@ -372,7 +444,7 @@ export default function OrdersPage() {
                                 padding: '16px 40px',
                                 borderRadius: '2px'
                             }}>
-                                Continue Shopping
+                                Shop Now
                             </Link>
                         </div>
                     )}
@@ -390,7 +462,7 @@ export default function OrdersPage() {
                     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: isMobile ? '32px' : '40px' }}>
                         <div style={{ width: '1px', height: isMobile ? '60px' : '80px', background: '#d4af37', opacity: 0.5 }} />
                     </div>
-                    <h2 style={{ fontSize: isMobile ? '24px' : '28px', fontWeight: 300, margin: 0, fontFamily: 'var(--font-baskerville)', textTransform: 'uppercase', letterSpacing: '0.2em', color: '#fff' }}>Elevate your Status</h2>
+                    <h2 style={{ fontSize: isMobile ? '24px' : '28px', fontWeight: 300, margin: 0, fontFamily: 'var(--font-baskerville)', textTransform: 'uppercase', letterSpacing: '0.2em', color: '#fff' }}>Member Benefits</h2>
                     <p style={{
                         color: 'rgba(255,255,255,0.4)',
                         fontSize: isMobile ? '14px' : '16px',
@@ -400,11 +472,11 @@ export default function OrdersPage() {
                         lineHeight: 1.8,
                         fontFamily: 'var(--font-baskerville)',
                         fontStyle: 'italic'
-                    }}>Reveil members get priority dispatch, complimentary miniature samples, and exclusive early access to the Noir Series archive.</p>
+                    }}>Members get fast shipping, free samples, and early access to new releases.</p>
                 </div>
 
             </div>
-            
+
             {reviewingProduct && (
                 <ReviewModal
                     isOpen={!!reviewingProduct}
@@ -413,8 +485,6 @@ export default function OrdersPage() {
                     orderId={activeOrderId}
                 />
             )}
-
-            <Footer />
         </main>
     )
 }

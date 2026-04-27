@@ -98,16 +98,16 @@ export default function WishlistPage() {
         return (
             <main style={{ background: '#050505', minHeight: '100vh', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <div style={{ textAlign: 'center', maxWidth: '450px', padding: '0 24px' }}>
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         style={{ marginBottom: '40px' }}
                     >
                         <Heart size={64} strokeWidth={1} style={{ margin: '0 auto', color: '#d4af37', opacity: 0.3 }} />
                     </motion.div>
-                    <h2 style={{ fontSize: '32px', fontFamily: 'var(--font-baskerville)', marginBottom: '16px', fontWeight: 300, letterSpacing: '0.05em' }}>Your Collection Awaits</h2>
+                    <h2 style={{ fontSize: '32px', fontFamily: 'var(--font-baskerville)', marginBottom: '16px', fontWeight: 300, letterSpacing: '0.05em' }}>Save Your Favorites</h2>
                     <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '15px', lineHeight: 1.8, marginBottom: '40px', letterSpacing: '0.02em', fontFamily: 'var(--font-baskerville)', fontStyle: 'italic' }}>
-                        Curate your personal archive of scents. Sign in to save and access your desired fragrances across all devices.
+                        Sign in to save products and view them on any device.
                     </p>
                     <Link href="/auth" style={{
                         background: '#d4af37', color: '#000', padding: '20px 56px',
@@ -115,7 +115,7 @@ export default function WishlistPage() {
                         fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.4em',
                         display: 'inline-block', boxShadow: '0 20px 40px rgba(212,175,55,0.1)'
                     }}>
-                        Login to my Account
+                        Sign In
                     </Link>
                 </div>
             </main>
@@ -133,8 +133,8 @@ export default function WishlistPage() {
                         animate={{ opacity: 1, y: 0 }}
                         style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', color: '#d4af37', fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.6em', marginBottom: '24px', fontFamily: 'var(--font-baskerville)' }}
                     >
-                        <div style={{ width: '40px', height: '1px', background: 'rgba(212,175,55,0.2)' }} /> 
-                        Private Archive 
+                        <div style={{ width: '40px', height: '1px', background: 'rgba(212,175,55,0.2)' }} />
+                        SAVED ITEMS
                         <div style={{ width: '40px', height: '1px', background: 'rgba(212,175,55,0.2)' }} />
                     </motion.div>
                     <h1 style={{
@@ -157,14 +157,32 @@ export default function WishlistPage() {
                         fontWeight: 400,
                         maxWidth: '600px',
                         margin: '32px auto 0'
-                    }}>A curated selection of olfactory masterpieces reserved for your collection.</p>
+                    }}>
+                        A list of products you've saved to buy later.
+                    </p>
+                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '40px' }}>
+                        <div style={{
+                            padding: '10px 24px',
+                            background: 'rgba(212,175,55,0.05)',
+                            border: '1px solid rgba(212,175,55,0.1)',
+                            borderRadius: '100px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px'
+                        }}>
+                            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#d4af37' }} />
+                            <span style={{ fontSize: '9px', fontWeight: 900, color: '#fff', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
+                                {items.length.toString().padStart(2, '0')} Items Saved
+                            </span>
+                        </div>
+                    </div>
                 </header>
 
                 {/* Wishlist Grid */}
-                <div style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(350px, 1fr))', 
-                    gap: '40px' 
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(260px, 1fr))',
+                    gap: '24px'
                 }}>
                     {items.length > 0 ? (
                         items.map((item, idx) => (
@@ -172,99 +190,137 @@ export default function WishlistPage() {
                                 key={item.id}
                                 initial={{ opacity: 0, y: 30 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: idx * 0.1, duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                                transition={{ delay: idx * 0.05, duration: 1, ease: [0.16, 1, 0.3, 1] }}
                                 style={{
-                                    background: 'linear-gradient(180deg, #111 0%, #080808 100%)',
+                                    background: '#0a0a0a',
                                     border: '1px solid rgba(255,255,255,0.05)',
-                                    borderRadius: '4px',
+                                    borderRadius: '8px',
                                     overflow: 'hidden',
-                                    position: 'relative'
+                                    position: 'relative',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    transition: 'transform 0.4s ease, border-color 0.4s ease'
                                 }}
+                                whileHover={{ y: -5, borderColor: 'rgba(212,175,55,0.2)' }}
                             >
-                                {/* Remove Button */}
-                                <button
-                                    onClick={() => removeFromWishlist(item.id)}
-                                    disabled={removingId === item.id}
-                                    style={{
-                                        position: 'absolute',
-                                        top: '20px',
-                                        right: '20px',
-                                        background: 'rgba(255,255,255,0.03)',
-                                        border: '1px solid rgba(255,255,255,0.1)',
-                                        color: '#fff',
-                                        width: '36px',
-                                        height: '36px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        borderRadius: '2px',
-                                        cursor: 'pointer',
-                                        zIndex: 10,
-                                        transition: 'all 0.3s'
-                                    }}
-                                    onMouseOver={(e) => {
-                                        e.currentTarget.style.background = 'rgba(248, 113, 113, 0.1)'
-                                        e.currentTarget.style.borderColor = 'rgba(248, 113, 113, 0.3)'
-                                    }}
-                                    onMouseOut={(e) => {
-                                        e.currentTarget.style.background = 'rgba(255,255,255,0.03)'
-                                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'
-                                    }}
-                                >
-                                    {removingId === item.id ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} strokeWidth={1.5} />}
-                                </button>
+                                {/* Collection Index */}
+                                <div style={{
+                                    position: 'absolute',
+                                    bottom: '100px',
+                                    right: '-10px',
+                                    fontSize: '80px',
+                                    fontWeight: 900,
+                                    color: 'rgba(255,255,255,0.02)',
+                                    zIndex: 0,
+                                    fontFamily: 'var(--font-tenor)',
+                                    pointerEvents: 'none'
+                                }}>
+                                    {String(idx + 1).padStart(2, '0')}
+                                </div>
+                                {/* Image Container */}
+                                <div style={{
+                                    width: '100%',
+                                    aspectRatio: '1/1',
+                                    position: 'relative',
+                                    overflow: 'hidden',
+                                    background: '#000'
+                                }}>
+                                    <img
+                                        src={item.products?.images?.[0]}
+                                        alt={item.products?.name}
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.85 }}
+                                    />
 
-                                <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', height: '100%' }}>
-                                    {/* Image Section */}
-                                    <div style={{ 
-                                        width: isMobile ? '100%' : '140px', 
-                                        height: isMobile ? '240px' : 'auto',
-                                        position: 'relative',
-                                        overflow: 'hidden',
-                                        background: '#000'
+                                    {/* Glass Overlay for Category */}
+                                    <div style={{
+                                        position: 'absolute',
+                                        top: '16px',
+                                        left: '16px',
+                                        background: 'rgba(0,0,0,0.3)',
+                                        backdropFilter: 'blur(10px)',
+                                        padding: '6px 12px',
+                                        borderRadius: '2px',
+                                        border: '1px solid rgba(255,255,255,0.1)'
                                     }}>
-                                        <img 
-                                            src={item.products?.images?.[0]} 
-                                            alt={item.products?.name} 
-                                            style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} 
-                                        />
-                                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, transparent, rgba(0,0,0,0.5))' }} />
+                                        <p style={{ fontSize: '8px', color: '#d4af37', textTransform: 'uppercase', letterSpacing: '0.3em', margin: 0, fontWeight: 900 }}>{item.products?.category}</p>
                                     </div>
 
-                                    {/* Content Section */}
-                                    <div style={{ padding: '32px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                                        <div style={{ marginBottom: '24px' }}>
-                                            <p style={{ fontSize: '9px', color: '#d4af37', textTransform: 'uppercase', letterSpacing: '0.4em', marginBottom: '8px', fontFamily: 'var(--font-baskerville)' }}>{item.products?.category}</p>
-                                            <h3 style={{ fontSize: '24px', fontWeight: 300, margin: '0 0 12px', fontFamily: 'var(--font-baskerville)', color: '#fff', letterSpacing: '0.02em' }}>{item.products?.name}</h3>
-                                            <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', lineHeight: 1.6, fontFamily: 'var(--font-baskerville)', fontStyle: 'italic' }}>
-                                                {item.products?.description?.slice(0, 80)}...
-                                            </p>
-                                        </div>
+                                    {/* Availability Tag */}
+                                    <div style={{
+                                        position: 'absolute',
+                                        bottom: '12px',
+                                        left: '12px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '6px',
+                                        background: 'rgba(0,0,0,0.4)',
+                                        backdropFilter: 'blur(4px)',
+                                        padding: '4px 8px',
+                                        borderRadius: '2px'
+                                    }}>
+                                        <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#4ade80' }} />
+                                        <span style={{ fontSize: '7px', color: 'rgba(255,255,255,0.6)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>In Stock</span>
+                                    </div>
 
-                                        <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                            <p style={{ fontSize: '20px', fontWeight: 400, color: '#d4af37', fontFamily: 'var(--font-baskerville)' }}>₹{item.products?.price.toLocaleString()}</p>
-                                            <button 
-                                                onClick={() => addToCart(item.product_id)}
-                                                style={{ 
-                                                    background: '#fff', 
-                                                    color: '#000', 
-                                                    border: 'none', 
-                                                    padding: '12px 24px', 
-                                                    borderRadius: '2px', 
-                                                    fontSize: '10px', 
-                                                    fontWeight: 900, 
-                                                    textTransform: 'uppercase', 
-                                                    letterSpacing: '0.2em', 
-                                                    cursor: 'pointer',
-                                                    fontFamily: 'var(--font-baskerville)',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: '8px'
-                                                }}
-                                            >
-                                                Acquire <ArrowRight size={14} />
-                                            </button>
-                                        </div>
+                                    {/* Remove Button */}
+                                    <button
+                                        onClick={() => removeFromWishlist(item.id)}
+                                        disabled={removingId === item.id}
+                                        style={{
+                                            position: 'absolute',
+                                            top: '16px',
+                                            right: '16px',
+                                            background: 'rgba(0,0,0,0.3)',
+                                            backdropFilter: 'blur(10px)',
+                                            border: '1px solid rgba(255,255,255,0.1)',
+                                            color: '#fff',
+                                            width: '32px',
+                                            height: '32px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            borderRadius: '2px',
+                                            cursor: 'pointer',
+                                            zIndex: 10,
+                                            transition: '0.3s'
+                                        }}
+                                    >
+                                        {removingId === item.id ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} strokeWidth={1.5} />}
+                                    </button>
+                                </div>
+
+                                {/* Info Section */}
+                                <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                                    <div style={{ marginBottom: '16px' }}>
+                                        <h3 style={{ fontSize: '16px', fontWeight: 300, margin: '0 0 6px', fontFamily: 'var(--font-tenor)', color: '#fff', letterSpacing: '0.05em' }}>{item.products?.name}</h3>
+                                        <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', lineHeight: 1.4, fontFamily: 'var(--font-tenor)', letterSpacing: '0.02em', height: '30px', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                                            {item.products?.description}
+                                        </p>
+                                    </div>
+
+                                    <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+                                        <p style={{ fontSize: '15px', fontWeight: 600, color: '#fff', fontFamily: 'var(--font-tenor)' }}>₹{item.products?.price.toLocaleString()}</p>
+                                        <button
+                                            onClick={() => addToCart(item.product_id)}
+                                            style={{
+                                                background: '#d4af37',
+                                                color: '#000',
+                                                border: 'none',
+                                                padding: '8px 14px',
+                                                borderRadius: '2px',
+                                                fontSize: '9px',
+                                                fontWeight: 900,
+                                                textTransform: 'uppercase',
+                                                letterSpacing: '0.1em',
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '6px',
+                                                transition: '0.3s'
+                                            }}
+                                        >
+                                            BUY NOW <ArrowRight size={12} />
+                                        </button>
                                     </div>
                                 </div>
                             </motion.div>
@@ -274,7 +330,7 @@ export default function WishlistPage() {
                             <div style={{ marginBottom: '32px' }}>
                                 <ShoppingBag size={48} strokeWidth={1} style={{ margin: '0 auto', color: 'rgba(255,255,255,0.1)' }} />
                             </div>
-                            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '20px', fontFamily: 'var(--font-baskerville)', fontStyle: 'italic', letterSpacing: '0.05em' }}>Your archive is currently empty.</p>
+                            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '20px', fontFamily: 'var(--font-baskerville)', fontStyle: 'italic', letterSpacing: '0.05em' }}>Your wishlist is empty.</p>
                             <Link href="/products" style={{
                                 background: '#d4af37',
                                 color: '#000',
@@ -288,7 +344,7 @@ export default function WishlistPage() {
                                 padding: '18px 48px',
                                 borderRadius: '2px'
                             }}>
-                                Explore Fragrances
+                                Go to Shop
                             </Link>
                         </div>
                     )}
@@ -304,7 +360,7 @@ export default function WishlistPage() {
                         background: 'linear-gradient(135deg, #111 0%, #050505 100%)',
                         border: '1px solid rgba(255,255,255,0.03)'
                     }}>
-                        <h2 style={{ fontSize: isMobile ? '24px' : '32px', fontWeight: 300, margin: 0, fontFamily: 'var(--font-baskerville)', textTransform: 'uppercase', letterSpacing: '0.2em', color: '#fff' }}>Complete the Ensemble</h2>
+                        <h2 style={{ fontSize: isMobile ? '24px' : '32px', fontWeight: 300, margin: 0, fontFamily: 'var(--font-baskerville)', textTransform: 'uppercase', letterSpacing: '0.2em', color: '#fff' }}>Recommended for You</h2>
                         <p style={{
                             color: 'rgba(255,255,255,0.4)',
                             fontSize: '16px',
@@ -314,13 +370,13 @@ export default function WishlistPage() {
                             lineHeight: 1.8,
                             fontFamily: 'var(--font-baskerville)',
                             fontStyle: 'italic'
-                        }}>Our curators suggest exploring these complementary notes to enhance your olfactory presence.</p>
-                        <Link href="/products" style={{ 
-                            color: '#d4af37', 
-                            textDecoration: 'none', 
-                            fontSize: '11px', 
-                            fontWeight: 800, 
-                            textTransform: 'uppercase', 
+                        }}>We think you'll love these items based on your saved products.</p>
+                        <Link href="/products" style={{
+                            color: '#d4af37',
+                            textDecoration: 'none',
+                            fontSize: '11px',
+                            fontWeight: 800,
+                            textTransform: 'uppercase',
                             letterSpacing: '0.4em',
                             display: 'flex',
                             alignItems: 'center',
@@ -328,7 +384,7 @@ export default function WishlistPage() {
                             gap: '12px',
                             marginTop: '40px'
                         }}>
-                            View Curated Collections <ChevronRight size={16} />
+                            Browse Shop <ChevronRight size={16} />
                         </Link>
                     </div>
                 )}

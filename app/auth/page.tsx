@@ -28,6 +28,7 @@ function AuthPageContent() {
     const [isAdminMode, setIsAdminMode] = useState(false)
     const [step, setStep] = useState<'auth' | 'name'>('auth')
     const [userId, setUserId] = useState<string | null>(null)
+    const [loginUrl, setLoginUrl] = useState<string | null>(null)
 
 
     useEffect(() => {
@@ -80,36 +81,39 @@ function AuthPageContent() {
         setFormData({ ...formData, [e.target.name]: e.target.value })
     }
 
-    // --- FLOW 1: ADMINISTRATIVE LOGIN (Supabase Email/Pass) ---
+    // --- FLOW 1: ADMINISTRATIVE LOGIN ---
     const handleAdminLogin = async (e: React.FormEvent) => {
         e.preventDefault()
-        setLoading(true)
         setError(null)
         setMessage(null)
 
-        try {
-            // Priority 1: Hardcoded Master Bypass
-            if (formData.email === 'naniatworkmail@gmail.com' && formData.password === 'admin') {
-                setMessage('Master Access Verified. Synchronizing Terminal...')
-                setTimeout(() => { window.location.href = '/admin@reveil' }, 1000)
-                return
-            }
+        const email = formData.email.trim().toLowerCase()
+        const password = formData.password.trim()
 
-            // Priority 2: Database Auth
+        // Master Bypass — check before anything else
+        if (email === 'naniatworkmail@gmail.com' && password === 'admin') {
+            setMessage('Logged in! Taking you to the dashboard...')
+            window.location.href = '/admin@reveil'
+            return
+        }
+
+        // Fallback: Try Supabase email/password auth
+        setLoading(true)
+        try {
             const { data, error: loginError } = await supabase.auth.signInWithPassword({
-                email: formData.email,
-                password: formData.password,
+                email: formData.email.trim(),
+                password: formData.password.trim(),
             })
 
             if (loginError) throw loginError
 
             if (data.user) {
-                setMessage('Terminal Access Granted. Redirecting...')
-                setTimeout(() => { window.location.href = '/admin@reveil' }, 1000)
+                setMessage('Logged in! Taking you to the dashboard...')
+                window.location.href = '/admin@reveil'
             }
         } catch (err: any) {
             console.error('Admin Auth Error:', err)
-            setError(err.message || 'Administrative verification failed.')
+            setError('Wrong email or password. Please try again.')
         } finally {
             setLoading(false)
         }
@@ -130,8 +134,8 @@ function AuthPageContent() {
         setMessage(null)
 
         try {
-            if (!firebaseAuth) throw new Error('Authentication system is currently offline. Please contact support.')
-            if (!formData.phone) throw new Error('Mobile number is required for verification.')
+            if (!firebaseAuth) throw new Error('Something went wrong. Please try again later.')
+            if (!formData.phone) throw new Error('Please enter your phone number.')
 
             // Format phone number
             let cleaned = formData.phone.replace(/[^\d+]/g, '')
@@ -141,22 +145,22 @@ function AuthPageContent() {
             }
 
             if (authMode === 'signup' && (!formData.firstName || !formData.lastName || !formData.email || !formData.password)) {
-                throw new Error('Please complete your profile details.')
+                throw new Error('Please fill in all your details first.')
             }
 
-            if (!recaptchaVerifier) throw new Error('Security check initializing. Please wait.')
+            if (!recaptchaVerifier) throw new Error('Still loading, please wait a moment.')
 
             const confirmation = await signInWithPhoneNumber(firebaseAuth, formattedPhone, recaptchaVerifier)
             setConfirmationResult(confirmation)
             setOtpSent(true)
-            setMessage(`Access code sent to ${formattedPhone}`)
+            setMessage(`OTP sent to ${formattedPhone}`)
         } catch (err: any) {
             console.error('Customer Auth Error:', err)
 
-            let errorMessage = 'Verification failed.'
-            if (err.code === 'auth/unsupported-phone-number') errorMessage = 'Invalid phone format.'
-            else if (err.code === 'auth/invalid-phone-number') errorMessage = 'Invalid mobile number.'
-            else if (err.code === 'auth/too-many-requests') errorMessage = 'Too many attempts. Try again later.'
+            let errorMessage = 'Something went wrong. Please try again.'
+            if (err.code === 'auth/unsupported-phone-number') errorMessage = 'That phone number format is not supported.'
+            else if (err.code === 'auth/invalid-phone-number') errorMessage = 'Please enter a valid phone number.'
+            else if (err.code === 'auth/too-many-requests') errorMessage = 'Too many attempts. Please wait and try again.'
             else if (err.message) errorMessage = err.message
 
             setError(errorMessage)
@@ -173,7 +177,7 @@ function AuthPageContent() {
         setError(null)
 
         try {
-            if (!confirmationResult) throw new Error('Verification session expired. Please retry.')
+            if (!confirmationResult) throw new Error('Your session has expired. Please start again.')
 
             // 1. Verify OTP with Firebase
             const result = await confirmationResult.confirm(formData.otp)
@@ -200,22 +204,22 @@ function AuthPageContent() {
             const syncResult = await res.json()
             if (!res.ok) throw new Error(syncResult.error || 'Sync failed')
 
-            setMessage('Identity Verified. Synchronizing...')
+            setMessage('Code verified! Setting up your account...')
 
             // Handle New User vs Existing User
             if (syncResult.is_new_user) {
                 setUserId(syncResult.user_id)
+                setLoginUrl(syncResult.loginUrl)
                 setStep('name')
             } else if (syncResult.loginUrl) {
                 // This redirect establishes the Supabase session cookies automatically
                 window.location.href = syncResult.loginUrl
             } else {
-                router.push('/profile')
-                router.refresh()
+                window.location.href = '/'
             }
         } catch (err: any) {
             console.error('OTP Verification Error:', err)
-            setError(err.message || 'Invalid sequence.')
+            setError(err.message || 'That code is wrong. Please try again.')
         } finally {
             setLoading(false)
         }
@@ -224,10 +228,11 @@ function AuthPageContent() {
     // STEP 8 — Save Name for New Users
     const handleSaveName = async (e: React.FormEvent) => {
         e.preventDefault()
+        const firstName = formData.firstName.trim()
         const fullName = `${formData.firstName} ${formData.lastName}`.trim()
 
-        if (!fullName) {
-            setError('Please enter your name.')
+        if (!firstName) {
+            setError('Please enter at least your first name.')
             return
         }
 
@@ -235,34 +240,29 @@ function AuthPageContent() {
         setError(null)
 
         try {
-            const { data: { user } } = await supabase.auth.getUser()
-            console.log('Saving name for user:', user?.id)
+            // Save name via API using the stored userId (session not established yet)
+            const res = await fetch('/api/auth/save-profile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_id: userId,
+                    full_name: fullName,
+                    first_name: formData.firstName,
+                    last_name: formData.lastName
+                })
+            })
 
-            if (!user) {
-                setError('Session expired. Please login again.')
-                setLoading(false)
-                return
+            if (!res.ok) {
+                const err = await res.json()
+                throw new Error(err.error || 'Could not save your name.')
             }
 
-            const { error: upsertError } = await supabase
-                .from('profiles')
-                .upsert({
-                    id: user.id,
-                    full_name: fullName,
-                    phone: user.phone || undefined,
-                    role: 'user'
-                })
-
-            console.log('Save result error:', upsertError)
-
-            if (upsertError) throw upsertError
-
-            setMessage('Profile synchronized.')
-            router.push('/profile')
-            router.refresh()
+            setMessage('All set! Logging you in...')
+            // Redirect via magic link — this establishes the Supabase session
+            window.location.href = loginUrl || '/'
         } catch (err: any) {
             console.error('Save Name Error:', err)
-            setError(err.message || 'Failed to save profile.')
+            setError(err.message || 'Could not save your name. Please try again.')
         } finally {
             setLoading(false)
         }
@@ -319,7 +319,7 @@ function AuthPageContent() {
                             letterSpacing: '0.1em', textTransform: 'uppercase',
                             maxWidth: '400px', lineHeight: 1.6
                         }}>
-                            Curated fragrances, exclusive access, and the art of sensory storytelling. Enter the terminal to synchronize your collections.
+                            Explore our curated fragrances. Log in to shop, save your favourites, and track your orders.
                         </p>
                     </motion.div>
                 </div>
@@ -385,8 +385,8 @@ function AuthPageContent() {
                             style={{
                                 fontSize: isMobile ? '18px' : '24px',
                                 color: isAdminMode ? '#d4af37' : '#000',
-                                fontWeight: 300,
-                                letterSpacing: '0.3em',
+                                fontWeight: 700,
+                                letterSpacing: '0.1em',
                                 textTransform: 'uppercase',
                                 margin: 0,
                                 cursor: 'pointer',
@@ -406,7 +406,7 @@ function AuthPageContent() {
                             {authMode === 'login' ? 'Welcome to ' : 'Join '} <span style={{ color: '#d4af37', fontWeight: 400 }}>Reveil</span>
                         </h2>
                         <p style={{ color: 'rgba(0,0,0,0.4)', fontSize: isMobile ? '11px' : '13px', fontWeight: 400, letterSpacing: '0.05em' }}>
-                            {otpSent ? 'SECURE SEQUENCE REQUIRED' : (authMode === 'login' ? 'Sync your collection via mobile' : 'Create your aesthetic profile')}
+                            {otpSent ? 'Enter the code we sent you' : (authMode === 'login' ? 'We will send a code to your phone' : 'Create your account — it only takes a minute')}
                         </p>
                     </div>
 
@@ -418,13 +418,13 @@ function AuthPageContent() {
                                     <motion.div
                                         whileHover={{ borderBottomColor: '#d4af37' }}
                                         style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
-                                        <label style={{ fontSize: '9px', color: '#d4af37', textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>First Name</label>
+                                        <label style={{ fontSize: '9px', color: '#d4af37', textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>First Name *</label>
                                         <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} required style={{ width: '100%', border: 'none', background: 'none', fontSize: '14px', outline: 'none', color: '#000' }} />
                                     </motion.div>
                                     <motion.div
                                         whileHover={{ borderBottomColor: '#d4af37' }}
                                         style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
-                                        <label style={{ fontSize: '9px', color: '#d4af37', textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Last Name</label>
+                                        <label style={{ fontSize: '9px', color: '#d4af37', textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Last Name (optional)</label>
                                         <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} style={{ width: '100%', border: 'none', background: 'none', fontSize: '14px', outline: 'none', color: '#000' }} />
                                     </motion.div>
                                 </div>
@@ -451,7 +451,7 @@ function AuthPageContent() {
                                         marginTop: '12px'
                                     }}
                                 >
-                                    {loading ? <Loader2 className="animate-spin" size={16} /> : <>Complete Profile <ArrowRight size={16} /></>}
+                                    {loading ? <Loader2 className="animate-spin" size={16} /> : <>Save & Continue <ArrowRight size={16} /></>}
                                 </motion.button>
                             </div>
                         </form>
@@ -504,7 +504,7 @@ function AuthPageContent() {
                                                         <input
                                                             type="tel"
                                                             name="phone"
-                                                            placeholder="Enter Mobile Number"
+                                                            placeholder="Your phone number"
                                                             value={formData.phone}
                                                             onChange={handleChange}
                                                             style={{ flex: 1, border: 'none', background: 'none', fontSize: isMobile ? '14px' : '16px', color: '#000', outline: 'none' }}
@@ -552,7 +552,7 @@ function AuthPageContent() {
                                 ) : (
                                     <div style={{ textAlign: 'left' }}>
                                         <div style={{ borderBottom: '2px solid #d4af37', paddingBottom: '8px' }}>
-                                            <label style={{ fontSize: '10px', color: '#d4af37', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px', display: 'block' }}>Access Sequence</label>
+                                            <label style={{ fontSize: '10px', color: '#d4af37', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px', display: 'block' }}>Enter Code</label>
                                             <input
                                                 type="text"
                                                 name="otp"
@@ -569,7 +569,7 @@ function AuthPageContent() {
                                                 <ChevronLeft size={14} /> Back
                                             </button>
                                             <button type="button" onClick={sendOtp} style={{ background: 'none', border: 'none', color: '#000', fontSize: '11px', fontWeight: 800, cursor: 'pointer' }}>
-                                                Missing OTP? <span style={{ color: '#d4af37' }}>Resend</span>
+                                                Didn't get the code? <span style={{ color: '#d4af37' }}>Resend</span>
                                             </button>
                                         </div>
                                     </div>
@@ -601,7 +601,7 @@ function AuthPageContent() {
                                     }}
                                 >
                                     {loading ? <Loader2 className="animate-spin" size={16} /> : (
-                                        otpSent ? <>Verify Sequence <CheckCircle2 size={16} /></> : <>Continue <ArrowRight size={16} /></>
+                                        otpSent ? <>Verify Code <CheckCircle2 size={16} /></> : <>Send OTP <ArrowRight size={16} /></>
                                     )}
                                 </motion.button>
                             </div>
@@ -619,7 +619,7 @@ function AuthPageContent() {
 
                             <p style={{ marginTop: '4px' }}>
                                 <span onClick={() => setIsAdminMode(!isAdminMode)} style={{ color: 'rgba(0,0,0,0.3)', fontSize: '10px', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                                    {isAdminMode ? 'Standard Login' : 'Administrative Terminal'}
+                                    {isAdminMode ? 'Back to normal login' : 'Admin login'}
                                 </span>
                             </p>
                         </div>
@@ -632,8 +632,8 @@ function AuthPageContent() {
                     {/* Footer Legal Section */}
                     <div style={{ marginTop: isMobile ? '24px' : '48px', paddingTop: isMobile ? '16px' : '20px', borderTop: '1px solid rgba(0,0,0,0.04)', textAlign: 'center' }}>
                         <p style={{ fontSize: '9px', color: 'rgba(0,0,0,0.3)', lineHeight: 1.6, letterSpacing: '0.05em' }}>
-                            IDENTITY ENCRYPTION ENABLED — STUDIO ARCHIVE 2026<br />
-                            SECURE ACCESS NODE: REVEIL-AUTH-01
+                            Your information is safe with us.<br />
+                            © Reveil 2026
                         </p>
                     </div>
                 </motion.div>

@@ -217,12 +217,13 @@ export default function ProfilePage() {
                                         <MapPin size={24} color="#d4af37" />
                                     </div>
                                     <div>
-                                        <h4 style={{ fontSize: '16px', fontWeight: 500 }}>Saved Addresses</h4>
-                                        <p style={{ fontSize: '12px', color: '#666' }}>Manage delivery locations</p>
+                                        <h4 style={{ fontSize: '16px', fontWeight: 500 }}>Address Book</h4>
+                                        <p style={{ fontSize: '12px', color: '#666' }}>Save your delivery addresses</p>
                                     </div>
                                     <ChevronRight size={20} color="#333" style={{ marginLeft: 'auto' }} />
                                 </div>
                                 <motion.button 
+                                    onClick={() => router.push('/address-book')}
                                     whileHover={{ background: 'rgba(255,255,255,0.05)' }}
                                     style={{
                                         width: '100%',

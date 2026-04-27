@@ -727,10 +727,10 @@ export function ReveilCollectionSection() {
                                 letterSpacing: '-0.01em', textTransform: 'uppercase'
                             }}>
                                 REVEIL <br />
-                                <span style={{ 
-                                    color: isMobile ? '#fff' : 'transparent', 
-                                    WebkitTextStroke: isMobile ? 'none' : '1.2px rgba(255,255,255,0.5)', 
-                                    fontFamily: 'var(--font-baskerville)', 
+                                <span style={{
+                                    color: isMobile ? '#fff' : 'transparent',
+                                    WebkitTextStroke: isMobile ? 'none' : '1.2px rgba(255,255,255,0.5)',
+                                    fontFamily: 'var(--font-baskerville)',
                                     fontStyle: 'italic', fontWeight: 400,
                                     fontSize: isMobile ? '28px' : 'inherit',
                                     display: 'block',
@@ -739,8 +739,8 @@ export function ReveilCollectionSection() {
                             </h2>
                             <motion.div
                                 style={{
-                                    x: isMobile ? 0 : labelX, 
-                                    opacity: isMobile ? 0.03 : 0.08, 
+                                    x: isMobile ? 0 : labelX,
+                                    opacity: isMobile ? 0.03 : 0.08,
                                     fontSize: isMobile ? '100px' : '180px', fontWeight: 900,
                                     position: 'absolute', top: isMobile ? '15px' : '-50px', left: isMobile ? '0px' : '-20px',
                                     pointerEvents: 'none', whiteSpace: 'nowrap', zIndex: -1, color: '#fff'

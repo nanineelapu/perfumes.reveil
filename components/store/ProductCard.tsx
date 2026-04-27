@@ -26,7 +26,7 @@ export default function ProductCard({ product }: { product: Product }) {
         const checkUser = async () => {
             const { data: { user } } = await supabase.auth.getUser()
             setUser(user)
-            
+
             if (user) {
                 // Check if wishlisted
                 const { data } = await supabase
@@ -120,9 +120,8 @@ export default function ProductCard({ product }: { product: Product }) {
                 position: 'relative',
                 cursor: 'pointer',
                 borderRadius: '8px',
-                padding: isMobile ? '8px' : '12px',
+                padding: isMobile ? '8px' : '16px',
                 border: '1px solid rgba(255,255,255,0.03)',
-                overflow: 'hidden',
                 transition: 'all 0.6s cubic-bezier(0.22, 1, 0.36, 1)'
             }}
         >
@@ -157,7 +156,7 @@ export default function ProductCard({ product }: { product: Product }) {
                 style={{
                     position: 'relative',
                     overflow: 'hidden',
-                    paddingBottom: '125%',
+                    paddingBottom: '140%',
                     background: '#111',
                     borderRadius: '2px', // Sharper, professional corners
                     border: '1px solid rgba(255,255,255,0.05)'
@@ -276,8 +275,8 @@ export default function ProductCard({ product }: { product: Product }) {
                     whileTap={{ scale: 0.9 }}
                     style={{
                         position: 'absolute',
-                        top: isMobile ? '12px' : '24px',
-                        left: isMobile ? '12px' : '24px',
+                        top: isMobile ? '26px' : '55px',
+                        left: isMobile ? '4px' : '8px',
                         zIndex: 10,
                         background: 'rgba(0,0,0,0.3)',
                         backdropFilter: 'blur(10px)',
@@ -296,9 +295,9 @@ export default function ProductCard({ product }: { product: Product }) {
                     {wishlisting ? (
                         <Loader2 size={isMobile ? 14 : 18} className="animate-spin" />
                     ) : (
-                        <Heart 
-                            size={isMobile ? 16 : 20} 
-                            fill={wishlisted ? '#d4af37' : 'transparent'} 
+                        <Heart
+                            size={isMobile ? 16 : 20}
+                            fill={wishlisted ? '#d4af37' : 'transparent'}
                             strokeWidth={wishlisted ? 0 : 1.5}
                         />
                     )}

@@ -11,11 +11,7 @@ if (!admin.apps.length) {
 
         if (projectId && clientEmail && privateKey) {
             admin.initializeApp({
-                credential: admin.credential.cert({
-                    projectId,
-                    clientEmail,
-                    privateKey,
-                }),
+                credential: admin.credential.cert({ projectId, clientEmail, privateKey }),
             });
         } else {
             admin.initializeApp({ projectId });
@@ -33,22 +29,22 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Authentication token is required.' }, { status: 401 })
         }
 
-        // 1. Verify Firebase ID Token for security
+        // 1. Verify Firebase ID Token
         const decodedToken = await admin.auth().verifyIdToken(id_token);
         const verifiedPhone = decodedToken.phone_number || phone;
 
         if (!verifiedPhone) {
-            return NextResponse.json({ error: 'Verified phone number not found.' }, { status: 400 })
+            return NextResponse.json({ error: 'Phone number not found.' }, { status: 400 })
         }
 
-        const basePhone = verifiedPhone.startsWith('+') ? verifiedPhone : `+91${verifiedPhone.replace(/[^\d]/g, '')}`
-        const normalizedPhone = '+' + basePhone.replace(/\D/g, '')
+        const normalizedPhone = '+' + verifiedPhone.replace(/\D/g, '')
         const supabaseAdmin = createAdminClient()
 
-        // 2. Find or Create User in Supabase Auth
+        // 2. Find or Create Supabase User — track if we just created them
         let supabaseUser: any = null
+        let is_new_user = false
 
-        // Try to find by phone in profiles first
+        // Search 1: Find by phone in profiles table
         const { data: profileRow } = await supabaseAdmin
             .from('profiles')
             .select('id')
@@ -60,63 +56,51 @@ export async function POST(request: Request) {
             supabaseUser = user
         }
 
-        // Fallback: search all users by phone with fuzzy match (ignores symbols like +)
+        // Search 2: Find by phone in auth users (fuzzy match)
         if (!supabaseUser) {
             const { data: usersData } = await supabaseAdmin.auth.admin.listUsers()
             supabaseUser = usersData?.users?.find(u => {
                 if (!u.phone) return false
-                const dbPhone = u.phone.replace(/\D/g, '')
-                const inputPhone = normalizedPhone.replace(/\D/g, '')
-                return dbPhone === inputPhone
+                return u.phone.replace(/\D/g, '') === normalizedPhone.replace(/\D/g, '')
             })
         }
 
-        // Create if still not found
+        // Search 3: Not found — create brand new user
         if (!supabaseUser) {
+            is_new_user = true
             const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
                 phone: normalizedPhone,
                 email: email || `${normalizedPhone.replace('+', '')}@reveil.internal`,
                 password: Math.random().toString(36).slice(-12),
                 phone_confirm: true,
-                user_metadata: { first_name: firstName, last_name: lastName, firebase_uid }
+                user_metadata: { firebase_uid }
             })
             if (createError) throw createError
             supabaseUser = newUser.user
         }
 
-        // 3. Ensure Profile exists and is synchronized
-        const { data: profile } = await supabaseAdmin
+        // 3. Ensure profile row exists
+        const { data: existingProfile } = await supabaseAdmin
             .from('profiles')
-            .select('id, first_name, full_name')
+            .select('id')
             .eq('id', supabaseUser.id)
             .maybeSingle()
 
-        if (!profile) {
+        if (!existingProfile) {
+            // Create placeholder profile — name will be filled in next step for new users
             await supabaseAdmin.from('profiles').insert({
                 id: supabaseUser.id,
                 phone: normalizedPhone,
-                full_name: firstName && lastName ? `${firstName} ${lastName}`.trim() : (firstName || lastName || '').trim(),
-                first_name: firstName || supabaseUser.user_metadata?.first_name,
-                last_name: lastName || supabaseUser.user_metadata?.last_name,
-                email: email || supabaseUser.email,
                 role: 'user'
             })
-        } else if (firstName || lastName || email) {
-            const fullName = firstName && lastName ? `${firstName} ${lastName}`.trim() : (firstName || lastName || undefined);
-            await supabaseAdmin.from('profiles').update({
-                full_name: fullName || undefined,
-                first_name: firstName || undefined,
-                last_name: lastName || undefined,
-                email: email || undefined
-            }).eq('id', supabaseUser.id)
         }
 
-        // 4. Generate Magic Link using the user's actual Auth email
+        // 4. Generate magic link — redirect to home page after login
         const origin = request.headers.get('origin') || new URL(request.url).origin
         const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
             type: 'magiclink',
             email: supabaseUser.email!,
-            options: { redirectTo: `${origin}/profile` }
+            options: { redirectTo: `${origin}/` }
         })
 
         if (linkError) throw linkError
@@ -124,7 +108,7 @@ export async function POST(request: Request) {
         return NextResponse.json({
             success: true,
             loginUrl: linkData.properties.action_link,
-            is_new_user: !profile || !profile.full_name,
+            is_new_user,
             user_id: supabaseUser.id
         })
 

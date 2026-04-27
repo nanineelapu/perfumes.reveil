@@ -152,12 +152,9 @@ function SlideMedia({ slide, isActive, emblaApi, isMobile }: { slide: Slide, isA
 
     // Multi-layered loading strategy for maximum reliability
     useEffect(() => {
-        setIsLoaded(false) // Reset on slide change
-        if (!slide.video_url) {
-            setIsLoaded(true)
-        }
-        // Safety fallback
-        const timer = setTimeout(() => setIsLoaded(true), 4000)
+        setIsLoaded(false)
+        // Always show content — don't gate on media loading
+        const timer = setTimeout(() => setIsLoaded(true), 100)
         return () => clearTimeout(timer)
     }, [slide.id])
 
@@ -259,7 +256,7 @@ function SlideMedia({ slide, isActive, emblaApi, isMobile }: { slide: Slide, isA
                 <div style={{ maxWidth: isMobile ? '100%' : '900px' }}>
                     <motion.div
                         initial="initial"
-                        animate={(isActive && isLoaded) ? "animate" : "initial"}
+                        animate={isActive ? "animate" : "initial"}
                         variants={{
                             animate: {
                                 transition: {

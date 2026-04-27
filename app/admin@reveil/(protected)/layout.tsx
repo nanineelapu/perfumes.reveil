@@ -36,6 +36,7 @@ export default async function AdminLayout({
                 {[
                     { href: '/admin@reveil', label: 'Dashboard' },
                     { href: '/admin@reveil/users', label: 'User Registry' },
+                    { href: '/admin@reveil/orders', label: 'Orders' },
                     { href: '/admin@reveil/products', label: 'Products' },
                     { href: '/admin@reveil/categories', label: 'Categories' },
                     { href: '/admin@reveil/reviews', label: 'Reviews' },
