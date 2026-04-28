@@ -165,8 +165,8 @@ export default function ProductCard({ product }: { product: Product }) {
                 {/* Background Image with Cinematic Focus */}
                 <motion.div
                     animate={{
-                        scale: hovered ? 1.08 : 1,
-                        filter: hovered ? 'brightness(0.6) blur(2px)' : 'brightness(0.8) blur(0px)'
+                        scale: hovered ? 1.05 : 1,
+                        filter: hovered ? 'brightness(0.7) blur(0.5px)' : 'brightness(0.8) blur(0px)'
                     }}
                     transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
                     style={{ position: 'absolute', inset: 0, zIndex: 0 }}
@@ -275,7 +275,7 @@ export default function ProductCard({ product }: { product: Product }) {
                     whileTap={{ scale: 0.9 }}
                     style={{
                         position: 'absolute',
-                        top: isMobile ? '26px' : '55px',
+                        top: '16px',
                         left: isMobile ? '4px' : '8px',
                         zIndex: 10,
                         background: 'rgba(0,0,0,0.3)',

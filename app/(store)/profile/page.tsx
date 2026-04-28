@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { User, Mail, Phone, MapPin, Package, LogOut, ChevronRight, Edit2 } from 'lucide-react'
+import { PremiumLoader } from '@/components/store/PremiumLoader'
 
 export default function ProfilePage() {
     const [user, setUser] = useState<any>(null)
@@ -46,19 +47,7 @@ export default function ProfilePage() {
     }
 
     if (loading) {
-        return (
-            <div style={{
-                height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: '#050505', color: '#d4af37'
-            }}>
-                <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-                >
-                    <User size={40} strokeWidth={1} />
-                </motion.div>
-            </div>
-        )
+        return <PremiumLoader iconName="user" text="Loading Profile" />
     }
 
     const containerVariants = {

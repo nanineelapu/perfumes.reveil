@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { ProductListContent } from './ProductListContent'
 import { Suspense } from 'react'
+import { Sparkles } from 'lucide-react'
+import { PremiumLoader } from '@/components/store/PremiumLoader'
 
 const CATEGORY_META: Record<string, { title: string; description: string }> = {
   PERFUMES: {
@@ -52,9 +54,7 @@ export async function generateMetadata({
 export default function ShopPage() {
     return (
         <Suspense fallback={
-            <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#050505', color: '#d4af37' }}>
-                Synchronizing Database...
-            </div>
+            <PremiumLoader iconName="sparkles" text="Loading Fragrances" />
         }>
             <ProductListContent />
         </Suspense>

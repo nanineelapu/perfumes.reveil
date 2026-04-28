@@ -1,13 +1,14 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Truck, CheckCircle, ChevronRight, Download, HelpCircle, Loader2, ShoppingBag, Star } from 'lucide-react'
+import { Truck, CheckCircle, ChevronRight, Download, HelpCircle, Loader2, ShoppingBag, Star, Package } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Footer } from '@/components/store/Footer'
 import { getAutomaticStatus } from '@/lib/utils/order-status'
 import { ReviewModal } from '@/components/store/ReviewModal'
+import { PremiumLoader } from '@/components/store/PremiumLoader'
 
 interface OrderItem {
     id: string
@@ -103,11 +104,7 @@ export default function OrdersPage() {
     }
 
     if (loading) {
-        return (
-            <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#050505' }}>
-                <Loader2 className="animate-spin" size={32} color="#d4af37" />
-            </div>
-        )
+        return <PremiumLoader iconName="package" text="Tracking Orders" />
     }
 
     if (!user) {

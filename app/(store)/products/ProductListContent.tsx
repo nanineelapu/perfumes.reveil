@@ -1,7 +1,8 @@
 'use client'
 import { useState, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, LayoutGrid, List, SlidersHorizontal, Filter, Plus, Loader2 } from 'lucide-react'
+import { Search, LayoutGrid, List, SlidersHorizontal, Filter, Plus, Loader2, Sparkles } from 'lucide-react'
+import { PremiumLoader } from '@/components/store/PremiumLoader'
 import { useSearchParams } from 'next/navigation'
 import ProductCard from '@/components/store/ProductCard'
 import { Product } from '@/types/store'
@@ -318,10 +319,9 @@ export function ProductListContent() {
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                     exit={{ opacity: 0 }}
-                                    style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '160px 0', gap: '24px' }}
+                                    style={{ width: '100%' }}
                                 >
-                                    <Loader2 className="animate-spin" size={32} color="#d4af37" />
-                                    <span style={{ fontSize: '10px', color: '#d4af37', letterSpacing: '0.4em', textTransform: 'uppercase' }}>Synchronizing Database</span>
+                                    <PremiumLoader iconName="sparkles" text="Loading Fragrances" />
                                 </motion.div>
                             ) : (
                                 <motion.div

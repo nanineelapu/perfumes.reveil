@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Footer } from '@/components/store/Footer'
+import { PremiumLoader } from '@/components/store/PremiumLoader'
 
 interface WishlistItem {
     id: string
@@ -87,11 +88,7 @@ export default function WishlistPage() {
     }
 
     if (loading) {
-        return (
-            <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#050505' }}>
-                <Loader2 className="animate-spin" size={32} color="#d4af37" />
-            </div>
-        )
+        return <PremiumLoader iconName="heart" text="Curating Favorites" />
     }
 
     if (!user) {
