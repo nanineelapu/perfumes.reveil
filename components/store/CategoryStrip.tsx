@@ -2,11 +2,12 @@
 import Link from 'next/link'
 
 const CATEGORY_CONFIG: Record<string, { label: string; icon: string; color: string }> = {
-    shoes: { label: 'Shoes', icon: '👟', color: '#ede9fe' },
-    clothing: { label: 'Clothing', icon: '👕', color: '#dbeafe' },
-    accessories: { label: 'Accessories', icon: '⌚', color: '#fef3c7' },
-    bags: { label: 'Bags', icon: '👜', color: '#fce7f3' },
-    sports: { label: 'Sports', icon: '⚽', color: '#dcfce7' },
+    'reveil-fragrances-attars': { label: 'Fragrances (Attars)', icon: '🏺', color: '#fcfcfc' },
+    'reveil-reed-diffusers': { label: 'Reed Diffusers', icon: '🎋', color: '#fcfcfc' },
+    'reveil-mini-diffusers': { label: 'Mini Diffusers', icon: '💨', color: '#fcfcfc' },
+    'attars': { label: 'Fragrances (Attars)', icon: '🏺', color: '#fcfcfc' },
+    'reed-diffusers': { label: 'Reed Diffusers', icon: '🎋', color: '#fcfcfc' },
+    'mini-diffusers': { label: 'Mini Diffusers', icon: '💨', color: '#fcfcfc' },
 }
 
 export default function CategoryStrip({ categories }: { categories: string[] }) {

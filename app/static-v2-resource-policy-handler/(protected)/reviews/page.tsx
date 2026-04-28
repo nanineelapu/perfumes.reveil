@@ -30,7 +30,8 @@ export default function AdminReviewsPage() {
         rating: 5,
         comment: '',
         product_id: '',
-        is_featured: false
+        is_featured: false,
+        source: 'google' // Default to Google as requested
     })
 
     const router = useRouter()
@@ -89,7 +90,7 @@ export default function AdminReviewsPage() {
             if (res.ok) {
                 setIsModalOpen(false)
                 setEditingReview(null)
-                setForm({ reviewer_name: '', reviewer_avatar: '', rating: 5, comment: '', product_id: '', is_featured: false })
+                setForm({ reviewer_name: '', reviewer_avatar: '', rating: 5, comment: '', product_id: '', is_featured: false, source: 'google' })
                 fetchReviews()
             }
         } catch (error) {
@@ -105,7 +106,8 @@ export default function AdminReviewsPage() {
             rating: review.rating,
             comment: review.comment || '',
             product_id: review.product_id || '',
-            is_featured: review.is_featured
+            is_featured: review.is_featured,
+            source: (review as any).source || 'google'
         })
         setIsModalOpen(true)
     }
@@ -131,15 +133,15 @@ export default function AdminReviewsPage() {
             <header style={{ marginBottom: '80px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                 <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#d4af37', fontSize: '11px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4em', marginBottom: '16px' }}>
-                        Curation <div style={{ width: '40px', height: '1px', background: 'rgba(212,175,55,0.4)' }} />
+                        Customer Feedback <div style={{ width: '40px', height: '1px', background: 'rgba(212,175,55,0.4)' }} />
                     </div>
                     <h1 style={{ fontSize: '56px', fontFamily: 'serif', textTransform: 'uppercase', margin: 0, fontWeight: 300, letterSpacing: '-0.02em', color: '#1a1a1a' }}>
-                        Customer <span style={{ fontStyle: 'italic', color: '#d4af37' }}>Archive</span>
+                        Ratings <span style={{ fontStyle: 'italic', color: '#d4af37' }}>& Reviews</span>
                     </h1>
-                    <p style={{ marginTop: '12px', color: '#999', fontSize: '14px', letterSpacing: '0.05em' }}>Managing the voice of the REVEIL community</p>
+                    <p style={{ marginTop: '12px', color: '#999', fontSize: '14px', letterSpacing: '0.05em' }}>Manual addition of Google and Website testimonials</p>
                 </div>
                 <button 
-                    onClick={() => { setEditingReview(null); setForm({ reviewer_name: '', reviewer_avatar: '', rating: 5, comment: '', product_id: '', is_featured: false }); setIsModalOpen(true); }}
+                    onClick={() => { setEditingReview(null); setForm({ reviewer_name: '', reviewer_avatar: '', rating: 5, comment: '', product_id: '', is_featured: false, source: 'google' }); setIsModalOpen(true); }}
                     style={{ 
                         background: '#000', color: '#fff', border: '1px solid #000', 
                         padding: '18px 40px', borderRadius: '4px', cursor: 'pointer', 
@@ -150,13 +152,13 @@ export default function AdminReviewsPage() {
                     }}
                     className="hover-gold"
                 >
-                    <Plus size={16} strokeWidth={3} /> Add Testimonial
+                    <Plus size={16} strokeWidth={3} /> Add Manual Review
                 </button>
             </header>
 
             {loading ? (
                 <div style={{ padding: '160px', textAlign: 'center' }}>
-                    <Loader2 className="animate-spin" style={{ margin: '0 auto 20px', color: '#d4af37' }} size={32} />
+                    <div style={{ width: '40px', height: '40px', border: '2px solid #eee', borderTopColor: '#d4af37', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 24px' }} />
                     <div style={{ color: '#999', fontSize: '11px', letterSpacing: '0.3em', textTransform: 'uppercase' }}>Synchronizing Archive...</div>
                 </div>
             ) : (
@@ -176,7 +178,15 @@ export default function AdminReviewsPage() {
                             }}
                             className="review-card"
                         >
-                            <Quote style={{ position: 'absolute', top: '24px', right: '24px', color: 'rgba(212,175,55,0.08)', width: '60px', height: '60px' }} />
+                            <div style={{ position: 'absolute', top: '24px', right: '24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                {(review as any).source === 'google' && (
+                                    <div style={{ fontSize: '9px', background: '#f8f9fa', padding: '4px 8px', borderRadius: '40px', color: '#4285F4', fontWeight: 700, border: '1px solid #eee', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        <svg width="10" height="10" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                                        Google
+                                    </div>
+                                )}
+                                <Quote style={{ color: 'rgba(212,175,55,0.08)', width: '40px', height: '40px' }} />
+                            </div>
                             
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
@@ -197,12 +207,12 @@ export default function AdminReviewsPage() {
                                         </div>
                                     </div>
                                     <div>
-                                        <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 600, color: '#1a1a1a', letterSpacing: '-0.01em' }}>{review.reviewer_name || review.profiles?.full_name || 'Anonymous'}</h3>
+                                        <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 600, color: '#1a1a1a', letterSpacing: '-0.01em' }}>{review.reviewer_name || review.profiles?.full_name || 'Anonymous Collector'}</h3>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px' }}>
                                             <div style={{ display: 'flex', gap: '2px' }}>
                                                 {[1,2,3,4,5].map(s => <Star key={s} size={11} fill={s <= review.rating ? '#d4af37' : 'none'} color={s <= review.rating ? '#d4af37' : '#eee'} />)}
                                             </div>
-                                            <span style={{ fontSize: '10px', color: '#999', textTransform: 'uppercase', letterSpacing: '0.1em' }}>• Verified</span>
+                                            <span style={{ fontSize: '10px', color: '#999', textTransform: 'uppercase', letterSpacing: '0.1em' }}>• Verified client</span>
                                         </div>
                                     </div>
                                 </div>
@@ -210,7 +220,7 @@ export default function AdminReviewsPage() {
 
                             <div style={{ flex: 1 }}>
                                 <div style={{ fontSize: '11px', color: '#d4af37', textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '12px', fontWeight: 700 }}>
-                                    Regarding: {review.products?.name || 'Brand Experience'}
+                                    Target Product: {review.products?.name || 'General Feedback'}
                                 </div>
                                 <p style={{ 
                                     margin: 0, fontSize: '17px', lineHeight: 1.8, color: '#333', 
@@ -266,64 +276,78 @@ export default function AdminReviewsPage() {
                             <button onClick={() => setIsModalOpen(false)} style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', cursor: 'pointer', color: '#999' }}><XCircle size={20} /></button>
                             
                             <h2 style={{ fontSize: '24px', fontFamily: 'serif', textTransform: 'uppercase', margin: '0 0 32px', fontWeight: 300, textAlign: 'center', letterSpacing: '-0.02em' }}>
-                                Testimonial <span style={{ fontStyle: 'italic', color: '#d4af37' }}>Entry</span>
+                                manual <span style={{ fontStyle: 'italic', color: '#d4af37' }}>entry</span>
                             </h2>
                             
                             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                                     <div className="input-group">
-                                        <label style={{ display: 'block', fontSize: '9px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#999', marginBottom: '8px' }}>Contributor</label>
+                                        <label style={{ display: 'block', fontSize: '9px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#999', marginBottom: '8px' }}>Client Name</label>
                                         <input 
                                             style={{ width: '100%', padding: '10px 0', border: 'none', borderBottom: '1px solid #eee', fontSize: '14px', outline: 'none', transition: 'all 0.3s ease', background: 'transparent' }} 
                                             className="custom-input"
                                             value={form.reviewer_name}
                                             onChange={e => setForm({ ...form, reviewer_name: e.target.value })}
-                                            placeholder="Name..."
+                                            placeholder="John Doe..."
                                             required
                                         />
                                     </div>
                                     <div className="input-group">
-                                        <label style={{ display: 'block', fontSize: '9px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#999', marginBottom: '8px' }}>Rating</label>
+                                        <label style={{ display: 'block', fontSize: '9px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#999', marginBottom: '8px' }}>Review Source</label>
+                                        <select 
+                                            style={{ width: '100%', padding: '10px 0', border: 'none', borderBottom: '1px solid #eee', fontSize: '14px', outline: 'none', background: 'transparent', cursor: 'pointer' }} 
+                                            value={form.source}
+                                            onChange={e => setForm({ ...form, source: e.target.value })}
+                                        >
+                                            <option value="google">Google Review</option>
+                                            <option value="website">Website Direct</option>
+                                            <option value="instagram">Instagram</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                    <div className="input-group">
+                                        <label style={{ display: 'block', fontSize: '9px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#999', marginBottom: '8px' }}>Star Rating</label>
                                         <select 
                                             style={{ width: '100%', padding: '10px 0', border: 'none', borderBottom: '1px solid #eee', fontSize: '14px', outline: 'none', background: 'transparent', cursor: 'pointer' }} 
                                             value={form.rating}
                                             onChange={e => setForm({ ...form, rating: parseInt(e.target.value) })}
                                         >
-                                            <option value="5">5 — Exceptional</option>
-                                            <option value="4">4 — Superior</option>
-                                            <option value="3">3 — Average</option>
-                                            <option value="2">2 — Limited</option>
-                                            <option value="1">1 — Poor</option>
+                                            <option value="5">5 Stars — Exceptional</option>
+                                            <option value="4">4 Stars — Superior</option>
+                                            <option value="3">3 Stars — Average</option>
+                                            <option value="2">2 Stars — Limited</option>
+                                            <option value="1">1 Star — Poor</option>
+                                        </select>
+                                    </div>
+                                    <div className="input-group">
+                                        <label style={{ display: 'block', fontSize: '9px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#999', marginBottom: '8px' }}>Product Link</label>
+                                        <select 
+                                            style={{ width: '100%', padding: '10px 0', border: 'none', borderBottom: '1px solid #eee', fontSize: '13px', outline: 'none', background: 'transparent', cursor: 'pointer' }} 
+                                            value={form.product_id}
+                                            onChange={e => setForm({ ...form, product_id: e.target.value })}
+                                        >
+                                            <option value="">General Narrative</option>
+                                            {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                                         </select>
                                     </div>
                                 </div>
 
                                 <div className="input-group">
-                                    <label style={{ display: 'block', fontSize: '9px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#999', marginBottom: '8px' }}>Avatar URL</label>
+                                    <label style={{ display: 'block', fontSize: '9px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#999', marginBottom: '8px' }}>Avatar / DP URL</label>
                                     <input 
                                         style={{ width: '100%', padding: '10px 0', border: 'none', borderBottom: '1px solid #eee', fontSize: '13px', outline: 'none', background: 'transparent' }} 
                                         value={form.reviewer_avatar}
                                         onChange={e => setForm({ ...form, reviewer_avatar: e.target.value })}
-                                        placeholder="https://..."
+                                        placeholder="https://googleusercontent.com/..."
                                     />
                                 </div>
 
                                 <div className="input-group">
-                                    <label style={{ display: 'block', fontSize: '9px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#999', marginBottom: '8px' }}>Product</label>
-                                    <select 
-                                        style={{ width: '100%', padding: '10px 0', border: 'none', borderBottom: '1px solid #eee', fontSize: '13px', outline: 'none', background: 'transparent', cursor: 'pointer' }} 
-                                        value={form.product_id}
-                                        onChange={e => setForm({ ...form, product_id: e.target.value })}
-                                    >
-                                        <option value="">General Narrative</option>
-                                        {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                                    </select>
-                                </div>
-
-                                <div className="input-group">
-                                    <label style={{ display: 'block', fontSize: '9px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#999', marginBottom: '8px' }}>Testimonial</label>
+                                    <label style={{ display: 'block', fontSize: '9px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#999', marginBottom: '8px' }}>Review Text</label>
                                     <textarea 
-                                        style={{ width: '100%', padding: '10px 0', border: 'none', borderBottom: '1px solid #eee', fontSize: '15px', outline: 'none', minHeight: '60px', resize: 'none', fontFamily: 'serif', fontStyle: 'italic', background: 'transparent', lineHeight: 1.5 }} 
+                                        style={{ width: '100%', padding: '10px 0', border: 'none', borderBottom: '1px solid #eee', fontSize: '15px', outline: 'none', minHeight: '80px', resize: 'none', fontFamily: 'serif', fontStyle: 'italic', background: 'transparent', lineHeight: 1.5 }} 
                                         value={form.comment}
                                         onChange={e => setForm({ ...form, comment: e.target.value })}
                                         placeholder="Describe the experience..."

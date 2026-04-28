@@ -192,8 +192,8 @@ export function AnimatedNavbar() {
             variants={containerVariants}
             style={{
                 background: isMobileMenuOpen ? '#050505' : 'transparent',
-                position: 'fixed', top: isMobileMenuOpen ? 0 : '20px', left: 0, right: 0, zIndex: 100,
-                padding: isMobile ? '0 20px' : '0 75px',
+                position: 'fixed', top: isMobileMenuOpen ? 0 : (isMobile ? '10px' : '20px'), left: 0, right: 0, zIndex: 100,
+                padding: isMobile ? '0 24px' : '0 75px',
                 transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
             }}
         >
@@ -216,7 +216,7 @@ export function AnimatedNavbar() {
                         ...capsuleStyle,
                         padding: '0 24px',
                         height: '100%',
-                        marginLeft: isMobile ? '-5px' : '0'
+                        marginLeft: '0'
                     }}
                 >
 

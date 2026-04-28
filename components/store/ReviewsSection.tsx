@@ -26,9 +26,24 @@ export function ReviewsSection({ reviews = [] }: { reviews?: Review[] }) {
 
     return (
         <section style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 24px' }}>
-            <header style={{ marginBottom: '60px', textAlign: 'center' }}>
-                <p style={{ fontSize: '10px', color: '#d4af37', letterSpacing: '0.4em', textTransform: 'uppercase', marginBottom: '16px' }}>Archives of Scent</p>
-                <h2 style={{ fontSize: '42px', fontFamily: 'var(--font-baskerville)', color: '#fff', fontWeight: 300, margin: 0 }}>Customer Reviews</h2>
+            <header style={{ marginBottom: '80px', textAlign: 'center', position: 'relative' }}>
+                <div style={{ 
+                    width: '1px', height: '40px', background: 'linear-gradient(to bottom, transparent, #d4af37)', 
+                    margin: '0 auto 32px', opacity: 0.5 
+                }} />
+                <p style={{ 
+                    fontSize: '11px', color: '#d4af37', letterSpacing: '0.6em', 
+                    textTransform: 'uppercase', marginBottom: '16px', fontWeight: 600,
+                    fontFamily: 'var(--font-tenor)'
+                }}>
+                    Archives of Scent
+                </p>
+                <h2 style={{ 
+                    fontSize: 'clamp(32px, 4vw, 48px)', fontFamily: 'var(--font-baskerville)', 
+                    color: '#fff', fontWeight: 400, margin: 0, letterSpacing: '-0.02em' 
+                }}>
+                    Customer Reviews
+                </h2>
             </header>
 
             {reviews.length > 0 ? (

@@ -140,6 +140,43 @@ export default function AdminCategoriesPage() {
                     ))}
                 </div>
                 <div style={{ padding: '16px', borderTop: '1px solid #eee' }}>
+                    <p style={{ fontSize: '10px', color: '#999', textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '16px', fontWeight: 700 }}>Brand Essentials</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {[
+                            'Reveil Fragrances (Attars)',
+                            'Reveil Reed Diffusers',
+                            'Reveil Mini Diffusers'
+                        ].map(brandCat => {
+                            const exists = categories.some(c => c.name.toLowerCase() === brandCat.toLowerCase())
+                            return (
+                                <button 
+                                    key={brandCat}
+                                    disabled={exists}
+                                    onClick={async () => {
+                                        const res = await fetch('/api/categories', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ name: brandCat })
+                                        })
+                                        if (res.ok) fetchData()
+                                    }}
+                                    style={{ 
+                                        textAlign: 'left', padding: '10px', borderRadius: '6px', 
+                                        border: '1px solid #eee', background: exists ? '#f8f9fa' : '#fff',
+                                        fontSize: '11px', cursor: exists ? 'default' : 'pointer',
+                                        display: 'flex', alignItems: 'center', gap: '8px',
+                                        color: exists ? '#ccc' : '#333'
+                                    }}
+                                >
+                                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: exists ? '#ccc' : '#d4af37' }} />
+                                    {brandCat}
+                                    {!exists && <Plus size={10} style={{ marginLeft: 'auto' }} />}
+                                </button>
+                            )
+                        })}
+                    </div>
+                </div>
+                <div style={{ padding: '16px', borderTop: '1px solid #eee' }}>
                     <p style={{ fontSize: '11px', color: '#999', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Total Categories: {categories.length}</p>
                 </div>
             </aside>

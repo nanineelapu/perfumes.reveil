@@ -86,10 +86,10 @@ export function ProductListContent() {
     }, [selectedCategory, searchQuery, products, selectedConcentrations, selectedStatus, sortBy])
 
     return (
-        <main style={{ background: '#050505', height: '100vh', color: '#fff', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <main style={{ background: '#050505', minHeight: '100vh', color: '#fff', display: 'flex', flexDirection: 'column' }}>
             {/* SECTION 1: TOP HERO (FIXED) */}
             <section style={{
-                padding: isMobile ? '60px 0 10px' : '30px 0 10px',
+                padding: isMobile ? '100px 0 20px' : '30px 0 10px',
                 position: 'relative',
                 overflow: 'hidden',
                 background: 'linear-gradient(to bottom, #0a0a0a, #050505)',
@@ -156,34 +156,48 @@ export function ProductListContent() {
 
             {isMobile && (
                 <div style={{
-                    position: 'sticky', top: '70px', zIndex: 50, background: 'rgba(5,5,5,0.95)',
-                    backdropFilter: 'blur(10px)', borderBottom: '1px solid rgba(255,255,255,0.05)',
-                    padding: '12px 0 16px', overflowX: 'auto', scrollbarWidth: 'none',
-                    display: 'flex', gap: '24px', paddingLeft: '24px', paddingRight: '24px'
+                    position: 'sticky', top: '66px', zIndex: 50, background: 'rgba(5,5,5,0.98)',
+                    backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.05)',
+                    padding: '20px 0', overflowX: 'auto', scrollbarWidth: 'none',
+                    display: 'flex', gap: '12px', paddingLeft: '24px', paddingRight: '24px',
+                    msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch',
+                    WebkitMaskImage: 'linear-gradient(to right, black 80%, transparent)'
                 }}>
                     {categories.map(cat => (
-                        <button
+                        <motion.button
                             key={cat}
+                            whileTap={{ scale: 0.95 }}
                             onClick={() => setSelectedCategory(cat)}
                             style={{
-                                background: 'none', border: 'none', color: selectedCategory === cat ? '#d4af37' : '#444',
-                                fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.2em', whiteSpace: 'nowrap', transition: '0.3s', fontWeight: selectedCategory === cat ? 800 : 500
+                                background: selectedCategory === cat ? 'rgba(212, 175, 55, 0.08)' : 'rgba(255,255,255,0.02)',
+                                border: `1px solid ${selectedCategory === cat ? '#d4af37' : 'rgba(255,255,255,0.1)'}`,
+                                color: selectedCategory === cat ? '#d4af37' : '#888',
+                                padding: '10px 24px',
+                                borderRadius: '1px',
+                                fontSize: '9px',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.25em',
+                                whiteSpace: 'nowrap',
+                                transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                                fontWeight: selectedCategory === cat ? 800 : 500,
+                                cursor: 'pointer',
+                                outline: 'none'
                             }}
                         >
                             {cat}
-                        </button>
+                        </motion.button>
                     ))}
                 </div>
             )}
 
             {/* SECTION 2 & 3 WRAPPER */}
-            <div style={{ display: 'flex', flex: 1, overflow: 'hidden', position: 'relative' }}>
+            <div style={{ display: 'flex', flex: 1, position: 'relative' }}>
                 {/* SECTION 2: SIDEBAR (FIXED/SCROLLABLE INDEPENDENTLY) */}
                 <aside style={{
                     width: isMobile ? '0' : '280px', padding: isMobile ? '0' : '40px 30px',
                     display: isMobile ? 'none' : 'flex', background: 'transparent', borderRight: '1px solid rgba(255,255,255,0.05)',
-                    height: '100%', flexDirection: 'column', gap: '40px', overflowY: 'auto', scrollbarWidth: 'none', zIndex: 20,
-                    flexShrink: 0
+                    minHeight: 'calc(100vh - 150px)', flexDirection: 'column', gap: '40px', zIndex: 20,
+                    flexShrink: 0, position: 'sticky', top: '100px'
                 }}>
                     <div>
                         <span style={{ fontSize: '11px', fontWeight: 900, color: '#d4af37', letterSpacing: '0.4em', textTransform: 'uppercase', marginBottom: '16px', display: 'block' }}>Search</span>
@@ -269,7 +283,7 @@ export function ProductListContent() {
                 </aside>
 
                 {/* SECTION 3: PRODUCTS (PRIMARY SCROLL AREA) */}
-                <section style={{ flex: 1, position: 'relative', overflowY: 'auto', height: '100%', scrollBehavior: 'smooth' }}>
+                <section style={{ flex: 1, position: 'relative', scrollBehavior: 'smooth' }}>
                     <div style={{
                         position: 'sticky', top: '0', zIndex: 10,
                         padding: isMobile ? '12px 24px' : '20px 80px', background: 'rgba(5,5,5,0.85)', backdropFilter: 'blur(20px)',
@@ -296,7 +310,7 @@ export function ProductListContent() {
                         </div>
                     </div>
 
-                    <div style={{ padding: isMobile ? '16px 16px 80px' : '20px 80px 80px' }}>
+                    <div style={{ padding: isMobile ? '16px 16px 40px' : '20px 80px 40px' }}>
                         <AnimatePresence mode="wait">
                             {loading ? (
                                 <motion.div

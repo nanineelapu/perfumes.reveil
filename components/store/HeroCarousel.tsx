@@ -289,13 +289,19 @@ function SlideMedia({ slide, isActive, emblaApi, isMobile }: { slide: Slide, isA
                         {slide.title && (
                             <h2 style={{
                                 color: '#fff',
-                                fontSize: isMobile ? 'clamp(32px, 10vw, 48px)' : ((slide.title?.toLowerCase().includes('collection') || slide.title?.toLowerCase().includes('stones')) ? 'clamp(28px, 5.5vw, 84px)' : 'clamp(32px, 6vw, 100px)'),
+                                // Dynamic scaling based on title length
+                                fontSize: isMobile 
+                                    ? 'clamp(32px, 10vw, 48px)' 
+                                    : (slide.title.length > 20 
+                                        ? 'clamp(24px, 4.5vw, 72px)' 
+                                        : 'clamp(32px, 6vw, 100px)'),
                                 fontWeight: 900,
                                 margin: isMobile ? '0 0 24px' : '0 0 40px',
                                 lineHeight: 1.1,
                                 fontFamily: 'var(--font-baskerville)',
                                 letterSpacing: '-0.03em',
-                                overflow: 'hidden'
+                                overflow: 'hidden',
+                                maxWidth: isMobile ? '100%' : '1100px'
                             }}>
                                 <motion.div
                                     variants={{
@@ -303,10 +309,11 @@ function SlideMedia({ slide, isActive, emblaApi, isMobile }: { slide: Slide, isA
                                         animate: { clipPath: 'inset(0% 0% 0% 0%)', y: 0 }
                                     }}
                                     transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+                                    style={{ display: 'flex', flexWrap: 'wrap' }}
                                 >
                                     {slide.title?.split(' ').map((word, i) => {
                                         const lowerWord = word.toLowerCase()
-                                        const isAccent = lowerWord.includes('meena') || lowerWord.includes('stones') || lowerWord.includes('scent') || lowerWord.includes('collection')
+                                        const isAccent = lowerWord.includes('meena') || lowerWord.includes('stones') || lowerWord.includes('scent') || lowerWord.includes('collection') || lowerWord.includes('wildstone')
                                         return (
                                             <span key={i} style={{
                                                 color: isAccent ? '#d4af37' : '#fff',
@@ -343,10 +350,10 @@ function SlideMedia({ slide, isActive, emblaApi, isMobile }: { slide: Slide, isA
                                     transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                                     style={{
                                         display: 'inline-block',
-                                        padding: isMobile ? '14px 32px' : '18px 48px',
+                                        padding: isMobile ? '14px 32px' : 'clamp(14px, 1.5vw, 20px) clamp(32px, 3.5vw, 60px)',
                                         background: '#fff', color: '#000',
                                         borderRadius: '100px', fontWeight: 700,
-                                        fontSize: isMobile ? '10px' : '11px',
+                                        fontSize: isMobile ? '10px' : 'clamp(10px, 0.8vw, 13px)',
                                         textTransform: 'uppercase',
                                         letterSpacing: isMobile ? '0.2em' : '0.3em',
                                         textDecoration: 'none',
