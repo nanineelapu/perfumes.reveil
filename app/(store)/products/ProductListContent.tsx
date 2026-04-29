@@ -51,7 +51,10 @@ export function ProductListContent() {
         return () => window.removeEventListener('resize', checkMobile)
     }, [])
 
-    const categories = ["ALL", "Perfumes", "DEODRANTS", "ATTARS", "AIRFRESHNER", "Reveil Fragrance"]
+    const categories = useMemo(() => {
+        const uniqueCats = Array.from(new Set(products.map(p => (p.category || 'UNCATEGORIZED').toUpperCase())))
+        return ["ALL", ...uniqueCats]
+    }, [products])
 
     const filteredAndSortedProducts = useMemo(() => {
         let filtered = products.filter(p => {
@@ -301,12 +304,6 @@ export function ProductListContent() {
                                     <Filter size={14} color="#d4af37" />
                                     <span style={{ fontSize: '9px', color: '#fff', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Filter</span>
                                 </button>
-                            )}
-                            {!isMobile && (
-                                <>
-                                    <LayoutGrid size={16} opacity={0.3} style={{ cursor: 'pointer' }} />
-                                    <List size={16} opacity={0.3} style={{ cursor: 'pointer' }} />
-                                </>
                             )}
                         </div>
                     </div>

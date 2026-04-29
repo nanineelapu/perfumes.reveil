@@ -5,6 +5,7 @@ import type { Metadata } from 'next'
 
 import { AnimatedNavbar } from "@/components/store/AnimatedNavbar"
 import { Footer } from '@/components/store/Footer'
+import { WhatsAppOverlay } from '@/components/store/WhatsAppOverlay'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://perfumesreveil.vercel.app'),
@@ -63,6 +64,7 @@ export default async function StoreLayout({ children }: { children: React.ReactN
         <AnimatedNavbar />
         {children}
         <Footer />
+        <WhatsAppOverlay />
       </CartProvider>
     </div>
   )

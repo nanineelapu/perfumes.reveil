@@ -1,25 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import * as admin from 'firebase-admin'
-
-// Initialize Firebase Admin (only once)
-if (!admin.apps.length) {
-    try {
-        const projectId = process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
-        const clientEmail = process.env.FIREBASE_SERVICE_ACCOUNT_CLIENT_EMAIL;
-        const privateKey = process.env.FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY?.replace(/\\n/g, '\n');
-
-        if (projectId && clientEmail && privateKey) {
-            admin.initializeApp({
-                credential: admin.credential.cert({ projectId, clientEmail, privateKey }),
-            });
-        } else {
-            admin.initializeApp({ projectId });
-        }
-    } catch (error) {
-        console.error('Firebase Admin Init Error:', error);
-    }
-}
+import { admin } from '@/lib/firebase-admin'
 
 export async function POST(request: Request) {
     try {
@@ -29,14 +10,15 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Authentication token is required.' }, { status: 401 })
         }
 
-        // 1. Verify Firebase ID Token
-        const decodedToken = await admin.auth().verifyIdToken(id_token);
-        const verifiedPhone = decodedToken.phone_number || phone;
+        // 1. Verify Firebase ID Token using the shared Admin SDK
+        const decodedToken = await admin.auth().verifyIdToken(id_token)
+        const verifiedPhone = decodedToken.phone_number || phone
 
         if (!verifiedPhone) {
             return NextResponse.json({ error: 'Phone number not found.' }, { status: 400 })
         }
 
+        // Normalize to E.164 format e.g. +91XXXXXXXXXX
         const normalizedPhone = '+' + verifiedPhone.replace(/\D/g, '')
         const supabaseAdmin = createAdminClient()
 
@@ -44,7 +26,7 @@ export async function POST(request: Request) {
         let supabaseUser: any = null
         let is_new_user = false
 
-        // Search 1: Find by phone in profiles table
+        // Search 1: Find by phone in profiles table (fastest)
         const { data: profileRow } = await supabaseAdmin
             .from('profiles')
             .select('id')
@@ -56,7 +38,7 @@ export async function POST(request: Request) {
             supabaseUser = user
         }
 
-        // Search 2: Find by phone in auth users (fuzzy match)
+        // Search 2: Find by phone in auth.users (fallback for users created before profile sync)
         if (!supabaseUser) {
             const { data: usersData } = await supabaseAdmin.auth.admin.listUsers()
             supabaseUser = usersData?.users?.find(u => {
@@ -95,12 +77,24 @@ export async function POST(request: Request) {
             })
         }
 
-        // 4. Generate magic link — redirect to home page after login
-        const origin = request.headers.get('origin') || new URL(request.url).origin
+        // 4. Determine the site origin robustly (works in both dev and production)
+        //    Priority: explicit env var > request origin header > request URL origin
+        const siteUrl =
+            process.env.NEXT_PUBLIC_APP_URL ||
+            process.env.NEXT_PUBLIC_SITE_URL ||
+            request.headers.get('origin') ||
+            new URL(request.url).origin
+
+        // 5. Generate magic link.
+        //    redirectTo = the URL Supabase sends the user to AFTER clicking the link.
+        //    It MUST point to our client-side /auth/callback page which parses the 
+        //    #access_token hash fragment (since server routes can't see hashes).
+        const redirectTo = `${siteUrl}/auth/callback`
+
         const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
             type: 'magiclink',
             email: supabaseUser.email!,
-            options: { redirectTo: `${origin}/` }
+            options: { redirectTo }
         })
 
         if (linkError) throw linkError
@@ -113,7 +107,7 @@ export async function POST(request: Request) {
         })
 
     } catch (err: any) {
-        console.error('Firebase Sync Error:', err)
+        console.error('[firebase-sync] Error:', err)
         return NextResponse.json({ error: err.message }, { status: 500 })
     }
 }

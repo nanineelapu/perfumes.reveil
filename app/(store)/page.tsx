@@ -1,7 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import HeroCarousel from '@/components/store/HeroCarousel'
 import ProductGrid from '@/components/store/ProductGrid'
-import { PhilosophySection, NotesSection, BrandShowcaseSection, ReveilCollectionSection } from '@/components/store/EditorialSections'
+import { ReveilCollectionSection, PhilosophySection, NotesSection } from '@/components/store/EditorialSections'
+import { InfiniteIconCarousel } from '@/components/store/InfiniteIconCarousel'
 import { NewsletterSection } from '@/components/store/NewsletterSection'
 import { ReviewsSection } from '@/components/store/ReviewsSection'
 
@@ -186,22 +187,25 @@ export default async function HomePage() {
         {/* Hero section */}
         <HeroCarousel slides={allSlides} />
 
-        {/* Editorial Content */}
-        <PhilosophySection />
-
-        <NotesSection />
-
-        <BrandShowcaseSection />
-
-        <ReveilCollectionSection />
-
-        {/* Grid of Featured Products */}
+        {/* 1. Trending Curation */}
         <ProductGrid items={trending ?? []} />
 
-        {/* Testimonials */}
+        {/* 2. Collections */}
+        <NotesSection />
+
+        {/* 3. Reviews */}
         <ReviewsSection reviews={latestReviews || []} />
 
-        {/* Newsletter */}
+        {/* 4. Reveil Collection Big Image */}
+        <ReveilCollectionSection />
+
+        {/* Brand Theme / Value Carousel */}
+        <InfiniteIconCarousel />
+
+        {/* 5. Our Story */}
+        <PhilosophySection />
+
+        {/* 6. Join Reveil */}
         <NewsletterSection />
 
       </main>

@@ -15,12 +15,6 @@ let auth: any;
 if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
   app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
   auth = getAuth(app);
-  // Enable testing mode for phone auth
-  // This is only allowed for Android emulator or debug builds
-  if (typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")) {
-    auth.settings.appVerificationDisabledForTesting = true;
-    console.log("Firebase testing mode enabled");
-  }
 }
 
 export { auth };

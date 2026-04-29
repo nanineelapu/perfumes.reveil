@@ -34,6 +34,11 @@ function AuthPageContent() {
         if (modeParam) {
             setAuthMode(modeParam)
         }
+        // Show error if redirected back from callback with an error
+        const errorParam = searchParams.get('error')
+        if (errorParam === 'session_failed') {
+            setError('Login link expired or already used. Please request a new OTP.')
+        }
     }, [modeParam])
 
     useEffect(() => {
@@ -85,6 +90,7 @@ function AuthPageContent() {
 
     // --- FLOW 2: CUSTOMER LOGIN (Firebase OTP) ---
     const sendOtp = async (e: React.FormEvent) => {
+        e.preventDefault()
         setLoading(true)
         setError(null)
         setMessage(null)
@@ -156,6 +162,13 @@ function AuthPageContent() {
                     email: formData.email
                 })
             })
+
+            const contentType = res.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                const text = await res.text();
+                console.error("Non-JSON response from server:", text.substring(0, 500));
+                throw new Error("Server communication error. Please try again or contact support.");
+            }
 
             const syncResult = await res.json()
             if (!res.ok) throw new Error(syncResult.error || 'Sync failed')
@@ -503,7 +516,7 @@ function AuthPageContent() {
                                             <button type="button" onClick={() => setOtpSent(false)} style={{ background: 'none', border: 'none', color: 'rgba(0,0,0,0.4)', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                                 <ChevronLeft size={14} /> Back
                                             </button>
-                                            <button type="button" onClick={sendOtp} style={{ background: 'none', border: 'none', color: '#000', fontSize: '11px', fontWeight: 800, cursor: 'pointer' }}>
+                                            <button type="button" onClick={(e) => sendOtp(e as any)} style={{ background: 'none', border: 'none', color: '#000', fontSize: '11px', fontWeight: 800, cursor: 'pointer' }}>
                                                 Didn't get the code? <span style={{ color: '#d4af37' }}>Resend</span>
                                             </button>
                                         </div>

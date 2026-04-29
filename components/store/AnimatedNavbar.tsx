@@ -19,6 +19,7 @@ export function AnimatedNavbar() {
     const [isMobile, setIsMobile] = useState(false)
     const [scrolled, setScrolled] = useState(false)
     const [user, setUser] = useState<SupabaseUser | null>(null)
+    const [userName, setUserName] = useState<string | null>(null)
     const [cartItems, setCartItems] = useState<any[]>([])
     const [cartTotals, setCartTotals] = useState({ subtotal: 0, total: 0 })
     const [isCartLoading, setIsCartLoading] = useState(false)
@@ -40,13 +41,49 @@ export function AnimatedNavbar() {
         checkMobile()
         window.addEventListener('resize', checkMobile)
 
-        // Auth state listener
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setUser(session?.user ?? null)
-        })
+        // Auth state listener — also fetch profile name on login
+        const fetchProfileName = async (userId: string) => {
+            try {
+                const { data } = await supabase
+                    .from('profiles')
+                    .select('first_name, full_name')
+                    .eq('id', userId)
+                    .maybeSingle()
+                if (data) {
+                    setUserName(data.first_name || data.full_name?.split(' ')[0] || null)
+                }
+            } catch {
+                // fail silently
+            }
+        }
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        // Implicit Flow Hash Fallback (in case Supabase redirects to home instead of callback route)
+        if (typeof window !== 'undefined' && window.location.hash.includes('access_token')) {
+            supabase.auth.getSession().then(({ data: { session } }) => {
+                if (session) {
+                    window.location.href = '/orders'
+                }
+            })
+        } else {
+            supabase.auth.getSession().then(({ data: { session } }) => {
+                setUser(session?.user ?? null)
+                if (session?.user) fetchProfileName(session.user.id)
+            })
+        }
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
             setUser(session?.user ?? null)
+            
+            if (event === 'SIGNED_IN' && window.location.hash.includes('access_token')) {
+                window.location.href = '/orders'
+                return
+            }
+            
+            if (session?.user) {
+                fetchProfileName(session.user.id)
+            } else {
+                setUserName(null)
+            }
         })
 
         return () => {
@@ -114,9 +151,11 @@ export function AnimatedNavbar() {
     }
 
     useEffect(() => {
-        if (isCartOpen) {
-            fetchCart()
-        }
+        fetchCart()
+
+        const handleCartUpdate = () => fetchCart()
+        window.addEventListener('cart-updated', handleCartUpdate)
+        return () => window.removeEventListener('cart-updated', handleCartUpdate)
     }, [isCartOpen, user])
 
 
@@ -352,7 +391,7 @@ export function AnimatedNavbar() {
                                         position: 'relative',
                                         padding: '4px 0'
                                     }}>
-                                    {user ? 'Profile' : 'Account'}
+                                    {user ? (userName ? `Hi, ${userName}` : 'Profile') : 'Account'}
 
                                     <motion.div
                                         variants={{
@@ -523,8 +562,21 @@ export function AnimatedNavbar() {
                                 <motion.div
                                     whileHover={{ scale: 1.15, color: '#fff' }}
                                     transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+                                    style={{ position: 'relative' }}
                                 >
                                     <ShoppingBag size={20} strokeWidth={1} />
+                                    {cartItems.length > 0 && (
+                                        <div style={{
+                                            position: 'absolute', top: '-6px', right: '-8px',
+                                            background: '#ff4b4b', color: '#fff',
+                                            fontSize: '9px', fontWeight: 'bold',
+                                            width: '16px', height: '16px',
+                                            borderRadius: '50%', display: 'flex',
+                                            alignItems: 'center', justifyContent: 'center'
+                                        }}>
+                                            {cartItems.length}
+                                        </div>
+                                    )}
                                 </motion.div>
                             </button>
                         </motion.div>
@@ -543,9 +595,21 @@ export function AnimatedNavbar() {
                         <motion.div variants={itemVariants}>
                             <button
                                 onClick={() => { setIsCartOpen(true); setIsMobileMenuOpen(false); }}
-                                style={{ background: 'none', border: 'none', color: textColor, display: 'flex', alignItems: 'center', cursor: 'pointer', padding: 0 }}
+                                style={{ background: 'none', border: 'none', color: textColor, display: 'flex', alignItems: 'center', cursor: 'pointer', padding: 0, position: 'relative' }}
                             >
                                 <ShoppingBag size={22} strokeWidth={1.5} />
+                                {cartItems.length > 0 && (
+                                    <div style={{
+                                        position: 'absolute', top: '-6px', right: '-8px',
+                                        background: '#ff4b4b', color: '#fff',
+                                        fontSize: '9px', fontWeight: 'bold',
+                                        width: '16px', height: '16px',
+                                        borderRadius: '50%', display: 'flex',
+                                        alignItems: 'center', justifyContent: 'center'
+                                    }}>
+                                        {cartItems.length}
+                                    </div>
+                                )}
                             </button>
                         </motion.div>
                         <motion.div variants={itemVariants}>
@@ -613,13 +677,15 @@ export function AnimatedNavbar() {
                             </motion.div>
 
                             {[
-                                { name: 'Shop', href: '/products' },
-                                { name: 'Orders', href: '/orders' },
-                                { name: 'Wishlist', href: '/wishlist' },
-                                { name: 'My Addresses', href: '/address-book' },
-                                { name: 'Track Order', href: '/track-order' },
-                                { name: 'Login', href: '/auth?mode=login' },
-                                { name: 'Register', href: '/auth?mode=signup' }
+                                { name: 'Shop', href: '/products', always: true },
+                                { name: 'Orders', href: '/orders', always: true },
+                                { name: 'Wishlist', href: '/wishlist', always: true },
+                                { name: 'My Addresses', href: '/address-book', loggedIn: true },
+                                { name: 'Track Order', href: '/track-order', always: true },
+                                ...(!user ? [
+                                    { name: 'Login', href: '/auth?mode=login', always: true },
+                                    { name: 'Register', href: '/auth?mode=signup', always: true }
+                                ] : [])
                             ].map((link, i) => (
                                 <motion.div
                                     key={link.name}
@@ -654,6 +720,29 @@ export function AnimatedNavbar() {
                                     </Link>
                                 </motion.div>
                             ))}
+                            {user && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 30, rotateX: -30 }}
+                                    animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                                    transition={{ duration: 0.8, delay: 0.9, ease: [0.16, 1, 0.3, 1] }}
+                                >
+                                    <button
+                                        onClick={() => { handleLogout(); setIsMobileMenuOpen(false) }}
+                                        style={{
+                                            background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+                                            fontSize: 'clamp(24px, 8vw, 32px)',
+                                            fontFamily: 'var(--font-baskerville)',
+                                            color: '#ff4b4b',
+                                            letterSpacing: '0.02em',
+                                            fontWeight: 300,
+                                            lineHeight: 1,
+                                            textAlign: 'left'
+                                        }}
+                                    >
+                                        Logout
+                                    </button>
+                                </motion.div>
+                            )}
                         </div>
 
                         {/* Mobile Footer Info */}

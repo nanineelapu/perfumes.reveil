@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
-import { Heart, Loader2 } from 'lucide-react'
+import { Heart, Loader2, ShoppingCart, ShoppingBag } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Product } from '@/types/store'
 
@@ -65,6 +65,7 @@ export default function ProductCard({ product }: { product: Product }) {
             })
 
             if (res.ok) {
+                window.dispatchEvent(new Event('cart-updated'))
                 if (type === 'buy') {
                     router.push('/cart')
                 } else {
@@ -146,6 +147,7 @@ export default function ProductCard({ product }: { product: Product }) {
             />
             {/* Visual Media Container */}
             <motion.div
+                onClick={() => router.push(`/products/${product.slug}`)}
                 onMouseEnter={() => setHovered(true)}
                 onMouseLeave={() => setHovered(false)}
                 animate={{
@@ -198,74 +200,6 @@ export default function ProductCard({ product }: { product: Product }) {
                     background: 'url("https://grainy-gradients.vercel.app/noise.svg")',
                     opacity: 0.05, pointerEvents: 'none'
                 }} />
-
-                {/* Action Interface - Sliding Glassmorphism */}
-                <motion.div
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: hovered ? 0 : 20, opacity: hovered ? 1 : 0 }}
-                    transition={{ duration: 0.4, delay: 0.1 }}
-                    style={{
-                        position: 'absolute', inset: 0,
-                        zIndex: 2,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'flex-end',
-                        padding: isMobile ? '12px' : '30px',
-                        background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 60%)'
-                    }}
-                >
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        <Link
-                            href={`/products/${product.slug}`}
-                            style={{
-                                width: '100%',
-                                textAlign: 'center',
-                                background: '#fff',
-                                color: '#000',
-                                padding: isMobile ? '10px 0' : '16px 0',
-                                textDecoration: 'none',
-                                fontSize: isMobile ? '8px' : '10px',
-                                fontWeight: 900,
-                                letterSpacing: '0.4em',
-                                textTransform: 'uppercase',
-                                boxShadow: '0 10px 20px rgba(0,0,0,0.2)'
-                            }}
-                        >
-                            EXPERIENCE
-                        </Link>
-                        <button
-                            disabled={adding}
-                            onClick={(e) => handleAction(e, 'cart')}
-                            style={{
-                                width: '100%',
-                                background: 'rgba(255,255,255,0.05)',
-                                backdropFilter: 'blur(10px)',
-                                color: '#fff',
-                                border: '1px solid rgba(255,255,255,0.1)',
-                                padding: isMobile ? '10px 0' : '14px 0',
-                                fontSize: isMobile ? '8px' : '9px',
-                                fontWeight: 700,
-                                letterSpacing: '0.2em',
-                                textTransform: 'uppercase',
-                                cursor: adding ? 'not-allowed' : 'pointer',
-                                opacity: adding ? 0.6 : 1
-                            }}
-                        >
-                            {adding ? (isMobile ? '...' : 'SYNCHRONIZING...') : 'ADD TO CART'}
-                        </button>
-                    </div>
-                </motion.div>
-
-                {/* Vertical Batch ID */}
-                <div style={{
-                    position: 'absolute', top: isMobile ? '12px' : '30px', right: isMobile ? '12px' : '30px',
-                    fontSize: isMobile ? '6px' : '8px', color: '#d4af37',
-                    letterSpacing: '0.4em', textTransform: 'uppercase',
-                    fontWeight: 900, zIndex: 3, writingMode: 'vertical-rl',
-                    opacity: hovered ? 0.2 : 0.6, transition: '0.5s'
-                }}>
-                    {isMobile ? `B-${product.id}` : `BATCH — REF.${product.id.toString().padStart(3, '0')}`}
-                </div>
 
                 {/* Wishlist Toggle Overlay */}
                 <motion.button
@@ -330,7 +264,7 @@ export default function ProductCard({ product }: { product: Product }) {
                         {product.name}
                     </h3>
 
-                    {/* Price and Discount Tag */}
+                    {/* Price Tag */}
                     <div style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -338,18 +272,8 @@ export default function ProductCard({ product }: { product: Product }) {
                         marginBottom: isMobile ? '12px' : '20px',
                         fontFamily: 'var(--font-tenor)'
                     }}>
-                        <span style={{ fontSize: isMobile ? '12px' : '14px', fontWeight: 500, color: '#d4af37' }}>
+                        <span style={{ fontSize: isMobile ? '16px' : '18px', fontWeight: 500, color: '#d4af37' }}>
                             ₹ {product.price}
-                        </span>
-                        <span style={{
-                            fontSize: isMobile ? '7px' : '9px',
-                            color: '#d4af37',
-                            padding: '2px 8px',
-                            border: '1px solid rgba(212,175,55,0.3)',
-                            borderRadius: '1px',
-                            letterSpacing: '0.1em'
-                        }}>
-                            12% OFF
                         </span>
                     </div>
                 </Link>
@@ -382,7 +306,11 @@ export default function ProductCard({ product }: { product: Product }) {
                                 fontFamily: 'var(--font-tenor)',
                                 position: 'relative',
                                 overflow: 'hidden',
-                                borderRadius: '2px'
+                                borderRadius: '2px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                lineHeight: 1
                             }}
                         >
                             {!isMobile && (
@@ -401,16 +329,16 @@ export default function ProductCard({ product }: { product: Product }) {
                                     initial: { color: '#d4af37' },
                                     hover: { color: '#000' }
                                 } : {}}
-                                style={{ position: 'relative', zIndex: 1, color: isMobile ? '#000' : 'inherit' }}
+                                style={{ position: 'relative', zIndex: 1, color: isMobile ? '#000' : 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}
                             >
                                 <motion.span
                                     variants={!isMobile ? {
                                         initial: { y: 0, opacity: 1 },
                                         hover: { y: -20, opacity: 0 }
                                     } : {}}
-                                    style={{ display: 'block', color: isMobile ? '#000' : 'inherit' }}
+                                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: isMobile ? '#000' : 'inherit' }}
                                 >
-                                    {adding ? '...' : 'BUY'}
+                                    {adding ? <span style={{ paddingTop: '2px' }}>...</span> : <><ShoppingBag size={isMobile ? 12 : 14} /> <span style={{ paddingTop: '2px' }}>BUY NOW</span></>}
                                 </motion.span>
                                 {!isMobile && (
                                     <motion.span
@@ -418,9 +346,9 @@ export default function ProductCard({ product }: { product: Product }) {
                                             initial: { y: 20, opacity: 0 },
                                             hover: { y: 0, opacity: 1 }
                                         }}
-                                        style={{ position: 'absolute', left: 0, right: 0, top: 0 }}
+                                        style={{ position: 'absolute', left: 0, right: 0, top: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                                     >
-                                        {adding ? '...' : 'BUY'}
+                                        {adding ? <span style={{ paddingTop: '2px' }}>...</span> : <><ShoppingBag size={14} /> <span style={{ paddingTop: '2px' }}>BUY NOW</span></>}
                                     </motion.span>
                                 )}
                             </motion.div>
@@ -447,7 +375,11 @@ export default function ProductCard({ product }: { product: Product }) {
                             fontFamily: 'var(--font-tenor)',
                             position: 'relative',
                             overflow: 'hidden',
-                            borderRadius: '2px'
+                            borderRadius: '2px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            lineHeight: 1
                         }}
                     >
                         {!isMobile && (
@@ -466,16 +398,16 @@ export default function ProductCard({ product }: { product: Product }) {
                                 initial: { color: '#d4af37' },
                                 hover: { color: '#000' }
                             } : {}}
-                            style={{ position: 'relative', zIndex: 1, color: isMobile ? '#000' : 'inherit' }}
+                            style={{ position: 'relative', zIndex: 1, color: isMobile ? '#000' : 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}
                         >
                             <motion.span
                                 variants={!isMobile ? {
                                     initial: { y: 0, opacity: 1 },
                                     hover: { y: -20, opacity: 0 }
                                 } : {}}
-                                style={{ display: 'block', color: isMobile ? '#000' : 'inherit' }}
+                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: isMobile ? '#000' : 'inherit' }}
                             >
-                                {adding ? '...' : 'CART'}
+                                {adding ? <span style={{ paddingTop: '2px' }}>...</span> : <><ShoppingCart size={isMobile ? 12 : 14} /> <span style={{ paddingTop: '2px' }}>CART</span></>}
                             </motion.span>
                             {!isMobile && (
                                 <motion.span
@@ -483,9 +415,9 @@ export default function ProductCard({ product }: { product: Product }) {
                                         initial: { y: 20, opacity: 0 },
                                         hover: { y: 0, opacity: 1 }
                                     }}
-                                    style={{ position: 'absolute', left: 0, right: 0, top: 0 }}
+                                    style={{ position: 'absolute', left: 0, right: 0, top: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                                 >
-                                    {adding ? '...' : 'CART'}
+                                    {adding ? <span style={{ paddingTop: '2px' }}>...</span> : <><ShoppingCart size={14} /> <span style={{ paddingTop: '2px' }}>CART</span></>}
                                 </motion.span>
                             )}
                         </motion.div>
