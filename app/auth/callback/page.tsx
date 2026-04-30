@@ -69,5 +69,5 @@ export default function AuthCallbackPage() {
         )
     }
 
-    return <PremiumLoader text="Securing your session..." />
+    return <PremiumLoader iconName="sparkles" text="Securing your session..." />
 }
