@@ -243,7 +243,7 @@ export default function ProductCard({ product }: { product: Product }) {
                 <Link href={`/products/${product.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                     <div style={{
                         fontSize: isMobile ? '7px' : '8px', color: '#666',
-                        letterSpacing: '0.6em', marginBottom: '8px',
+                        letterSpacing: isMobile ? '0.2em' : '0.6em', marginBottom: '8px',
                         fontWeight: 400, textTransform: 'uppercase',
                         display: 'flex', alignItems: 'center', gap: '8px',
                         fontFamily: 'var(--font-tenor)'
@@ -257,9 +257,9 @@ export default function ProductCard({ product }: { product: Product }) {
                         {product.category}
                     </div>
                     <h3 style={{
-                        margin: '0 0 8px', fontSize: isMobile ? '14px' : '18px', fontWeight: 300,
+                        margin: '0 0 8px', fontSize: isMobile ? '15px' : '18px', fontWeight: 300,
                         color: '#fff', fontFamily: 'var(--font-cormorant)',
-                        letterSpacing: '0.02em', textTransform: 'none' // Allows admin casing
+                        letterSpacing: '0.02em', textTransform: 'none', lineHeight: 1.2
                     }}>
                         {product.name}
                     </h3>
@@ -272,7 +272,7 @@ export default function ProductCard({ product }: { product: Product }) {
                         marginBottom: isMobile ? '12px' : '20px',
                         fontFamily: 'var(--font-tenor)'
                     }}>
-                        <span style={{ fontSize: isMobile ? '16px' : '18px', fontWeight: 500, color: '#d4af37' }}>
+                        <span style={{ fontSize: isMobile ? '14px' : '18px', fontWeight: 500, color: '#d4af37' }}>
                             ₹ {product.price}
                         </span>
                     </div>
@@ -297,10 +297,10 @@ export default function ProductCard({ product }: { product: Product }) {
                                 background: isMobile ? '#d4af37' : 'rgba(255,255,255,0.02)',
                                 color: isMobile ? '#000' : '#d4af37',
                                 border: isMobile ? 'none' : '1px solid rgba(212,175,55,0.2)',
-                                padding: isMobile ? '6px 0' : '14px 0',
-                                fontSize: isMobile ? '9px' : '8px',
+                                padding: isMobile ? '8px 2px' : '14px 0',
+                                fontSize: '8px',
                                 fontWeight: 900,
-                                letterSpacing: isMobile ? '0.1em' : '0.3em',
+                                letterSpacing: isMobile ? '0' : '0.3em',
                                 textTransform: 'uppercase',
                                 cursor: adding ? 'not-allowed' : 'pointer',
                                 fontFamily: 'var(--font-tenor)',
@@ -336,9 +336,9 @@ export default function ProductCard({ product }: { product: Product }) {
                                         initial: { y: 0, opacity: 1 },
                                         hover: { y: -20, opacity: 0 }
                                     } : {}}
-                                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: isMobile ? '#000' : 'inherit' }}
+                                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: isMobile ? '4px' : '8px', color: isMobile ? '#000' : 'inherit', whiteSpace: 'nowrap' }}
                                 >
-                                    {adding ? <span style={{ paddingTop: '2px' }}>...</span> : <><ShoppingBag size={isMobile ? 12 : 14} /> <span style={{ paddingTop: '2px' }}>BUY NOW</span></>}
+                                    {adding ? <span style={{ paddingTop: '2px' }}>...</span> : <><ShoppingBag size={isMobile ? 12 : 14} /> <span style={{ paddingTop: '2px' }}>{isMobile ? 'BUY' : 'BUY NOW'}</span></>}
                                 </motion.span>
                                 {!isMobile && (
                                     <motion.span
@@ -366,10 +366,10 @@ export default function ProductCard({ product }: { product: Product }) {
                             background: isMobile ? '#fff' : 'rgba(255,255,255,0.02)',
                             color: isMobile ? '#000' : '#d4af37',
                             border: isMobile ? 'none' : '1px solid rgba(212,175,55,0.2)',
-                            padding: isMobile ? '6px 0' : '14px 0',
-                            fontSize: isMobile ? '9px' : '8px',
+                            padding: isMobile ? '8px 2px' : '14px 0',
+                            fontSize: '8px',
                             fontWeight: 900,
-                            letterSpacing: isMobile ? '0.1em' : '0.3em',
+                            letterSpacing: isMobile ? '0' : '0.3em',
                             textTransform: 'uppercase',
                             cursor: adding ? 'not-allowed' : 'pointer',
                             fontFamily: 'var(--font-tenor)',
@@ -405,7 +405,7 @@ export default function ProductCard({ product }: { product: Product }) {
                                     initial: { y: 0, opacity: 1 },
                                     hover: { y: -20, opacity: 0 }
                                 } : {}}
-                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: isMobile ? '#000' : 'inherit' }}
+                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: isMobile ? '4px' : '8px', color: isMobile ? '#000' : 'inherit', whiteSpace: 'nowrap' }}
                             >
                                 {adding ? <span style={{ paddingTop: '2px' }}>...</span> : <><ShoppingCart size={isMobile ? 12 : 14} /> <span style={{ paddingTop: '2px' }}>CART</span></>}
                             </motion.span>

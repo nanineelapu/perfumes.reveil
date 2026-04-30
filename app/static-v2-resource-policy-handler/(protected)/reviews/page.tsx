@@ -92,6 +92,10 @@ export default function AdminReviewsPage() {
                 setEditingReview(null)
                 setForm({ reviewer_name: '', reviewer_avatar: '', rating: 5, comment: '', product_id: '', is_featured: false, source: 'google' })
                 fetchReviews()
+            } else {
+                const errorData = await res.json()
+                console.error('Failed to save review:', errorData)
+                alert('Failed to save review: ' + (errorData.error || 'Unknown error'))
             }
         } catch (error) {
             console.error('Error saving review:', error)

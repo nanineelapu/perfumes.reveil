@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 
 // GET — fetch reviews
@@ -111,14 +112,17 @@ export async function POST(request: Request) {
         insertData.order_id = order_id
     }
 
-    const { data: review, error: reviewError } = await supabase
+    const activeClient = isAdmin ? createAdminClient() : supabase
+
+    const { data: review, error: reviewError } = await activeClient
         .from('reviews')
         .insert(insertData)
         .select()
         .single()
 
     if (reviewError) {
-        return NextResponse.json({ error: reviewError.message }, { status: 500 })
+        console.error('Supabase review insert error:', reviewError)
+        return NextResponse.json({ error: reviewError.message, details: reviewError }, { status: 500 })
     }
 
     // 3. Update Product Average Rating if product_id exists
@@ -159,7 +163,8 @@ export async function PATCH(request: Request) {
 
     if (!id) return NextResponse.json({ error: 'ID is required' }, { status: 400 })
 
-    const { data, error } = await supabase
+    const adminClient = createAdminClient()
+    const { data, error } = await adminClient
         .from('reviews')
         .update(updates)
         .eq('id', id)
@@ -184,7 +189,8 @@ export async function DELETE(request: Request) {
 
     if (!id) return NextResponse.json({ error: 'ID is required' }, { status: 400 })
 
-    const { error } = await supabase
+    const adminClient = createAdminClient()
+    const { error } = await adminClient
         .from('reviews')
         .delete()
         .eq('id', id)

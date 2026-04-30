@@ -54,6 +54,7 @@ export function PhilosophySection() {
                 viewport={{ once: true }}
                 transition={{ duration: 1.5 }}
                 style={{
+                    display: isMobile ? 'none' : 'block',
                     position: 'absolute', right: 'clamp(20px, 4vw, 60px)', top: '50%', transform: 'translateY(-50%)',
                     writingMode: 'vertical-rl',
                     textTransform: 'uppercase',
@@ -70,12 +71,12 @@ export function PhilosophySection() {
             <div style={{ maxWidth: '1400px', margin: '0 auto', width: '100%', position: 'relative', zIndex: 1 }}>
                 <div style={{
                     display: 'grid',
-                    gridTemplateColumns: isMobile ? '1.5fr 0.5fr' : 'repeat(auto-fit, minmax(300px, 1fr))',
+                    gridTemplateColumns: isMobile ? '1fr 90px' : 'repeat(auto-fit, minmax(300px, 1fr))',
                     alignItems: 'center',
-                    gap: isMobile ? '24px' : 'clamp(30px, 6vw, 60px)',
-                    textAlign: isMobile ? 'left' : 'left'
+                    gap: isMobile ? '20px' : 'clamp(30px, 6vw, 60px)',
+                    textAlign: 'left'
                 }}>
-                    <div style={{ maxWidth: isMobile ? '100%' : '700px', display: 'flex', flexDirection: 'column', alignItems: isMobile ? 'center' : 'flex-start' }}>
+                    <div style={{ maxWidth: isMobile ? '100%' : '700px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
@@ -96,7 +97,7 @@ export function PhilosophySection() {
                         </motion.div>
 
                         <h2 style={{
-                            fontSize: isMobile ? '18px' : 'clamp(22px, 3.2vw, 38px)',
+                            fontSize: isMobile ? '15px' : 'clamp(22px, 3.2vw, 38px)',
                             fontFamily: 'var(--font-baskerville)',
                             lineHeight: 1.4,
                             fontWeight: 400,
@@ -151,11 +152,11 @@ export function PhilosophySection() {
                         transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
                         style={{
                             position: 'relative',
-                            height: isMobile ? '120px' : 'clamp(290px, 28vw, 380px)',
+                            height: isMobile ? '160px' : 'clamp(290px, 28vw, 380px)',
                             width: '100%',
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'center',
+                            justifyContent: isMobile ? 'flex-end' : 'center',
                             overflow: 'hidden'
                         }}
                     >
@@ -163,8 +164,8 @@ export function PhilosophySection() {
                             src="https://lhnamtkpjkrawgql.public.blob.vercel-storage.com/Untitled%20%281%29.png"
                             alt="Reveil Artistry"
                             style={{
-                                width: isMobile ? '100%' : '100%',
-                                height: isMobile ? '100%' : '100%',
+                                width: isMobile ? 'auto' : '100%',
+                                height: '100%',
                                 objectFit: 'contain',
                                 filter: 'contrast(1.05) brightness(0.98)'
                             }}

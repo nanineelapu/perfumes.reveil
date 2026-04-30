@@ -16,7 +16,7 @@ export default function AuthCallbackPage() {
                 // Supabase createBrowserClient automatically parses the hash fragment
                 // (#access_token=...) and establishes the session in the background.
                 // We just need to wait for it to be ready.
-                
+
                 const { data: { session }, error: sessionError } = await supabase.auth.getSession()
 
                 if (sessionError) throw sessionError
