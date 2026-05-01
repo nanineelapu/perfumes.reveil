@@ -95,16 +95,17 @@ export async function POST(request: Request) {
             console.error('[firebase-sync] Profile creation failed:', profileError)
         }
 
-        // 4. Determine the site origin robustly (works in both dev and production)
-        const siteUrl =
-            process.env.NEXT_PUBLIC_APP_URL ||
-            process.env.NEXT_PUBLIC_SITE_URL ||
-            request.headers.get('origin') ||
-            new URL(request.url).origin
+        // 4. Determine the site origin robustly
+        let siteUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_SITE_URL
+
+        // If we are on Vercel, or if siteUrl isn't set, use the actual request origin
+        if (!siteUrl || siteUrl.includes('localhost')) {
+            const host = request.headers.get('x-forwarded-host') || request.headers.get('host')
+            const protocol = request.headers.get('x-forwarded-proto') || 'https'
+            siteUrl = `${protocol}://${host}`
+        }
 
         // 5. Generate magic link.
-        //    redirectTo = the URL Supabase sends the user to AFTER clicking the link.
-        //    We point it to /auth/callback to handle the session establishment.
         const redirectTo = `${siteUrl}/auth/callback`
 
         const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({

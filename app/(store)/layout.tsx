@@ -57,8 +57,14 @@ export const metadata: Metadata = {
 }
 
 export default async function StoreLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  let user = null
+  try {
+    const supabase = await createClient()
+    const { data } = await supabase.auth.getUser()
+    user = data?.user
+  } catch (e) {
+    console.error('Layout Auth Error:', e)
+  }
 
   return (
     <div style={{ background: '#000', color: '#fff', minHeight: '100vh' }}>
