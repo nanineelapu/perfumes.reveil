@@ -38,27 +38,22 @@ export default function AddressBookPage() {
 
     useEffect(() => {
         async function load() {
-            const { data: { user } } = await supabase.auth.getUser()
-            if (!user) { router.push('/auth'); return }
-            setUserId(user.id)
+            try {
+                const { data: { user } } = await supabase.auth.getUser()
+                if (!user) { router.push('/auth'); return }
+                setUserId(user.id)
 
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('addresses')
-                .eq('id', user.id)
-                .single()
-
-            if (profile?.addresses) setAddresses(profile.addresses)
-            setLoading(false)
+                const res = await fetch('/api/user/address')
+                const data = await res.json()
+                if (data.addresses) setAddresses(data.addresses)
+            } catch (err) {
+                console.error('Load error:', err)
+            } finally {
+                setLoading(false)
+            }
         }
         load()
     }, [])
-
-    const saveAddresses = async (updated: Address[]) => {
-        if (!userId) return
-        await supabase.from('profiles').update({ addresses: updated }).eq('id', userId)
-        setAddresses(updated)
-    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -70,45 +65,41 @@ export default function AddressBookPage() {
         setSaving(true)
         setError(null)
 
-        const newAddress: Address = {
-            id: editingId || Date.now().toString(),
-            label: form.label,
-            name: form.name,
-            phone: form.phone,
-            line1: form.line1,
-            line2: form.line2,
-            city: form.city,
-            state: form.state,
-            pincode: form.pincode,
-            is_default: addresses.length === 0
+        try {
+            const res = await fetch('/api/user/address', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    label: form.label.toUpperCase(),
+                    full_name: form.name,
+                    phone: form.phone,
+                    address_line1: form.line1,
+                    address_line2: form.line2,
+                    city: form.city,
+                    state: form.state,
+                    pincode: form.pincode,
+                    is_default: addresses.length === 0 || editingId === null // Default if first address
+                })
+            })
+
+            const data = await res.json()
+            if (!res.ok) throw new Error(data.error || 'Failed to save address')
+
+            // Reload addresses
+            const loadRes = await fetch('/api/user/address')
+            const loadData = await loadRes.json()
+            if (loadData.addresses) setAddresses(loadData.addresses)
+
+            setSuccess(editingId ? 'Address updated!' : 'Address saved!')
+            setShowForm(false)
+            setEditingId(null)
+            setForm(emptyForm)
+        } catch (err: any) {
+            setError(err.message)
+        } finally {
+            setSaving(false)
+            setTimeout(() => setSuccess(null), 3000)
         }
-
-        let updated: Address[]
-        if (editingId) {
-            updated = addresses.map(a => a.id === editingId ? newAddress : a)
-        } else {
-            updated = [...addresses, newAddress]
-        }
-
-        await saveAddresses(updated)
-        setSuccess(editingId ? 'Address updated!' : 'Address saved!')
-        setShowForm(false)
-        setEditingId(null)
-        setForm(emptyForm)
-        setSaving(false)
-        setTimeout(() => setSuccess(null), 3000)
-    }
-
-    const handleDelete = async (id: string) => {
-        const updated = addresses.filter(a => a.id !== id)
-        await saveAddresses(updated)
-        setSuccess('Address removed.')
-        setTimeout(() => setSuccess(null), 3000)
-    }
-
-    const handleSetDefault = async (id: string) => {
-        const updated = addresses.map(a => ({ ...a, is_default: a.id === id }))
-        await saveAddresses(updated)
     }
 
     const handleEdit = (a: Address) => {
