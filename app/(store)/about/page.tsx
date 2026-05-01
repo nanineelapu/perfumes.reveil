@@ -23,7 +23,6 @@ export default function AboutPage() {
 
     return (
         <main style={{ background: '#ffffff', color: black, minHeight: '100vh', overflowX: 'hidden' }}>
-            <AnimatedNavbar />
 
             {/* Editorial Hero Section */}
             <section style={{
@@ -52,7 +51,7 @@ export default function AboutPage() {
                         fontFamily: 'var(--font-baskerville)'
                     }}
                 >
-                    EST. 1999
+                    EST. 2024
                 </motion.div>
 
                 <motion.div
@@ -186,7 +185,6 @@ export default function AboutPage() {
             </section>
 
             <StayConnected theme="light" />
-            <Footer theme="light" />
         </main>
     )
 }

@@ -34,24 +34,13 @@ export default function ProductGrid({ items }: { items: (Product | Collection)[]
                     display: 'flex',
                     flexDirection: isMobile ? 'column' : 'row',
                     justifyContent: 'space-between',
-                    alignItems: isMobile ? 'center' : 'flex-end',
+                    alignItems: isMobile ? 'center' : 'baseline',
                     marginBottom: isMobile ? '40px' : '80px',
                     gap: isMobile ? '20px' : '30px',
                     textAlign: isMobile ? 'center' : 'left'
                 }}>
                     <div style={{ display: 'flex', gap: isMobile ? '16px' : '30px', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'center' : 'flex-start' }}>
-                        {/* Vertical Meta Branding */}
-                        {!isMobile && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingRight: '25px', borderRight: '1px solid rgba(255,255,255,0.1)' }}>
-                                <div style={{
-                                    writingMode: 'vertical-rl', transform: 'rotate(180deg)',
-                                    fontSize: '10px', fontWeight: 900, color: '#d4af37',
-                                    letterSpacing: '0.4em', textTransform: 'uppercase',
-                                }}>
-                                    EST. 2024
-                                </div>
-                            </div>
-                        )}
+                        {/* Vertical Meta Branding removed */}
 
                         <motion.div
                             initial={{ opacity: 0, x: isMobile ? 0 : -20, y: isMobile ? 20 : 0 }}
@@ -75,33 +64,34 @@ export default function ProductGrid({ items }: { items: (Product | Collection)[]
                                 fontFamily: 'var(--font-baskerville)',
                                 color: '#fff', margin: 0, lineHeight: 1,
                                 letterSpacing: '0.02em', textTransform: 'uppercase',
-                                whiteSpace: isMobile ? 'nowrap' : 'normal',
-                                marginBottom: isMobile ? '12px' : '24px'
+                                whiteSpace: isMobile ? 'nowrap' : 'normal'
                             }}>
                                 TRENDING <span style={{ color: '#d4af37' }}>CURATION</span>
                             </h2>
 
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', opacity: 0.6 }}>
-                                <span style={{ fontSize: isMobile ? '8px' : '10px', fontWeight: 900, letterSpacing: '0.6em', textTransform: 'uppercase', color: '#fff' }}>CURATED SELECTION</span>
-                            </div>
+                            {isMobile && (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', opacity: 0.6, marginTop: '12px' }}>
+                                    <span style={{ fontSize: '8px', fontWeight: 900, letterSpacing: '0.6em', textTransform: 'uppercase', color: '#fff' }}># CURATED SELECTION</span>
+                                </div>
+                            )}
                         </motion.div>
                     </div>
 
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 1, delay: 0.2 }}
-                        style={{ maxWidth: '400px' }}
-                    >
-                        <p style={{
-                            fontSize: isMobile ? '13px' : '15px', color: '#777', fontWeight: 300,
-                            lineHeight: 1.6, margin: 0, fontFamily: 'var(--font-baskerville)',
-                            textAlign: isMobile ? 'center' : 'right', letterSpacing: '0.02em', fontStyle: 'italic'
-                        }}>
-                            Discover the scents defining the modern luxury landscape.
-                        </p>
-                    </motion.div>
+                    {!isMobile && (
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 1, delay: 0.2 }}
+                            style={{ opacity: 0.6 }}
+                        >
+                            <span style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.6em', textTransform: 'uppercase', color: '#fff' }}># CURATED SELECTION</span>
+                        </motion.div>
+                    )}
+
+
+
+
                 </div>
 
                 {/* Grid with Tighter Scaling */}

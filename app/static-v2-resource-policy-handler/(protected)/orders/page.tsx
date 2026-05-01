@@ -3,9 +3,10 @@ import Link from 'next/link'
 import OrderStatusBadge from '@/components/admin/OrderStatusBadge'
 import StatusUpdateMenu from '@/components/admin/StatusUpdateMenu'
 import { cn } from '@/lib/utils'
-import { Truck } from 'lucide-react'
+import { Truck, ArrowRight, ExternalLink, Printer, ShoppingBag } from 'lucide-react'
 import FulfillButton from '../../../../components/admin/FulfillButton'
 import { getAutomaticStatus } from '@/lib/utils/order-status'
+import PageHeader from '../_components/PageHeader'
 
 export default async function AdminOrdersPage() {
     const supabase = await createClient()
@@ -30,47 +31,38 @@ export default async function AdminOrdersPage() {
         `)
         .order('created_at', { ascending: false })
 
-    if (error) {
-        console.error('Order Fetch Error:', error)
-    }
-
     return (
-        <div className="max-w-7xl mx-auto space-y-10 text-gray-900">
-            {/* Header */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
-                    <h1 className="text-3xl font-light tracking-[0.2em] uppercase text-gray-900">
-                        Order Registry
-                    </h1>
-                    <div className="flex items-center gap-3 mt-2">
-                        <div className="h-px w-8 bg-accent" />
-                        <p className="text-gray-400 text-[10px] font-bold tracking-[.3em] uppercase italic">
-                            Transaction & Fulfillment Manifest
-                        </p>
-                    </div>
+        <div className="space-y-12">
+            <PageHeader 
+                title="Order Registry" 
+                subtitle="Transaction and fulfillment manifest for your luxury collection."
+            >
+                <div className="bg-white px-6 py-2.5 rounded-full border border-gray-100 shadow-sm">
+                    <span className="text-[10px] font-bold tracking-widest uppercase text-gray-400">Volume: </span>
+                    <span className="text-sm font-semibold text-black">{orders?.length ?? 0}</span>
                 </div>
-                <div className="text-[10px] font-bold tracking-widest uppercase bg-gray-50 px-4 py-2 border border-gray-100 rounded-full text-gray-500">
-                    Total Volume: <span className="text-gray-900 ml-1">{orders?.length ?? 0}</span>
-                </div>
-            </div>
+            </PageHeader>
 
             {error && (
-                <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-500 text-xs tracking-wide animate-in fade-in slide-in-from-top-2">
-                    ERROR: UNABLE TO SYNCHRONIZE ORDERS — {error.message.toUpperCase()}
+                <div className="bg-red-50 p-6 rounded-3xl border border-red-100 flex items-center gap-4 text-red-600">
+                    <div className="w-2 h-2 bg-red-500 rounded-full animate-ping" />
+                    <span className="text-xs font-bold tracking-widest uppercase">System Sync Error: {error.message}</span>
                 </div>
             )}
 
-            <div className="bg-white border border-gray-100 shadow-sm rounded-2xl overflow-hidden mt-8">
+            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
-                            <tr className="bg-[#fcfcfc] border-b border-gray-100">
-                                {['Manifest ID', 'Clientele', 'Inventory Manifest', 'Timeline', 'Valuation', 'Liquidity', 'Status', 'Process'].map((h) => (
-                                    <th key={h} className="px-8 py-5 text-[10px] font-bold tracking-widest uppercase text-gray-400 whitespace-nowrap">
-                                        {h}
-                                    </th>
-                                ))}
-                                <th className="px-8 py-5 text-[10px] font-bold tracking-widest uppercase text-gray-400 whitespace-nowrap">Logistics Manifest</th>
+                            <tr className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400 border-b border-gray-50 bg-gray-50/30">
+                                <th className="px-8 py-5">Manifest ID</th>
+                                <th className="px-8 py-5">Clientele</th>
+                                <th className="px-8 py-5">Inventory</th>
+                                <th className="px-8 py-5">Valuation</th>
+                                <th className="px-8 py-5">Liquidity</th>
+                                <th className="px-8 py-5">Status</th>
+                                <th className="px-8 py-5">Logistics</th>
+                                <th className="px-8 py-5 text-right">Process</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
@@ -79,108 +71,77 @@ export default async function AdminOrdersPage() {
                                 return (
                                     <tr key={order.id} className="group hover:bg-gray-50/50 transition-colors">
                                         <td className="px-8 py-6">
-                                            <div className="text-[11px] font-mono text-gray-400 tracking-tighter group-hover:text-gray-900 transition-colors">
-                                                #{order.id ? order.id.slice(0, 8).toUpperCase() : 'N/A'}
+                                            <div className="text-[10px] font-mono text-gray-400 uppercase">
+                                                #{order.id?.slice(0, 8)}
+                                            </div>
+                                            <div className="text-[9px] text-gray-300 mt-1 uppercase tracking-tighter">
+                                                {new Date(order.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
                                             </div>
                                         </td>
                                         <td className="px-8 py-6">
-                                            <div className="text-xs font-medium tracking-wide text-gray-900">
-                                                {profile?.first_name ? `${profile.first_name} ${profile.last_name || ''}` : profile?.full_name ?? 'Anonymous Client'}
+                                            <div className="text-xs font-semibold text-gray-900">
+                                                {profile?.full_name ?? 'Anonymous Client'}
                                             </div>
                                             <div className="text-[9px] text-gray-400 uppercase tracking-widest mt-1">
-                                                {profile?.phone || 'NO PHONE RECORD'}
+                                                {profile?.phone ?? 'N/A'}
                                             </div>
                                         </td>
                                         <td className="px-8 py-6">
-                                            <div className="text-[10px] text-gray-500 font-light leading-tight">
+                                            <div className="text-[10px] text-gray-500 font-medium leading-relaxed">
                                                 {order.order_items?.map((item: any, i: number) => (
-                                                    <span key={i} className="block">
+                                                    <span key={i} className="block whitespace-nowrap">
                                                         {item.quantity}× {item.products?.name}
                                                     </span>
                                                 ))}
                                             </div>
                                         </td>
                                         <td className="px-8 py-6">
-                                            <div className="text-[10px] font-light text-gray-400 uppercase tracking-wider">
-                                                {order.created_at ? new Date(order.created_at).toLocaleDateString('en-GB', {
-                                                    day: '2-digit',
-                                                    month: 'short',
-                                                    year: 'numeric'
-                                                }) : 'N/A'}
-                                            </div>
-                                        </td>
-                                        <td className="px-8 py-6">
-                                            <div className="text-sm font-light text-gray-900">
-                                                ₹{order.total != null ? order.total.toLocaleString() : '0'}
+                                            <div className="text-xs font-semibold text-black">
+                                                ₹{order.total?.toLocaleString()}
                                             </div>
                                             {order.payment_method === 'cod' && (
-                                                <div className="text-[8px] text-accent font-bold tracking-widest uppercase mt-1 italic">
-                                                    Includes COD Fee
+                                                <div className="text-[8px] text-[#d4af37] font-bold tracking-widest uppercase mt-1">
+                                                    COD
                                                 </div>
                                             )}
                                         </td>
                                         <td className="px-8 py-6">
                                             <div className={cn(
-                                                "text-[9px] font-bold tracking-widest uppercase",
-                                                order.payment_status === 'paid' ? "text-emerald-500" : "text-amber-500"
+                                                "inline-flex px-2 py-0.5 rounded text-[9px] font-bold tracking-widest uppercase",
+                                                order.payment_status === 'paid' ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600"
                                             )}>
-                                                {order.payment_status ?? 'Awaiting'}
+                                                {order.payment_status ?? 'Pending'}
                                             </div>
-                                            <div className="text-[8px] text-gray-400 uppercase tracking-tighter mt-1">{order.payment_method?.toUpperCase() ?? 'N/A'}</div>
                                         </td>
                                         <td className="px-8 py-6">
                                             <OrderStatusBadge status={getAutomaticStatus(order.status ?? 'pending', order.created_at)} />
                                         </td>
                                         <td className="px-8 py-6">
-                                            <div className="flex items-center gap-6">
-                                                <Link
-                                                    href={`/static-v2-resource-policy-handler/orders/${order.id}`}
-                                                    className="text-[10px] font-bold tracking-widest uppercase text-gray-900 hover:text-accent transition-colors underline underline-offset-4"
-                                                >
-                                                    Details
-                                                </Link>
-                                                <StatusUpdateMenu orderId={order.id} currentStatus={order.status ?? 'pending'} />
-                                            </div>
-                                        </td>
-                                        <td className="px-8 py-6">
-                                            <div className="flex flex-col gap-2 min-w-[140px]">
+                                            <div className="flex flex-col gap-1.5">
                                                 {order.shiprocket_order_id ? (
                                                     <>
                                                         {order.awb_code && (
-                                                            <Link
-                                                                href={`/track/${order.awb_code}`}
-                                                                target="_blank"
-                                                                className="text-[10px] font-bold tracking-wider text-indigo-600 hover:text-indigo-800 flex items-center gap-1.5"
-                                                            >
-                                                                <Truck size={12} /> {order.awb_code}
+                                                            <Link href={`/track/${order.awb_code}`} target="_blank" className="text-[9px] font-bold tracking-widest text-indigo-500 hover:text-indigo-700 flex items-center gap-1 uppercase transition-colors">
+                                                                <Truck className="w-3 h-3" /> {order.awb_code}
                                                             </Link>
                                                         )}
                                                         {order.label_url && (
-                                                            <a
-                                                                href={order.label_url}
-                                                                target="_blank"
-                                                                className="text-[9px] font-bold tracking-widest uppercase text-emerald-600 hover:text-emerald-800 flex items-center gap-1.5"
-                                                            >
-                                                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Print Label
+                                                            <a href={order.label_url} target="_blank" className="text-[9px] font-bold tracking-widest text-emerald-500 hover:text-emerald-700 flex items-center gap-1 uppercase transition-colors">
+                                                                <Printer className="w-3 h-3" /> Label
                                                             </a>
-                                                        )}
-                                                        {order.courier_name && (
-                                                            <span className="text-[9px] text-gray-400 uppercase tracking-tighter italic">
-                                                                via {order.courier_name}
-                                                            </span>
-                                                        )}
-                                                        {!order.awb_code && (
-                                                            <span className="text-[9px] text-amber-600 font-bold tracking-widest uppercase">
-                                                                Awaiting Courier
-                                                            </span>
                                                         )}
                                                     </>
                                                 ) : (
-                                                    <FulfillButton
-                                                        orderId={order.id}
-                                                        isFulfilled={!!order.shiprocket_order_id}
-                                                    />
+                                                    <FulfillButton orderId={order.id} isFulfilled={false} />
                                                 )}
+                                            </div>
+                                        </td>
+                                        <td className="px-8 py-6">
+                                            <div className="flex items-center justify-end gap-4">
+                                                <Link href={`/static-v2-resource-policy-handler/orders/${order.id}`} className="text-[10px] font-bold tracking-widest uppercase text-gray-400 hover:text-black flex items-center gap-1 transition-colors">
+                                                    Details <ExternalLink className="w-3 h-3" />
+                                                </Link>
+                                                <StatusUpdateMenu orderId={order.id} currentStatus={order.status ?? 'pending'} />
                                             </div>
                                         </td>
                                     </tr>
@@ -191,18 +152,14 @@ export default async function AdminOrdersPage() {
                 </div>
 
                 {(!orders || orders.length === 0) && (
-                    <div className="py-32 text-center">
-                        <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-200">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-6 h-6">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-                            </svg>
-                        </div>
-                        <p className="text-[11px] font-light tracking-[0.2em] uppercase text-gray-400 whitespace-pre">
-                            NO REGISTERED TRANSACTIONS FOUND
+                    <div className="py-32 text-center bg-gray-50/30">
+                        <ShoppingBag className="w-12 h-12 text-gray-200 mx-auto mb-6" />
+                        <p className="text-sm font-light tracking-wide text-gray-400 uppercase tracking-widest">
+                            No registered transactions found
                         </p>
                     </div>
                 )}
             </div>
         </div>
     )
-}
+}

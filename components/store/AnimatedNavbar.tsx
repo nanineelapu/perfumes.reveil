@@ -160,12 +160,16 @@ export function AnimatedNavbar() {
     }, [isCartOpen, user])
 
 
-    // Lock scroll when mobile menu or cart is open
     useEffect(() => {
         if (isMobileMenuOpen || isCartOpen) {
-            document.body.style.overflow = 'hidden'
+            const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
+            document.body.style.overflow = 'hidden';
+            document.body.style.height = '100vh';
+            document.body.style.paddingRight = `${scrollBarWidth}px`;
         } else {
-            document.body.style.overflow = 'unset'
+            document.body.style.overflow = '';
+            document.body.style.height = '';
+            document.body.style.paddingRight = '';
         }
     }, [isMobileMenuOpen, isCartOpen])
 
@@ -647,7 +651,10 @@ export function AnimatedNavbar() {
                             position: 'fixed', inset: 0,
                             background: '#050505', zIndex: 110,
                             display: 'flex', flexDirection: 'column',
-                            padding: '80px 40px 40px'
+                            padding: '80px 40px 40px',
+                            overflowY: 'auto',
+                            overscrollBehavior: 'contain',
+                            WebkitOverflowScrolling: 'touch'
                         }}
                     >
                         {/* Decorative Background Element */}
@@ -780,7 +787,8 @@ export function AnimatedNavbar() {
                                 position: 'fixed', inset: 0,
                                 background: 'rgba(0,0,0,0.6)',
                                 backdropFilter: 'blur(4px)',
-                                zIndex: 200
+                                zIndex: 200,
+                                touchAction: 'none'
                             }}
                         />
 
@@ -791,21 +799,23 @@ export function AnimatedNavbar() {
                             exit={{ x: '100%' }}
                             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                             style={{
-                                position: 'fixed', top: 0, right: 0, bottom: 0,
+                                position: 'fixed', top: 0, right: 0, 
+                                height: isMobile ? '100dvh' : '100vh',
                                 width: isMobile ? '100%' : '480px',
                                 background: 'linear-gradient(180deg, #0a0a0a 0%, #000000 100%)',
                                 zIndex: 201,
                                 display: 'flex',
                                 flexDirection: 'column',
                                 boxShadow: '-40px 0 80px rgba(0,0,0,0.8)',
-                                borderLeft: '1px solid rgba(212,175,55,0.2)'
+                                borderLeft: '1px solid rgba(212,175,55,0.2)',
+                                overflow: 'hidden'
                             }}
                         >
                             {/* Decorative Top Glow */}
                             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(90deg, transparent, #d4af37, transparent)', opacity: 0.5 }} />
 
                             {/* Drawer Header */}
-                            <div style={{ padding: '40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ padding: '40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                     <h2 style={{
                                         fontSize: '24px',
@@ -832,7 +842,7 @@ export function AnimatedNavbar() {
                             </div>
 
                             {/* Unique Floating Banner */}
-                            <div style={{ margin: '0 40px 20px', position: 'relative' }}>
+                            <div style={{ margin: '0 40px 20px', position: 'relative', flexShrink: 0 }}>
                                 <div style={{
                                     background: 'linear-gradient(90deg, rgba(212,175,55,0.1), transparent)',
                                     padding: '12px 24px',
@@ -856,7 +866,14 @@ export function AnimatedNavbar() {
                             </div>
 
                             {/* Cart Items Area */}
-                            <div style={{ flex: 1, overflowY: 'auto', padding: '0 40px 40px', scrollbarWidth: 'none' }}>
+                            <div style={{ 
+                                flex: 1, 
+                                overflowY: 'auto', 
+                                padding: '0 40px 40px', 
+                                overscrollBehavior: 'contain',
+                                WebkitOverflowScrolling: 'touch',
+                                minHeight: 0
+                            }}>
                                 {isCartLoading ? (
                                     <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                         <Loader2 className="animate-spin" size={32} color="#d4af37" />
@@ -951,7 +968,8 @@ export function AnimatedNavbar() {
                                 borderTop: '1px solid rgba(212,175,55,0.1)',
                                 background: 'rgba(255,255,255,0.02)',
                                 backdropFilter: 'blur(20px)',
-                                position: 'relative'
+                                position: 'relative',
+                                flexShrink: 0
                             }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '32px' }}>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>

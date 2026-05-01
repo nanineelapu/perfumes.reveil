@@ -124,11 +124,11 @@ export default function WishlistPage() {
             <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
 
                 {/* Header */}
-                <header style={{ marginBottom: isMobile ? '60px' : '100px', textAlign: 'center' }}>
+                <header style={{ marginBottom: isMobile ? '40px' : '60px', textAlign: 'center' }}>
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', color: '#d4af37', fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.6em', marginBottom: '24px', fontFamily: 'var(--font-baskerville)' }}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', color: '#d4af37', fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.6em', marginBottom: '16px', fontFamily: 'var(--font-baskerville)' }}
                     >
                         <div style={{ width: '40px', height: '1px', background: 'rgba(212,175,55,0.2)' }} />
                         SAVED ITEMS
@@ -147,17 +147,17 @@ export default function WishlistPage() {
                     </h1>
                     <p style={{
                         color: 'rgba(255,255,255,0.3)',
-                        marginTop: '32px',
+                        marginTop: '16px',
                         fontSize: isMobile ? '14px' : '18px',
                         fontFamily: 'var(--font-baskerville)',
                         fontStyle: 'italic',
                         fontWeight: 400,
                         maxWidth: '600px',
-                        margin: '32px auto 0'
+                        margin: '16px auto 0'
                     }}>
                         A list of products you've saved to buy later.
                     </p>
-                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '40px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '24px' }}>
                         <div style={{
                             padding: '10px 24px',
                             background: 'rgba(212,175,55,0.05)',
@@ -174,6 +174,7 @@ export default function WishlistPage() {
                         </div>
                     </div>
                 </header>
+
 
                 {/* Wishlist Grid */}
                 <div style={{
@@ -387,7 +388,7 @@ export default function WishlistPage() {
                 )}
 
             </div>
-            <Footer />
+
         </main>
     )
 }

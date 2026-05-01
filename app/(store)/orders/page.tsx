@@ -139,33 +139,7 @@ export default function OrdersPage() {
         <main style={{ background: '#050505', minHeight: '100vh', color: '#fff', paddingTop: isMobile ? '100px' : '160px', paddingBottom: '120px' }}>
             <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px', position: 'relative' }}>
 
-                {/* Side Architectural Details - Desktop Only */}
-                {!isMobile && (
-                    <>
-                        <div style={{ position: 'fixed', left: '40px', top: '50%', transform: 'translateY(-50%) rotate(-90deg)', transformOrigin: 'center', opacity: 0.1, pointerEvents: 'none' }}>
-                            <p style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '1em', color: '#fff', margin: 0, whiteSpace: 'nowrap', textTransform: 'uppercase' }}>
-                                REVEIL ORDERS / HISTORY
-                            </p>
-                        </div>
-                        <div style={{ position: 'fixed', right: '40px', top: '50%', transform: 'translateY(-50%) rotate(90deg)', transformOrigin: 'center', opacity: 0.1, pointerEvents: 'none' }}>
-                            <p style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '1em', color: '#fff', margin: 0, whiteSpace: 'nowrap', textTransform: 'uppercase' }}>
-                                REVEIL PERFUMES / SINCE 2024
-                            </p>
-                        </div>
 
-                        {/* Location Detail */}
-                        <div style={{ position: 'fixed', left: '40px', top: '100px', opacity: 0.05, fontSize: '8px', color: '#fff', letterSpacing: '0.2em' }}>
-                            BASED IN INDIA
-                        </div>
-                        <div style={{ position: 'fixed', right: '40px', bottom: '100px', opacity: 0.05, fontSize: '8px', color: '#fff', letterSpacing: '0.2em', textAlign: 'right' }}>
-                            SAFE & SECURE <br /> CHECKOUT
-                        </div>
-
-                        {/* Side Border Lines */}
-                        <div style={{ position: 'fixed', left: '80px', top: '15%', bottom: '15%', width: '1px', background: 'linear-gradient(to bottom, transparent, rgba(255,255,255,0.05), transparent)' }} />
-                        <div style={{ position: 'fixed', right: '80px', top: '15%', bottom: '15%', width: '1px', background: 'linear-gradient(to bottom, transparent, rgba(255,255,255,0.05), transparent)' }} />
-                    </>
-                )}
 
                 {/* Header */}
                 <header style={{ marginBottom: isMobile ? '60px' : '80px' }}>
@@ -195,7 +169,7 @@ export default function OrdersPage() {
                         fontStyle: 'italic',
                         fontWeight: 400
                     }}>View and track all your past orders.</p>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginTop: '40px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginTop: '24px' }}>
                         <div style={{
                             padding: '8px 20px',
                             background: 'rgba(212,175,55,0.05)',

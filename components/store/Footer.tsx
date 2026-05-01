@@ -100,13 +100,13 @@ export function Footer({ theme = 'dark' }: FooterProps) {
                         marginBottom: isMobile ? '40px' : '32px'
                     }}>
                         <div style={{ marginBottom: isMobile ? '0' : '32px', marginLeft: isMobile ? '0' : '-15px' }}>
-                            <img 
-                                src="https://lhnamtkpjkrawgql.public.blob.vercel-storage.com/Untitled%20%282%29.webp" 
-                                alt="Reveil" 
-                                style={{ height: isMobile ? '40px' : '60px', width: 'auto', filter: isLight ? 'invert(1) brightness(0.2)' : 'none' }} 
+                            <img
+                                src="https://lhnamtkpjkrawgql.public.blob.vercel-storage.com/Untitled%20%282%29.webp"
+                                alt="Reveil"
+                                style={{ height: isMobile ? '40px' : '60px', width: 'auto', filter: isLight ? 'invert(1) brightness(0.2)' : 'none' }}
                             />
                         </div>
-                        
+
                         {!isMobile && (
                             <>
                                 <p style={{
@@ -114,7 +114,7 @@ export function Footer({ theme = 'dark' }: FooterProps) {
                                     marginBottom: '20px', maxWidth: '300px',
                                     fontFamily: 'var(--font-baskerville)', fontWeight: 300
                                 }}>
-                                    Curating the world's most evocative olfactory narratives.
+                                    Bringing you the best scents from around the perfume world.
                                 </p>
                                 <p style={{
                                     fontSize: '12px', lineHeight: 1.6, color: isLight ? '#999' : '#666',
@@ -154,9 +154,9 @@ export function Footer({ theme = 'dark' }: FooterProps) {
                     </div>
 
                     {/* Navigation Block */}
-                    <div style={{ 
-                        display: isMobile ? 'grid' : 'block', 
-                        gridTemplateColumns: isMobile ? '1fr 1fr' : 'none', 
+                    <div style={{
+                        display: isMobile ? 'grid' : 'block',
+                        gridTemplateColumns: isMobile ? '1fr 1fr' : 'none',
                         width: '100%',
                         borderTop: isMobile ? `1px solid ${borderColor}` : 'none',
                         paddingTop: isMobile ? '32px' : '0',
@@ -254,7 +254,7 @@ export function Footer({ theme = 'dark' }: FooterProps) {
                                 fontSize: '10px', color: gold, fontWeight: 900,
                                 letterSpacing: '0.4em', marginBottom: '32px', textTransform: 'uppercase'
                             }}>
-                                ESTABLISHED IN 1999
+                                ESTABLISHED IN 2024
                             </div>
                             <p style={{
                                 fontSize: '20px', fontFamily: 'var(--font-baskerville)',

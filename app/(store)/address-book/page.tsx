@@ -111,7 +111,7 @@ export default function AddressBookPage() {
                 body: JSON.stringify({ id })
             })
             if (!res.ok) throw new Error('Failed to delete')
-            
+
             setAddresses(prev => prev.filter(a => a.id !== id))
             setSuccess('Address removed.')
         } catch (err: any) {
@@ -129,7 +129,7 @@ export default function AddressBookPage() {
                 body: JSON.stringify({ id, is_default: true, updateOnly: true })
             })
             if (!res.ok) throw new Error('Failed to update')
-            
+
             // Refresh list
             const loadRes = await fetch('/api/user/address')
             const loadData = await loadRes.json()

@@ -106,7 +106,7 @@ export function PhilosophySection() {
                             color: '#1a1a1a',
                             maxWidth: isMobile ? '100%' : '680px'
                         }}>
-                            {"Luxury perfumes crafted with natural ingredients for a long-lasting, premium scent experience.".split(' ').map((word, i) => (
+                            {"High-quality diffusers made with natural ingredients that smell great for a long time.".split(' ').map((word, i) => (
                                 <motion.span
                                     key={i}
                                     initial={{ opacity: 0, y: 20 }}
@@ -243,31 +243,32 @@ export function NotesSection() {
                     position: 'relative',
                     display: 'flex',
                     flexDirection: isMobile ? 'column' : 'row',
-                    alignItems: isMobile ? 'center' : 'flex-start',
+                    justifyContent: 'space-between',
+                    alignItems: isMobile ? 'center' : 'baseline',
                     gap: isMobile ? '24px' : '40px',
                     textAlign: isMobile ? 'center' : 'left'
                 }}>
-                    {!isMobile && (
-                        <div
-                            style={{
-                                fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.6em',
-                                color: '#d4af37', writingMode: 'vertical-rl', transform: 'rotate(180deg)',
-                                fontFamily: 'var(--font-baskerville)', paddingRight: '20px', borderRight: '1px solid rgba(212,175,55,0.3)'
-                            }}
-                        >
-                            EST. 2026
+                    {isMobile && (
+                        <div style={{
+                            fontSize: '8px', fontWeight: 900, color: '#d4af37',
+                            letterSpacing: '0.4em', textTransform: 'uppercase',
+                            marginBottom: '16px'
+                        }}>
+                            EST. 2024
                         </div>
                     )}
 
                     <div style={{ flex: 1 }}>
-                        <span
-                            style={{
-                                fontSize: isMobile ? '9px' : '12px', textTransform: 'uppercase', letterSpacing: isMobile ? '0.6em' : '1em',
-                                color: '#fff', display: 'block', marginBottom: '12px', opacity: 0.5
-                            }}
-                        >
-                            Best Sellers
-                        </span>
+                        {isMobile && (
+                            <span
+                                style={{
+                                    fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.6em',
+                                    color: '#fff', display: 'block', marginBottom: '12px', opacity: 0.5
+                                }}
+                            >
+                                # BEST SELLERS
+                            </span>
+                        )}
                         <h2
                             style={{
                                 fontSize: isMobile ? 'clamp(22px, 6vw, 28px)' : 'clamp(24px, 4vw, 48px)',
@@ -281,16 +282,20 @@ export function NotesSection() {
                     </div>
 
                     {!isMobile && (
-                        <div style={{ maxWidth: '350px', position: 'absolute', right: 0, bottom: 0, textAlign: 'right' }}>
-                            <p style={{
-                                fontSize: '14px', color: '#666', fontWeight: 300,
-                                lineHeight: 1.6, margin: 0, fontStyle: 'italic',
-                                fontFamily: 'var(--font-baskerville)'
-                            }}>
-                                Explore our exclusive range of luxury perfumes crafted for every occasion.
-                            </p>
+                        <div style={{ alignSelf: 'flex-end', opacity: 0.5 }}>
+                            <span
+                                style={{
+                                    fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1em',
+                                    color: '#fff', display: 'block'
+                                }}
+                            >
+                                # BEST SELLERS
+                            </span>
                         </div>
                     )}
+
+
+
                 </div>
 
                 {/* Editorial Collection Scroll */}
@@ -608,7 +613,7 @@ export function ReveilCollectionSection() {
                                 fontFamily: 'var(--font-baskerville)', opacity: 0.8,
                                 whiteSpace: 'nowrap'
                             }}>
-                                P R E M I U M — P E R F U M E S
+                                P R E M I U M — D I F F U S E R S
                             </span>
                             <h2 style={{
                                 fontSize: isMobile ? '32px' : 'clamp(40px, 6vw, 80px)',
@@ -625,7 +630,7 @@ export function ReveilCollectionSection() {
                                     fontSize: isMobile ? '28px' : 'inherit',
                                     display: 'block',
                                     marginTop: isMobile ? '2px' : '0'
-                                }}>Perfumes</span>
+                                }}>Diffusers</span>
                             </h2>
                             <motion.div
                                 style={{
@@ -662,15 +667,16 @@ export function ReveilCollectionSection() {
                                 fontFamily: 'var(--font-baskerville)', fontStyle: 'italic',
                                 fontWeight: 400, marginBottom: '20px', lineHeight: 1.4
                             }}>
-                                "The finest luxury perfumes."
+                                "The best smelling diffusers."
                             </h3>
                             <p style={{
                                 color: '#bbb', fontSize: '14px', lineHeight: 1.8,
                                 marginBottom: '40px', fontWeight: 300,
                                 fontFamily: 'var(--font-baskerville)'
                             }}>
-                                Discover the Reveil Signature collection. Experience our best-selling, long-lasting luxury perfumes crafted for elegance.
+                                Shop our most popular collection. Our diffusers are high quality, smell great, and the scent lasts for a long time.
                             </p>
+
 
                             <motion.div
                                 onClick={(e) => {
