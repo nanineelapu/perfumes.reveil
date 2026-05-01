@@ -168,36 +168,34 @@ function AuthPageContent() {
                 return
             }
 
-            if (!data.access_token) {
-                setError('Token not received — please try again.')
+            if (!data.loginUrl && !data.access_token) {
+                setError('Login failed — please try again.')
                 setLoading(false)
                 return
             }
 
-            // 3. Set Supabase session
-            const { error: sessErr } = await supabase.auth.setSession({
-                access_token: data.access_token,
-                refresh_token: data.refresh_token,
-            })
-
-            if (sessErr) {
-                setError('Session error: ' + sessErr.message)
-                setLoading(false)
-                return
-            }
-
-            // 4. Save userId for name step
+            // 3. Save userId and loginUrl for next steps
             setUserId(data.user_id)
+            setLoginUrl(data.loginUrl)
 
-            // 5. If needs name → show name form
+            // 4. If needs name → show name form
             if (data.needs_name) {
                 setStep('name')
                 setLoading(false)
                 return
             }
 
-            // 6. Done — full page reload so navbar updates
-            window.location.href = '/'
+            // 5. Done — redirect or establish session
+            if (data.loginUrl) {
+                window.location.href = data.loginUrl
+            } else if (data.access_token && data.refresh_token) {
+                const { error: sessErr } = await supabase.auth.setSession({
+                    access_token: data.access_token,
+                    refresh_token: data.refresh_token,
+                })
+                if (sessErr) throw sessErr
+                window.location.href = '/'
+            }
 
         } catch (err: any) {
             console.error('Verify error:', err)
