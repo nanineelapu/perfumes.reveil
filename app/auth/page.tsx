@@ -136,9 +136,9 @@ function AuthPageContent() {
     const verifyOtp = async (e: React.FormEvent) => {
         e.preventDefault()
         setError(null)
-        if (formData.otp.length !== 6) { 
+        if (formData.otp.length !== 6) {
             setError('Please enter a valid 6-digit OTP.')
-            return 
+            return
         }
         setLoading(true)
 
