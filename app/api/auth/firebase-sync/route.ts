@@ -11,23 +11,52 @@ export async function POST(request: Request) {
     console.log('=== FIREBASE SYNC ===')
 
     try {
-        const { phone, firebase_uid, mode } = await request.json()
+        const { phone, firebase_uid, mode, checkOnly } = await request.json()
 
         if (!phone) {
             return NextResponse.json({ error: 'Phone required' }, { status: 400 })
         }
 
-        // Normalize phone to +91XXXXXXXXXX
-        const digits = phone.replace(/\D/g, '')
-        const cleanPhone = digits.length === 10 ? `+91${digits}` : `+${digits}`
+        // Normalize phone: remove all non-digits
+        let digits = phone.replace(/\D/g, '')
+
+        // If it starts with 91 and is 12 digits total, remove the 91
+        if (digits.length === 12 && digits.startsWith('91')) {
+            digits = digits.substring(2)
+        }
+
+        // 1. Strict Validation: Mobile number must be exactly 10 digits
+        if (digits.length !== 10) {
+            return NextResponse.json({ error: 'Please enter a valid 10-digit mobile number.' }, { status: 400 })
+        }
+
+        const cleanPhone = `+91${digits}`
 
         let userId: string | null = null
         let userEmail: string | null = null
         let needsName = false
 
-        // 1. Find existing user
+        // 2. Find existing user
         const { data: { users } } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 })
-        const match = users?.find(u => (u.phone ?? '').replace(/\D/g, '') === cleanPhone.replace(/\D/g, ''))
+        const match = users?.find(u => (u.phone ?? '').replace(/\D/g, '') === digits)
+
+        // 3. Mode Check: If signup but user exists -> Error
+        if (mode === 'signup' && match) {
+            return NextResponse.json({
+                error: 'This number is already registered. Please login instead.'
+            }, { status: 400 })
+        }
+
+        if (mode === 'login' && !match) {
+            return NextResponse.json({
+                error: 'This number is not registered. Please sign up first.'
+            }, { status: 400 })
+        }
+
+        // If we are just checking user existence, we stop here
+        if (checkOnly) {
+            return NextResponse.json({ success: true })
+        }
 
         if (match) {
             userId = match.id

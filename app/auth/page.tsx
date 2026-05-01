@@ -91,8 +91,16 @@ function AuthPageContent() {
     // --- FLOW 2: CUSTOMER LOGIN (Firebase OTP) ---
     const sendOtp = async (e: React.FormEvent) => {
         e.preventDefault()
-        setLoading(true)
         setError(null)
+        
+        // 1. Validate Phone (10 digits)
+        const digits = formData.phone.replace(/\D/g, '')
+        if (digits.length !== 10) {
+            setError('Please enter a valid 10-digit mobile number.')
+            return
+        }
+
+        setLoading(true)
         setMessage(null)
 
         try {
@@ -106,8 +114,22 @@ function AuthPageContent() {
                 formattedPhone = formattedPhone.startsWith('91') && formattedPhone.length >= 12 ? `+${formattedPhone}` : `+91${formattedPhone}`
             }
 
-            if (authMode === 'signup' && (!formData.firstName || !formData.lastName || !formData.email || !formData.password)) {
-                throw new Error('Please fill in all your details first.')
+            // 2. Pre-validate with our API (Check if user exists/doesn't exist based on mode)
+            const checkRes = await fetch('/api/auth/firebase-sync', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    phone: formattedPhone, 
+                    mode: authMode,
+                    checkOnly: true 
+                })
+            })
+            
+            const checkData = await checkRes.json()
+            if (!checkRes.ok) {
+                setError(checkData.error || 'Something went wrong.')
+                setLoading(false)
+                return
             }
 
             if (!recaptchaVerifier) throw new Error('Still loading, please wait a moment.')
@@ -255,8 +277,8 @@ function AuthPageContent() {
                 return
             }
 
-            // Full reload so navbar shows name
-            window.location.href = '/'
+            // Redirect to the new success page after registration
+            window.location.href = '/auth/success'
 
         } catch (err: any) {
             setError('Error: ' + err.message)
@@ -490,39 +512,6 @@ function AuthPageContent() {
                                             </motion.div>
                                         </div>
 
-                                        {/* Identity Profile Fields Grid */}
-                                        {authMode === 'signup' && (
-                                            <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '12px' : '20px', textAlign: 'left' }}>
-                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: isMobile ? '16px' : '32px' }}>
-                                                    <motion.div
-                                                        whileHover={{ borderBottomColor: '#000' }}
-                                                        style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
-                                                        <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>First Name</label>
-                                                        <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
-                                                    </motion.div>
-                                                    <motion.div
-                                                        whileHover={{ borderBottomColor: '#000' }}
-                                                        style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
-                                                        <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Last Name</label>
-                                                        <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
-                                                    </motion.div>
-                                                </div>
-                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: isMobile ? '16px' : '32px' }}>
-                                                    <motion.div
-                                                        whileHover={{ borderBottomColor: '#000' }}
-                                                        style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
-                                                        <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Email</label>
-                                                        <input type="email" name="email" value={formData.email} onChange={handleChange} style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
-                                                    </motion.div>
-                                                    <motion.div
-                                                        whileHover={{ borderBottomColor: '#000' }}
-                                                        style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
-                                                        <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Password</label>
-                                                        <input type="password" name="password" value={formData.password} onChange={handleChange} style={{ width: '100%', border: 'none', background: 'none', fontSize: isMobile ? '13px' : '14px', outline: 'none', color: '#000' }} />
-                                                    </motion.div>
-                                                </div>
-                                            </div>
-                                        )}
                                     </>
                                 ) : (
                                     <div style={{ textAlign: 'left' }}>
