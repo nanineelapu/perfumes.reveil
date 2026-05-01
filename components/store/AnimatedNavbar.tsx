@@ -646,7 +646,7 @@ export function AnimatedNavbar() {
                             position: 'fixed', inset: 0,
                             background: '#050505', zIndex: 110,
                             display: 'flex', flexDirection: 'column',
-                            padding: '120px 40px 60px'
+                            padding: '80px 40px 40px'
                         }}
                     >
                         {/* Decorative Background Element */}
@@ -745,27 +745,7 @@ export function AnimatedNavbar() {
                             )}
                         </div>
 
-                        {/* Mobile Footer Info */}
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 0.8, duration: 1 }}
-                            style={{ marginTop: 'auto', borderTop: '1px solid rgba(212,175,55,0.05)', paddingTop: '40px' }}
-                        >
-                            <div style={{
-                                color: '#444', fontSize: '8px', letterSpacing: '0.4em',
-                                textTransform: 'uppercase', marginBottom: '20px'
-                            }}>
-                                Studio Archive — 2024
-                            </div>
-                            <p style={{
-                                color: '#888', fontSize: '13px', fontFamily: 'var(--font-tenor)',
-                                lineHeight: 1.8, maxWidth: '240px'
-                            }}>
-                                Crafting a new legacy in scent. <br />
-                                Explore the architecture of perfume.
-                            </p>
-                        </motion.div>
+
 
                         {/* Close button inside overlay for better UX */}
                         <motion.button
@@ -774,7 +754,7 @@ export function AnimatedNavbar() {
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.5 }}
                             style={{
-                                position: 'absolute', top: '40px', right: '40px',
+                                position: 'absolute', top: '24px', right: '24px',
                                 background: 'transparent', border: 'none', color: '#fff',
                                 cursor: 'pointer', padding: '10px'
                             }}

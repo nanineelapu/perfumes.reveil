@@ -106,15 +106,15 @@ export default function TrackOrderPage() {
                             type="text"
                             value={query}
                             onChange={e => setQuery(e.target.value)}
-                            placeholder="Enter Order ID or AWB / Tracking number"
+                            placeholder="Enter Order ID or AWB..."
                             style={{
-                                flex: 1, background: 'transparent', border: 'none', color: '#fff',
+                                flex: 1, minWidth: 0, background: 'transparent', border: 'none', color: '#fff',
                                 padding: '20px 16px', fontSize: '14px', outline: 'none',
                                 fontFamily: 'var(--font-baskerville)'
                             }}
                         />
                         <motion.button type="submit" disabled={loading} whileHover={{ background: '#c5a02e' }}
-                            style={{ padding: '0 32px', background: '#d4af37', border: 'none', color: '#000', cursor: 'pointer', fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.3em', display: 'flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap' }}>
+                            style={{ padding: '0 24px', background: '#d4af37', border: 'none', color: '#000', cursor: 'pointer', fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', display: 'flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap', flexShrink: 0 }}>
                             {loading ? <Loader2 size={14} className="animate-spin" /> : <><ArrowRight size={14} /> Track</>}
                         </motion.button>
                     </div>

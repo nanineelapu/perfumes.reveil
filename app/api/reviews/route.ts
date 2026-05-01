@@ -10,6 +10,7 @@ export async function GET(request: Request) {
     const featured = searchParams.get('featured') === 'true'
 
     const supabase = await createClient()
+    const activeClient = createAdminClient()
 
     // If admin, check authorization
     if (admin) {
@@ -25,7 +26,7 @@ export async function GET(request: Request) {
         if (profile?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    let query = supabase
+    let query = activeClient
         .from('reviews')
         .select(`
             id,

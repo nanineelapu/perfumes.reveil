@@ -44,7 +44,7 @@ export function PhilosophySection() {
                 animate={{ x: ['10%', '-30%', '10%'] }}
                 transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
             >
-                Authenticity
+                Luxury
             </motion.div>
 
             {/* Side Headings */}
@@ -65,7 +65,7 @@ export function PhilosophySection() {
                     fontFamily: 'var(--font-baskerville)',
                     zIndex: 2
                 }}>
-                Reveil / Philosophy — Artisan Series
+                Reveil / About Us
             </motion.div>
 
             <div style={{ maxWidth: '1400px', margin: '0 auto', width: '100%', position: 'relative', zIndex: 1 }}>
@@ -93,7 +93,7 @@ export function PhilosophySection() {
                                 color: '#d4af37'
                             }}
                         >
-                            Process <span style={{ width: isMobile ? '20px' : '30px', height: '1px', background: '#d4af37' }} />
+                            Our Craft <span style={{ width: isMobile ? '20px' : '30px', height: '1px', background: '#d4af37' }} />
                         </motion.div>
 
                         <h2 style={{
@@ -106,7 +106,7 @@ export function PhilosophySection() {
                             color: '#1a1a1a',
                             maxWidth: isMobile ? '100%' : '680px'
                         }}>
-                            {"Elevated perfumes crafted with natural extraits and made with artisanal care. Timeless and sensory experiences.".split(' ').map((word, i) => (
+                            {"Luxury perfumes crafted with natural ingredients for a long-lasting, premium scent experience.".split(' ').map((word, i) => (
                                 <motion.span
                                     key={i}
                                     initial={{ opacity: 0, y: 20 }}
@@ -266,7 +266,7 @@ export function NotesSection() {
                                 color: '#fff', display: 'block', marginBottom: '12px', opacity: 0.5
                             }}
                         >
-                            Curated Series
+                            Best Sellers
                         </span>
                         <h2
                             style={{
@@ -276,7 +276,7 @@ export function NotesSection() {
                                 lineHeight: 1
                             }}
                         >
-                            THE <span style={{ color: '#d4af37' }}>COLLECTIONS</span>
+                            PERFUME <span style={{ color: '#d4af37' }}>COLLECTIONS</span>
                         </h2>
                     </div>
 
@@ -287,7 +287,7 @@ export function NotesSection() {
                                 lineHeight: 1.6, margin: 0, fontStyle: 'italic',
                                 fontFamily: 'var(--font-baskerville)'
                             }}>
-                                Meticulously crafted universes. Distinct olfactory journeys.
+                                Explore our exclusive range of luxury perfumes crafted for every occasion.
                             </p>
                         </div>
                     )}
@@ -434,7 +434,7 @@ export function NotesSection() {
                                 color: '#fff', display: 'block', marginBottom: '20px', opacity: 0.4
                             }}
                         >
-                            Curated Series
+                            Best Sellers
                         </span>
                         <div style={{
                             display: 'flex',
@@ -608,7 +608,7 @@ export function ReveilCollectionSection() {
                                 fontFamily: 'var(--font-baskerville)', opacity: 0.8,
                                 whiteSpace: 'nowrap'
                             }}>
-                                L U X U R Y — E D I T I O N
+                                P R E M I U M — P E R F U M E S
                             </span>
                             <h2 style={{
                                 fontSize: isMobile ? '32px' : 'clamp(40px, 6vw, 80px)',
@@ -625,7 +625,7 @@ export function ReveilCollectionSection() {
                                     fontSize: isMobile ? '28px' : 'inherit',
                                     display: 'block',
                                     marginTop: isMobile ? '2px' : '0'
-                                }}>Collection</span>
+                                }}>Perfumes</span>
                             </h2>
                             <motion.div
                                 style={{
@@ -636,7 +636,7 @@ export function ReveilCollectionSection() {
                                     pointerEvents: 'none', whiteSpace: 'nowrap', zIndex: -1, color: '#fff'
                                 }}
                             >
-                                ESTATE
+                                LUXURY
                             </motion.div>
                         </motion.div>
 
@@ -662,15 +662,14 @@ export function ReveilCollectionSection() {
                                 fontFamily: 'var(--font-baskerville)', fontStyle: 'italic',
                                 fontWeight: 400, marginBottom: '20px', lineHeight: 1.4
                             }}>
-                                "The best natural perfumes."
+                                "The finest luxury perfumes."
                             </h3>
                             <p style={{
                                 color: '#bbb', fontSize: '14px', lineHeight: 1.8,
                                 marginBottom: '40px', fontWeight: 300,
                                 fontFamily: 'var(--font-baskerville)'
                             }}>
-                                The Reveil Signature collection features our finest luxury scents.
-                                Made for those who love high-quality fragrance.
+                                Discover the Reveil Signature collection. Experience our best-selling, long-lasting luxury perfumes crafted for elegance.
                             </p>
 
                             <motion.div

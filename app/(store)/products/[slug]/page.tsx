@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { ProductContent } from './ProductContent'
 import { notFound } from 'next/navigation'
 
@@ -57,6 +58,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ProductExperiencePage({ params }: Props) {
     const { slug } = await params
     const supabase = await createClient()
+    const adminClient = createAdminClient()
 
     // 1. Fetch Product
     const { data: product, error } = await supabase
@@ -70,7 +72,7 @@ export default async function ProductExperiencePage({ params }: Props) {
     }
 
     // 2. Fetch Reviews
-    const { data: reviews } = await supabase
+    const { data: reviews } = await adminClient
         .from('reviews')
         .select(`
             id,

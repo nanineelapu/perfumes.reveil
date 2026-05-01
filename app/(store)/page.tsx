@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import HeroCarousel from '@/components/store/HeroCarousel'
 import ProductGrid from '@/components/store/ProductGrid'
 import { ReveilCollectionSection, PhilosophySection, NotesSection } from '@/components/store/EditorialSections'
@@ -9,6 +10,7 @@ import { ReviewsSection } from '@/components/store/ReviewsSection'
 
 export default async function HomePage() {
   const supabase = await createClient()
+  const adminClient = createAdminClient()
 
   const [
     { data: slides },
@@ -40,7 +42,7 @@ export default async function HomePage() {
       .select('category')
       .not('category', 'is', null),
 
-    supabase
+    adminClient
       .from('reviews')
       .select(`
           id,
