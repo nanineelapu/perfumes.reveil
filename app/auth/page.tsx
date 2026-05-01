@@ -135,60 +135,79 @@ function AuthPageContent() {
     // STEP 7 — Verify OTP
     const verifyOtp = async (e: React.FormEvent) => {
         e.preventDefault()
-        setLoading(true)
         setError(null)
+        if (formData.otp.length !== 6) { 
+            setError('Please enter a valid 6-digit OTP.')
+            return 
+        }
+        setLoading(true)
 
         try {
+            // 1. Firebase verify
             if (!confirmationResult) throw new Error('Your session has expired. Please start again.')
-
-            // 1. Verify OTP with Firebase
             const result = await confirmationResult.confirm(formData.otp)
             const firebaseUser = result.user
-            const idToken = await firebaseUser.getIdToken()
+            console.log('Firebase OK:', firebaseUser.phoneNumber)
 
-            // 2. Sync with Supabase
+            // 2. Sync to Supabase
             const res = await fetch('/api/auth/firebase-sync', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    id_token: idToken,
                     phone: firebaseUser.phoneNumber,
                     firebase_uid: firebaseUser.uid,
-                    isSignup: authMode === 'signup',
-                    firstName: formData.firstName,
-                    lastName: formData.lastName,
-                    email: formData.email
-                })
+                    mode: authMode,
+                }),
+            })
+            const data = await res.json()
+            console.log('Sync result:', data)
+
+            if (!res.ok || data.error) {
+                setError(data.error || 'Login failed. Please try again.')
+                setLoading(false)
+                return
+            }
+
+            if (!data.access_token) {
+                setError('Token not received — please try again.')
+                setLoading(false)
+                return
+            }
+
+            // 3. Set Supabase session
+            const { error: sessErr } = await supabase.auth.setSession({
+                access_token: data.access_token,
+                refresh_token: data.refresh_token,
             })
 
-            const contentType = res.headers.get("content-type");
-            if (!contentType || !contentType.includes("application/json")) {
-                const text = await res.text();
-                throw new Error("Server communication error. Please try again.");
+            if (sessErr) {
+                setError('Session error: ' + sessErr.message)
+                setLoading(false)
+                return
             }
 
-            const syncResult = await res.json()
-            if (!res.ok) throw new Error(syncResult.error || 'Sync failed')
+            // 4. Save userId for name step
+            setUserId(data.user_id)
 
-            setMessage('Code verified! Setting up your account...')
-
-            // Handle New User vs Existing User
-            if (syncResult.is_new_user) {
-                setUserId(syncResult.user_id)
-                setLoginUrl(syncResult.loginUrl)
+            // 5. If needs name → show name form
+            if (data.needs_name) {
                 setStep('name')
-            } else if (syncResult.loginUrl) {
-                // This redirect establishes the Supabase session cookies automatically
-                window.location.href = syncResult.loginUrl
-            } else {
-                window.location.href = '/'
+                setLoading(false)
+                return
             }
+
+            // 6. Done — full page reload so navbar updates
+            window.location.href = '/'
+
         } catch (err: any) {
-            console.error('OTP Verification Error:', err)
-            setError(err.message || 'That code is wrong. Please try again.')
-        } finally {
+            console.error('Verify error:', err)
+            if (err.code === 'auth/invalid-verification-code') {
+                setError('Invalid OTP code. Please check and try again.')
+            } else if (err.code === 'auth/code-expired') {
+                setError('OTP code has expired. Please request a new one.')
+            } else {
+                setError('Something went wrong: ' + err.message)
+            }
             setLoading(false)
         }
     }
@@ -196,42 +215,53 @@ function AuthPageContent() {
     // STEP 8 — Save Name for New Users
     const handleSaveName = async (e: React.FormEvent) => {
         e.preventDefault()
+        setError(null)
         const firstName = formData.firstName.trim()
-        const fullName = `${formData.firstName} ${formData.lastName}`.trim()
 
         if (!firstName) {
             setError('Please enter at least your first name.')
             return
         }
-
         setLoading(true)
-        setError(null)
 
         try {
-            // Save name via API using the stored userId (session not established yet)
+            const { data: { user } } = await supabase.auth.getUser()
+            const uid = user?.id ?? userId
+
+            console.log('Saving name for:', uid)
+
+            if (!uid) {
+                setError('Session not found — please login again.')
+                setLoading(false)
+                return
+            }
+
+            // Use server API to save — bypasses RLS issues
             const res = await fetch('/api/auth/save-profile', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    user_id: userId,
-                    full_name: fullName,
-                    first_name: formData.firstName,
-                    last_name: formData.lastName
-                })
+                    user_id: uid,
+                    first_name: firstName,
+                    last_name: formData.lastName.trim(),
+                    phone: formData.phone,
+                }),
             })
 
-            if (!res.ok) {
-                const err = await res.json()
-                throw new Error(err.error || 'Could not save your name.')
+            const data = await res.json()
+            console.log('Save profile:', data)
+
+            if (!res.ok || data.error) {
+                setError(data.error || 'Could not save your name.')
+                setLoading(false)
+                return
             }
 
-            setMessage('All set! Logging you in...')
-            // Redirect via magic link — this establishes the Supabase session
-            window.location.href = loginUrl || '/'
+            // Full reload so navbar shows name
+            window.location.href = '/'
+
         } catch (err: any) {
-            console.error('Save Name Error:', err)
-            setError(err.message || 'Could not save your name. Please try again.')
-        } finally {
+            setError('Error: ' + err.message)
             setLoading(false)
         }
     }

@@ -1,34 +1,46 @@
 import { NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  { auth: { autoRefreshToken: false, persistSession: false } }
+)
 
 export async function POST(request: Request) {
-    try {
-        const { user_id, full_name, first_name, last_name } = await request.json()
+  try {
+    const { user_id, first_name, last_name, phone } = await request.json()
+    console.log('Saving profile:', user_id, first_name, last_name)
 
-        if (!user_id) {
-            return NextResponse.json({ error: 'User ID is required.' }, { status: 400 })
-        }
-
-        if (!full_name) {
-            return NextResponse.json({ error: 'Name is required.' }, { status: 400 })
-        }
-
-        const supabaseAdmin = createAdminClient()
-
-        const { error } = await supabaseAdmin
-            .from('profiles')
-            .update({
-                full_name,
-                first_name: first_name || undefined,
-                last_name: last_name || undefined,
-            })
-            .eq('id', user_id)
-
-        if (error) throw error
-
-        return NextResponse.json({ success: true })
-    } catch (err: any) {
-        console.error('Save Profile Error:', err)
-        return NextResponse.json({ error: err.message }, { status: 500 })
+    if (!user_id || !first_name) {
+      return NextResponse.json(
+        { error: 'user_id and first_name required' },
+        { status: 400 }
+      )
     }
+
+    const full_name = `${first_name.trim()} ${(last_name ?? '').trim()}`.trim()
+
+    const { error } = await supabaseAdmin
+      .from('profiles')
+      .upsert({
+        id:         user_id,
+        first_name: first_name.trim(),
+        last_name:  (last_name ?? '').trim(),
+        full_name,
+        phone,
+        role:       'user',
+      })
+
+    if (error) {
+      console.error('Profile save error:', error)
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    console.log('Profile saved:', full_name)
+    return NextResponse.json({ success: true, full_name })
+  } catch (err: any) {
+    console.error('Save Profile Route Error:', err)
+    return NextResponse.json({ error: err.message }, { status: 500 })
+  }
 }
