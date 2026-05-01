@@ -102,6 +102,43 @@ export default function AddressBookPage() {
         }
     }
 
+    const handleDelete = async (id: string) => {
+        if (!confirm('Are you sure you want to remove this address?')) return
+        try {
+            const res = await fetch('/api/user/address', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            })
+            if (!res.ok) throw new Error('Failed to delete')
+            
+            setAddresses(prev => prev.filter(a => a.id !== id))
+            setSuccess('Address removed.')
+        } catch (err: any) {
+            setError(err.message)
+        } finally {
+            setTimeout(() => setSuccess(null), 3000)
+        }
+    }
+
+    const handleSetDefault = async (id: string) => {
+        try {
+            const res = await fetch('/api/user/address', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, is_default: true, updateOnly: true })
+            })
+            if (!res.ok) throw new Error('Failed to update')
+            
+            // Refresh list
+            const loadRes = await fetch('/api/user/address')
+            const loadData = await loadRes.json()
+            if (loadData.addresses) setAddresses(loadData.addresses)
+        } catch (err: any) {
+            setError(err.message)
+        }
+    }
+
     const handleEdit = (a: Address) => {
         setForm({ label: a.label, name: a.name, phone: a.phone, line1: a.line1, line2: a.line2 || '', city: a.city, state: a.state, pincode: a.pincode })
         setEditingId(a.id)

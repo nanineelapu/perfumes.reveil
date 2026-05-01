@@ -12,6 +12,7 @@ export async function POST(request: Request) {
 
         const body = await request.json()
         const { 
+            id,
             label, 
             full_name, 
             phone, 
@@ -20,7 +21,8 @@ export async function POST(request: Request) {
             city, 
             state, 
             pincode,
-            is_default 
+            is_default,
+            updateOnly
         } = body
 
         // 1. If this is set as default, unset others first
@@ -31,10 +33,22 @@ export async function POST(request: Request) {
                 .eq('user_id', user.id)
         }
 
-        // 2. Insert the new address
+        // 2. If updateOnly (for set default), just update that row
+        if (updateOnly && id) {
+            const { error } = await supabase
+                .from('addresses')
+                .update({ is_default: true })
+                .eq('id', id)
+                .eq('user_id', user.id)
+            if (error) throw error
+            return NextResponse.json({ success: true })
+        }
+
+        // 3. Upsert the address
         const { data, error } = await supabase
             .from('addresses')
-            .insert({
+            .upsert({
+                ...(id ? { id } : {}),
                 user_id: user.id,
                 label,
                 full_name,
@@ -45,7 +59,7 @@ export async function POST(request: Request) {
                 state,
                 pincode,
                 is_default: is_default || false
-            })
+            }, { onConflict: 'id' })
             .select()
             .single()
 
@@ -55,6 +69,28 @@ export async function POST(request: Request) {
 
     } catch (err: any) {
         console.error('Save Address Error:', err)
+        return NextResponse.json({ error: err.message }, { status: 500 })
+    }
+}
+
+export async function DELETE(request: Request) {
+    try {
+        const supabase = await createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+        const { id } = await request.json()
+        if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 })
+
+        const { error } = await supabase
+            .from('addresses')
+            .delete()
+            .eq('id', id)
+            .eq('user_id', user.id)
+
+        if (error) throw error
+        return NextResponse.json({ success: true })
+    } catch (err: any) {
         return NextResponse.json({ error: err.message }, { status: 500 })
     }
 }
