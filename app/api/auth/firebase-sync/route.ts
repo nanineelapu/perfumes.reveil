@@ -37,19 +37,38 @@ export async function POST(request: Request) {
         let needsName = false
 
         // 2. Find existing user
+        // A. Check Supabase Auth List
         const { data: { users } } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 })
-        const match = users?.find(u => (u.phone ?? '').replace(/\D/g, '') === digits)
+        const authMatch = users?.find(u => (u.phone ?? '').replace(/\D/g, '').endsWith(digits))
+        
+        let match = authMatch
+        
+        // B. If not in auth list, check profiles table
+        if (!match) {
+            const { data: profileMatch } = await supabaseAdmin
+                .from('profiles')
+                .select('id, phone')
+                .or(`phone.eq.${digits},phone.eq.+91${digits}`)
+                .maybeSingle()
+            
+            if (profileMatch) {
+                // If we found them in profiles, fetch the actual auth user record
+                const { data: { user } } = await supabaseAdmin.auth.admin.getUserById(profileMatch.id)
+                if (user) match = user as any
+            }
+        }
 
         // 3. Mode Check: If signup but user exists -> Error
         if (mode === 'signup' && match) {
-            return NextResponse.json({
-                error: 'This number is already registered. Please login instead.'
+            return NextResponse.json({ 
+                error: 'This number is already registered. Please login instead.' 
             }, { status: 400 })
         }
 
+        // 4. Mode Check: If login but user DOES NOT exist -> Error
         if (mode === 'login' && !match) {
-            return NextResponse.json({
-                error: 'This number is not registered. Please sign up first.'
+            return NextResponse.json({ 
+                error: 'This number is not registered. Please sign up first.' 
             }, { status: 400 })
         }
 

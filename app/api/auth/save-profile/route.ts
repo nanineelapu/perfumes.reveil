@@ -9,8 +9,8 @@ const supabaseAdmin = createClient(
 
 export async function POST(request: Request) {
   try {
-    const { user_id, first_name, last_name, phone } = await request.json()
-    console.log('Saving profile:', user_id, first_name, last_name)
+    const { user_id, first_name, last_name, phone, email } = await request.json()
+    console.log('Saving profile:', user_id, first_name, last_name, email)
 
     if (!user_id || !first_name) {
       return NextResponse.json(
@@ -29,6 +29,7 @@ export async function POST(request: Request) {
         last_name:  (last_name ?? '').trim(),
         full_name,
         phone,
+        email:      (email ?? '').trim(),
         role:       'user',
       })
 

@@ -444,6 +444,15 @@ function AuthPageContent() {
                                         <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} style={{ width: '100%', border: 'none', background: 'none', fontSize: '14px', outline: 'none', color: '#000' }} />
                                     </motion.div>
                                 </div>
+                                
+                                {/* Email Input */}
+                                <motion.div
+                                    whileHover={{ borderBottomColor: '#d4af37' }}
+                                    style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
+                                    <label style={{ fontSize: '9px', color: '#d4af37', textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Email Address *</label>
+                                    <input type="email" name="email" value={formData.email} onChange={handleChange} required style={{ width: '100%', border: 'none', background: 'none', fontSize: '14px', outline: 'none', color: '#000' }} />
+                                </motion.div>
+
                                 <motion.button
                                     whileHover={{ scale: 1.01, backgroundColor: '#c5a02e' }}
                                     whileTap={{ scale: 0.99 }}
