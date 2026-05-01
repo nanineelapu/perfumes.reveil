@@ -13,45 +13,59 @@ export default function AuthCallbackPage() {
     useEffect(() => {
         const handleCallback = async () => {
             try {
-                // Supabase createBrowserClient automatically parses the hash fragment
-                // (#access_token=...) and establishes the session in the background.
-                // We just need to wait for it to be ready.
-
-                const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-
-                if (sessionError) throw sessionError
-
-                if (session) {
-                    // Session established successfully!
+                // 1. Check if session is already established (e.g. by automatic background parsing)
+                const { data: { session: existingSession } } = await supabase.auth.getSession()
+                if (existingSession) {
                     router.replace('/orders')
-                } else {
-                    // Sometimes the parsing takes a tiny bit of time, or it's listening via onAuthStateChange
-                    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
-                        if (event === 'SIGNED_IN' && newSession) {
+                    return
+                }
+
+                // 2. Fallback: Manually parse tokens from hash if Supabase SDK is taking too long
+                // This is critical for mobile browsers where the hash fragment might not be 
+                // immediately picked up by the SDK's internal listeners.
+                const hash = window.location.hash
+                if (hash && (hash.includes('access_token=') || hash.includes('refresh_token='))) {
+                    const params = new URLSearchParams(hash.substring(1))
+                    const access_token = params.get('access_token')
+                    const refresh_token = params.get('refresh_token')
+
+                    if (access_token && refresh_token) {
+                        const { data: { session: newSession }, error: setSessionError } = await supabase.auth.setSession({
+                            access_token,
+                            refresh_token,
+                        })
+                        if (setSessionError) throw setSessionError
+                        if (newSession) {
                             router.replace('/orders')
+                            return
                         }
-                    })
-
-                    // Fallback timeout in case no session is found after 3 seconds
-                    setTimeout(() => {
-                        if (!error) {
-                            supabase.auth.getSession().then(({ data }) => {
-                                if (data.session) {
-                                    router.replace('/orders')
-                                } else {
-                                    setError('Failed to establish session. Please try logging in again.')
-                                }
-                            })
-                        }
-                    }, 3000)
-
-                    return () => {
-                        subscription.unsubscribe()
                     }
+                }
+
+                // 3. Listen for the SIGNED_IN event (this is what the SDK usually triggers)
+                const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
+                    if ((event === 'SIGNED_IN' || event === 'USER_UPDATED') && newSession) {
+                        router.replace('/orders')
+                    }
+                })
+
+                // 4. Final Fallback: If nothing happens after 5 seconds, try one last check
+                const timeout = setTimeout(async () => {
+                    const { data: { session: finalCheck } } = await supabase.auth.getSession()
+                    if (finalCheck) {
+                        router.replace('/orders')
+                    } else {
+                        setError('We couldn\'t establish your session. This might happen if the link is expired or used already.')
+                    }
+                }, 5000)
+
+                return () => {
+                    subscription.unsubscribe()
+                    clearTimeout(timeout)
                 }
             } catch (err: any) {
                 console.error('Callback error:', err)
-                setError(err.message || 'Authentication failed')
+                setError(err.message || 'Authentication failed. Please try again.')
             }
         }
 

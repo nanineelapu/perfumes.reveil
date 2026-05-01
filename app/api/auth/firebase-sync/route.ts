@@ -4,18 +4,29 @@ import { admin } from '@/lib/firebase-admin'
 
 export async function POST(request: Request) {
     try {
-        const { phone, firebase_uid, id_token, firstName, lastName, email } = await request.json()
+        const body = await request.json()
+        const { phone, firebase_uid, id_token, firstName, lastName, email } = body
 
-        if (!id_token) {
+        // 1. Determine which phone number to use
+        let verifiedPhone = phone
+
+        // 2. If an id_token is provided, verify it with Firebase Admin
+        // This is our primary security check for production
+        if (id_token) {
+            try {
+                const decodedToken = await admin.auth().verifyIdToken(id_token)
+                verifiedPhone = decodedToken.phone_number || phone
+            } catch (err) {
+                console.error('[firebase-sync] Token verification failed:', err)
+                return NextResponse.json({ error: 'Invalid authentication token.' }, { status: 401 })
+            }
+        } else if (process.env.NODE_ENV === 'production') {
+            // In production, we MUST have a token
             return NextResponse.json({ error: 'Authentication token is required.' }, { status: 401 })
         }
 
-        // 1. Verify Firebase ID Token using the shared Admin SDK
-        const decodedToken = await admin.auth().verifyIdToken(id_token)
-        const verifiedPhone = decodedToken.phone_number || phone
-
         if (!verifiedPhone) {
-            return NextResponse.json({ error: 'Phone number not found.' }, { status: 400 })
+            return NextResponse.json({ error: 'Phone number is required.' }, { status: 400 })
         }
 
         // Normalize to E.164 format e.g. +91XXXXXXXXXX
@@ -61,24 +72,30 @@ export async function POST(request: Request) {
             supabaseUser = newUser.user
         }
 
-        // 3. Ensure profile row exists
-        const { data: existingProfile } = await supabaseAdmin
-            .from('profiles')
-            .select('id')
-            .eq('id', supabaseUser.id)
-            .maybeSingle()
+        // 3. Ensure profile row exists (Robust Upsert)
+        // Fallback: If no name is provided, try to use the part of the email before @
+        const fallbackName = email ? email.split('@')[0] : 'Collector'
+        const finalFirstName = firstName || (is_new_user ? fallbackName : undefined)
 
-        if (!existingProfile) {
-            // Create placeholder profile — name will be filled in next step for new users
-            await supabaseAdmin.from('profiles').insert({
-                id: supabaseUser.id,
-                phone: normalizedPhone,
-                role: 'user'
-            })
+        const profileData = {
+            id: supabaseUser.id,
+            phone: normalizedPhone,
+            email: email || supabaseUser.email,
+            role: 'user',
+            first_name: finalFirstName,
+            last_name: lastName || undefined,
+            full_name: firstName ? `${firstName} ${lastName || ''}`.trim() : (finalFirstName || 'Collector')
+        }
+
+        const { error: profileError } = await supabaseAdmin
+            .from('profiles')
+            .upsert(profileData, { onConflict: 'id' })
+
+        if (profileError) {
+            console.error('[firebase-sync] Profile creation failed:', profileError)
         }
 
         // 4. Determine the site origin robustly (works in both dev and production)
-        //    Priority: explicit env var > request origin header > request URL origin
         const siteUrl =
             process.env.NEXT_PUBLIC_APP_URL ||
             process.env.NEXT_PUBLIC_SITE_URL ||
@@ -87,8 +104,7 @@ export async function POST(request: Request) {
 
         // 5. Generate magic link.
         //    redirectTo = the URL Supabase sends the user to AFTER clicking the link.
-        //    It MUST point to our client-side /auth/callback page which parses the 
-        //    #access_token hash fragment (since server routes can't see hashes).
+        //    We point it to /auth/callback to handle the session establishment.
         const redirectTo = `${siteUrl}/auth/callback`
 
         const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
@@ -107,7 +123,6 @@ export async function POST(request: Request) {
         })
 
     } catch (err: any) {
-        console.error('[firebase-sync] Error:', err)
         return NextResponse.json({ error: err.message }, { status: 500 })
     }
 }

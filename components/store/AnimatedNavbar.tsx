@@ -57,27 +57,28 @@ export function AnimatedNavbar() {
             }
         }
 
-        // Implicit Flow Hash Fallback (in case Supabase redirects to home instead of callback route)
-        if (typeof window !== 'undefined' && window.location.hash.includes('access_token')) {
-            supabase.auth.getSession().then(({ data: { session } }) => {
-                if (session) {
-                    window.location.href = '/orders'
-                }
-            })
-        } else {
-            supabase.auth.getSession().then(({ data: { session } }) => {
+        // Initialize Auth
+        const initAuth = async () => {
+            // First check if there's a session in the hash (implicit fallback)
+            if (typeof window !== 'undefined' && window.location.hash.includes('access_token')) {
+                 const { data: { session } } = await supabase.auth.getSession()
+                 if (session) {
+                    setUser(session.user)
+                    fetchProfileName(session.user.id)
+                    // If we're on a page that needs a clean URL, we could router.replace here
+                 }
+            } else {
+                const { data: { session } } = await supabase.auth.getSession()
                 setUser(session?.user ?? null)
                 if (session?.user) fetchProfileName(session.user.id)
-            })
+            }
         }
 
+        initAuth()
+
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            console.log('Auth Event:', event)
             setUser(session?.user ?? null)
-            
-            if (event === 'SIGNED_IN' && window.location.hash.includes('access_token')) {
-                window.location.href = '/orders'
-                return
-            }
             
             if (session?.user) {
                 fetchProfileName(session.user.id)

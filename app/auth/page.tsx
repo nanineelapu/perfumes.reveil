@@ -166,8 +166,7 @@ function AuthPageContent() {
             const contentType = res.headers.get("content-type");
             if (!contentType || !contentType.includes("application/json")) {
                 const text = await res.text();
-                console.error("Non-JSON response from server:", text.substring(0, 500));
-                throw new Error("Server communication error. Please try again or contact support.");
+                throw new Error("Server communication error. Please try again.");
             }
 
             const syncResult = await res.json()

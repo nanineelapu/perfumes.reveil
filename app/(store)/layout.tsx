@@ -6,8 +6,10 @@ import type { Metadata } from 'next'
 import { AnimatedNavbar } from "@/components/store/AnimatedNavbar"
 import { Footer } from '@/components/store/Footer'
 import { WhatsAppOverlay } from '@/components/store/WhatsAppOverlay'
+import { AuthTokenCatcher } from '@/components/store/AuthTokenCatcher'
 
 export const metadata: Metadata = {
+// ... existing metadata ...
   metadataBase: new URL('https://perfumesreveil.vercel.app'),
   title: {
     default: 'REVEIL — Premium Perfumes & Luxury Fragrances India',
@@ -61,6 +63,7 @@ export default async function StoreLayout({ children }: { children: React.ReactN
   return (
     <div style={{ background: '#000', color: '#fff', minHeight: '100vh' }}>
       <CartProvider>
+        <AuthTokenCatcher />
         <AnimatedNavbar />
         {children}
         <Footer />

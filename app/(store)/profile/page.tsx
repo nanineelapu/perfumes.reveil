@@ -102,7 +102,7 @@ export default function ProfilePage() {
                                 marginBottom: '8px',
                                 fontFamily: 'var(--font-baskerville)'
                             }}>
-                                Bonjour, <span style={{ color: '#d4af37' }}>{profile?.first_name || 'Collector'}</span>
+                                Bonjour, <span style={{ color: '#d4af37' }}>{profile?.first_name || user?.user_metadata?.first_name || user?.email?.split('@')[0] || 'Collector'}</span>
                             </motion.h1>
                             <motion.p variants={itemVariants} style={{ color: '#666', fontSize: '15px' }}>
                                 Manage your personal details and order history.
