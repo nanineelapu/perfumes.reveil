@@ -92,7 +92,7 @@ function AuthPageContent() {
     const sendOtp = async (e: React.FormEvent) => {
         e.preventDefault()
         setError(null)
-        
+
         // 1. Validate Phone (10 digits)
         const digits = formData.phone.replace(/\D/g, '')
         if (digits.length !== 10) {
@@ -118,13 +118,13 @@ function AuthPageContent() {
             const checkRes = await fetch('/api/auth/firebase-sync', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    phone: formattedPhone, 
+                body: JSON.stringify({
+                    phone: formattedPhone,
                     mode: authMode,
-                    checkOnly: true 
+                    checkOnly: true
                 })
             })
-            
+
             const checkData = await checkRes.json()
             if (!checkRes.ok) {
                 setError(checkData.error || 'Something went wrong.')
@@ -444,7 +444,7 @@ function AuthPageContent() {
                                         <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} style={{ width: '100%', border: 'none', background: 'none', fontSize: '14px', outline: 'none', color: '#000' }} />
                                     </motion.div>
                                 </div>
-                                
+
                                 {/* Email Input */}
                                 <motion.div
                                     whileHover={{ borderBottomColor: '#d4af37' }}
