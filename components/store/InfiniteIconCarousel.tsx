@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react'
-import { motion } from 'framer-motion'
 
 const icons = [
     {
@@ -39,7 +38,6 @@ const icons = [
                 <path d="M9 18h6" opacity="0.4" />
                 <path d="M9 9V6a1 1 0 011-1h4a1 1 0 011 1v3" />
                 <circle cx="12" cy="4.5" r="1.5" />
-                <path d="M15 16s1.5-1 1.5-2.5a1.5 1.5 0 00-3 0c0 1.5 1.5 2.5 1.5 2.5z" />
             </svg>
         )
     },
@@ -96,8 +94,8 @@ const icons = [
 ]
 
 export function InfiniteIconCarousel() {
-    // Duplicate the icons array once for a perfect 50% seamless loop
-    const carouselItems = [...icons, ...icons]
+    // Triplicate for seamless infinite loop
+    const carouselItems = [...icons, ...icons, ...icons]
 
     return (
         <section style={{
@@ -107,61 +105,77 @@ export function InfiniteIconCarousel() {
             borderTop: '1px solid rgba(212, 175, 55, 0.1)',
             borderBottom: '1px solid rgba(212, 175, 55, 0.1)'
         }}>
-            <div style={{
-                display: 'flex',
-                width: 'max-content'
-            }}>
-                <motion.div
-                    animate={{ x: ["0%", "-50%"] }}
-                    transition={{
-                        duration: 15, // Restored original faster speed
-                        ease: "linear",
-                        repeat: Infinity,
-                        repeatType: "loop"
-                    }}
-                    style={{
-                        display: 'flex',
-                        gap: '60px', // Restored original gap
-                        paddingLeft: '60px',
-                        willChange: 'transform',
-                        transform: 'translateZ(0)' // Force GPU acceleration
-                    }}
-                >
+            <div className="reveil-marquee-track">
+                <div className="reveil-marquee-inner">
                     {carouselItems.map((item, idx) => (
-                        <div key={idx} style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '16px',
-                            minWidth: '120px'
-                        }}>
-                            <div style={{
-                                width: '64px',
-                                height: '64px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                background: 'rgba(212, 175, 55, 0.02)',
-                                border: '1px solid rgba(212, 175, 55, 0.1)',
-                                borderRadius: '50%'
-                            }}>
+                        <div key={idx} className="reveil-marquee-item">
+                            <div className="reveil-icon-circle">
                                 {item.svg}
                             </div>
-                            <span style={{
-                                color: '#d4af37',
-                                fontSize: '10px',
-                                fontFamily: 'var(--font-baskerville)',
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.15em',
-                                textAlign: 'center'
-                            }}>
+                            <span className="reveil-icon-label">
                                 {item.name}
                             </span>
                         </div>
                     ))}
-                </motion.div>
+                </div>
             </div>
+
+            <style>{`
+                @keyframes reveil-scroll {
+                    0%   { transform: translateX(0); }
+                    100% { transform: translateX(-33.333%); }
+                }
+
+                .reveil-marquee-track {
+                    width: 100%;
+                    overflow: hidden;
+                }
+
+                .reveil-marquee-inner {
+                    display: flex;
+                    gap: 60px;
+                    width: max-content;
+                    animation: reveil-scroll 20s linear infinite;
+                    will-change: transform;
+                }
+
+                .reveil-marquee-item {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 16px;
+                    min-width: 120px;
+                    flex-shrink: 0;
+                }
+
+                .reveil-icon-circle {
+                    width: 64px;
+                    height: 64px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: rgba(212, 175, 55, 0.02);
+                    border: 1px solid rgba(212, 175, 55, 0.1);
+                    border-radius: 50%;
+                }
+
+                .reveil-icon-label {
+                    color: #d4af37;
+                    font-size: 10px;
+                    font-family: var(--font-baskerville);
+                    text-transform: uppercase;
+                    letter-spacing: 0.15em;
+                    text-align: center;
+                    white-space: nowrap;
+                }
+
+                @media (prefers-reduced-motion: reduce) {
+                    .reveil-marquee-inner {
+                        animation: none;
+                    }
+                }
+            `}</style>
         </section>
     )
 }

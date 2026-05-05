@@ -99,6 +99,7 @@ export default function ProductGrid({ items }: { items: (Product | Collection)[]
                     display: 'grid',
                     gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(auto-fill, minmax(280px, 1fr))',
                     gap: isMobile ? '24px 12px' : '50px 30px',
+                    alignItems: 'stretch',
                 }}>
                     {items.map((item, i) => {
                         const product: Product = 'image_url' in item ? {
@@ -123,6 +124,7 @@ export default function ProductGrid({ items }: { items: (Product | Collection)[]
                                     delay: i * 0.08,
                                     ease: [0.16, 1, 0.3, 1]
                                 }}
+                            style={{ height: '100%' }}
                             >
                                 <ProductCard product={product} />
                             </motion.div>

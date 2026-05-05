@@ -123,7 +123,10 @@ export default function ProductCard({ product }: { product: Product }) {
                 borderRadius: '8px',
                 padding: isMobile ? '8px' : '16px',
                 border: '1px solid rgba(255,255,255,0.03)',
-                transition: 'all 0.6s cubic-bezier(0.22, 1, 0.36, 1)'
+                transition: 'all 0.6s cubic-bezier(0.22, 1, 0.36, 1)',
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
             }}
         >
             {/* Atmospheric Chassis Glow (Animated on Hover) */}
@@ -239,7 +242,7 @@ export default function ProductCard({ product }: { product: Product }) {
             </motion.div>
 
             {/* Typography Section */}
-            <div style={{ padding: isMobile ? '12px 0' : '24px 0', textAlign: 'left' }}>
+            <div style={{ padding: isMobile ? '12px 0' : '24px 0', textAlign: 'left', flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <Link href={`/products/${product.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                     <div style={{
                         fontSize: isMobile ? '7px' : '8px', color: '#666',
