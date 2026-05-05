@@ -4,16 +4,15 @@
  * Docs: https://www.messagecentral.com/
  *
  * Required env vars:
- *   MESSAGE_CENTRAL_CUSTOMER_ID  — Your customer ID from Message Central
- *   MESSAGE_CENTRAL_AUTH_TOKEN   — Auth token (base64 encoded password or bearer token)
- *   MESSAGE_CENTRAL_COUNTRY_CODE — Country code (e.g. 91 for India)
+ *   MESSAGE_CENTRAL_CUSTOMER_ID  — Your customer ID (e.g. C-9098EFD657F64B3)
+ *   MESSAGE_CENTRAL_AUTH_TOKEN   — The JWT auth token from MC dashboard (starts with eyJ...)
+ *   MESSAGE_CENTRAL_COUNTRY_CODE — Country code (default: 91 for India)
  */
 
 const MC_BASE_URL = 'https://cpaas.messagecentral.com'
 
 /**
  * Send an OTP to the given phone number via Message Central.
- * Returns { verificationId, success } on success.
  */
 export async function sendMessageCentralOTP(phone: string): Promise<{
     success: boolean
@@ -25,15 +24,17 @@ export async function sendMessageCentralOTP(phone: string): Promise<{
     const countryCode = process.env.MESSAGE_CENTRAL_COUNTRY_CODE || '91'
 
     if (!customerId || !authToken) {
-        console.warn('[Message Central] Credentials not set — OTP not sent.')
+        console.error('[Message Central] Missing CUSTOMER_ID or AUTH_TOKEN env vars.')
         return { success: false, message: 'OTP service not configured.' }
     }
 
-    // Strip everything except digits, remove leading country code if present
+    // Strip everything except digits, remove leading 91 if present
     const digits = phone.replace(/\D/g, '').replace(/^91/, '')
 
     try {
-        const url = `${MC_BASE_URL}/verification/v3/send?countryCode=${countryCode}&customerId=${customerId}&senderId=REVEIL&type=SMS&mobileNumber=${digits}&message=&flowType=SMS`
+        const url = `${MC_BASE_URL}/verification/v3/send?countryCode=${countryCode}&customerId=${customerId}&flowType=SMS&mobileNumber=${digits}`
+
+        console.log('[Message Central] Sending OTP to:', digits)
 
         const res = await fetch(url, {
             method: 'POST',
@@ -43,8 +44,15 @@ export async function sendMessageCentralOTP(phone: string): Promise<{
             },
         })
 
-        const data = await res.json()
-        console.log('[Message Central] Send Response:', data)
+        const text = await res.text()
+        console.log('[Message Central] Send raw response:', text)
+
+        let data: any
+        try {
+            data = JSON.parse(text)
+        } catch {
+            return { success: false, message: `MC service error: ${text.slice(0, 100)}` }
+        }
 
         if (data?.responseCode === 200 && data?.data?.verificationId) {
             return { success: true, verificationId: String(data.data.verificationId) }
@@ -52,7 +60,7 @@ export async function sendMessageCentralOTP(phone: string): Promise<{
 
         return {
             success: false,
-            message: data?.message || 'Failed to send OTP. Please try again.',
+            message: data?.message || `OTP failed (code: ${data?.responseCode})`,
         }
     } catch (err: any) {
         console.error('[Message Central] Send Error:', err)
@@ -62,7 +70,6 @@ export async function sendMessageCentralOTP(phone: string): Promise<{
 
 /**
  * Verify the OTP provided by the user.
- * Returns { success: true } if valid, otherwise { success: false, message }.
  */
 export async function verifyMessageCentralOTP(
     verificationId: string,
@@ -72,7 +79,6 @@ export async function verifyMessageCentralOTP(
     const authToken = process.env.MESSAGE_CENTRAL_AUTH_TOKEN
 
     if (!customerId || !authToken) {
-        console.warn('[Message Central] Credentials not set — OTP not verified.')
         return { success: false, message: 'OTP service not configured.' }
     }
 
@@ -84,8 +90,15 @@ export async function verifyMessageCentralOTP(
             headers: { authToken },
         })
 
-        const data = await res.json()
-        console.log('[Message Central] Verify Response:', data)
+        const text = await res.text()
+        console.log('[Message Central] Verify raw response:', text)
+
+        let data: any
+        try {
+            data = JSON.parse(text)
+        } catch {
+            return { success: false, message: `Verify service error: ${text.slice(0, 100)}` }
+        }
 
         if (data?.responseCode === 200 && data?.data?.verificationStatus === 'VERIFICATION_COMPLETED') {
             return { success: true }

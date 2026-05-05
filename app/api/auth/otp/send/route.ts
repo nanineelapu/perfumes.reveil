@@ -3,7 +3,19 @@ import { sendMessageCentralOTP } from '@/lib/messageCentral'
 
 export async function POST(request: Request) {
     try {
-        const { phone } = await request.json()
+        const body = await request.text()
+        if (!body) {
+            return NextResponse.json({ error: 'Request body is empty' }, { status: 400 })
+        }
+
+        let parsed: { phone?: string }
+        try {
+            parsed = JSON.parse(body)
+        } catch {
+            return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 })
+        }
+
+        const { phone } = parsed
 
         if (!phone) {
             return NextResponse.json({ error: 'Phone number is required' }, { status: 400 })
@@ -24,6 +36,7 @@ export async function POST(request: Request) {
             { status: 400 }
         )
     } catch (error: any) {
+        console.error('[OTP Send Route] Error:', error)
         return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 })
     }
 }
