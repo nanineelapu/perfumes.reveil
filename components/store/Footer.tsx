@@ -264,7 +264,7 @@ export function Footer({ theme = 'dark' }: FooterProps) {
                                 "Luxury is not a status, <br /> it is a sensory journey."
                             </p>
                             <div style={{ color: isLight ? '#bbb' : '#444', fontSize: '9px', letterSpacing: '0.1em' }}>
-                                ODISHA — BRAHMAPUR — ANDHRA PRADESH
+                                ODISHA — BRAHMAPUR
                             </div>
                         </div>
                     )}
