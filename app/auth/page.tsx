@@ -84,7 +84,16 @@ function AuthPageContent() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ phone: formattedPhone, mode: authMode }),
             })
-            const checkData = await checkRes.json()
+            
+            let checkData;
+            try {
+                checkData = await checkRes.json()
+            } catch (e) {
+                const text = await checkRes.text()
+                console.error('Pre-check non-JSON response:', text)
+                throw new Error(`Server Error (${checkRes.status}): ${text.slice(0, 50)}`)
+            }
+
             if (!checkRes.ok) {
                 setError(checkData.error || 'Something went wrong.')
                 setLoading(false)
@@ -97,7 +106,15 @@ function AuthPageContent() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ phone: formattedPhone }),
             })
-            const otpData = await otpRes.json()
+            
+            let otpData;
+            try {
+                otpData = await otpRes.json()
+            } catch (e) {
+                const text = await otpRes.text()
+                console.error('OTP Send non-JSON response:', text)
+                throw new Error(`OTP Service Error (${otpRes.status}): ${text.slice(0, 50)}`)
+            }
 
             if (!otpRes.ok || !otpData.verificationId) {
                 setError(otpData.error || 'Failed to send OTP. Please try again.')
@@ -109,6 +126,7 @@ function AuthPageContent() {
             setOtpSent(true)
             setMessage(`OTP sent to +91 ${digits}`)
         } catch (err: any) {
+            console.error('[AuthPage] Error:', err)
             setError(err.message || 'Something went wrong. Please try again.')
         } finally {
             setLoading(false)
@@ -146,7 +164,15 @@ function AuthPageContent() {
                     mode: authMode,
                 }),
             })
-            const data = await res.json()
+            
+            let data;
+            try {
+                data = await res.json()
+            } catch (e) {
+                const text = await res.text()
+                console.error('OTP Verify non-JSON response:', text)
+                throw new Error(`Verify Error (${res.status}): ${text.slice(0, 50)}`)
+            }
 
             if (!res.ok || data.error) {
                 setError(data.error || 'OTP verification failed. Please try again.')
@@ -167,6 +193,7 @@ function AuthPageContent() {
                 window.location.href = data.loginUrl
             }
         } catch (err: any) {
+            console.error('[AuthPage] Verify Error:', err)
             setError('Something went wrong: ' + err.message)
             setLoading(false)
         }
