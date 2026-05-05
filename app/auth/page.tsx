@@ -138,8 +138,8 @@ function AuthPageContent() {
         e.preventDefault()
         setError(null)
 
-        if (formData.otp.length !== 6) {
-            setError('Please enter a valid 6-digit OTP.')
+        if (formData.otp.length !== 4) {
+            setError('Please enter the 4-digit OTP.')
             return
         }
 
@@ -390,11 +390,11 @@ function AuthPageContent() {
                                             <input
                                                 type="text"
                                                 name="otp"
-                                                placeholder="· · · · · ·"
+                                                placeholder="· · · ·"
                                                 value={formData.otp}
                                                 onChange={handleChange}
                                                 required
-                                                maxLength={6}
+                                                maxLength={4}
                                                 inputMode="numeric"
                                                 style={{ width: '100%', padding: '8px 0 0', background: 'none', border: 'none', color: '#000', fontSize: '24px', letterSpacing: '0.6em', outline: 'none' }}
                                             />

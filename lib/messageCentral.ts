@@ -32,7 +32,7 @@ export async function sendMessageCentralOTP(phone: string): Promise<{
     const digits = phone.replace(/\D/g, '').replace(/^91/, '')
 
     try {
-        const url = `${MC_BASE_URL}/verification/v3/send?countryCode=${countryCode}&customerId=${customerId}&flowType=SMS&mobileNumber=${digits}`
+        const url = `${MC_BASE_URL}/verification/v3/send?countryCode=${countryCode}&customerId=${customerId}&flowType=SMS&mobileNumber=${digits}&otpLength=4`
 
         console.log('[Message Central] Sending OTP to:', digits)
 
