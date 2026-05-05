@@ -74,17 +74,22 @@ export function ReviewsSection({ reviews = [] }: { reviews?: Review[] }) {
 
             <div className="carousel-section">
                 <div className="carousel-container">
-                    <AnimatePresence mode="wait">
+                    <AnimatePresence mode="popLayout">
                         <motion.div
                             key={currentReview.id}
-                            initial={{ opacity: 0, x: 30 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -30 }}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
                             transition={{
-                                duration: 0.5,
+                                duration: 0.6,
                                 ease: "easeInOut"
                             }}
-                            style={{ position: 'relative', width: '100%' }}
+                            style={{
+                                position: 'relative',
+                                width: '100%',
+                                willChange: 'opacity',
+                                transform: 'translateZ(0)',
+                            }}
                             className="review-card desktop-carousel-card"
                         >
                             <div className="review-left">
@@ -149,7 +154,7 @@ export function ReviewsSection({ reviews = [] }: { reviews?: Review[] }) {
                 
                 .carousel-container {
                     position: relative;
-                    min-height: 400px;
+                    min-height: 240px;
                     display: flex;
                     flex-direction: column;
                     align-items: center;
@@ -259,7 +264,7 @@ export function ReviewsSection({ reviews = [] }: { reviews?: Review[] }) {
                         display: block;
                     }
                     .carousel-container {
-                        min-height: 550px;
+                        min-height: 480px;
                     }
                     .review-card {
                         height: 420px;
@@ -316,7 +321,7 @@ export function ReviewsSection({ reviews = [] }: { reviews?: Review[] }) {
 
                 @media (max-width: 600px) {
                     .carousel-container {
-                        min-height: 480px;
+                        min-height: 440px;
                     }
                     .review-card {
                         height: 400px;

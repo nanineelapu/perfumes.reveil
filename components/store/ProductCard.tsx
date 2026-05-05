@@ -257,9 +257,10 @@ export default function ProductCard({ product }: { product: Product }) {
                         {product.category}
                     </div>
                     <h3 style={{
-                        margin: '0 0 8px', fontSize: isMobile ? '15px' : '18px', fontWeight: 300,
+                        margin: '0 0 8px', fontSize: isMobile ? '12px' : '15px', fontWeight: 300,
                         color: '#fff', fontFamily: 'var(--font-cormorant)',
-                        letterSpacing: '0.02em', textTransform: 'none', lineHeight: 1.2
+                        letterSpacing: '0.02em', textTransform: 'none', lineHeight: 1.2,
+                        ...(isMobile && { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' })
                     }}>
                         {product.name}
                     </h3>
