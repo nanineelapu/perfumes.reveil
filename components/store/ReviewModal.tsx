@@ -61,7 +61,7 @@ export function ReviewModal({ isOpen, onClose, product, orderId }: ReviewModalPr
                         onClick={onClose}
                         style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)' }}
                     />
-                    
+
                     <motion.div
                         initial={{ scale: 0.9, opacity: 0, y: 20 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -107,10 +107,10 @@ export function ReviewModal({ isOpen, onClose, product, orderId }: ReviewModalPr
                                             onMouseLeave={() => setHoveredRating(0)}
                                             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                                         >
-                                            <Star 
-                                                size={32} 
-                                                fill={(hoveredRating || rating) >= star ? '#d4af37' : 'transparent'} 
-                                                color={(hoveredRating || rating) >= star ? '#d4af37' : 'rgba(255,255,255,0.1)'} 
+                                            <Star
+                                                size={32}
+                                                fill={(hoveredRating || rating) >= star ? '#d4af37' : 'transparent'}
+                                                color={(hoveredRating || rating) >= star ? '#d4af37' : 'rgba(255,255,255,0.1)'}
                                                 strokeWidth={1.5}
                                             />
                                         </motion.button>

@@ -96,8 +96,8 @@ const icons = [
 ]
 
 export function InfiniteIconCarousel() {
-    // Duplicate the icons array to create an infinite loop effect
-    const carouselItems = [...icons, ...icons, ...icons]
+    // Duplicate the icons array once for a perfect 50% seamless loop
+    const carouselItems = [...icons, ...icons]
 
     return (
         <section style={{
@@ -109,22 +109,22 @@ export function InfiniteIconCarousel() {
         }}>
             <div style={{
                 display: 'flex',
-                width: 'fit-content'
+                width: 'max-content'
             }}>
                 <motion.div
-                    animate={{ x: [0, -1032] }} // Approximate width of one set
+                    animate={{ x: ["0%", "-50%"] }}
                     transition={{
-                        x: {
-                            repeat: Infinity,
-                            repeatType: "loop",
-                            duration: 15, // Faster scroll speed
-                            ease: "linear"
-                        }
+                        duration: 15, // Restored original faster speed
+                        ease: "linear",
+                        repeat: Infinity,
+                        repeatType: "loop"
                     }}
                     style={{
                         display: 'flex',
-                        gap: '60px',
-                        paddingLeft: '60px'
+                        gap: '60px', // Restored original gap
+                        paddingLeft: '60px',
+                        willChange: 'transform',
+                        transform: 'translateZ(0)' // Force GPU acceleration
                     }}
                 >
                     {carouselItems.map((item, idx) => (

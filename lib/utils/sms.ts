@@ -1,76 +1,85 @@
 /**
- * Msg91 SMS Service
- * Handles dispatching SMS notifications via Msg91 API.
+ * Message Central SMS Notification Service
+ * Handles dispatching transactional SMS (order confirmations, delivery alerts)
+ * via the Message Central flow API.
+ *
+ * Required env vars:
+ *   MESSAGE_CENTRAL_CUSTOMER_ID
+ *   MESSAGE_CENTRAL_AUTH_TOKEN
+ *   MESSAGE_CENTRAL_FLOW_ID_CONFIRMED   (order confirmation template ID)
+ *   MESSAGE_CENTRAL_FLOW_ID_DELIVERED   (order delivered template ID)
  */
 
-const MSG91_API_URL = 'https://api.msg91.com/api/v5/flow/';
+const MC_BASE_URL = 'https://cpaas.messagecentral.com'
 
-export async function sendSMSNotification(phone: string, templateId: string, params: Record<string, string>) {
-    const authKey = process.env.MSG91_AUTH_KEY;
-    
-    if (!authKey) {
-        console.log('--- MOCK SMS START ---');
-        console.log(`To: ${phone}`);
-        console.log(`Template: ${templateId}`);
-        console.log(`Params:`, params);
-        console.log('--- MOCK SMS END ---');
-        return { success: true, mocked: true };
+export async function sendSMSNotification(
+    phone: string,
+    templateId: string,
+    params: Record<string, string>
+) {
+    const customerId = process.env.MESSAGE_CENTRAL_CUSTOMER_ID
+    const authToken = process.env.MESSAGE_CENTRAL_AUTH_TOKEN
+
+    if (!customerId || !authToken) {
+        // Mock mode: log to console instead of sending
+        console.log('--- MOCK SMS START ---')
+        console.log(`To: ${phone}`)
+        console.log(`Template: ${templateId}`)
+        console.log(`Params:`, params)
+        console.log('--- MOCK SMS END ---')
+        return { success: true, mocked: true }
     }
 
+    const digits = phone.replace(/\D/g, '').replace(/^91/, '')
+
     try {
-        const response = await fetch(MSG91_API_URL, {
+        // Build the message body from params — adjust as needed for your templates
+        const paramStr = Object.entries(params).map(([k, v]) => `${k}=${v}`).join('&')
+        const url = `${MC_BASE_URL}/verification/v3/send?countryCode=91&customerId=${customerId}&senderId=REVEIL&type=SMS&mobileNumber=${digits}&flowId=${templateId}&${paramStr}`
+
+        const res = await fetch(url, {
             method: 'POST',
             headers: {
-                'authkey': authKey,
-                'content-type': 'application/json'
+                authToken,
+                'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                template_id: templateId,
-                short_url: '1', // Optional
-                recipients: [
-                    {
-                        mobiles: phone.startsWith('+91') ? phone.slice(3) : phone,
-                        ...params
-                    }
-                ]
-            })
-        });
+        })
 
-        const data = await response.json();
+        const data = await res.json()
 
-        if (!response.ok) {
-            console.error('Msg91 Error:', data);
-            return { success: false, error: data };
+        if (!res.ok) {
+            console.error('[Message Central SMS] Error:', data)
+            return { success: false, error: data }
         }
 
-        return { success: true, data };
+        return { success: true, data }
     } catch (err) {
-        console.error('SMS Dispatch Error:', err);
-        return { success: false, error: err };
+        console.error('[Message Central SMS] Dispatch Error:', err)
+        return { success: false, error: err }
     }
 }
 
 /**
- * Utility to send Order Confirmation SMS
+ * Send Order Confirmation SMS
  */
 export async function sendOrderConfirmationSMS(phone: string, orderId: string, customerName: string) {
-    const flowId = process.env.MSG91_FLOW_ID_CONFIRMED;
-    if (!flowId) return { success: false, error: 'Flow ID not configured' };
+    const flowId = process.env.MESSAGE_CENTRAL_FLOW_ID_CONFIRMED
+    if (!flowId) return { success: false, error: 'Flow ID not configured' }
 
     return await sendSMSNotification(phone, flowId, {
         name: customerName,
-        order_id: orderId.slice(0, 8).toUpperCase()
-    });
+        order_id: orderId.slice(0, 8).toUpperCase(),
+    })
 }
 
 /**
- * Utility to send Order Delivered SMS
+ * Send Order Delivered SMS
  */
 export async function sendOrderDeliveredSMS(phone: string, orderId: string) {
-    const flowId = process.env.MSG91_FLOW_ID_DELIVERED;
-    if (!flowId) return { success: false, error: 'Flow ID not configured' };
+    const flowId = process.env.MESSAGE_CENTRAL_FLOW_ID_DELIVERED
+    if (!flowId) return { success: false, error: 'Flow ID not configured' }
 
     return await sendSMSNotification(phone, flowId, {
-        order_id: orderId.slice(0, 8).toUpperCase()
-    });
+        order_id: orderId.slice(0, 8).toUpperCase(),
+    })
 }

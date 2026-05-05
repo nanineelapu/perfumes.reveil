@@ -41,9 +41,9 @@ export function StayConnected({ theme = 'light' }: StayConnectedProps) {
     }
 
     return (
-        <section style={{ 
-            padding: isMobile ? '60px 20px' : '80px 40px', 
-            background: bgColor, 
+        <section style={{
+            padding: isMobile ? '60px 20px' : '80px 40px',
+            background: bgColor,
             textAlign: 'center',
             borderTop: `1px solid ${borderColor}`,
             overflow: 'hidden'
@@ -55,10 +55,10 @@ export function StayConnected({ theme = 'light' }: StayConnectedProps) {
                 transition={{ duration: 0.8 }}
                 style={{ maxWidth: '600px', margin: '0 auto' }}
             >
-                <h3 style={{ 
-                    fontSize: isMobile ? '20px' : '24px', 
-                    fontWeight: 900, 
-                    letterSpacing: '0.2em', 
+                <h3 style={{
+                    fontSize: isMobile ? '20px' : '24px',
+                    fontWeight: 900,
+                    letterSpacing: '0.2em',
                     color: textColor,
                     marginBottom: '10px',
                     textTransform: 'uppercase',
@@ -66,9 +66,9 @@ export function StayConnected({ theme = 'light' }: StayConnectedProps) {
                 }}>
                     Stay Connected
                 </h3>
-                <p style={{ 
-                    fontSize: isMobile ? '12px' : '14px', 
-                    color: subColor, 
+                <p style={{
+                    fontSize: isMobile ? '12px' : '14px',
+                    color: subColor,
                     marginBottom: isMobile ? '30px' : '40px',
                     fontFamily: 'var(--font-baskerville)',
                     fontStyle: 'italic',
@@ -79,30 +79,30 @@ export function StayConnected({ theme = 'light' }: StayConnectedProps) {
 
                 <AnimatePresence mode="wait">
                     {!isSubmitted ? (
-                        <motion.form 
+                        <motion.form
                             key="form"
                             onSubmit={handleSubmit}
-                            style={{ 
-                                display: 'flex', 
+                            style={{
+                                display: 'flex',
                                 flexDirection: isMobile ? 'column' : 'row',
-                                background: isLight ? '#fff' : '#000', 
+                                background: isLight ? '#fff' : '#000',
                                 border: `1px solid ${borderColor}`,
                                 padding: isMobile ? '4px' : '8px',
                                 boxShadow: isLight ? '0 10px 30px rgba(0,0,0,0.03)' : 'none',
                                 gap: isMobile ? '10px' : '0'
                             }}
                         >
-                            <input 
-                                type="email" 
+                            <input
+                                type="email"
                                 required
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder="example@gmail.com"
-                                style={{ 
-                                    flex: 1, 
-                                    background: 'transparent', 
-                                    border: 'none', 
-                                    outline: 'none', 
+                                style={{
+                                    flex: 1,
+                                    background: 'transparent',
+                                    border: 'none',
+                                    outline: 'none',
                                     padding: isMobile ? '15px' : '12px 20px',
                                     color: textColor,
                                     fontSize: '14px',
@@ -115,10 +115,10 @@ export function StayConnected({ theme = 'light' }: StayConnectedProps) {
                                 disabled={isSubmitting}
                                 whileHover={!isMobile ? { scale: 1.02, backgroundColor: textColor, color: isLight ? '#fff' : '#000' } : {}}
                                 whileTap={{ scale: 0.98 }}
-                                style={{ 
-                                    background: subColor, 
-                                    color: '#000', 
-                                    border: 'none', 
+                                style={{
+                                    background: subColor,
+                                    color: '#000',
+                                    border: 'none',
                                     padding: isMobile ? '15px' : '0 30px',
                                     fontWeight: 900,
                                     fontSize: '11px',

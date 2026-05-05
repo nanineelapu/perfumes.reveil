@@ -2,14 +2,12 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
-import { Smartphone, Lock, ArrowRight, Loader2, CheckCircle2, ChevronLeft, ShieldCheck } from 'lucide-react'
+import { MessageCircle, ArrowRight, Loader2, CheckCircle2, ChevronLeft } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Home } from 'lucide-react'
-import { auth as firebaseAuth } from '@/lib/firebase'
-import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from 'firebase/auth'
 
 
 function AuthPageContent() {
@@ -17,24 +15,30 @@ function AuthPageContent() {
     const searchParams = useSearchParams()
     const modeParam = searchParams.get('mode') as 'login' | 'signup' | null
     const supabase = createClient()
+
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [message, setMessage] = useState<string | null>(null)
     const [otpSent, setOtpSent] = useState(false)
     const [isMobile, setIsMobile] = useState(false)
     const [authMode, setAuthMode] = useState<'login' | 'signup'>(modeParam || 'login')
-    const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null)
-    const [recaptchaVerifier, setRecaptchaVerifier] = useState<RecaptchaVerifier | null>(null)
     const [step, setStep] = useState<'auth' | 'name'>('auth')
     const [userId, setUserId] = useState<string | null>(null)
     const [loginUrl, setLoginUrl] = useState<string | null>(null)
 
+    // Message Central verification ID — returned after OTP send
+    const [verificationId, setVerificationId] = useState<string | null>(null)
+
+    const [formData, setFormData] = useState({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        otp: '',
+    })
 
     useEffect(() => {
-        if (modeParam) {
-            setAuthMode(modeParam)
-        }
-        // Show error if redirected back from callback with an error
+        if (modeParam) setAuthMode(modeParam)
         const errorParam = searchParams.get('error')
         if (errorParam === 'session_failed') {
             setError('Login link expired or already used. Please request a new OTP.')
@@ -53,47 +57,15 @@ function AuthPageContent() {
         setMessage(null)
     }, [authMode])
 
-    // Initialize Recaptcha
-    useEffect(() => {
-        if (!recaptchaVerifier && typeof window !== 'undefined' && firebaseAuth) {
-            try {
-                const verifier = new RecaptchaVerifier(firebaseAuth, 'recaptcha-container', {
-                    size: 'invisible',
-                    callback: () => {
-                        console.log('Recaptcha verified')
-                    }
-                })
-                setRecaptchaVerifier(verifier)
-            } catch (err) {
-                console.error('Recaptcha init error:', err)
-            }
-        }
-    }, [recaptchaVerifier])
-
-
-    // Form States
-    const [formData, setFormData] = useState({
-        firstName: '',
-        lastName: '',
-        email: '',
-        password: '',
-        phone: '',
-        otp: ''
-    })
-
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value })
     }
 
-
-
-
-    // --- FLOW 2: CUSTOMER LOGIN (Firebase OTP) ---
+    // ── STEP 1: Send OTP via Message Central ──────────────────────────────────
     const sendOtp = async (e: React.FormEvent) => {
         e.preventDefault()
         setError(null)
 
-        // 1. Validate Phone (10 digits)
         const digits = formData.phone.replace(/\D/g, '')
         if (digits.length !== 10) {
             setError('Please enter a valid 10-digit mobile number.')
@@ -104,27 +76,14 @@ function AuthPageContent() {
         setMessage(null)
 
         try {
-            if (!firebaseAuth) throw new Error('Something went wrong. Please try again later.')
-            if (!formData.phone) throw new Error('Please enter your phone number.')
+            const formattedPhone = `+91${digits}`
 
-            // Format phone number
-            let cleaned = formData.phone.replace(/[^\d+]/g, '')
-            let formattedPhone = cleaned
-            if (!formattedPhone.startsWith('+')) {
-                formattedPhone = formattedPhone.startsWith('91') && formattedPhone.length >= 12 ? `+${formattedPhone}` : `+91${formattedPhone}`
-            }
-
-            // 2. Pre-validate with our API (Check if user exists/doesn't exist based on mode)
+            // Pre-validate: check if user exists/doesn't exist
             const checkRes = await fetch('/api/auth/firebase-sync', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    phone: formattedPhone,
-                    mode: authMode,
-                    checkOnly: true
-                })
+                body: JSON.stringify({ phone: formattedPhone, mode: authMode }),
             })
-
             const checkData = await checkRes.json()
             if (!checkRes.ok) {
                 setError(checkData.error || 'Something went wrong.')
@@ -132,107 +91,88 @@ function AuthPageContent() {
                 return
             }
 
-            if (!recaptchaVerifier) throw new Error('Still loading, please wait a moment.')
+            // Send OTP via Message Central
+            const otpRes = await fetch('/api/auth/otp/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: formattedPhone }),
+            })
+            const otpData = await otpRes.json()
 
-            const confirmation = await signInWithPhoneNumber(firebaseAuth, formattedPhone, recaptchaVerifier)
-            setConfirmationResult(confirmation)
+            if (!otpRes.ok || !otpData.verificationId) {
+                setError(otpData.error || 'Failed to send OTP. Please try again.')
+                setLoading(false)
+                return
+            }
+
+            setVerificationId(otpData.verificationId)
             setOtpSent(true)
-            setMessage(`OTP sent to ${formattedPhone}`)
+            setMessage(`OTP sent to +91 ${digits}`)
         } catch (err: any) {
-            console.error('Customer Auth Error:', err)
-
-            let errorMessage = 'Something went wrong. Please try again.'
-            if (err.code === 'auth/unsupported-phone-number') errorMessage = 'That phone number format is not supported.'
-            else if (err.code === 'auth/invalid-phone-number') errorMessage = 'Please enter a valid phone number.'
-            else if (err.code === 'auth/too-many-requests') errorMessage = 'Too many attempts. Please wait and try again.'
-            else if (err.message) errorMessage = err.message
-
-            setError(errorMessage)
+            setError(err.message || 'Something went wrong. Please try again.')
         } finally {
             setLoading(false)
         }
     }
 
-
-    // STEP 7 — Verify OTP
+    // ── STEP 2: Verify OTP ────────────────────────────────────────────────────
     const verifyOtp = async (e: React.FormEvent) => {
         e.preventDefault()
         setError(null)
+
         if (formData.otp.length !== 6) {
             setError('Please enter a valid 6-digit OTP.')
             return
         }
+
+        if (!verificationId) {
+            setError('Session expired. Please request a new OTP.')
+            return
+        }
+
         setLoading(true)
 
         try {
-            // 1. Firebase verify
-            if (!confirmationResult) throw new Error('Your session has expired. Please start again.')
-            const result = await confirmationResult.confirm(formData.otp)
-            const firebaseUser = result.user
-            console.log('Firebase OK:', firebaseUser.phoneNumber)
+            const digits = formData.phone.replace(/\D/g, '')
+            const formattedPhone = `+91${digits}`
 
-            // 2. Sync to Supabase
-            const res = await fetch('/api/auth/firebase-sync', {
+            const res = await fetch('/api/auth/otp/verify', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    phone: firebaseUser.phoneNumber,
-                    firebase_uid: firebaseUser.uid,
+                    phone: formattedPhone,
+                    otp: formData.otp,
+                    verificationId,
                     mode: authMode,
                 }),
             })
             const data = await res.json()
-            console.log('Sync result:', data)
 
             if (!res.ok || data.error) {
-                setError(data.error || 'Login failed. Please try again.')
+                setError(data.error || 'OTP verification failed. Please try again.')
                 setLoading(false)
                 return
             }
 
-            if (!data.loginUrl && !data.access_token) {
-                setError('Login failed — please try again.')
-                setLoading(false)
-                return
-            }
-
-            // 3. Save userId and loginUrl for next steps
             setUserId(data.user_id)
             setLoginUrl(data.loginUrl)
 
-            // 4. If needs name → show name form
             if (data.needs_name) {
                 setStep('name')
                 setLoading(false)
                 return
             }
 
-            // 5. Done — redirect or establish session
             if (data.loginUrl) {
                 window.location.href = data.loginUrl
-            } else if (data.access_token && data.refresh_token) {
-                const { error: sessErr } = await supabase.auth.setSession({
-                    access_token: data.access_token,
-                    refresh_token: data.refresh_token,
-                })
-                if (sessErr) throw sessErr
-                window.location.href = '/'
             }
-
         } catch (err: any) {
-            console.error('Verify error:', err)
-            if (err.code === 'auth/invalid-verification-code') {
-                setError('Invalid OTP code. Please check and try again.')
-            } else if (err.code === 'auth/code-expired') {
-                setError('OTP code has expired. Please request a new one.')
-            } else {
-                setError('Something went wrong: ' + err.message)
-            }
+            setError('Something went wrong: ' + err.message)
             setLoading(false)
         }
     }
 
-    // STEP 8 — Save Name for New Users
+    // ── STEP 3: Save Name (new users only) ────────────────────────────────────
     const handleSaveName = async (e: React.FormEvent) => {
         e.preventDefault()
         setError(null)
@@ -248,15 +188,12 @@ function AuthPageContent() {
             const { data: { user } } = await supabase.auth.getUser()
             const uid = user?.id ?? userId
 
-            console.log('Saving name for:', uid)
-
             if (!uid) {
                 setError('Session not found — please login again.')
                 setLoading(false)
                 return
             }
 
-            // Use server API to save — bypasses RLS issues
             const res = await fetch('/api/auth/save-profile', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -267,9 +204,7 @@ function AuthPageContent() {
                     phone: formData.phone,
                 }),
             })
-
             const data = await res.json()
-            console.log('Save profile:', data)
 
             if (!res.ok || data.error) {
                 setError(data.error || 'Could not save your name.')
@@ -277,9 +212,7 @@ function AuthPageContent() {
                 return
             }
 
-            // Redirect to the new success page after registration
             window.location.href = '/auth/success'
-
         } catch (err: any) {
             setError('Error: ' + err.message)
             setLoading(false)
@@ -287,92 +220,32 @@ function AuthPageContent() {
     }
 
 
-
     return (
         <main style={{
             background: '#fafafa',
             minHeight: '100vh',
             display: 'flex',
-            flexDirection: 'row',
-            overflow: 'hidden',
-            fontFamily: 'var(--font-baskerville)'
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontFamily: 'var(--font-baskerville)',
+            padding: '24px'
         }}>
-            {/* Visual Side (Hidden on Mobile) */}
-            <div style={{
-                flex: 1,
-                position: 'relative',
-                display: 'none',
-                '@media (minWidth: 1024px)': { display: 'block' }
-            } as any} className="hidden lg:block">
-                <Image
-                    src="https://lhnamtkpjkrawgql.public.blob.vercel-storage.com/COURSEL%20POSTERS/WILDSTONE%20COURSEL.webp"
-                    alt="REVEIL Aesthetic"
-                    fill
-                    className="object-cover"
-                    priority
-                />
-                <div style={{
-                    position: 'absolute', inset: 0,
-                    background: 'linear-gradient(to right, rgba(250,250,250,0.4), rgba(250,250,250,0.8))',
-                    zIndex: 1
-                }} />
-
-                <div style={{
-                    position: 'absolute', bottom: '10%', left: '10%', zIndex: 2,
-                    maxWidth: '80%'
-                }}>
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.5, duration: 1 }}
-                    >
-                        <h2 style={{
-                            fontSize: '64px', color: '#fff', fontWeight: 300, lineHeight: 1,
-                            letterSpacing: '-0.02em', marginBottom: '16px'
-                        }}>
-                            The <span style={{ color: '#d4af37', fontStyle: 'italic' }}>Archive</span>
-                        </h2>
-                        <p style={{
-                            color: 'rgba(0,0,0,0.6)', fontSize: '14px',
-                            letterSpacing: '0.1em', textTransform: 'uppercase',
-                            maxWidth: '400px', lineHeight: 1.6
-                        }}>
-                            Explore our curated fragrances. Log in to shop, save your favourites, and track your orders.
-                        </p>
-                    </motion.div>
-                </div>
-
-                {/* Decorative Vertical Text */}
-                <div style={{
-                    position: 'absolute', top: '10%', left: '5%',
-                    writingMode: 'vertical-rl', transform: 'rotate(180deg)',
-                    color: 'rgba(212,175,55,0.2)', fontSize: '10px',
-                    letterSpacing: '1em', textTransform: 'uppercase',
-                    zIndex: 2, pointerEvents: 'none'
-                }}>
-                    REVEIL STUDIO ARCHIVE — 2026
-                </div>
-            </div>
-
             {/* Form Side */}
             <div style={{
-                flex: 1,
-                display: 'flex',
-                alignItems: isMobile ? 'flex-start' : 'center',
-                justifyContent: 'center',
-                padding: isMobile ? '60px 16px 24px' : '40px 24px',
+                width: '100%',
+                maxWidth: '650px',
                 position: 'relative',
                 zIndex: 10,
-                minHeight: '100vh',
-                overflowY: 'auto'
+                display: 'flex',
+                justifyContent: 'center'
             }}>
-                {/* Back to Home Button at top left of form container area */}
+                {/* Back to Home */}
                 <div style={{ position: 'absolute', top: isMobile ? '20px' : '24px', left: isMobile ? '20px' : '40px' }}>
                     <Link href="/" prefetch={false} style={{
                         display: 'flex', alignItems: 'center', gap: '10px',
                         color: 'rgba(0,0,0,0.4)', textDecoration: 'none',
-                        fontSize: isMobile ? '9px' : '11px', fontWeight: 500, letterSpacing: '0.2em',
-                        textTransform: 'uppercase', transition: 'all 0.3s ease'
+                        fontSize: isMobile ? '9px' : '11px', fontWeight: 500,
+                        letterSpacing: '0.2em', textTransform: 'uppercase', transition: 'all 0.3s ease'
                     }}
                         onMouseEnter={(e) => e.currentTarget.style.color = '#d4af37'}
                         onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(0,0,0,0.4)'}
@@ -396,24 +269,15 @@ function AuthPageContent() {
                         border: '1px solid rgba(0,0,0,0.02)'
                     }}
                 >
-                    {/* Brand Logo Header (Secret Admin Toggle) */}
+                    {/* Brand Logo Header */}
                     <div style={{ marginBottom: isMobile ? '24px' : '40px' }}>
-                        <h1
-                            style={{
-                                fontSize: isMobile ? '18px' : '24px',
-                                color: '#000',
-                                fontWeight: 700,
-                                letterSpacing: '0.1em',
-                                textTransform: 'uppercase',
-                                margin: 0,
-                                transition: 'color 0.3s'
-                            }}
-                        >
+                        <h1 style={{
+                            fontSize: isMobile ? '18px' : '24px', color: '#000', fontWeight: 700,
+                            letterSpacing: '0.1em', textTransform: 'uppercase', margin: 0
+                        }}>
                             REVEIL
                         </h1>
-                        <div id="recaptcha-container"></div>
                         <div style={{ height: '1.5px', width: '30px', background: '#d4af37', margin: isMobile ? '8px auto' : '12px auto', opacity: 0.5 }} />
-
                     </div>
 
                     {/* Welcome Typography */}
@@ -422,7 +286,11 @@ function AuthPageContent() {
                             {authMode === 'login' ? 'Welcome to ' : 'Join '} <span style={{ color: '#d4af37', fontWeight: 400 }}>Reveil</span>
                         </h2>
                         <p style={{ color: 'rgba(0,0,0,0.4)', fontSize: isMobile ? '11px' : '13px', fontWeight: 400, letterSpacing: '0.05em' }}>
-                            {otpSent ? 'Enter the code we sent you' : (authMode === 'login' ? 'We will send a code to your phone' : 'Create your account — it only takes a minute')}
+                            {otpSent
+                                ? 'Enter the code we sent to your phone'
+                                : authMode === 'login'
+                                    ? 'We will send a code to your phone'
+                                    : 'Create your account — it only takes a minute'}
                         </p>
                     </div>
 
@@ -431,24 +299,17 @@ function AuthPageContent() {
                         <form onSubmit={handleSaveName}>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', textAlign: 'left' }}>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                                    <motion.div
-                                        whileHover={{ borderBottomColor: '#d4af37' }}
-                                        style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
+                                    <motion.div whileHover={{ borderBottomColor: '#d4af37' }} style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px' }}>
                                         <label style={{ fontSize: '9px', color: '#d4af37', textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>First Name *</label>
                                         <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} required style={{ width: '100%', border: 'none', background: 'none', fontSize: '14px', outline: 'none', color: '#000' }} />
                                     </motion.div>
-                                    <motion.div
-                                        whileHover={{ borderBottomColor: '#d4af37' }}
-                                        style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
+                                    <motion.div whileHover={{ borderBottomColor: '#d4af37' }} style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px' }}>
                                         <label style={{ fontSize: '9px', color: '#d4af37', textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Last Name (optional)</label>
                                         <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} style={{ width: '100%', border: 'none', background: 'none', fontSize: '14px', outline: 'none', color: '#000' }} />
                                     </motion.div>
                                 </div>
 
-                                {/* Email Input */}
-                                <motion.div
-                                    whileHover={{ borderBottomColor: '#d4af37' }}
-                                    style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px', transition: 'border-color 0.3s' }}>
+                                <motion.div whileHover={{ borderBottomColor: '#d4af37' }} style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px' }}>
                                     <label style={{ fontSize: '9px', color: '#d4af37', textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Email Address *</label>
                                     <input type="email" name="email" value={formData.email} onChange={handleChange} required style={{ width: '100%', border: 'none', background: 'none', fontSize: '14px', outline: 'none', color: '#000' }} />
                                 </motion.div>
@@ -458,25 +319,14 @@ function AuthPageContent() {
                                     whileTap={{ scale: 0.99 }}
                                     disabled={loading}
                                     style={{
-                                        width: '100%',
-                                        background: '#d4af37',
-                                        color: '#000',
-                                        border: 'none',
-                                        padding: '20px',
-                                        fontSize: '11px',
-                                        fontWeight: 800,
-                                        textTransform: 'uppercase',
-                                        letterSpacing: '0.5em',
-                                        cursor: loading ? 'not-allowed' : 'pointer',
-                                        borderRadius: '2px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        gap: '12px',
-                                        marginTop: '12px'
+                                        width: '100%', background: '#d4af37', color: '#000', border: 'none',
+                                        padding: '20px', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase',
+                                        letterSpacing: '0.5em', cursor: loading ? 'not-allowed' : 'pointer',
+                                        borderRadius: '2px', display: 'flex', alignItems: 'center',
+                                        justifyContent: 'center', gap: '12px', marginTop: '12px'
                                     }}
                                 >
-                                    {loading ? <Loader2 className="animate-spin" size={16} /> : <>Save & Continue <ArrowRight size={16} /></>}
+                                    {loading ? <Loader2 className="animate-spin" size={16} /> : <>Save &amp; Continue <ArrowRight size={16} /></>}
                                 </motion.button>
                             </div>
                         </form>
@@ -485,43 +335,27 @@ function AuthPageContent() {
                             <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '16px' : '20px' }}>
 
                                 {!otpSent ? (
-                                    <>
-                                        {/* Phone Section */}
-                                        <div style={{ textAlign: 'left' }}>
-                                            <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '6px', display: 'block', letterSpacing: '0.15em' }}>Mobile Number</label>
-                                            <motion.div
-                                                whileHover={{ background: 'linear-gradient(145deg, #ffffff, #f9f9f9)', borderColor: '#000' }}
-                                                style={{
-                                                    background: '#fff',
-                                                    border: '1px solid rgba(0,0,0,0.08)',
-                                                    borderRadius: '4px',
-                                                    padding: isMobile ? '14px 16px' : '20px 24px',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: '12px',
-                                                    transition: 'all 0.3s ease'
-                                                }}>
-                                                <span style={{
-                                                    fontSize: isMobile ? '14px' : '16px',
-                                                    color: '#000',
-                                                    opacity: 0.4,
-                                                    fontWeight: 500,
-                                                    borderRight: '1px solid rgba(0,0,0,0.1)',
-                                                    paddingRight: '12px'
-                                                }}>+91</span>
-                                                <input
-                                                    type="tel"
-                                                    name="phone"
-                                                    placeholder="Your phone number"
-                                                    value={formData.phone}
-                                                    onChange={handleChange}
-                                                    style={{ flex: 1, border: 'none', background: 'none', fontSize: isMobile ? '14px' : '16px', color: '#000', outline: 'none' }}
-                                                />
-                                                <Smartphone size={isMobile ? 16 : 18} style={{ color: '#d4af37', opacity: 0.6 }} />
-                                            </motion.div>
-                                        </div>
-
-                                    </>
+                                    <div style={{ textAlign: 'left' }}>
+                                        <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '6px', display: 'block', letterSpacing: '0.15em' }}>Mobile Number</label>
+                                        <motion.div
+                                            whileHover={{ background: 'linear-gradient(145deg, #ffffff, #f9f9f9)', borderColor: '#000' }}
+                                            style={{
+                                                background: '#fff', border: '1px solid rgba(0,0,0,0.08)', borderRadius: '4px',
+                                                padding: isMobile ? '14px 16px' : '20px 24px',
+                                                display: 'flex', alignItems: 'center', gap: '12px', transition: 'all 0.3s ease'
+                                            }}>
+                                            <span style={{ fontSize: isMobile ? '14px' : '16px', color: '#000', opacity: 0.4, fontWeight: 500, borderRight: '1px solid rgba(0,0,0,0.1)', paddingRight: '12px' }}>+91</span>
+                                            <input
+                                                type="tel"
+                                                name="phone"
+                                                placeholder="Your phone number"
+                                                value={formData.phone}
+                                                onChange={handleChange}
+                                                style={{ flex: 1, border: 'none', background: 'none', fontSize: isMobile ? '14px' : '16px', color: '#000', outline: 'none' }}
+                                            />
+                                            <MessageCircle size={isMobile ? 16 : 18} style={{ color: '#d4af37', opacity: 0.6 }} />
+                                        </motion.div>
+                                    </div>
                                 ) : (
                                     <div style={{ textAlign: 'left' }}>
                                         <div style={{ borderBottom: '2px solid #d4af37', paddingBottom: '8px' }}>
@@ -534,15 +368,16 @@ function AuthPageContent() {
                                                 onChange={handleChange}
                                                 required
                                                 maxLength={6}
+                                                inputMode="numeric"
                                                 style={{ width: '100%', padding: '8px 0 0', background: 'none', border: 'none', color: '#000', fontSize: '24px', letterSpacing: '0.6em', outline: 'none' }}
                                             />
                                         </div>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
-                                            <button type="button" onClick={() => setOtpSent(false)} style={{ background: 'none', border: 'none', color: 'rgba(0,0,0,0.4)', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            <button type="button" onClick={() => { setOtpSent(false); setVerificationId(null) }} style={{ background: 'none', border: 'none', color: 'rgba(0,0,0,0.4)', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                                 <ChevronLeft size={14} /> Back
                                             </button>
                                             <button type="button" onClick={(e) => sendOtp(e as any)} style={{ background: 'none', border: 'none', color: '#000', fontSize: '11px', fontWeight: 800, cursor: 'pointer' }}>
-                                                Didn't get the code? <span style={{ color: '#d4af37' }}>Resend</span>
+                                                Didn&apos;t get the code? <span style={{ color: '#d4af37' }}>Resend</span>
                                             </button>
                                         </div>
                                     </div>
@@ -554,23 +389,12 @@ function AuthPageContent() {
                                     whileTap={{ scale: 0.99 }}
                                     disabled={loading}
                                     style={{
-                                        width: '100%',
-                                        background: '#d4af37',
-                                        color: '#000',
-                                        border: 'none',
-                                        padding: isMobile ? '16px' : '20px',
-                                        fontSize: isMobile ? '10px' : '11px',
-                                        fontWeight: 800,
-                                        textTransform: 'uppercase',
-                                        letterSpacing: '0.5em',
-                                        cursor: loading ? 'not-allowed' : 'pointer',
-                                        borderRadius: '2px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        gap: '12px',
-                                        marginTop: isMobile ? '4px' : '8px',
-                                        transition: 'background-color 0.3s ease'
+                                        width: '100%', background: '#d4af37', color: '#000', border: 'none',
+                                        padding: isMobile ? '16px' : '20px', fontSize: isMobile ? '10px' : '11px',
+                                        fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5em',
+                                        cursor: loading ? 'not-allowed' : 'pointer', borderRadius: '2px',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px',
+                                        marginTop: isMobile ? '4px' : '8px', transition: 'background-color 0.3s ease'
                                     }}
                                 >
                                     {loading ? <Loader2 className="animate-spin" size={16} /> : (
@@ -583,7 +407,7 @@ function AuthPageContent() {
 
                     {/* Mode Toggle */}
                     {!otpSent && (
-                        <div style={{ marginTop: '24px', fontSize: '12px', color: 'rgba(0,0,0,0.5)', letterSpacing: '0.02em', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div style={{ marginTop: '24px', fontSize: '12px', color: 'rgba(0,0,0,0.5)', letterSpacing: '0.02em' }}>
                             {authMode === 'login' ? (
                                 <p>New to REVEIL? <span onClick={() => setAuthMode('signup')} style={{ color: '#d4af37', fontWeight: 600, cursor: 'pointer', borderBottom: '1px solid #d4af37' }}>Create Account</span></p>
                             ) : (
@@ -596,7 +420,7 @@ function AuthPageContent() {
                     {error && <p style={{ color: '#ff4d4d', fontSize: '11px', marginTop: '16px', letterSpacing: '0.02em', fontWeight: 500 }}>{error}</p>}
                     {message && <p style={{ color: '#d4af37', fontSize: '11px', marginTop: '16px', letterSpacing: '0.02em', fontWeight: 500 }}>{message}</p>}
 
-                    {/* Footer Legal Section */}
+                    {/* Footer Legal */}
                     <div style={{ marginTop: isMobile ? '24px' : '48px', paddingTop: isMobile ? '16px' : '20px', borderTop: '1px solid rgba(0,0,0,0.04)', textAlign: 'center' }}>
                         <p style={{ fontSize: '9px', color: 'rgba(0,0,0,0.3)', lineHeight: 1.6, letterSpacing: '0.05em' }}>
                             Your information is safe with us.<br />
@@ -606,19 +430,10 @@ function AuthPageContent() {
                 </motion.div>
             </div>
 
-            {/* Global Focus Styles Patch */}
             <style jsx global>{`
-                .grecaptcha-badge { 
-                    visibility: hidden !important; 
-                }
                 input:focus {
                     outline: none !important;
                     box-shadow: none !important;
-                }
-                @media (max-width: 1024px) {
-                    .hidden.lg\\:block {
-                        display: none !important;
-                    }
                 }
             `}</style>
         </main>

@@ -77,12 +77,12 @@ export function ReviewsSection({ reviews = [] }: { reviews?: Review[] }) {
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={currentReview.id}
-                            initial={{ opacity: 0, scale: 0.98, filter: 'blur(10px)' }}
-                            animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-                            exit={{ opacity: 0, scale: 1.02, filter: 'blur(10px)' }}
+                            initial={{ opacity: 0, x: 30 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -30 }}
                             transition={{
-                                duration: 0.6,
-                                ease: "circOut"
+                                duration: 0.5,
+                                ease: "easeInOut"
                             }}
                             style={{ position: 'relative', width: '100%' }}
                             className="review-card desktop-carousel-card"

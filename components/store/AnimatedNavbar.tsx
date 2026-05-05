@@ -61,12 +61,12 @@ export function AnimatedNavbar() {
         const initAuth = async () => {
             // First check if there's a session in the hash (implicit fallback)
             if (typeof window !== 'undefined' && window.location.hash.includes('access_token')) {
-                 const { data: { session } } = await supabase.auth.getSession()
-                 if (session) {
+                const { data: { session } } = await supabase.auth.getSession()
+                if (session) {
                     setUser(session.user)
                     fetchProfileName(session.user.id)
                     // If we're on a page that needs a clean URL, we could router.replace here
-                 }
+                }
             } else {
                 const { data: { session } } = await supabase.auth.getSession()
                 setUser(session?.user ?? null)
@@ -79,7 +79,7 @@ export function AnimatedNavbar() {
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
             console.log('Auth Event:', event)
             setUser(session?.user ?? null)
-            
+
             if (session?.user) {
                 fetchProfileName(session.user.id)
             } else {
@@ -799,7 +799,7 @@ export function AnimatedNavbar() {
                             exit={{ x: '100%' }}
                             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                             style={{
-                                position: 'fixed', top: 0, right: 0, 
+                                position: 'fixed', top: 0, right: 0,
                                 height: isMobile ? '100dvh' : '100vh',
                                 width: isMobile ? '100%' : '480px',
                                 background: 'linear-gradient(180deg, #0a0a0a 0%, #000000 100%)',
@@ -866,10 +866,10 @@ export function AnimatedNavbar() {
                             </div>
 
                             {/* Cart Items Area */}
-                            <div style={{ 
-                                flex: 1, 
-                                overflowY: 'auto', 
-                                padding: '0 40px 40px', 
+                            <div style={{
+                                flex: 1,
+                                overflowY: 'auto',
+                                padding: '0 40px 40px',
                                 overscrollBehavior: 'contain',
                                 WebkitOverflowScrolling: 'touch',
                                 minHeight: 0

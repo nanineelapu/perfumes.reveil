@@ -1,73 +1,99 @@
 import { NextResponse } from 'next/server'
-import { verifyMSG91OTP } from '@/lib/msg91'
+import { verifyMessageCentralOTP } from '@/lib/messageCentral'
 import { createClient } from '@supabase/supabase-js'
 
 export async function POST(request: Request) {
     try {
-        const { phone, otp, isSignup, firstName, lastName, email } = await request.json()
-        
-        // 1. Verify OTP with MSG91
-        const msg91Result = await verifyMSG91OTP(phone, otp)
-        
-        if (msg91Result.type !== 'success') {
-            return NextResponse.json({ error: 'Invalid or expired OTP sequence.' }, { status: 400 })
+        const { phone, otp, verificationId, mode, firstName, lastName } = await request.json()
+
+        if (!verificationId || !otp) {
+            return NextResponse.json({ error: 'OTP and verification ID are required.' }, { status: 400 })
         }
 
-        // 2. Initialize Supabase with Service Role to manage users
+        // 1. Verify OTP with Message Central
+        const mcResult = await verifyMessageCentralOTP(verificationId, otp)
+
+        if (!mcResult.success) {
+            return NextResponse.json(
+                { error: mcResult.message || 'Invalid or expired OTP.' },
+                { status: 400 }
+            )
+        }
+
+        // 2. Initialize Supabase Admin
         const supabaseAdmin = createClient(
             process.env.NEXT_PUBLIC_SUPABASE_URL!,
             process.env.SUPABASE_SERVICE_ROLE_KEY!
         )
 
-        // 3. Check if user exists, if not create them
-        const formattedPhone = phone.startsWith('+') ? phone : `+91${phone}`
-        
-        // Find user by phone
-        const { data: users, error: findError } = await supabaseAdmin.auth.admin.listUsers()
-        let user = users?.users.find(u => u.phone === formattedPhone || u.email === email)
+        // 3. Normalize phone
+        const digits = phone.replace(/\D/g, '').replace(/^91/, '')
+        const cleanPhone = `+91${digits}`
 
-        if (!user && isSignup) {
-            // Create new user if it's a signup
+        // 4. Find or create user
+        const { data: { users } } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 })
+        const existingUser = users?.find(u => (u.phone ?? '').replace(/\D/g, '').endsWith(digits))
+
+        let userId: string
+        let userEmail: string
+        let needsName = false
+
+        if (existingUser) {
+            userId = existingUser.id
+            userEmail = existingUser.email!
+            const { data: profile } = await supabaseAdmin
+                .from('profiles')
+                .select('first_name, full_name')
+                .eq('id', userId)
+                .maybeSingle()
+            needsName = !profile?.first_name && !profile?.full_name
+        } else {
+            // Create new user
+            const internalEmail = `${digits}@reveil.internal`
             const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
-                phone: formattedPhone,
-                email: email,
-                password: Math.random().toString(36).slice(-12), // Random password for phone-only users
-                email_confirm: true,
+                phone: cleanPhone,
+                email: internalEmail,
                 phone_confirm: true,
-                user_metadata: { first_name: firstName, last_name: lastName }
+                email_confirm: true,
+                user_metadata: firstName ? { first_name: firstName, last_name: lastName ?? '' } : {},
             })
             if (createError) throw createError
-            user = newUser.user
-            
-            // Sync to profiles table
+            userId = newUser.user.id
+            userEmail = newUser.user.email!
+
             await supabaseAdmin.from('profiles').upsert({
-                id: user?.id,
-                first_name: firstName,
-                last_name: lastName,
-                email: email,
-                phone: formattedPhone
-            })
+                id: userId,
+                phone: cleanPhone,
+                role: 'user',
+                ...(firstName && { first_name: firstName, last_name: lastName ?? '' }),
+            }, { onConflict: 'id' })
+
+            needsName = !firstName
         }
 
-        if (!user) {
-            return NextResponse.json({ error: 'Account not found. Please register first.' }, { status: 404 })
-        }
+        // 5. Generate Magic Link
+        const protocol = request.headers.get('x-forwarded-proto') || 'https'
+        const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || 'perfumesreveil.vercel.app'
+        const siteUrl = host.includes('localhost') ? `http://${host}` : `${protocol}://${host}`
+        const redirectTo = `${siteUrl}/auth/callback`
 
-        // 4. Generate a Login Link (Magic Link) to sign the user in on the frontend
         const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
             type: 'magiclink',
-            email: user.email!
+            email: userEmail,
+            options: { redirectTo },
         })
 
         if (linkError) throw linkError
 
-        return NextResponse.json({ 
-            success: true, 
-            loginUrl: linkData.properties.action_link 
+        return NextResponse.json({
+            success: true,
+            loginUrl: linkData.properties.action_link,
+            needs_name: needsName,
+            user_id: userId,
         })
 
     } catch (error: any) {
-        console.error('Verification Logic Error:', error)
-        return NextResponse.json({ error: error.message || 'Verification sequence failed.' }, { status: 500 })
+        console.error('[OTP Verify] Error:', error)
+        return NextResponse.json({ error: error.message || 'Verification failed.' }, { status: 500 })
     }
 }

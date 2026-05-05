@@ -16,7 +16,7 @@ export default function AuthSuccessPage() {
             padding: '20px',
             fontFamily: 'var(--font-geist-sans)'
         }}>
-            <motion.div 
+            <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
