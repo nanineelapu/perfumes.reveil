@@ -88,7 +88,7 @@ export async function POST(request: Request) {
         return NextResponse.json({
             success: true,
             loginUrl: linkData.properties.action_link,
-            needs_name: needsName,
+            needs_name: mode === 'signup' ? needsName : false,
             user_id: userId,
         })
 

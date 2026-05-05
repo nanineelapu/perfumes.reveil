@@ -161,9 +161,12 @@ export default function ProductCard({ product }: { product: Product }) {
                 style={{
                     position: 'relative',
                     overflow: 'hidden',
-                    paddingBottom: '140%',
+                    ...(isMobile
+                        ? { height: '200px' }
+                        : { paddingBottom: '140%' }
+                    ),
                     background: '#111',
-                    borderRadius: '2px', // Sharper, professional corners
+                    borderRadius: '2px',
                     border: '1px solid rgba(255,255,255,0.05)'
                 }}
             >

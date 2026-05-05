@@ -229,6 +229,7 @@ function AuthPageContent() {
                     first_name: firstName,
                     last_name: formData.lastName.trim(),
                     phone: formData.phone,
+                    email: formData.email.trim(),
                 }),
             })
             const data = await res.json()
@@ -255,49 +256,49 @@ function AuthPageContent() {
             alignItems: 'center',
             justifyContent: 'center',
             fontFamily: 'var(--font-baskerville)',
-            padding: '24px'
+            padding: isMobile ? '16px' : '24px'
         }}>
             {/* Form Side */}
             <div style={{
                 width: '100%',
-                maxWidth: '650px',
+                maxWidth: '480px',
                 position: 'relative',
                 zIndex: 10,
                 display: 'flex',
                 justifyContent: 'center'
             }}>
-                {/* Back to Home */}
-                <div style={{ position: 'absolute', top: isMobile ? '20px' : '24px', left: isMobile ? '20px' : '40px' }}>
-                    <Link href="/" prefetch={false} style={{
-                        display: 'flex', alignItems: 'center', gap: '10px',
-                        color: 'rgba(0,0,0,0.4)', textDecoration: 'none',
-                        fontSize: isMobile ? '9px' : '11px', fontWeight: 500,
-                        letterSpacing: '0.2em', textTransform: 'uppercase', transition: 'all 0.3s ease'
-                    }}
-                        onMouseEnter={(e) => e.currentTarget.style.color = '#d4af37'}
-                        onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(0,0,0,0.4)'}
-                    >
-                        <Home size={isMobile ? 12 : 14} style={{ marginBottom: '1px' }} />
-                        <span style={{ lineHeight: 1 }}>Back to Home</span>
-                    </Link>
-                </div>
 
                 <motion.div
                     initial={{ opacity: 0, scale: 0.98 }}
                     animate={{ opacity: 1, scale: 1 }}
                     style={{
                         width: '100%',
-                        maxWidth: isMobile ? '400px' : '650px',
                         background: '#ffffff',
-                        padding: isMobile ? '24px 20px' : '48px 60px',
+                        padding: isMobile ? '28px 20px 24px' : '48px 60px',
                         borderRadius: '8px',
                         boxShadow: '0 40px 120px rgba(0,0,0,0.04)',
                         textAlign: 'center',
                         border: '1px solid rgba(0,0,0,0.02)'
                     }}
                 >
+                    {/* Back to Home — inside card, top aligned */}
+                    <div style={{ textAlign: 'left', marginBottom: isMobile ? '20px' : '28px' }}>
+                        <Link href="/" prefetch={false} style={{
+                            display: 'inline-flex', alignItems: 'center', gap: '8px',
+                            color: 'rgba(0,0,0,0.4)', textDecoration: 'none',
+                            fontSize: '10px', fontWeight: 500,
+                            letterSpacing: '0.2em', textTransform: 'uppercase', transition: 'all 0.3s ease'
+                        }}
+                            onMouseEnter={(e) => e.currentTarget.style.color = '#d4af37'}
+                            onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(0,0,0,0.4)'}
+                        >
+                            <Home size={12} style={{ marginBottom: '1px' }} />
+                            <span style={{ lineHeight: 1 }}>Back to Home</span>
+                        </Link>
+                    </div>
+
                     {/* Brand Logo Header */}
-                    <div style={{ marginBottom: isMobile ? '24px' : '40px' }}>
+                    <div style={{ marginBottom: isMobile ? '20px' : '40px' }}>
                         <h1 style={{
                             fontSize: isMobile ? '18px' : '24px', color: '#000', fontWeight: 700,
                             letterSpacing: '0.1em', textTransform: 'uppercase', margin: 0
