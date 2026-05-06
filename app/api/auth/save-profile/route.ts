@@ -29,7 +29,6 @@ export async function POST(request: Request) {
         last_name:  (last_name ?? '').trim(),
         full_name,
         phone,
-        email:      (email ?? '').trim(),
         role:       'user',
       })
 
