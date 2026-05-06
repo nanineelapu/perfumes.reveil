@@ -79,7 +79,7 @@ export default function ContactPage() {
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'center',
-                    padding: isMobile ? '80px 24px' : '80px',
+                    padding: isMobile ? '80px 24px' : '100px 80px 80px',
                     minHeight: isMobile ? '450px' : 'auto'
                 }}>
                     <motion.div
@@ -102,7 +102,7 @@ export default function ContactPage() {
                         style={{ position: 'relative', zIndex: 1 }}
                     >
                         <h2 style={{
-                            fontSize: isMobile ? '36px' : 'clamp(32px, 4vw, 54px)',
+                            fontSize: isMobile ? '28px' : 'clamp(28px, 3vw, 42px)',
                             fontFamily: 'var(--font-baskerville)',
                             color: '#d4af37',
                             marginBottom: '24px',
@@ -111,7 +111,7 @@ export default function ContactPage() {
                             The Art of <br /> Communication
                         </h2>
                         <p style={{
-                            fontSize: isMobile ? '14px' : '16px',
+                            fontSize: isMobile ? '13px' : '15px',
                             color: '#ffffff',
                             maxWidth: isMobile ? '100%' : '400px',
                             lineHeight: 1.7,
@@ -122,14 +122,14 @@ export default function ContactPage() {
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '24px' : '32px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                                <div style={{ width: '36px', height: '36px', borderRadius: '50%', border: '1px solid rgba(212,175,55,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#d4af37' }}>
-                                    <Mail size={14} />
+                                <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '1px solid rgba(212,175,55,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#d4af37' }}>
+                                    <Mail size={12} />
                                 </div>
                                 <span style={{ fontSize: '12px', letterSpacing: '0.1em', color: '#ffffff' }}>naniatworkmail@gmail.com</span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                                <div style={{ width: '36px', height: '36px', borderRadius: '50%', border: '1px solid rgba(212,175,55,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#d4af37' }}>
-                                    <Phone size={14} />
+                                <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '1px solid rgba(212,175,55,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#d4af37' }}>
+                                    <Phone size={12} />
                                 </div>
                                 <span style={{ fontSize: '12px', letterSpacing: '0.1em', color: '#ffffff' }}>+91 7873789595</span>
                             </div>
@@ -140,7 +140,7 @@ export default function ContactPage() {
                 {/* Right Side: Contact Form */}
                 <div style={{
                     background: '#fff',
-                    padding: isMobile ? '60px 24px' : '120px 80px 80px',
+                    padding: isMobile ? '40px 24px 60px' : '100px 80px 80px',
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'center'
@@ -151,9 +151,9 @@ export default function ContactPage() {
                         viewport={{ once: true }}
                         transition={{ duration: 1, delay: 0.2 }}
                     >
-                        <div style={{ marginBottom: isMobile ? '40px' : '60px' }}>
+                        <div style={{ marginBottom: isMobile ? '32px' : '48px' }}>
                             <h1 style={{
-                                fontSize: isMobile ? '32px' : '48px',
+                                fontSize: isMobile ? '26px' : '38px',
                                 fontFamily: 'var(--font-baskerville)',
                                 color: '#050505',
                                 marginBottom: '12px'
@@ -193,9 +193,9 @@ export default function ContactPage() {
                             </motion.div>
                         ) : (
                             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '32px' : '40px', width: '100%', boxSizing: 'border-box' }}>
-                                <div style={{ 
-                                    display: 'grid', 
-                                    gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', 
+                                <div style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
                                     gap: isMobile ? '32px' : '32px',
                                     width: '100%'
                                 }}>

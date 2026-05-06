@@ -13,6 +13,19 @@ export default function ProfilePage() {
     const [loading, setLoading] = useState(true)
     const router = useRouter()
 
+    const [isMobile, setIsMobile] = useState(false)
+    const [isTablet, setIsTablet] = useState(false)
+
+    useEffect(() => {
+        const checkRes = () => {
+            setIsMobile(window.innerWidth < 768)
+            setIsTablet(window.innerWidth >= 768 && window.innerWidth < 1024)
+        }
+        checkRes()
+        window.addEventListener('resize', checkRes)
+        return () => window.removeEventListener('resize', checkRes)
+    }, [])
+
     useEffect(() => {
         async function getProfile() {
             try {
@@ -78,8 +91,9 @@ export default function ProfilePage() {
             minHeight: '100vh',
             background: 'radial-gradient(circle at top right, #1a140a 0%, #050505 50%)',
             color: '#fff',
-            padding: '140px 20px 80px',
-            fontFamily: 'var(--font-geist-sans)'
+            padding: isMobile ? '100px 16px 60px' : '140px 24px 80px',
+            fontFamily: 'var(--font-geist-sans)',
+            overflowX: 'hidden'
         }}>
             <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
                 <motion.div
@@ -90,21 +104,25 @@ export default function ProfilePage() {
                     {/* Header Section */}
                     <div style={{ 
                         display: 'flex', 
+                        flexDirection: isMobile ? 'column' : 'row',
                         justifyContent: 'space-between', 
-                        alignItems: 'flex-end',
-                        marginBottom: '48px'
+                        alignItems: isMobile ? 'flex-start' : 'flex-end',
+                        gap: isMobile ? '24px' : '0',
+                        marginBottom: isMobile ? '32px' : '48px'
                     }}>
-                        <div>
+                        <div style={{ width: '100%' }}>
                             <motion.h1 variants={itemVariants} style={{
-                                fontSize: '42px',
+                                fontSize: isMobile ? '28px' : isTablet ? '36px' : '42px',
                                 fontWeight: 300,
                                 letterSpacing: '-0.02em',
                                 marginBottom: '8px',
-                                fontFamily: 'var(--font-baskerville)'
+                                fontFamily: 'var(--font-baskerville)',
+                                wordBreak: 'break-word',
+                                lineHeight: 1.2
                             }}>
                                 Hi, <span style={{ color: '#d4af37' }}>{profile?.first_name || user?.user_metadata?.first_name || user?.email?.split('@')[0] || 'Collector'}</span>
                             </motion.h1>
-                            <motion.p variants={itemVariants} style={{ color: '#666', fontSize: '15px' }}>
+                            <motion.p variants={itemVariants} style={{ color: '#666', fontSize: isMobile ? '13px' : '15px', lineHeight: 1.5 }}>
                                 Manage your personal details and order history.
                             </motion.p>
                         </div>
@@ -131,7 +149,11 @@ export default function ProfilePage() {
                         </motion.button>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '32px' }}>
+                    <div style={{ 
+                        display: 'grid', 
+                        gridTemplateColumns: (isMobile || isTablet) ? '1fr' : '1.2fr 0.8fr', 
+                        gap: isMobile ? '24px' : '32px' 
+                    }}>
                         {/* Left Column: Profile Info */}
                         <motion.div variants={itemVariants} style={cardStyle}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
@@ -141,7 +163,11 @@ export default function ProfilePage() {
                                 </motion.button>
                             </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px' }}>
+                            <div style={{ 
+                                display: 'grid', 
+                                gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', 
+                                gap: isMobile ? '24px' : '40px' 
+                            }}>
                                 <div>
                                     <label style={{ display: 'block', fontSize: '11px', textTransform: 'uppercase', color: '#444', letterSpacing: '0.1em', marginBottom: '8px' }}>First Name</label>
                                     <p style={{ fontSize: '16px', fontWeight: 400 }}>{profile?.first_name || '—'}</p>
@@ -150,18 +176,18 @@ export default function ProfilePage() {
                                     <label style={{ display: 'block', fontSize: '11px', textTransform: 'uppercase', color: '#444', letterSpacing: '0.1em', marginBottom: '8px' }}>Last Name</label>
                                     <p style={{ fontSize: '16px', fontWeight: 400 }}>{profile?.last_name || '—'}</p>
                                 </div>
-                                <div style={{ gridColumn: 'span 2' }}>
+                                <div style={{ gridColumn: isMobile ? 'auto' : 'span 2' }}>
                                     <label style={{ display: 'block', fontSize: '11px', textTransform: 'uppercase', color: '#444', letterSpacing: '0.1em', marginBottom: '8px' }}>Email Address</label>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                         <Mail size={16} color="#d4af37" />
-                                        <p style={{ fontSize: '16px', fontWeight: 400 }}>{user?.email}</p>
+                                        <p style={{ fontSize: isMobile ? '14px' : '16px', fontWeight: 400, wordBreak: 'break-all' }}>{user?.email}</p>
                                     </div>
                                 </div>
-                                <div style={{ gridColumn: 'span 2' }}>
+                                <div style={{ gridColumn: isMobile ? 'auto' : 'span 2' }}>
                                     <label style={{ display: 'block', fontSize: '11px', textTransform: 'uppercase', color: '#444', letterSpacing: '0.1em', marginBottom: '8px' }}>Phone Number</label>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                         <Phone size={16} color="#d4af37" />
-                                        <p style={{ fontSize: '16px', fontWeight: 400 }}>{profile?.phone || 'Not provided'}</p>
+                                        <p style={{ fontSize: isMobile ? '14px' : '16px', fontWeight: 400 }}>{profile?.phone || 'Not provided'}</p>
                                     </div>
                                 </div>
                             </div>

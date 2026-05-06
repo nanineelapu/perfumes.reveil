@@ -61,26 +61,28 @@ export function NewsletterSection() {
             }}
         >
             {/* Background Aesthetic: Large Parallax Text */}
-            <motion.div
-                style={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    x: '-50%',
-                    y: '-55%',
-                    fontSize: 'clamp(150px, 30vw, 380px)',
-                    fontFamily: 'var(--font-baskerville)',
-                    color: '#d4af37',
-                    opacity: bgOpacity,
-                    whiteSpace: 'nowrap',
-                    zIndex: 0,
-                    translateX: bgX,
-                    pointerEvents: 'none',
-                    userSelect: 'none'
-                }}
-            >
-                REVEIL
-            </motion.div>
+            {!isMobile && (
+                <motion.div
+                    style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        x: '-50%',
+                        y: '-55%',
+                        fontSize: 'clamp(150px, 30vw, 380px)',
+                        fontFamily: 'var(--font-baskerville)',
+                        color: '#d4af37',
+                        opacity: bgOpacity,
+                        whiteSpace: 'nowrap',
+                        zIndex: 0,
+                        translateX: bgX,
+                        pointerEvents: 'none',
+                        userSelect: 'none'
+                    }}
+                >
+                    REVEIL
+                </motion.div>
+            )}
 
             {/* Decorative Gold Elements */}
             <motion.div

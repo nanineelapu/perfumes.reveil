@@ -550,7 +550,7 @@ export function ReveilCollectionSection() {
                     }}
                 >
                     <img
-                        src="https://images.unsplash.com/photo-1547887538-e3a2f32cb1cc?auto=format&fit=crop&q=80&w=2000"
+                        src={isMobile ? "https://images.unsplash.com/photo-1547887538-e3a2f32cb1cc?auto=format&fit=crop&q=80&w=1000" : "https://images.unsplash.com/photo-1547887538-e3a2f32cb1cc?auto=format&fit=crop&q=80&w=2000"}
                         alt="Reveil Collection"
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
@@ -608,10 +608,10 @@ export function ReveilCollectionSection() {
                         </div>
 
                         <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
+                            initial={isMobile ? { opacity: 1 } : { opacity: 0, scale: 0.95 }}
                             whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 1.2 }}
+                            viewport={{ once: true, amount: 0.2 }}
+                            transition={{ duration: 0.8 }}
                             style={{
                                 padding: isMobile ? '32px 20px' : '48px',
                                 background: isMobile ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.2)',
