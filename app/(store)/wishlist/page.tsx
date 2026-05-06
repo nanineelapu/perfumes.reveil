@@ -126,6 +126,9 @@ export default function WishlistPage() {
         <h1>Your REVEIL Fragrance Wishlist - Curated Luxury Perfumes</h1>
         <h2>Save Best Long Lasting Perfumes and Designer Scents - Personalized Collection</h2>
         <p>Keep track of your favorite laboratory fragrances, Oudh, and Musk scents. Create a curated list of high-end perfumes for your next purchase at REVEIL.</p>
+        <h3>Buy Premium Attars and Niche Perfumes Online India - Save Your Favorite Signature Scents</h3>
+        <h4>REVEIL Wishlist - Bookmark Handcrafted Eau de Parfum, Oudh, Musk and Designer Body Sprays</h4>
+        <h5>Personalized Fragrance Shortlist - Shop Long Lasting Luxury Perfumes for Men and Women at REVEIL Laboratory</h5>
       </div>
 
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
