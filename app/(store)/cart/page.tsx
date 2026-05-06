@@ -107,7 +107,7 @@ export default function CartPage() {
                         YOUR ORDER <div style={{ width: '30px', height: '1px', background: 'rgba(212,175,55,0.3)' }} />
                     </motion.div>
                     <h1 style={{ fontSize: 'clamp(32px, 6vw, 64px)', fontFamily: 'var(--font-baskerville)', textTransform: 'uppercase', margin: 0, lineHeight: 1, fontWeight: 300 }}>
-                        Your <span style={{ color: '#d4af37', fontStyle: 'italic', fontWeight: 400 }}>Basket</span>
+                        Your <span style={{ color: '#d4af37', fontStyle: 'italic', fontWeight: 400 }}>Cart</span>
                     </h1>
                 </header>
 
@@ -131,7 +131,7 @@ export default function CartPage() {
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                 <Truck size={16} color="#d4af37" />
                                 <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: totals.subtotal >= 250 ? '#16a34a' : '#fff' }}>
-                                    {totals.subtotal >= 250 ? 'You got free delivery! 🎉' : `Add ₹${(250 - totals.subtotal).toLocaleString()} more for free shipping`}
+                                    {totals.subtotal >= 250 ? 'Free delivery unlocked! 🎉' : `Add ₹${(250 - totals.subtotal).toLocaleString()} more for free shipping`}
                                 </span>
                             </div>
                             <span style={{ fontSize: '10px', color: '#666', letterSpacing: '0.1em' }}>THRESHOLD: ₹250</span>
@@ -180,7 +180,7 @@ export default function CartPage() {
                                         <div style={{ display: 'flex', flexDirection: 'column' }}>
                                             <p style={{ fontSize: '9px', color: '#d4af37', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px', fontFamily: 'var(--font-baskerville)' }}>{item.products.category}</p>
                                             <h3 style={{ fontSize: '20px', fontFamily: 'var(--font-baskerville)', margin: 0, fontWeight: 400 }}>{item.products.name}</h3>
-                                            <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', marginTop: '6px', fontFamily: 'var(--font-baskerville)' }}>Standard Atelier Bottling — 100ml</p>
+                                            <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', marginTop: '6px', fontFamily: 'var(--font-baskerville)' }}>Premium Quality Fragrance</p>
 
                                             <div style={{ marginTop: '24px', display: 'flex', alignItems: 'center', gap: '24px' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', border: '1px solid #222', padding: '4px 12px' }}>
@@ -224,7 +224,7 @@ export default function CartPage() {
 
                         {/* SUMMARY PANEL */}
                         <aside style={{ background: '#0a0a0a', padding: '32px', borderRadius: '2px', border: '1px solid rgba(255,255,255,0.05)', position: 'sticky', top: '140px' }}>
-                            <h2 style={{ fontSize: '9px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4em', marginBottom: '32px', color: '#d4af37', fontFamily: 'var(--font-baskerville)' }}>Atelier Summary</h2>
+                            <h2 style={{ fontSize: '9px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4em', marginBottom: '32px', color: '#d4af37', fontFamily: 'var(--font-baskerville)' }}>Order Summary</h2>
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
@@ -234,7 +234,7 @@ export default function CartPage() {
                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
                                     <span style={{ color: 'rgba(255,255,255,0.4)' }}>Shipping</span>
                                     <span style={{ color: totals.shipping === 0 ? '#16a34a' : '#fff' }}>
-                                        {totals.shipping === 0 ? 'COMPLIMENTARY' : `₹${totals.shipping.toLocaleString()}`}
+                                        {totals.shipping === 0 ? 'FREE' : `₹${totals.shipping.toLocaleString()}`}
                                     </span>
                                 </div>
                                 <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', margin: '16px 0' }} />
@@ -250,7 +250,7 @@ export default function CartPage() {
                                 textTransform: 'uppercase', letterSpacing: '0.3em', cursor: 'pointer',
                                 marginTop: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px'
                             }}>
-                                Secure Checkout <ArrowRight size={14} />
+                                Checkout <ArrowRight size={14} />
                             </button>
 
                             <div style={{ marginTop: '32px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '32px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -260,14 +260,14 @@ export default function CartPage() {
                                 </div>
                                 <div style={{ display: 'flex', gap: '12px' }}>
                                     <Truck size={14} color="#d4af37" />
-                                    <p style={{ fontSize: '9px', fontWeight: 900, margin: 0, textTransform: 'uppercase' }}>Artisan Packaging</p>
+                                    <p style={{ fontSize: '9px', fontWeight: 900, margin: 0, textTransform: 'uppercase' }}>Premium Packaging</p>
                                 </div>
                             </div>
                         </aside>
                     </div>
                 ) : (
                     <div style={{ textAlign: 'center', padding: '120px 0', border: '1px dashed rgba(255,255,255,0.05)' }}>
-                        <h2 style={{ fontSize: '13px', fontWeight: 300, color: '#444', textTransform: 'uppercase', letterSpacing: '0.4em' }}>Your studio basket is empty</h2>
+                        <h2 style={{ fontSize: '13px', fontWeight: 300, color: '#444', textTransform: 'uppercase', letterSpacing: '0.4em' }}>Your cart is empty</h2>
                         <Link href="/products" style={{ textDecoration: 'none' }}>
                             <motion.button
                                 whileHover={{ scale: 1.05 }}
@@ -277,7 +277,7 @@ export default function CartPage() {
                                     textTransform: 'uppercase', letterSpacing: '0.2em'
                                 }}
                             >
-                                Return to Collection
+                                Go Back to Shop
                             </motion.button>
                         </Link>
                     </div>

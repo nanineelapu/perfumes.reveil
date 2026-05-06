@@ -84,7 +84,7 @@ function AuthPageContent() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ phone: formattedPhone, mode: authMode }),
             })
-            
+
             let checkData;
             try {
                 checkData = await checkRes.json()
@@ -106,7 +106,7 @@ function AuthPageContent() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ phone: formattedPhone }),
             })
-            
+
             let otpData;
             try {
                 otpData = await otpRes.json()
@@ -164,7 +164,7 @@ function AuthPageContent() {
                     mode: authMode,
                 }),
             })
-            
+
             let data;
             try {
                 data = await res.json()

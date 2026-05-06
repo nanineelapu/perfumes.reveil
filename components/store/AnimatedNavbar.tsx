@@ -3,10 +3,11 @@ import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence, Variants } from 'framer-motion'
 import Link from 'next/link'
 import { ShoppingBag, User, Menu, X, Heart, Loader2, Trash2 } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
+import { useLenis } from 'lenis/react'
 
 
 export function AnimatedNavbar() {
@@ -24,6 +25,8 @@ export function AnimatedNavbar() {
     const [cartTotals, setCartTotals] = useState({ subtotal: 0, total: 0 })
     const [isCartLoading, setIsCartLoading] = useState(false)
     const router = useRouter()
+    const lenis = useLenis()
+    const isFetchingRef = useRef(false)
 
 
     useEffect(() => {
@@ -109,9 +112,10 @@ export function AnimatedNavbar() {
         router.push('/')
         router.refresh()
     }
-    const fetchCart = async () => {
-        if (!user) return
-        setIsCartLoading(true)
+    const fetchCart = async (showLoading = true) => {
+        if (!user || isFetchingRef.current) return
+        if (showLoading) setIsCartLoading(true)
+        isFetchingRef.current = true
         try {
             const res = await fetch('/api/cart')
             if (res.ok) {
@@ -126,14 +130,15 @@ export function AnimatedNavbar() {
         } catch (error) {
             console.error('Cart fetch error:', error)
         } finally {
-            setIsCartLoading(false)
+            if (showLoading) setIsCartLoading(false)
+            isFetchingRef.current = false
         }
     }
 
     const handleRemoveItem = async (itemId: string) => {
         try {
             const res = await fetch(`/api/cart/${itemId}`, {
-                method: 'DELETE'
+                method: 'DELETE' 
             })
             if (res.ok) {
                 // Refresh cart locally for instant feedback
@@ -151,13 +156,21 @@ export function AnimatedNavbar() {
         }
     }
 
+    // Initial fetch and event listener
     useEffect(() => {
-        fetchCart()
+        fetchCart(false) // Don't show loading on background fetch
 
-        const handleCartUpdate = () => fetchCart()
+        const handleCartUpdate = () => fetchCart(false)
         window.addEventListener('cart-updated', handleCartUpdate)
         return () => window.removeEventListener('cart-updated', handleCartUpdate)
-    }, [isCartOpen, user])
+    }, [user])
+
+    // Fetch on open
+    useEffect(() => {
+        if (isCartOpen) {
+            fetchCart(true)
+        }
+    }, [isCartOpen])
 
 
     useEffect(() => {
@@ -166,12 +179,14 @@ export function AnimatedNavbar() {
             document.body.style.overflow = 'hidden';
             document.body.style.height = '100vh';
             document.body.style.paddingRight = `${scrollBarWidth}px`;
+            if (lenis) lenis.stop()
         } else {
             document.body.style.overflow = '';
             document.body.style.height = '';
             document.body.style.paddingRight = '';
+            if (lenis) lenis.start()
         }
-    }, [isMobileMenuOpen, isCartOpen])
+    }, [isMobileMenuOpen, isCartOpen, lenis])
 
     const containerVariants: Variants = {
         visible: {
@@ -866,14 +881,17 @@ export function AnimatedNavbar() {
                             </div>
 
                             {/* Cart Items Area */}
-                            <div style={{
-                                flex: 1,
-                                overflowY: 'auto',
-                                padding: '0 40px 40px',
-                                overscrollBehavior: 'contain',
-                                WebkitOverflowScrolling: 'touch',
-                                minHeight: 0
-                            }}>
+                            <div 
+                                data-lenis-prevent
+                                style={{
+                                    flex: 1,
+                                    overflowY: 'auto',
+                                    padding: '0 40px 40px',
+                                    overscrollBehavior: 'contain',
+                                    WebkitOverflowScrolling: 'touch',
+                                    minHeight: 0
+                                }}
+                            >
                                 {isCartLoading ? (
                                     <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                         <Loader2 className="animate-spin" size={32} color="#d4af37" />
@@ -936,8 +954,8 @@ export function AnimatedNavbar() {
                                             />
                                         </div>
                                         <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                            <p style={{ color: '#fff', fontSize: '14px', letterSpacing: '0.2em', textTransform: 'uppercase', margin: 0, fontWeight: 300 }}>Your basket is empty</p>
-                                            <p style={{ color: 'rgba(212,175,55,0.5)', fontSize: '10px', letterSpacing: '0.1em', margin: 0 }}>Select your first creation to begin</p>
+                                            <p style={{ color: '#fff', fontSize: '14px', letterSpacing: '0.2em', textTransform: 'uppercase', margin: 0, fontWeight: 300 }}>Your cart is empty</p>
+                                            <p style={{ color: 'rgba(212,175,55,0.5)', fontSize: '10px', letterSpacing: '0.1em', margin: 0 }}>Add something to your cart to get started</p>
                                         </div>
                                         <Link href="/products" onClick={() => setIsCartOpen(false)} style={{ textDecoration: 'none' }}>
                                             <motion.button
@@ -973,8 +991,8 @@ export function AnimatedNavbar() {
                             }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '32px' }}>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                        <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.2em' }}>Estimated Value</span>
-                                        <span style={{ fontSize: '11px', color: '#d4af37', letterSpacing: '0.1em' }}>Including Complimentary Shipping</span>
+                                        <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.2em' }}>Subtotal</span>
+                                        <span style={{ fontSize: '11px', color: '#d4af37', letterSpacing: '0.1em' }}>Free Shipping Included</span>
                                     </div>
                                     <span style={{ fontSize: '28px', color: '#fff', fontWeight: 200, fontFamily: 'var(--font-baskerville)' }}>₹{cartTotals.subtotal.toLocaleString()}</span>
                                 </div>
@@ -997,7 +1015,7 @@ export function AnimatedNavbar() {
                                             transition: 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)'
                                         }}
                                     >
-                                        Seal Transaction
+                                        CHECKOUT
                                     </motion.button>
                                 </Link>
 

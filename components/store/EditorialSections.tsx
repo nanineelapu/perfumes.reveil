@@ -31,21 +31,7 @@ export function PhilosophySection() {
             justifyContent: 'center',
             overflow: 'hidden'
         }}>
-            {/* Dynamic Background Text */}
-            <motion.div
-                style={{
-                    position: 'absolute', top: '50%', left: '0',
-                    transform: 'translateY(-50%)',
-                    fontSize: 'clamp(60px, 12vw, 180px)', fontWeight: 900, color: 'rgba(0,0,0,0.02)',
-                    letterSpacing: '-0.05em', zIndex: 0, pointerEvents: 'none',
-                    whiteSpace: 'nowrap', textTransform: 'uppercase',
-                    fontFamily: 'var(--font-baskerville)'
-                }}
-                animate={{ x: ['10%', '-30%', '10%'] }}
-                transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-            >
-                Luxury
-            </motion.div>
+            {/* Removed Dynamic Background Text to fix scroll lag */}
 
             {/* Side Headings */}
             <motion.div
@@ -96,33 +82,24 @@ export function PhilosophySection() {
                             Our Craft <span style={{ width: isMobile ? '20px' : '30px', height: '1px', background: '#d4af37' }} />
                         </motion.div>
 
-                        <h2 style={{
-                            fontSize: isMobile ? '15px' : 'clamp(22px, 3.2vw, 38px)',
-                            fontFamily: 'var(--font-baskerville)',
-                            lineHeight: 1.4,
-                            fontWeight: 400,
-                            letterSpacing: '-0.01em',
-                            margin: 0,
-                            color: '#1a1a1a',
-                            maxWidth: isMobile ? '100%' : '680px'
-                        }}>
-                            {"High-quality diffusers made with natural ingredients that smell great for a long time.".split(' ').map((word, i) => (
-                                <motion.span
-                                    key={i}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    viewport={{ once: true }}
-                                    transition={{
-                                        duration: 0.8,
-                                        delay: i * 0.03,
-                                        ease: [0.215, 0.61, 0.355, 1]
-                                    }}
-                                    style={{ display: 'inline-block', marginRight: '0.25em' }}
-                                >
-                                    {word}
-                                </motion.span>
-                            ))}
-                        </h2>
+                        <motion.h2
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 1 }}
+                            style={{
+                                fontSize: isMobile ? '15px' : 'clamp(22px, 3.2vw, 38px)',
+                                fontFamily: 'var(--font-baskerville)',
+                                lineHeight: 1.4,
+                                fontWeight: 400,
+                                letterSpacing: '-0.01em',
+                                margin: 0,
+                                color: '#1a1a1a',
+                                maxWidth: isMobile ? '100%' : '680px'
+                            }}
+                        >
+                            High-quality diffusers made with natural ingredients that smell great for a long time.
+                        </motion.h2>
 
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
@@ -537,10 +514,7 @@ export function ReveilCollectionSection() {
         checkUser()
     }, [])
 
-    // Parallax Transforms
-    const imageScale = useTransform(smoothProgress, [0, 1], [1.1, 1])
-    const titleY = useTransform(smoothProgress, [0, 1], [0, -50])
-    const labelX = useTransform(smoothProgress, [0, 1], [-100, 100])
+    // Parallax Transforms removed to fix scroll lag
 
     return (
         <section ref={containerRef} style={{
@@ -570,10 +544,9 @@ export function ReveilCollectionSection() {
                     background: isMobile ? '#000' : 'transparent'
                 }}
             >
-                <motion.div
+                <div
                     style={{
-                        position: 'absolute', inset: 0, zIndex: 0,
-                        scale: imageScale
+                        position: 'absolute', inset: 0, zIndex: 0
                     }}
                 >
                     <img
@@ -589,7 +562,7 @@ export function ReveilCollectionSection() {
                         position: 'absolute', inset: 0,
                         background: 'radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.6) 100%)'
                     }} />
-                </motion.div>
+                </div>
 
                 <div style={{
                     maxWidth: '1200px',
@@ -606,7 +579,7 @@ export function ReveilCollectionSection() {
                         alignItems: 'center',
                         textAlign: isMobile ? 'center' : 'left'
                     }}>
-                        <motion.div style={{ y: titleY, position: 'relative' }}>
+                        <div style={{ position: 'relative' }}>
                             <span style={{
                                 fontSize: isMobile ? '8px' : '10px', textTransform: 'uppercase', letterSpacing: isMobile ? '0.4em' : '1.4em',
                                 color: '#d4af37', display: 'block', marginBottom: isMobile ? '16px' : '28px',
@@ -632,18 +605,7 @@ export function ReveilCollectionSection() {
                                     marginTop: isMobile ? '2px' : '0'
                                 }}>Diffusers</span>
                             </h2>
-                            <motion.div
-                                style={{
-                                    x: isMobile ? 0 : labelX,
-                                    opacity: isMobile ? 0.03 : 0.08,
-                                    fontSize: isMobile ? '100px' : '180px', fontWeight: 900,
-                                    position: 'absolute', top: isMobile ? '15px' : '-50px', left: isMobile ? '0px' : '-20px',
-                                    pointerEvents: 'none', whiteSpace: 'nowrap', zIndex: -1, color: '#fff'
-                                }}
-                            >
-                                LUXURY
-                            </motion.div>
-                        </motion.div>
+                        </div>
 
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95 }}
