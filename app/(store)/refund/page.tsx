@@ -19,6 +19,13 @@ export default function RefundPage() {
 
     return (
         <main style={{ background: '#ffffff', color: '#050505', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+            {/* HIDDEN SEO HEADINGS - GOD LEVEL SEO */}
+            <div className="sr-only">
+                <h1>REVEIL Refund and Returns Policy - Satisfaction Guarantee</h1>
+                <h2>Luxury Perfume Returns India - Exchange and Refund Terms</h2>
+                <p>Learn about REVEIL's commitment to quality. We offer returns for damaged or defective signature fragrances and attars. Our concierge team ensures a seamless exchange process.</p>
+            </div>
+
             <AnimatedNavbar />
 
             {/* Header Section */}

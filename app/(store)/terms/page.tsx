@@ -18,6 +18,13 @@ export default function TermsPage() {
 
     return (
         <main style={{ background: '#ffffff', color: '#050505', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+            {/* HIDDEN SEO HEADINGS - GOD LEVEL SEO */}
+            <div className="sr-only">
+                <h1>REVEIL Terms and Conditions - Luxury Perfume Store Policies</h1>
+                <h2>Legal Terms for Buying Designer Fragrances and Attars Online India</h2>
+                <p>Read the official terms and conditions for REVEIL. Information regarding user rights, intellectual property, and purchase agreements for our signature laboratory fragrances.</p>
+            </div>
+
             <AnimatedNavbar />
 
             {/* Header section */}

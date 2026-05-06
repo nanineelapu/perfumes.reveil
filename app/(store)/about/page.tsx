@@ -1,5 +1,4 @@
 'use client'
-
 import React from 'react'
 import { motion } from 'framer-motion'
 import { AnimatedNavbar } from '@/components/store/AnimatedNavbar'
@@ -23,7 +22,16 @@ export default function AboutPage() {
 
     return (
         <main style={{ background: '#ffffff', color: black, minHeight: '100vh', overflowX: 'hidden' }}>
+            {/* HIDDEN SEO HEADINGS - GOD LEVEL SEO */}
+            <div className="sr-only">
+                <h1>REVEIL Perfumes - Premium Luxury Fragrances and Authentic Attars in India</h1>
+                <h2>Best Long Lasting Perfumes for Men and Women - Designer Scents Archive</h2>
+                <p>Explore the art of perfumery with REVEIL. Our signature laboratory fragrances are crafted for longevity, sophistication, and elegance. Buy luxury perfumes, Oudh, Musk, and Floral scents online.</p>
+                <h3>Top Rated Designer Fragrances India - REVEIL Laboratory</h3>
+            </div>
 
+            <AnimatedNavbar />
+            
             {/* Editorial Hero Section */}
             <section style={{
                 padding: isMobile ? '160px 24px 80px' : '220px 40px 120px',
@@ -185,6 +193,7 @@ export default function AboutPage() {
             </section>
 
             <StayConnected theme="light" />
+            <Footer />
         </main>
     )
 }

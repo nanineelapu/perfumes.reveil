@@ -1,3 +1,4 @@
+import { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import HeroCarousel from '@/components/store/HeroCarousel'
@@ -6,6 +7,11 @@ import { ReveilCollectionSection, PhilosophySection, NotesSection } from '@/comp
 import { InfiniteIconCarousel } from '@/components/store/InfiniteIconCarousel'
 import { NewsletterSection } from '@/components/store/NewsletterSection'
 import { ReviewsSection } from '@/components/store/ReviewsSection'
+
+export const metadata: Metadata = {
+  title: "REVEIL | The Official Online Store for Luxury Perfumes & Attars",
+  description: "Shop the official REVEIL online store. Discover our signature long-lasting perfumes, traditional attars, and luxury diffusers. Experience the elite art of scent with Reveil Perfumes.",
+}
 
 
 export default async function HomePage() {
@@ -186,6 +192,14 @@ export default async function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
       />
       <main style={{ background: '#050505', color: '#fff', overflowX: 'hidden' }}>
+        {/* HIDDEN SEO HEADINGS - GOD LEVEL SEO */}
+        <div className="sr-only">
+          <h1>REVEIL - India's Premier Online Store for Luxury Perfumes and Designer Fragrances</h1>
+          <h2>Buy Best Long Lasting Perfumes Online - Premium Oudh, Musk and Floral Scents</h2>
+          <p>Welcome to REVEIL, your ultimate destination for high-end perfumery. Discover our signature collection of long-lasting perfumes, authentic attars, and premium air fresheners handcrafted for sophistication.</p>
+          <h3>Designer Perfume Shop India - Signature Laboratory Archive</h3>
+        </div>
+
         {/* Hero section */}
         <HeroCarousel slides={allSlides} />
 

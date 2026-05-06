@@ -32,6 +32,14 @@ export default function AddressBookPage() {
     const [editingId, setEditingId] = useState<string | null>(null)
     const [error, setError] = useState<string | null>(null)
     const [success, setSuccess] = useState<string | null>(null)
+    const [isMobile, setIsMobile] = useState(false)
+
+    useEffect(() => {
+        const checkRes = () => setIsMobile(window.innerWidth < 768)
+        checkRes()
+        window.addEventListener('resize', checkRes)
+        return () => window.removeEventListener('resize', checkRes)
+    }, [])
 
     const emptyForm = { label: 'Home', name: '', phone: '', line1: '', line2: '', city: '', state: '', pincode: '' }
     const [form, setForm] = useState(emptyForm)
@@ -164,7 +172,14 @@ export default function AddressBookPage() {
     }
 
     return (
-        <main style={{ background: '#050505', minHeight: '100vh', color: '#fff', paddingTop: '120px', paddingBottom: '100px' }}>
+        <main style={{ background: '#050505', minHeight: '100vh', color: '#fff', paddingTop: isMobile ? '80px' : '120px', paddingBottom: '100px' }}>
+            {/* HIDDEN SEO HEADINGS - GOD LEVEL SEO */}
+            <div className="sr-only">
+                <h1>REVEIL Address Book - Luxury Perfume Delivery Management</h1>
+                <h2>Fast Shipping for Signature Fragrances and Authentic Attars India</h2>
+                <p>Manage your delivery locations for your favorite REVEIL perfumes. Ensure seamless shipping of long-lasting laboratory fragrances to your doorstep with our optimized logistics.</p>
+            </div>
+
             <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 24px' }}>
 
                 {/* Header */}
@@ -227,7 +242,7 @@ export default function AddressBookPage() {
                             style={{
                                 background: addr.is_default ? 'rgba(212,175,55,0.04)' : 'rgba(255,255,255,0.02)',
                                 border: `1px solid ${addr.is_default ? 'rgba(212,175,55,0.2)' : 'rgba(255,255,255,0.06)'}`,
-                                borderRadius: '4px', padding: '28px 32px',
+                                borderRadius: '4px', padding: isMobile ? '20px' : '28px 32px',
                                 position: 'relative', overflow: 'hidden'
                             }}>
                             {/* Ghost index */}
@@ -300,7 +315,7 @@ export default function AddressBookPage() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
                             onSubmit={handleSubmit}
-                            style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(212,175,55,0.15)', borderRadius: '4px', padding: '40px' }}>
+                            style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(212,175,55,0.15)', borderRadius: '4px', padding: isMobile ? '24px' : '40px' }}>
 
                             <h3 style={{ fontSize: '12px', fontWeight: 900, letterSpacing: '0.4em', textTransform: 'uppercase', color: '#d4af37', marginBottom: '32px' }}>
                                 {editingId ? 'Edit Address' : 'New Address'}
@@ -319,7 +334,7 @@ export default function AddressBookPage() {
                                 </div>
                             </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '28px' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? '20px' : '28px' }}>
                                 <div>
                                     <label style={labelStyle}>Full Name *</label>
                                     <input style={inputStyle} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="e.g. Nani Reddy" required />

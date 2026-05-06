@@ -18,6 +18,13 @@ export default function ShippingPage() {
 
     return (
         <main style={{ background: '#ffffff', color: '#050505', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+            {/* HIDDEN SEO HEADINGS - GOD LEVEL SEO */}
+            <div className="sr-only">
+                <h1>REVEIL Shipping and Delivery - Premium Perfume Logistics India</h1>
+                <h2>Fast Delivery for Luxury Fragrances, Attars, and Designer Scents</h2>
+                <p>Learn about REVEIL's shipping policies. We offer free shipping on orders above ₹400 and cash on delivery (COD) across India. Track your signature scents from our laboratory to your doorstep.</p>
+            </div>
+
             <AnimatedNavbar />
 
             {/* Header Section */}

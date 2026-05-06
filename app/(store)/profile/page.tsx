@@ -95,6 +95,13 @@ export default function ProfilePage() {
             fontFamily: 'var(--font-geist-sans)',
             overflowX: 'hidden'
         }}>
+            {/* HIDDEN SEO HEADINGS - GOD LEVEL SEO */}
+            <div className="sr-only">
+                <h1>REVEIL User Profile - Luxury Fragrance Collector Portal</h1>
+                <h2>Manage Your Signature Perfume Collection and Designer Scents India</h2>
+                <p>Welcome to your personal REVEIL archive. Manage your laboratory fragrance orders, review your favorite scents, and update your collector preferences.</p>
+            </div>
+
             <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
                 <motion.div
                     variants={containerVariants}

@@ -21,6 +21,18 @@ const CATEGORY_META: Record<string, { title: string; description: string }> = {
     title: 'Luxury Home Fragrances & Air Freshners | REVEIL',
     description: 'Transform your space with REVEIL luxury air freshners. Signature scents designed for the sophisticated home.',
   },
+  OUDH: {
+    title: 'Premium Oudh Perfumes & Agarwood Fragrances | REVEIL',
+    description: 'Explore the deep, mystical world of REVEIL Oudh. Intense, long-lasting agarwood perfumes for true connoisseurs.',
+  },
+  MUSK: {
+    title: 'Signature Musk Perfumes & Clean Scents | REVEIL',
+    description: 'Elegant musk fragrances from REVEIL. Sophisticated, intimate scents designed for all-day wear.',
+  },
+  FLORAL: {
+    title: 'Luxury Floral Perfumes — Fresh Bloom Collection | REVEIL',
+    description: 'Experience the freshness of REVEIL Floral. Hand-picked botanical scents and blooming fragrance masterpieces.',
+  },
 }
 
 export async function generateMetadata({
@@ -56,6 +68,12 @@ export default function ShopPage() {
         <Suspense fallback={
             <PremiumLoader iconName="sparkles" text="Loading Fragrances" />
         }>
+            {/* HIDDEN SEO HEADINGS - GOD LEVEL SEO */}
+            <div className="sr-only">
+                <h1>Shop Luxury Fragrances Online - REVEIL Laboratory Archive</h1>
+                <h2>Best Long Lasting Perfumes, Premium Oudh, and Authentic Attars in India</h2>
+                <p>Browse our curated collection of designer perfumes and signature scents. High-concentration fragrances designed for maximum longevity and olfactory impact.</p>
+            </div>
             <ProductListContent />
         </Suspense>
     )
