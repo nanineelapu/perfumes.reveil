@@ -264,12 +264,13 @@ export function ReviewsSection({ reviews = [] }: { reviews?: Review[] }) {
                         display: block;
                     }
                     .carousel-container {
-                        min-height: 480px;
+                        min-height: 0;
                     }
                     .review-card {
-                        height: 420px;
-                        padding: 24px 20px;
-                        gap: 16px;
+                        height: auto;
+                        min-height: 0;
+                        padding: 20px 20px;
+                        gap: 12px;
                         flex-direction: column;
                         align-items: center;
                         text-align: center;
@@ -321,10 +322,11 @@ export function ReviewsSection({ reviews = [] }: { reviews?: Review[] }) {
 
                 @media (max-width: 600px) {
                     .carousel-container {
-                        min-height: 440px;
+                        min-height: 0;
                     }
                     .review-card {
-                        height: 400px;
+                        height: auto;
+                        min-height: 0;
                     }
                     .card-dark {
                         border-radius: 12px 30px 12px 30px !important;

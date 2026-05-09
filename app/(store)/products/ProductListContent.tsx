@@ -92,6 +92,7 @@ export function ProductListContent() {
     return (
         <main style={{ background: '#050505', minHeight: '100vh', color: '#fff', display: 'flex', flexDirection: 'column' }}>
             {/* SECTION 1: TOP HERO (FIXED) */}
+            {!isMobile && (
             <section style={{
                 padding: isMobile ? '100px 0 20px' : '30px 0 10px',
                 position: 'relative',
@@ -157,11 +158,13 @@ export function ProductListContent() {
                     </div>
                 </div>
             </section>
+            )}
 
             {isMobile && (
                 <div style={{
                     position: 'sticky', top: '66px', zIndex: 50, background: 'rgba(5,5,5,0.98)',
                     backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.05)',
+                    marginTop: '90px',
                     padding: '20px 0', overflowX: 'auto', scrollbarWidth: 'none',
                     display: 'flex', gap: '12px', paddingLeft: '24px', paddingRight: '24px',
                     msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch',
@@ -328,12 +331,12 @@ export function ProductListContent() {
                                     exit={{ opacity: 0 }}
                                     style={{
                                         display: 'grid',
-                                        gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(auto-fill, minmax(300px, 1fr))',
-                                        gap: isMobile ? '24px 12px' : '64px 40px'
+                                        gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(auto-fill, minmax(220px, 1fr))',
+                                        gap: isMobile ? '24px 12px' : '48px 28px'
                                     }}
                                 >
                                     {filteredAndSortedProducts.map((product, idx) => (
-                                        <motion.div key={product.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }}>
+                                        <motion.div key={product.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }} style={{ height: '100%', display: 'flex' }}>
                                             <ProductCard product={product} />
                                         </motion.div>
                                     ))}

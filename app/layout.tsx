@@ -1,13 +1,7 @@
 import type { Metadata } from "next";
-import { GeistSans } from 'geist/font/sans';
-import { GeistMono } from 'geist/font/mono';
 import localFont from 'next/font/local'
 import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
-
-const geistSans = GeistSans;
-const geistMono = GeistMono;
-
 
 const bungee = localFont({
   src: '../public/fonts/Bungee-Regular.woff2',
@@ -95,7 +89,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${bungee.variable} ${bungeeHairline.variable} ${markoOne.variable} ${baskerville.variable}`}
+      className={`${bungee.variable} ${bungeeHairline.variable} ${markoOne.variable} ${baskerville.variable}`}
       suppressHydrationWarning
     >
       <body className="antialiased selection:bg-black selection:text-white" suppressHydrationWarning>

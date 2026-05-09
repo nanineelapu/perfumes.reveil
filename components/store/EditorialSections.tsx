@@ -208,7 +208,7 @@ export function NotesSection() {
 
     return (
         <section ref={containerRef} style={{
-            padding: isMobile ? '40px 24px' : '80px 80px',
+            padding: isMobile ? '40px 24px 16px' : '80px 80px',
             background: '#0a0a0a',
             position: 'relative',
             overflow: 'hidden'
@@ -225,16 +225,6 @@ export function NotesSection() {
                     gap: isMobile ? '24px' : '40px',
                     textAlign: isMobile ? 'center' : 'left'
                 }}>
-                    {isMobile && (
-                        <div style={{
-                            fontSize: '8px', fontWeight: 900, color: '#d4af37',
-                            letterSpacing: '0.4em', textTransform: 'uppercase',
-                            marginBottom: '16px'
-                        }}>
-                            EST. 2024
-                        </div>
-                    )}
-
                     <div style={{ flex: 1 }}>
                         {isMobile && (
                             <span
@@ -358,18 +348,17 @@ export function NotesSection() {
                                     {/* Label Area */}
                                     <div style={{
                                         position: 'absolute', bottom: 0, left: 0, right: 0,
-                                        padding: isMobile ? '32px 24px' : '24px',
+                                        padding: '24px',
                                         background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 50%, transparent 100%)',
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        gap: '4px'
+                                        textAlign: 'left'
                                     }}>
                                         <div style={{
-                                            fontSize: isMobile ? '9px' : '8px', color: '#d4af37',
-                                            letterSpacing: '0.4em', marginBottom: '4px',
+                                            fontSize: isMobile ? '11px' : '11px', color: '#d4af37',
+                                            letterSpacing: '0.05em',
                                             fontFamily: 'var(--font-baskerville)',
-                                            textTransform: 'uppercase',
-                                            opacity: 0.8
+                                            textTransform: 'none',
+                                            opacity: 0.8,
+                                            marginBottom: '8px'
                                         }}>
                                             {item.type}
                                         </div>
@@ -407,17 +396,9 @@ export function NotesSection() {
                     ))}
                 </div>
 
-                {/* Mobile Scroll Hint & Sub-label (Bottom) */}
+                {/* Mobile Scroll Hint (Bottom) */}
                 {isMobile && (
-                    <div style={{ marginTop: '32px', textAlign: 'center' }}>
-                        <span
-                            style={{
-                                fontSize: '9px', textTransform: 'uppercase', letterSpacing: '1em',
-                                color: '#fff', display: 'block', marginBottom: '20px', opacity: 0.4
-                            }}
-                        >
-                            Best Sellers
-                        </span>
+                    <div style={{ marginTop: '12px', textAlign: 'center' }}>
                         <div style={{
                             display: 'flex',
                             justifyContent: 'center',
@@ -519,7 +500,7 @@ export function ReveilCollectionSection() {
     return (
         <section ref={containerRef} style={{
             background: '#050505',
-            padding: isMobile ? '40px 20px' : '100px 80px',
+            padding: isMobile ? '40px 0' : '100px 80px',
             position: 'relative',
             overflow: 'hidden'
         }}>
@@ -533,13 +514,13 @@ export function ReveilCollectionSection() {
                     margin: '0 auto',
                     minHeight: isMobile ? 'auto' : '85vh',
                     position: 'relative',
-                    borderRadius: isMobile ? '24px' : '48px',
+                    borderRadius: isMobile ? '0' : '48px',
                     overflow: 'hidden',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    boxShadow: '0 80px 160px rgba(0,0,0,1)',
-                    border: '1px solid rgba(255,255,255,0.05)',
+                    boxShadow: isMobile ? 'none' : '0 80px 160px rgba(0,0,0,1)',
+                    border: isMobile ? 'none' : '1px solid rgba(255,255,255,0.05)',
                     padding: isMobile ? '60px 0' : '0',
                     background: isMobile ? '#000' : 'transparent'
                 }}
@@ -651,6 +632,7 @@ export function ReveilCollectionSection() {
                                     display: 'inline-block',
                                     border: '1px solid rgba(212,175,55,0.5)',
                                     padding: '16px 40px',
+                                    borderRadius: '999px',
                                     color: '#d4af37',
                                     textDecoration: 'none',
                                     fontSize: '9px',

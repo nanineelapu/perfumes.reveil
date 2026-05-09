@@ -28,8 +28,8 @@ export default function CartPage() {
                 return sum + ((item.products as any)?.price ?? 0) * item.quantity
             }, 0)
 
-            // FREE SHIPPING LOGIC: Free if subtotal >= 250, else ₹50
-            const shipping = subtotal >= 250 ? 0 : 50
+            // FREE SHIPPING LOGIC: Free if subtotal >= 249, else ₹50
+            const shipping = subtotal >= 249 ? 0 : 50
             const total = subtotal + shipping
 
             setCartItems(items)
@@ -130,16 +130,16 @@ export default function CartPage() {
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                 <Truck size={16} color="#d4af37" />
-                                <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: totals.subtotal >= 250 ? '#16a34a' : '#fff' }}>
-                                    {totals.subtotal >= 250 ? 'Free delivery unlocked! 🎉' : `Add ₹${(250 - totals.subtotal).toLocaleString()} more for free shipping`}
+                                <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: totals.subtotal >= 249 ? '#16a34a' : '#fff' }}>
+                                    {totals.subtotal >= 249 ? 'Free delivery unlocked! 🎉' : `Add ₹${(249 - totals.subtotal).toLocaleString()} more for free shipping`}
                                 </span>
                             </div>
-                            <span style={{ fontSize: '10px', color: '#666', letterSpacing: '0.1em' }}>THRESHOLD: ₹250</span>
+                            <span style={{ fontSize: '10px', color: '#666', letterSpacing: '0.1em' }}>THRESHOLD: ₹249</span>
                         </div>
                         <div style={{ width: '100%', height: '2px', background: 'rgba(255,255,255,0.05)', position: 'relative', overflow: 'hidden' }}>
-                            <motion.div 
+                            <motion.div
                                 initial={{ width: 0 }}
-                                animate={{ width: `${Math.min((totals.subtotal / 250) * 100, 100)}%` }}
+                                animate={{ width: `${Math.min((totals.subtotal / 249) * 100, 100)}%` }}
                                 transition={{ duration: 1, ease: "easeOut" }}
                                 style={{ height: '100%', background: '#d4af37', position: 'absolute', left: 0, top: 0 }}
                             />
@@ -244,12 +244,21 @@ export default function CartPage() {
                                 </div>
                             </div>
 
-                            <button style={{
-                                width: '100%', background: '#fff', color: '#000', border: 'none',
-                                padding: '18px', fontSize: '10px', fontWeight: 900,
-                                textTransform: 'uppercase', letterSpacing: '0.3em', cursor: 'pointer',
-                                marginTop: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px'
-                            }}>
+                            <button
+                                onClick={async () => {
+                                    const { data: { user } } = await supabase.auth.getUser()
+                                    if (!user) {
+                                        router.push('/auth?next=/checkout')
+                                        return
+                                    }
+                                    router.push('/checkout')
+                                }}
+                                style={{
+                                    width: '100%', background: '#fff', color: '#000', border: 'none',
+                                    padding: '18px', fontSize: '10px', fontWeight: 900,
+                                    textTransform: 'uppercase', letterSpacing: '0.3em', cursor: 'pointer',
+                                    marginTop: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px'
+                                }}>
                                 Checkout <ArrowRight size={14} />
                             </button>
 

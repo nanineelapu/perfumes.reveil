@@ -117,9 +117,8 @@ export async function POST(request: Request) {
         return sum + product.price * item.quantity
     }, 0)
 
-    const shippingFee = subtotal >= 250 ? 0 : 30
-    const codFee = payment_method === 'cod' ? 30 : 0
-    const total = subtotal + shippingFee + codFee
+    const shippingFee = subtotal >= 249 ? 0 : 50
+    const total = subtotal + shippingFee
 
     // 6. Create order
     const { data: order, error: orderError } = await supabase
@@ -129,6 +128,7 @@ export async function POST(request: Request) {
             total,
             status: 'pending',
             payment_method,
+            payment_status: payment_method === 'cod' ? 'pending' : 'pending',
             shipping_address,
         })
         .select()

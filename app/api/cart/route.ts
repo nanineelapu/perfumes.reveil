@@ -37,8 +37,8 @@ export async function GET() {
         return sum + ((item.products as any)?.price ?? 0) * item.quantity
     }, 0) ?? 0
 
-    // FREE SHIPPING LOGIC: Free if subtotal >= 250, else ₹50
-    const shipping = subtotal >= 250 ? 0 : 50
+    // FREE SHIPPING LOGIC: Free if subtotal >= 249, else ₹50
+    const shipping = subtotal >= 249 ? 0 : 50
     const total = subtotal + shipping
 
     return NextResponse.json({

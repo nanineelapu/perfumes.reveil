@@ -1,0 +1,451 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import Script from 'next/script'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { motion } from 'framer-motion'
+import { Loader2, ShieldCheck, Truck, MapPin, Plus, ArrowRight, Check, CreditCard, Wallet } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
+
+type Address = {
+    id: string
+    label: string
+    full_name: string
+    phone: string
+    address_line1: string
+    address_line2?: string | null
+    city: string
+    state: string
+    pincode: string
+    is_default: boolean
+}
+
+type CartItem = {
+    id: string
+    quantity: number
+    products: {
+        id: string
+        name: string
+        price: number
+        images?: string[] | null
+        category?: string | null
+    } | null
+}
+
+declare global {
+    interface Window {
+        Razorpay: any
+    }
+}
+
+const FREE_THRESHOLD = 249
+const SHIPPING_FEE = 50
+
+export default function CheckoutPage() {
+    const router = useRouter()
+    const supabase = createClient()
+
+    const [loading, setLoading] = useState(true)
+    const [items, setItems] = useState<CartItem[]>([])
+    const [addresses, setAddresses] = useState<Address[]>([])
+    const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null)
+    const [paymentMethod, setPaymentMethod] = useState<'razorpay' | 'cod'>('razorpay')
+    const [placing, setPlacing] = useState(false)
+    const [error, setError] = useState<string | null>(null)
+    const [scriptReady, setScriptReady] = useState(false)
+    const [userEmail, setUserEmail] = useState<string>('')
+
+    useEffect(() => {
+        async function load() {
+            try {
+                const { data: { user } } = await supabase.auth.getUser()
+                if (!user) {
+                    router.push('/auth?next=/checkout')
+                    return
+                }
+                setUserEmail(user.email || '')
+
+                const [cartRes, addrRes] = await Promise.all([
+                    fetch('/api/cart'),
+                    fetch('/api/user/address'),
+                ])
+
+                if (cartRes.status === 401) {
+                    router.push('/auth?next=/checkout')
+                    return
+                }
+
+                const cartData = await cartRes.json()
+                const addrData = await addrRes.json()
+
+                const cartItems: CartItem[] = cartData.items || []
+                if (cartItems.length === 0) {
+                    router.push('/cart')
+                    return
+                }
+                setItems(cartItems)
+
+                const addrs: Address[] = addrData.addresses || []
+                setAddresses(addrs)
+                const def = addrs.find((a) => a.is_default) || addrs[0]
+                if (def) setSelectedAddressId(def.id)
+            } catch (err) {
+                console.error('Checkout load error:', err)
+                setError('Failed to load checkout. Please try again.')
+            } finally {
+                setLoading(false)
+            }
+        }
+        load()
+    }, [])
+
+    const subtotal = items.reduce((sum, item) => sum + (item.products?.price ?? 0) * item.quantity, 0)
+    const shipping = subtotal >= FREE_THRESHOLD ? 0 : SHIPPING_FEE
+    const total = subtotal + shipping
+    const selectedAddress = addresses.find((a) => a.id === selectedAddressId) || null
+
+    const placeCodOrder = async () => {
+        if (!selectedAddress) return
+        const orderItems = items.map((i) => ({
+            product_id: i.products!.id,
+            quantity: i.quantity,
+        }))
+        const res = await fetch('/api/orders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                items: orderItems,
+                shipping_address: {
+                    label: selectedAddress.label,
+                    full_name: selectedAddress.full_name,
+                    phone: selectedAddress.phone,
+                    address_line1: selectedAddress.address_line1,
+                    address_line2: selectedAddress.address_line2,
+                    city: selectedAddress.city,
+                    state: selectedAddress.state,
+                    pincode: selectedAddress.pincode,
+                },
+                payment_method: 'cod',
+            }),
+        })
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error || 'Failed to place order')
+        return data?.id as string
+    }
+
+    const placeRazorpayOrder = async () => {
+        if (!selectedAddress) return
+
+        if (!window.Razorpay) {
+            throw new Error('Razorpay is still loading. Please wait a moment and try again.')
+        }
+
+        // Step 1 — create the Razorpay order on our server
+        const createRes = await fetch('/api/payment/razorpay/create-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ address_id: selectedAddress.id }),
+        })
+        const createData = await createRes.json()
+        if (!createRes.ok) throw new Error(createData.error || 'Failed to start payment')
+
+        if (!createData.key_id) {
+            throw new Error('Razorpay is not configured yet. Please contact support.')
+        }
+
+        // Step 2 — open Razorpay Checkout
+        return await new Promise<string>((resolve, reject) => {
+            const rzp = new window.Razorpay({
+                key: createData.key_id,
+                amount: createData.amount,
+                currency: createData.currency,
+                name: 'REVEIL',
+                description: 'Luxury Perfumes',
+                order_id: createData.razorpay_order_id,
+                prefill: {
+                    name: selectedAddress.full_name,
+                    email: userEmail,
+                    contact: selectedAddress.phone,
+                },
+                notes: { address_id: selectedAddress.id },
+                theme: { color: '#d4af37' },
+                handler: async (response: any) => {
+                    try {
+                        const verifyRes = await fetch('/api/payment/razorpay/verify', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                                address_id: selectedAddress.id,
+                            }),
+                        })
+                        const verifyData = await verifyRes.json()
+                        if (!verifyRes.ok) throw new Error(verifyData.error || 'Payment verification failed')
+                        resolve(verifyData.order_id)
+                    } catch (err: any) {
+                        reject(err)
+                    }
+                },
+                modal: {
+                    ondismiss: () => reject(new Error('Payment cancelled')),
+                },
+            })
+            rzp.on('payment.failed', (resp: any) => {
+                reject(new Error(resp?.error?.description || 'Payment failed'))
+            })
+            rzp.open()
+        })
+    }
+
+    const handlePlaceOrder = async () => {
+        if (!selectedAddress) {
+            setError('Please select a delivery address.')
+            return
+        }
+        setPlacing(true)
+        setError(null)
+        try {
+            const orderId =
+                paymentMethod === 'cod' ? await placeCodOrder() : await placeRazorpayOrder()
+            if (orderId) {
+                router.push(`/orders?placed=${orderId}`)
+            } else {
+                router.push('/orders')
+            }
+        } catch (err: any) {
+            console.error('Place order error:', err)
+            setError(err.message || 'Something went wrong. Please try again.')
+        } finally {
+            setPlacing(false)
+        }
+    }
+
+    if (loading) {
+        return (
+            <div style={{ minHeight: '100vh', background: '#050505', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '14px' }}>
+                <Loader2 className="animate-spin" size={28} color="#d4af37" />
+                <span style={{ fontSize: '10px', color: '#d4af37', letterSpacing: '0.4em', textTransform: 'uppercase' }}>Preparing checkout...</span>
+            </div>
+        )
+    }
+
+    return (
+        <>
+            <Script
+                src="https://checkout.razorpay.com/v1/checkout.js"
+                strategy="afterInteractive"
+                onLoad={() => setScriptReady(true)}
+            />
+
+            <main style={{ background: '#050505', minHeight: '100vh', color: '#fff', paddingTop: '120px', paddingBottom: '120px' }}>
+                <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 40px' }}>
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#d4af37', fontSize: '9px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.6em', marginBottom: '16px', fontFamily: 'var(--font-baskerville)' }}>
+                        Secure Checkout <div style={{ width: '30px', height: '1px', background: 'rgba(212,175,55,0.3)' }} />
+                    </motion.div>
+                    <h1 style={{ fontSize: 'clamp(32px, 6vw, 56px)', fontFamily: 'var(--font-baskerville)', textTransform: 'uppercase', margin: 0, lineHeight: 1, fontWeight: 300, marginBottom: '48px' }}>
+                        Complete Your <span style={{ color: '#d4af37', fontStyle: 'italic', fontWeight: 400 }}>Order</span>
+                    </h1>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: '60px', alignItems: 'start' }}>
+                        {/* LEFT — address + payment */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+                            {/* Addresses */}
+                            <section style={{ background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '2px', padding: '32px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                                    <h2 style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4em', color: '#d4af37', fontFamily: 'var(--font-baskerville)', margin: 0 }}>Delivery Address</h2>
+                                    <Link href="/address-book" style={{ fontSize: '9px', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.2em', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <Plus size={12} /> Add New
+                                    </Link>
+                                </div>
+
+                                {addresses.length === 0 ? (
+                                    <div style={{ padding: '32px', border: '1px dashed rgba(255,255,255,0.1)', textAlign: 'center' }}>
+                                        <MapPin size={20} color="#666" style={{ marginBottom: '12px' }} />
+                                        <p style={{ fontSize: '12px', color: '#888', margin: '0 0 16px' }}>You don't have any saved addresses yet.</p>
+                                        <Link href="/address-book" style={{ display: 'inline-block', padding: '12px 24px', border: '1px solid #d4af37', color: '#d4af37', fontSize: '9px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', textDecoration: 'none' }}>
+                                            Add Address
+                                        </Link>
+                                    </div>
+                                ) : (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                        {addresses.map((a) => {
+                                            const active = a.id === selectedAddressId
+                                            return (
+                                                <button
+                                                    key={a.id}
+                                                    onClick={() => setSelectedAddressId(a.id)}
+                                                    style={{
+                                                        textAlign: 'left',
+                                                        padding: '20px',
+                                                        background: active ? 'rgba(212,175,55,0.05)' : 'transparent',
+                                                        border: `1px solid ${active ? '#d4af37' : 'rgba(255,255,255,0.08)'}`,
+                                                        cursor: 'pointer',
+                                                        color: '#fff',
+                                                        display: 'grid',
+                                                        gridTemplateColumns: '24px 1fr',
+                                                        gap: '16px',
+                                                        alignItems: 'start',
+                                                    }}
+                                                >
+                                                    <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: `1px solid ${active ? '#d4af37' : '#333'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '2px' }}>
+                                                        {active && <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#d4af37' }} />}
+                                                    </div>
+                                                    <div>
+                                                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '6px' }}>
+                                                            <span style={{ fontSize: '9px', letterSpacing: '0.3em', color: '#d4af37', fontWeight: 900, textTransform: 'uppercase' }}>{a.label}</span>
+                                                            {a.is_default && <span style={{ fontSize: '8px', padding: '2px 8px', border: '1px solid rgba(255,255,255,0.1)', color: '#888', textTransform: 'uppercase', letterSpacing: '0.2em' }}>Default</span>}
+                                                        </div>
+                                                        <div style={{ fontSize: '13px', fontWeight: 500 }}>{a.full_name} · {a.phone}</div>
+                                                        <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', marginTop: '4px', lineHeight: 1.5 }}>
+                                                            {a.address_line1}{a.address_line2 ? `, ${a.address_line2}` : ''}, {a.city}, {a.state} {a.pincode}
+                                                        </div>
+                                                    </div>
+                                                </button>
+                                            )
+                                        })}
+                                    </div>
+                                )}
+                            </section>
+
+                            {/* Payment Method */}
+                            <section style={{ background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '2px', padding: '32px' }}>
+                                <h2 style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4em', color: '#d4af37', fontFamily: 'var(--font-baskerville)', margin: '0 0 24px' }}>Payment Method</h2>
+
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                    {[
+                                        { id: 'razorpay' as const, label: 'Razorpay', desc: 'Cards · UPI · Netbanking · Wallets', Icon: CreditCard },
+                                        { id: 'cod' as const, label: 'Cash on Delivery', desc: 'Pay in cash when your order arrives', Icon: Wallet },
+                                    ].map(({ id, label, desc, Icon }) => {
+                                        const active = paymentMethod === id
+                                        return (
+                                            <button
+                                                key={id}
+                                                onClick={() => setPaymentMethod(id)}
+                                                style={{
+                                                    textAlign: 'left',
+                                                    padding: '20px',
+                                                    background: active ? 'rgba(212,175,55,0.05)' : 'transparent',
+                                                    border: `1px solid ${active ? '#d4af37' : 'rgba(255,255,255,0.08)'}`,
+                                                    cursor: 'pointer',
+                                                    color: '#fff',
+                                                    display: 'grid',
+                                                    gridTemplateColumns: '24px 1fr auto',
+                                                    gap: '16px',
+                                                    alignItems: 'center',
+                                                }}
+                                            >
+                                                <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: `1px solid ${active ? '#d4af37' : '#333'}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    {active && <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#d4af37' }} />}
+                                                </div>
+                                                <div>
+                                                    <div style={{ fontSize: '13px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{label}</div>
+                                                    <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', marginTop: '4px' }}>{desc}</div>
+                                                </div>
+                                                <Icon size={18} color={active ? '#d4af37' : '#666'} />
+                                            </button>
+                                        )
+                                    })}
+                                </div>
+                            </section>
+                        </div>
+
+                        {/* RIGHT — summary */}
+                        <aside style={{ background: '#0a0a0a', padding: '32px', borderRadius: '2px', border: '1px solid rgba(255,255,255,0.05)', position: 'sticky', top: '120px' }}>
+                            <h2 style={{ fontSize: '9px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4em', marginBottom: '24px', color: '#d4af37', fontFamily: 'var(--font-baskerville)' }}>Order Summary</h2>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '24px', maxHeight: '240px', overflowY: 'auto' }}>
+                                {items.map((item) => (
+                                    <div key={item.id} style={{ display: 'grid', gridTemplateColumns: '48px 1fr auto', gap: '12px', alignItems: 'center' }}>
+                                        <div style={{ width: '48px', height: '60px', background: '#000', overflow: 'hidden' }}>
+                                            {item.products?.images?.[0] && (
+                                                <img src={item.products.images[0]} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            )}
+                                        </div>
+                                        <div style={{ minWidth: 0 }}>
+                                            <div style={{ fontSize: '11px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.products?.name}</div>
+                                            <div style={{ fontSize: '10px', color: '#666', marginTop: '4px' }}>Qty {item.quantity}</div>
+                                        </div>
+                                        <div style={{ fontSize: '12px', fontFamily: 'var(--font-baskerville)' }}>₹{((item.products?.price ?? 0) * item.quantity).toLocaleString()}</div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', margin: '8px 0 24px' }} />
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+                                    <span style={{ color: 'rgba(255,255,255,0.5)' }}>Subtotal</span>
+                                    <span>₹{subtotal.toLocaleString()}</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+                                    <span style={{ color: 'rgba(255,255,255,0.5)' }}>Shipping</span>
+                                    <span style={{ color: shipping === 0 ? '#16a34a' : '#fff' }}>
+                                        {shipping === 0 ? 'FREE' : `₹${shipping}`}
+                                    </span>
+                                </div>
+                                {shipping === 0 && (
+                                    <div style={{ fontSize: '10px', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <Check size={12} /> Free delivery unlocked (orders over ₹{FREE_THRESHOLD})
+                                    </div>
+                                )}
+                                <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', margin: '8px 0' }} />
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '20px', fontWeight: 400, fontFamily: 'var(--font-baskerville)' }}>
+                                    <span>TOTAL</span>
+                                    <span>₹{total.toLocaleString()}</span>
+                                </div>
+                            </div>
+
+                            {error && (
+                                <div style={{ marginTop: '20px', padding: '12px', background: 'rgba(255,77,77,0.08)', border: '1px solid rgba(255,77,77,0.2)', color: '#ff6b6b', fontSize: '11px' }}>
+                                    {error}
+                                </div>
+                            )}
+
+                            <button
+                                onClick={handlePlaceOrder}
+                                disabled={placing || !selectedAddressId || (paymentMethod === 'razorpay' && !scriptReady)}
+                                style={{
+                                    width: '100%',
+                                    background: placing || !selectedAddressId ? '#444' : '#fff',
+                                    color: '#000',
+                                    border: 'none',
+                                    padding: '18px',
+                                    fontSize: '10px',
+                                    fontWeight: 900,
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.3em',
+                                    cursor: placing || !selectedAddressId ? 'not-allowed' : 'pointer',
+                                    marginTop: '24px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '10px',
+                                }}
+                            >
+                                {placing ? (
+                                    <><Loader2 className="animate-spin" size={14} /> Processing</>
+                                ) : (
+                                    <>{paymentMethod === 'cod' ? 'Place Order' : `Pay ₹${total.toLocaleString()}`} <ArrowRight size={14} /></>
+                                )}
+                            </button>
+
+                            <div style={{ marginTop: '24px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                                    <ShieldCheck size={12} color="#d4af37" />
+                                    <p style={{ fontSize: '9px', fontWeight: 900, margin: 0, textTransform: 'uppercase', letterSpacing: '0.2em' }}>Secure 256-bit Encrypted</p>
+                                </div>
+                                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                                    <Truck size={12} color="#d4af37" />
+                                    <p style={{ fontSize: '9px', fontWeight: 900, margin: 0, textTransform: 'uppercase', letterSpacing: '0.2em' }}>Pan-India Delivery</p>
+                                </div>
+                            </div>
+                        </aside>
+                    </div>
+                </div>
+            </main>
+        </>
+    )
+}

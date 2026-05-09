@@ -124,6 +124,7 @@ export default function ProductCard({ product }: { product: Product }) {
                 padding: isMobile ? '8px' : '16px',
                 border: '1px solid rgba(255,255,255,0.03)',
                 transition: 'all 0.6s cubic-bezier(0.22, 1, 0.36, 1)',
+                width: '100%',
                 height: '100%',
                 display: 'flex',
                 flexDirection: 'column',
@@ -249,18 +250,21 @@ export default function ProductCard({ product }: { product: Product }) {
                 <Link href={`/products/${product.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                     <div style={{
                         fontSize: isMobile ? '7px' : '8px', color: '#666',
-                        letterSpacing: isMobile ? '0.2em' : '0.6em', marginBottom: '8px',
+                        letterSpacing: isMobile ? '0.2em' : '0.4em', marginBottom: '8px',
                         fontWeight: 400, textTransform: 'uppercase',
                         display: 'flex', alignItems: 'center', gap: '8px',
-                        fontFamily: 'var(--font-tenor)'
+                        fontFamily: 'var(--font-tenor)',
+                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                        height: '14px', lineHeight: '14px'
                     }}>
                         <div style={{
                             width: (hovered && !isMobile) ? '30px' : '0px',
                             height: '1px',
                             background: '#d4af37',
-                            transition: 'width 0.6s cubic-bezier(0.22, 1, 0.36, 1)'
+                            transition: 'width 0.6s cubic-bezier(0.22, 1, 0.36, 1)',
+                            flexShrink: 0
                         }} />
-                        {product.category}
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{product.category}</span>
                     </div>
                     <h3 style={{
                         margin: '0 0 8px', fontSize: isMobile ? '12px' : '15px', fontWeight: 300,
@@ -290,7 +294,8 @@ export default function ProductCard({ product }: { product: Product }) {
                     display: 'flex',
                     flexDirection: isMobile ? 'row' : 'row', // Side by side for both
                     gap: isMobile ? '6px' : '12px',
-                    marginTop: isMobile ? '12px' : '20px',
+                    marginTop: 'auto',
+                    paddingTop: isMobile ? '12px' : '20px',
                     background: 'transparent'
                 }}>
                     <div onClick={(e) => handleAction(e, 'buy')} style={{ flex: 1 }}>

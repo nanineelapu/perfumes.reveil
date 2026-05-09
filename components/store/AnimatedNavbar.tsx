@@ -175,15 +175,26 @@ export function AnimatedNavbar() {
 
     useEffect(() => {
         if (isMobileMenuOpen || isCartOpen) {
+            const scrollY = window.scrollY;
             const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
-            document.body.style.overflow = 'hidden';
-            document.body.style.height = '100vh';
+            document.body.dataset.scrollY = String(scrollY);
+            document.body.style.position = 'fixed';
+            document.body.style.top = `-${scrollY}px`;
+            document.body.style.left = '0';
+            document.body.style.right = '0';
+            document.body.style.width = '100%';
             document.body.style.paddingRight = `${scrollBarWidth}px`;
             if (lenis) lenis.stop()
         } else {
-            document.body.style.overflow = '';
-            document.body.style.height = '';
+            const savedY = parseInt(document.body.dataset.scrollY || '0', 10);
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.left = '';
+            document.body.style.right = '';
+            document.body.style.width = '';
             document.body.style.paddingRight = '';
+            delete document.body.dataset.scrollY;
+            if (savedY) window.scrollTo(0, savedY);
             if (lenis) lenis.start()
         }
     }, [isMobileMenuOpen, isCartOpen, lenis])
@@ -576,7 +587,8 @@ export function AnimatedNavbar() {
                         >
 
                             <button
-                                onClick={() => setIsCartOpen(true)}
+                                type="button"
+                                onClick={(e) => { e.preventDefault(); setIsCartOpen(true) }}
                                 style={{ background: 'none', border: 'none', color: textColor, display: 'flex', alignItems: 'center', cursor: 'pointer', padding: 0 }}
                             >
                                 <motion.div
@@ -614,7 +626,8 @@ export function AnimatedNavbar() {
 
                         <motion.div variants={itemVariants}>
                             <button
-                                onClick={() => { setIsCartOpen(true); setIsMobileMenuOpen(false); }}
+                                type="button"
+                                onClick={(e) => { e.preventDefault(); setIsCartOpen(true); setIsMobileMenuOpen(false); }}
                                 style={{ background: 'none', border: 'none', color: textColor, display: 'flex', alignItems: 'center', cursor: 'pointer', padding: 0, position: 'relative' }}
                             >
                                 <ShoppingBag size={22} strokeWidth={1.5} />
@@ -684,18 +697,18 @@ export function AnimatedNavbar() {
                             }}
                         />
 
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                             {/* Brand Logo in Overlay */}
                             <motion.div
                                 initial={{ opacity: 0, y: -10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.2 }}
-                                style={{ marginBottom: '32px', marginLeft: '-20px' }}
+                                style={{ marginBottom: '20px', marginLeft: '-20px' }}
                             >
                                 <img
                                     src="https://lhnamtkpjkrawgql.public.blob.vercel-storage.com/Untitled%20%282%29.webp"
                                     alt="Reveil Logo"
-                                    style={{ height: '44px', width: 'auto' }}
+                                    style={{ height: '32px', width: 'auto' }}
                                 />
                             </motion.div>
 
@@ -724,7 +737,7 @@ export function AnimatedNavbar() {
                                         href={link.href}
                                         onClick={() => setIsMobileMenuOpen(false)}
                                         style={{
-                                            fontSize: 'clamp(24px, 8vw, 32px)',
+                                            fontSize: 'clamp(18px, 6vw, 24px)',
                                             fontFamily: 'var(--font-baskerville)',
                                             color: textColor,
                                             textDecoration: 'none',
@@ -753,7 +766,7 @@ export function AnimatedNavbar() {
                                         onClick={() => { handleLogout(); setIsMobileMenuOpen(false) }}
                                         style={{
                                             background: 'none', border: 'none', padding: 0, cursor: 'pointer',
-                                            fontSize: 'clamp(24px, 8vw, 32px)',
+                                            fontSize: 'clamp(18px, 6vw, 24px)',
                                             fontFamily: 'var(--font-baskerville)',
                                             color: '#ff4b4b',
                                             letterSpacing: '0.02em',
