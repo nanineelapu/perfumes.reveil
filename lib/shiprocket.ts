@@ -123,6 +123,10 @@ export async function shiprocketFetch(endpoint: string, options: RequestInit = {
     const email = process.env.SHIPROCKET_EMAIL;
     const password = process.env.SHIPROCKET_PASSWORD;
 
+    if (!email || !password) {
+        throw new Error('Shiprocket credentials missing. Set SHIPROCKET_EMAIL and SHIPROCKET_PASSWORD in .env.local and restart the server.');
+    }
+
     // Login to get token
     const authRes = await fetch(`${SHIPROCKET_API_BASE}/auth/login`, {
         method: 'POST',
@@ -130,14 +134,23 @@ export async function shiprocketFetch(endpoint: string, options: RequestInit = {
         body: JSON.stringify({ email, password }),
     });
 
-    const { token } = await authRes.json();
+    const authData = await authRes.json().catch(() => ({}));
 
-    return fetch(`${SHIPROCKET_API_BASE}${endpoint}`, {
+    if (!authRes.ok || !authData?.token) {
+        const reason = authData?.message || `HTTP ${authRes.status}`;
+        throw new Error(`Shiprocket authentication failed: ${reason}`);
+    }
+
+    const token: string = authData.token;
+
+    const res = await fetch(`${SHIPROCKET_API_BASE}${endpoint}`, {
         ...options,
         headers: {
             ...options.headers,
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
         }
-    }).then(res => res.json());
+    });
+
+    return res.json();
 }

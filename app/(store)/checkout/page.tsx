@@ -53,8 +53,15 @@ export default function CheckoutPage() {
     const [paymentMethod, setPaymentMethod] = useState<'razorpay' | 'cod'>('razorpay')
     const [placing, setPlacing] = useState(false)
     const [error, setError] = useState<string | null>(null)
-    const [scriptReady, setScriptReady] = useState(false)
     const [userEmail, setUserEmail] = useState<string>('')
+    const [isMobile, setIsMobile] = useState(false)
+
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 1024)
+        checkMobile()
+        window.addEventListener('resize', checkMobile)
+        return () => window.removeEventListener('resize', checkMobile)
+    }, [])
 
     useEffect(() => {
         async function load() {
@@ -134,12 +141,31 @@ export default function CheckoutPage() {
         return data?.id as string
     }
 
+    const ensureRazorpayLoaded = async () => {
+        if (typeof window === 'undefined') throw new Error('Browser only')
+        if (window.Razorpay) return
+        await new Promise<void>((resolve, reject) => {
+            const existing = document.querySelector<HTMLScriptElement>('script[data-rzp]')
+            if (existing) {
+                existing.addEventListener('load', () => resolve(), { once: true })
+                existing.addEventListener('error', () => reject(new Error('Failed to load Razorpay')), { once: true })
+                return
+            }
+            const s = document.createElement('script')
+            s.src = 'https://checkout.razorpay.com/v1/checkout.js'
+            s.async = true
+            s.dataset.rzp = '1'
+            s.onload = () => resolve()
+            s.onerror = () => reject(new Error('Failed to load Razorpay'))
+            document.head.appendChild(s)
+        })
+        if (!window.Razorpay) throw new Error('Razorpay failed to initialise. Please reload the page.')
+    }
+
     const placeRazorpayOrder = async () => {
         if (!selectedAddress) return
 
-        if (!window.Razorpay) {
-            throw new Error('Razorpay is still loading. Please wait a moment and try again.')
-        }
+        await ensureRazorpayLoaded()
 
         // Step 1 — create the Razorpay order on our server
         const createRes = await fetch('/api/payment/razorpay/create-order', {
@@ -237,23 +263,23 @@ export default function CheckoutPage() {
             <Script
                 src="https://checkout.razorpay.com/v1/checkout.js"
                 strategy="afterInteractive"
-                onLoad={() => setScriptReady(true)}
+                data-rzp="1"
             />
 
-            <main style={{ background: '#050505', minHeight: '100vh', color: '#fff', paddingTop: '120px', paddingBottom: '120px' }}>
-                <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 40px' }}>
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#d4af37', fontSize: '9px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.6em', marginBottom: '16px', fontFamily: 'var(--font-baskerville)' }}>
+            <main style={{ background: '#050505', minHeight: '100vh', color: '#fff', paddingTop: isMobile ? '90px' : '120px', paddingBottom: isMobile ? '60px' : '120px' }}>
+                <div style={{ maxWidth: '1200px', margin: '0 auto', padding: isMobile ? '0 16px' : '0 40px' }}>
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#d4af37', fontSize: isMobile ? '8px' : '9px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: isMobile ? '0.4em' : '0.6em', marginBottom: '16px', fontFamily: 'var(--font-baskerville)' }}>
                         Secure Checkout <div style={{ width: '30px', height: '1px', background: 'rgba(212,175,55,0.3)' }} />
                     </motion.div>
-                    <h1 style={{ fontSize: 'clamp(32px, 6vw, 56px)', fontFamily: 'var(--font-baskerville)', textTransform: 'uppercase', margin: 0, lineHeight: 1, fontWeight: 300, marginBottom: '48px' }}>
+                    <h1 style={{ fontSize: isMobile ? 'clamp(26px, 8vw, 36px)' : 'clamp(32px, 6vw, 56px)', fontFamily: 'var(--font-baskerville)', textTransform: 'uppercase', margin: 0, lineHeight: 1, fontWeight: 300, marginBottom: isMobile ? '28px' : '48px' }}>
                         Complete Your <span style={{ color: '#d4af37', fontStyle: 'italic', fontWeight: 400 }}>Order</span>
                     </h1>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: '60px', alignItems: 'start' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 380px', gap: isMobile ? '24px' : '60px', alignItems: 'start' }}>
                         {/* LEFT — address + payment */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '20px' : '32px' }}>
                             {/* Addresses */}
-                            <section style={{ background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '2px', padding: '32px' }}>
+                            <section style={{ background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '2px', padding: isMobile ? '20px' : '32px' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                                     <h2 style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4em', color: '#d4af37', fontFamily: 'var(--font-baskerville)', margin: 0 }}>Delivery Address</h2>
                                     <Link href="/address-book" style={{ fontSize: '9px', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.2em', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -311,12 +337,12 @@ export default function CheckoutPage() {
                             </section>
 
                             {/* Payment Method */}
-                            <section style={{ background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '2px', padding: '32px' }}>
+                            <section style={{ background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '2px', padding: isMobile ? '20px' : '32px' }}>
                                 <h2 style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4em', color: '#d4af37', fontFamily: 'var(--font-baskerville)', margin: '0 0 24px' }}>Payment Method</h2>
 
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                     {[
-                                        { id: 'razorpay' as const, label: 'Razorpay', desc: 'Cards · UPI · Netbanking · Wallets', Icon: CreditCard },
+                                        { id: 'razorpay' as const, label: 'Pay Online', desc: 'Cards · UPI · Netbanking · Wallets', Icon: CreditCard },
                                         { id: 'cod' as const, label: 'Cash on Delivery', desc: 'Pay in cash when your order arrives', Icon: Wallet },
                                     ].map(({ id, label, desc, Icon }) => {
                                         const active = paymentMethod === id
@@ -353,7 +379,7 @@ export default function CheckoutPage() {
                         </div>
 
                         {/* RIGHT — summary */}
-                        <aside style={{ background: '#0a0a0a', padding: '32px', borderRadius: '2px', border: '1px solid rgba(255,255,255,0.05)', position: 'sticky', top: '120px' }}>
+                        <aside style={{ background: '#0a0a0a', padding: isMobile ? '20px' : '32px', borderRadius: '2px', border: '1px solid rgba(255,255,255,0.05)' }}>
                             <h2 style={{ fontSize: '9px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4em', marginBottom: '24px', color: '#d4af37', fontFamily: 'var(--font-baskerville)' }}>Order Summary</h2>
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '24px', maxHeight: '240px', overflowY: 'auto' }}>
@@ -406,7 +432,7 @@ export default function CheckoutPage() {
 
                             <button
                                 onClick={handlePlaceOrder}
-                                disabled={placing || !selectedAddressId || (paymentMethod === 'razorpay' && !scriptReady)}
+                                disabled={placing || !selectedAddressId}
                                 style={{
                                     width: '100%',
                                     background: placing || !selectedAddressId ? '#444' : '#fff',

@@ -204,7 +204,7 @@ export function ProductContent({ product, initialReviews }: ProductContentProps)
                         {/* Actions */}
                         <div style={{ display: 'flex', gap: '20px' }}>
                             <motion.button
-                                whileHover={{ backgroundColor: '#fff', color: '#000', borderColor: '#fff' }}
+                                whileHover={{ backgroundColor: '#d4af37', color: '#000', borderColor: '#d4af37' }}
                                 whileTap={{ scale: 0.98 }}
                                 style={{
                                     flex: 1,

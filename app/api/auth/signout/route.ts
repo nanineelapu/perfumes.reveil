@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
-export async function POST() {
+export async function POST(request: NextRequest) {
     const supabase = await createClient()
 
     // 1. Check if user exists
@@ -11,8 +11,9 @@ export async function POST() {
         await supabase.auth.signOut()
     }
 
-    // 2. Redirect to landing page
-    return NextResponse.redirect(new URL('/', process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'), {
+    // 2. Redirect to landing page on the same host the request came in on
+    const origin = process.env.NEXT_PUBLIC_SITE_URL || request.nextUrl.origin
+    return NextResponse.redirect(new URL('/', origin), {
         status: 302,
     })
 }

@@ -49,6 +49,10 @@ export default function EditProductPage(props: { params: Params }) {
         // Auto-generate slug if not provided, or ensure it's clean
         const slug = formData.get('slug') as string || name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '')
 
+        const top = ((formData.get('top_notes') as string) || '').trim()
+        const heart = ((formData.get('heart_notes') as string) || '').trim()
+        const base = ((formData.get('base_notes') as string) || '').trim()
+
         const body = {
             name,
             slug,
@@ -58,7 +62,12 @@ export default function EditProductPage(props: { params: Params }) {
             category: formData.get('category'),
             is_featured: formData.get('is_featured') === 'on',
             // Handle images as a comma-separated list converted to array
-            images: (formData.get('images') as string).split(',').map(s => s.trim()).filter(s => s !== '')
+            images: (formData.get('images') as string).split(',').map(s => s.trim()).filter(s => s !== ''),
+            scent_profile: {
+                top: top || null,
+                heart: heart || null,
+                base: base || null,
+            },
         }
 
         try {
@@ -199,6 +208,42 @@ export default function EditProductPage(props: { params: Params }) {
                                     <img src={img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Preview" />
                                 </div>
                             ))}
+                        </div>
+                    </section>
+
+                    <section className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm space-y-6">
+                        <div className="flex items-center gap-2 mb-2 text-accent">
+                            <Sparkles className="w-4 h-4" />
+                            <h2 className="text-[10px] font-bold tracking-[.3em] uppercase">Scent Profile</h2>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold tracking-widest uppercase text-gray-400">Top Notes</label>
+                                <input
+                                    name="top_notes"
+                                    defaultValue={product.scent_profile?.top || ''}
+                                    className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-accent transition-all"
+                                    placeholder="e.g. Bergamot, Lemon"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold tracking-widest uppercase text-gray-400">Heart Notes</label>
+                                <input
+                                    name="heart_notes"
+                                    defaultValue={product.scent_profile?.heart || ''}
+                                    className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-accent transition-all"
+                                    placeholder="e.g. Rose, Jasmine"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold tracking-widest uppercase text-gray-400">Base Notes</label>
+                                <input
+                                    name="base_notes"
+                                    defaultValue={product.scent_profile?.base || ''}
+                                    className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-accent transition-all"
+                                    placeholder="e.g. Oud, Amber"
+                                />
+                            </div>
                         </div>
                     </section>
                 </div>

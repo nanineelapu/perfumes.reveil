@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
-import { Heart, Loader2, ShoppingCart, ShoppingBag } from 'lucide-react'
+import { Heart, Loader2, ShoppingCart, ShoppingBag, ChevronLeft, ChevronRight } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Product } from '@/types/store'
 
@@ -18,6 +18,7 @@ export default function ProductCard({ product }: { product: Product }) {
     const [wishlisting, setWishlisting] = useState(false)
     const [wishlisted, setWishlisted] = useState(false)
     const [isMobile, setIsMobile] = useState(false)
+    const [imageIndex, setImageIndex] = useState(0)
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 1024)
@@ -108,7 +109,20 @@ export default function ProductCard({ product }: { product: Product }) {
         }
     }
 
-    const mainImage = product.images?.[0]
+    const images = product.images?.filter(Boolean) || []
+    const mainImage = images[imageIndex] ?? images[0]
+    const hasMultiple = images.length > 1
+
+    const goPrev = (e: React.MouseEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
+        setImageIndex((i) => (i - 1 + images.length) % images.length)
+    }
+    const goNext = (e: React.MouseEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
+        setImageIndex((i) => (i + 1) % images.length)
+    }
 
     return (
         <motion.div
@@ -200,6 +214,66 @@ export default function ProductCard({ product }: { product: Product }) {
                         </div>
                     )}
                 </motion.div>
+
+                {/* Image Slider Controls */}
+                {hasMultiple && (
+                    <>
+                        <button
+                            type="button"
+                            onClick={goPrev}
+                            aria-label="Previous image"
+                            style={{
+                                position: 'absolute', top: '50%', left: '8px', transform: 'translateY(-50%)',
+                                zIndex: 5, background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)',
+                                border: '1px solid rgba(255,255,255,0.1)', color: '#fff',
+                                width: isMobile ? '28px' : '32px', height: isMobile ? '28px' : '32px',
+                                borderRadius: '50%', cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                opacity: isMobile ? 0.85 : (hovered ? 1 : 0),
+                                transition: 'opacity 0.3s ease'
+                            }}
+                        >
+                            <ChevronLeft size={isMobile ? 14 : 16} />
+                        </button>
+                        <button
+                            type="button"
+                            onClick={goNext}
+                            aria-label="Next image"
+                            style={{
+                                position: 'absolute', top: '50%', right: '8px', transform: 'translateY(-50%)',
+                                zIndex: 5, background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)',
+                                border: '1px solid rgba(255,255,255,0.1)', color: '#fff',
+                                width: isMobile ? '28px' : '32px', height: isMobile ? '28px' : '32px',
+                                borderRadius: '50%', cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                opacity: isMobile ? 0.85 : (hovered ? 1 : 0),
+                                transition: 'opacity 0.3s ease'
+                            }}
+                        >
+                            <ChevronRight size={isMobile ? 14 : 16} />
+                        </button>
+                        <div style={{
+                            position: 'absolute', bottom: '8px', left: 0, right: 0,
+                            display: 'flex', justifyContent: 'center', gap: '6px', zIndex: 5
+                        }}>
+                            {images.map((_, i) => (
+                                <button
+                                    key={i}
+                                    type="button"
+                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setImageIndex(i) }}
+                                    aria-label={`Show image ${i + 1}`}
+                                    style={{
+                                        width: i === imageIndex ? '16px' : '6px',
+                                        height: '6px', borderRadius: '3px',
+                                        background: i === imageIndex ? '#d4af37' : 'rgba(255,255,255,0.4)',
+                                        border: 'none', cursor: 'pointer',
+                                        transition: 'all 0.3s ease', padding: 0
+                                    }}
+                                />
+                            ))}
+                        </div>
+                    </>
+                )}
 
                 {/* Subtle Grain Overlay for Texture */}
                 <div style={{
@@ -350,7 +424,7 @@ export default function ProductCard({ product }: { product: Product }) {
                                     } : {}}
                                     style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: isMobile ? '4px' : '8px', color: isMobile ? '#000' : 'inherit', whiteSpace: 'nowrap' }}
                                 >
-                                    {adding ? <span style={{ paddingTop: '2px' }}>...</span> : <><ShoppingBag size={isMobile ? 12 : 14} /> <span style={{ paddingTop: '2px' }}>{isMobile ? 'BUY' : 'BUY NOW'}</span></>}
+                                    {adding ? <span style={{ paddingTop: '2px' }}>...</span> : <><ShoppingBag size={isMobile ? 12 : 14} /> <span style={{ paddingTop: '2px' }}>{isMobile ? 'BUY' : 'BUY'}</span></>}
                                 </motion.span>
                                 {!isMobile && (
                                     <motion.span
@@ -360,7 +434,7 @@ export default function ProductCard({ product }: { product: Product }) {
                                         }}
                                         style={{ position: 'absolute', left: 0, right: 0, top: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                                     >
-                                        {adding ? <span style={{ paddingTop: '2px' }}>...</span> : <><ShoppingBag size={14} /> <span style={{ paddingTop: '2px' }}>BUY NOW</span></>}
+                                        {adding ? <span style={{ paddingTop: '2px' }}>...</span> : <><ShoppingBag size={14} /> <span style={{ paddingTop: '2px' }}>BUY</span></>}
                                     </motion.span>
                                 )}
                             </motion.div>

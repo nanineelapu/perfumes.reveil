@@ -361,7 +361,7 @@ function SlideMedia({ slide, isActive, emblaApi, isMobile }: { slide: Slide, isA
                                         border: '1px solid transparent'
                                     }}
                                 >
-                                    {slide.button_label || 'The Essence'}
+                                    {slide.button_label || 'Shop Now'}
                                 </motion.a>
                             </motion.div>
                         </div>

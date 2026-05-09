@@ -20,6 +20,9 @@ export default function NewProductPage() {
         is_featured: false,
         meta_title: '',
         meta_description: '',
+        top_notes: '',
+        heart_notes: '',
+        base_notes: '',
     })
 
     useEffect(() => {
@@ -121,6 +124,11 @@ export default function NewProductPage() {
                 price: parseFloat(form.price),
                 stock: parseInt(form.stock || '0'),
                 images,
+                scent_profile: {
+                    top: form.top_notes.trim() || null,
+                    heart: form.heart_notes.trim() || null,
+                    base: form.base_notes.trim() || null,
+                },
             }),
         })
 
@@ -252,6 +260,40 @@ export default function NewProductPage() {
                             onBlur={handleDescBlur}
                             placeholder="Describe the product..."
                         />
+                    </div>
+                </div>
+
+                {/* ── Scent profile ── */}
+                <div style={card}>
+                    <h2 style={{ marginTop: 0, fontSize: '16px', marginBottom: '8px' }}>Scent profile</h2>
+                    <p style={{ fontSize: '13px', color: '#888', marginTop: 0, marginBottom: '16px' }}>
+                        Top, heart and base notes shown on the product page.
+                    </p>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
+                        <div>
+                            <label style={label}>Top notes</label>
+                            <input
+                                style={input} name="top_notes" value={form.top_notes}
+                                onChange={handleChange}
+                                placeholder="e.g. Bergamot, Lemon"
+                            />
+                        </div>
+                        <div>
+                            <label style={label}>Heart notes</label>
+                            <input
+                                style={input} name="heart_notes" value={form.heart_notes}
+                                onChange={handleChange}
+                                placeholder="e.g. Rose, Jasmine"
+                            />
+                        </div>
+                        <div>
+                            <label style={label}>Base notes</label>
+                            <input
+                                style={input} name="base_notes" value={form.base_notes}
+                                onChange={handleChange}
+                                placeholder="e.g. Oud, Amber"
+                            />
+                        </div>
                     </div>
                 </div>
 

@@ -8,8 +8,6 @@ import ProductCard from '@/components/store/ProductCard'
 import { Product } from '@/types/store'
 import { createClient } from '@/lib/supabase/client'
 
-const concentrations = ["Pure Parfum", "Extrait de Parfum", "Eau de Parfum", "Parfum Oil"]
-
 export function ProductListContent() {
     const searchParams = useSearchParams()
     const initialSearch = searchParams.get('search') || ""
@@ -24,6 +22,7 @@ export function ProductListContent() {
     const [sortBy, setSortBy] = useState("Featured")
     const [selectedConcentrations, setSelectedConcentrations] = useState<string[]>([])
     const [selectedStatus, setSelectedStatus] = useState<string[]>([])
+    const [wishlistedIds, setWishlistedIds] = useState<Set<string>>(new Set())
 
     const supabase = createClient()
 
@@ -43,7 +42,21 @@ export function ProductListContent() {
                 setLoading(false)
             }
         }
+        async function fetchWishlist() {
+            try {
+                const { data: { user } } = await supabase.auth.getUser()
+                if (!user) return
+                const { data } = await supabase
+                    .from('wishlists')
+                    .select('product_id')
+                    .eq('user_id', user.id)
+                if (data) setWishlistedIds(new Set(data.map((r: any) => r.product_id)))
+            } catch (err) {
+                console.error('Error fetching wishlist:', err)
+            }
+        }
         fetchProducts()
+        fetchWishlist()
 
         const checkMobile = () => setIsMobile(window.innerWidth < 1024)
         checkMobile()
@@ -67,7 +80,7 @@ export function ProductListContent() {
                 matchesStatus = false
                 if (selectedStatus.includes("In Stock") && p.stock > 0) matchesStatus = true
                 if (selectedStatus.includes("Limited Edition") && p.category === "LIMITED") matchesStatus = true
-                if (selectedStatus.includes("Archived") && p.stock === 0) matchesStatus = true
+                if (selectedStatus.includes("Wishlisted") && wishlistedIds.has(p.id)) matchesStatus = true
             }
 
             return matchesCat && matchesSearch && matchesConc && matchesStatus
@@ -87,7 +100,7 @@ export function ProductListContent() {
         }
 
         return filtered
-    }, [selectedCategory, searchQuery, products, selectedConcentrations, selectedStatus, sortBy])
+    }, [selectedCategory, searchQuery, products, selectedConcentrations, selectedStatus, sortBy, wishlistedIds])
 
     return (
         <main style={{ background: '#050505', minHeight: '100vh', color: '#fff', display: 'flex', flexDirection: 'column' }}>
@@ -262,26 +275,6 @@ export function ProductListContent() {
                         </button>
                     </div>
 
-                    <div>
-                        <span style={{ fontSize: '11px', fontWeight: 900, color: '#d4af37', letterSpacing: '0.35em', textTransform: 'uppercase', marginBottom: '16px', display: 'block' }}>Fragrance Type</span>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                            {concentrations.map(c => (
-                                <label key={c} style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '12px', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', fontWeight: 600, letterSpacing: '0.04em' }}>
-                                    <input
-                                        type="checkbox"
-                                        style={{ accentColor: '#d4af37', width: '14px', height: '14px' }}
-                                        checked={selectedConcentrations.includes(c)}
-                                        onChange={(e) => {
-                                            if (e.target.checked) setSelectedConcentrations([...selectedConcentrations, c])
-                                            else setSelectedConcentrations(selectedConcentrations.filter(item => item !== c))
-                                        }}
-                                    />
-                                    {c}
-                                </label>
-                            ))}
-                        </div>
-                    </div>
-
                     <div style={{ marginTop: 'auto', padding: '20px', background: 'rgba(255,255,255,0.02)', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.05)' }}>
                         <p style={{ fontSize: '11px', color: '#555', lineHeight: 1.7, margin: 0, fontWeight: 600, letterSpacing: '0.02em' }}>
                             All products are 100% genuine and safe to use.
@@ -406,7 +399,7 @@ export function ProductListContent() {
                                 <div>
                                     <label style={{ fontSize: '9px', color: '#d4af37', textTransform: 'uppercase', letterSpacing: '0.4em', marginBottom: '24px', display: 'block' }}>Status</label>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                                        {["In Stock", "Limited Edition", "Archived"].map(status => (
+                                        {["In Stock", "Limited Edition", "Wishlisted"].map(status => (
                                             <label key={status} style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '12px', color: '#666', cursor: 'pointer' }}>
                                                 <input
                                                     type="checkbox"
@@ -427,10 +420,14 @@ export function ProductListContent() {
                             <button
                                 onClick={() => setIsFilterOpen(false)}
                                 style={{
-                                    marginTop: 'auto', background: '#fff', color: '#000', border: 'none',
+                                    marginTop: 'auto', background: '#d4af37', color: '#000', border: 'none',
                                     padding: '24px', fontWeight: 900, textTransform: 'uppercase',
-                                    letterSpacing: '0.3em', fontSize: '10px', cursor: 'pointer'
+                                    letterSpacing: '0.3em', fontSize: '10px', cursor: 'pointer',
+                                    borderRadius: '4px',
+                                    transition: 'background 0.3s ease'
                                 }}
+                                onMouseOver={(e) => (e.currentTarget.style.background = '#e8c050')}
+                                onMouseOut={(e) => (e.currentTarget.style.background = '#d4af37')}
                             >
                                 Apply Filters
                             </button>

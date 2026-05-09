@@ -3,17 +3,18 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { 
-    LayoutDashboard, 
-    Users, 
-    ShoppingBag, 
-    Tag, 
-    Layers, 
-    MessageSquare, 
-    Image as ImageIcon, 
-    Sparkles, 
+import {
+    LayoutDashboard,
+    Users,
+    ShoppingBag,
+    Tag,
+    Layers,
+    MessageSquare,
+    Image as ImageIcon,
+    Sparkles,
     TrendingUp,
-    LogOut
+    LogOut,
+    ExternalLink
 } from 'lucide-react'
 
 const navItems = [
@@ -77,10 +78,19 @@ export default function AdminSidebar() {
                 })}
             </nav>
 
-            <div className="p-4 border-t border-white/5">
+            <div className="p-4 border-t border-white/5 space-y-1">
+                <Link
+                    href="/"
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[#d4af37] hover:bg-[#d4af37]/10 transition-colors duration-300 group"
+                >
+                    <ExternalLink className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                    <span className="text-sm font-semibold uppercase tracking-widest">
+                        Back to Site
+                    </span>
+                </Link>
                 <form action="/api/auth/signout" method="post">
-                    <button 
-                        type="submit" 
+                    <button
+                        type="submit"
                         className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-colors duration-300 group"
                     >
                         <LogOut className="w-5 h-5 transition-transform group-hover:-translate-x-1" />

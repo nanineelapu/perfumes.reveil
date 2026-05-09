@@ -4,13 +4,18 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { User, Mail, Phone, MapPin, Package, LogOut, ChevronRight, Edit2 } from 'lucide-react'
+import { User, Mail, Phone, MapPin, Package, LogOut, ChevronRight, Edit2, Check, X, Loader2 } from 'lucide-react'
 import { PremiumLoader } from '@/components/store/PremiumLoader'
 
 export default function ProfilePage() {
     const [user, setUser] = useState<any>(null)
     const [profile, setProfile] = useState<any>(null)
     const [loading, setLoading] = useState(true)
+    const [isEditing, setIsEditing] = useState(false)
+    const [savingName, setSavingName] = useState(false)
+    const [nameError, setNameError] = useState<string | null>(null)
+    const [firstNameInput, setFirstNameInput] = useState('')
+    const [lastNameInput, setLastNameInput] = useState('')
     const router = useRouter()
 
     const [isMobile, setIsMobile] = useState(false)
@@ -57,6 +62,43 @@ export default function ProfilePage() {
         await supabase.auth.signOut()
         router.push('/')
         router.refresh()
+    }
+
+    const startEditingName = () => {
+        setFirstNameInput(profile?.first_name || '')
+        setLastNameInput(profile?.last_name || '')
+        setNameError(null)
+        setIsEditing(true)
+    }
+
+    const cancelEditingName = () => {
+        setIsEditing(false)
+        setNameError(null)
+    }
+
+    const saveName = async () => {
+        if (!user) return
+        const first = firstNameInput.trim()
+        const last = lastNameInput.trim()
+        if (!first) {
+            setNameError('First name cannot be empty.')
+            return
+        }
+        setSavingName(true)
+        setNameError(null)
+        const { data, error } = await supabase
+            .from('profiles')
+            .update({ first_name: first, last_name: last })
+            .eq('id', user.id)
+            .select()
+            .single()
+        setSavingName(false)
+        if (error) {
+            setNameError(error.message || 'Failed to update name.')
+            return
+        }
+        if (data) setProfile(data)
+        setIsEditing(false)
     }
 
     if (loading) {
@@ -165,10 +207,46 @@ export default function ProfilePage() {
                         <motion.div variants={itemVariants} style={cardStyle}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
                                 <h3 style={{ fontSize: '18px', fontWeight: 500, color: '#d4af37' }}>Account Details</h3>
-                                <motion.button whileHover={{ scale: 1.1 }} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer' }}>
-                                    <Edit2 size={18} />
-                                </motion.button>
+                                {!isEditing ? (
+                                    <motion.button
+                                        type="button"
+                                        onClick={startEditingName}
+                                        whileHover={{ scale: 1.1 }}
+                                        style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer' }}
+                                        aria-label="Edit name"
+                                    >
+                                        <Edit2 size={18} />
+                                    </motion.button>
+                                ) : (
+                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                        <motion.button
+                                            type="button"
+                                            onClick={saveName}
+                                            disabled={savingName}
+                                            whileHover={{ scale: 1.1 }}
+                                            style={{ background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.3)', color: '#d4af37', cursor: savingName ? 'not-allowed' : 'pointer', padding: '6px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px' }}
+                                            aria-label="Save"
+                                        >
+                                            {savingName ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+                                            Save
+                                        </motion.button>
+                                        <motion.button
+                                            type="button"
+                                            onClick={cancelEditingName}
+                                            disabled={savingName}
+                                            whileHover={{ scale: 1.1 }}
+                                            style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#888', cursor: savingName ? 'not-allowed' : 'pointer', padding: '6px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px' }}
+                                            aria-label="Cancel"
+                                        >
+                                            <X size={14} />
+                                            Cancel
+                                        </motion.button>
+                                    </div>
+                                )}
                             </div>
+                            {nameError && (
+                                <p style={{ color: '#ff6b6b', fontSize: '12px', marginTop: '-16px', marginBottom: '16px' }}>{nameError}</p>
+                            )}
 
                             <div style={{ 
                                 display: 'grid', 
@@ -177,11 +255,31 @@ export default function ProfilePage() {
                             }}>
                                 <div>
                                     <label style={{ display: 'block', fontSize: '11px', textTransform: 'uppercase', color: '#444', letterSpacing: '0.1em', marginBottom: '8px' }}>First Name</label>
-                                    <p style={{ fontSize: '16px', fontWeight: 400 }}>{profile?.first_name || '—'}</p>
+                                    {isEditing ? (
+                                        <input
+                                            type="text"
+                                            value={firstNameInput}
+                                            onChange={(e) => setFirstNameInput(e.target.value)}
+                                            disabled={savingName}
+                                            style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(212,175,55,0.2)', color: '#fff', fontSize: '16px', padding: '10px 12px', borderRadius: '6px', outline: 'none' }}
+                                        />
+                                    ) : (
+                                        <p style={{ fontSize: '16px', fontWeight: 400 }}>{profile?.first_name || '—'}</p>
+                                    )}
                                 </div>
                                 <div>
                                     <label style={{ display: 'block', fontSize: '11px', textTransform: 'uppercase', color: '#444', letterSpacing: '0.1em', marginBottom: '8px' }}>Last Name</label>
-                                    <p style={{ fontSize: '16px', fontWeight: 400 }}>{profile?.last_name || '—'}</p>
+                                    {isEditing ? (
+                                        <input
+                                            type="text"
+                                            value={lastNameInput}
+                                            onChange={(e) => setLastNameInput(e.target.value)}
+                                            disabled={savingName}
+                                            style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(212,175,55,0.2)', color: '#fff', fontSize: '16px', padding: '10px 12px', borderRadius: '6px', outline: 'none' }}
+                                        />
+                                    ) : (
+                                        <p style={{ fontSize: '16px', fontWeight: 400 }}>{profile?.last_name || '—'}</p>
+                                    )}
                                 </div>
                                 <div style={{ gridColumn: isMobile ? 'auto' : 'span 2' }}>
                                     <label style={{ display: 'block', fontSize: '11px', textTransform: 'uppercase', color: '#444', letterSpacing: '0.1em', marginBottom: '8px' }}>Email Address</label>

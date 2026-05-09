@@ -117,22 +117,8 @@ export default async function HomePage() {
       image_url: '/images/hero-1.png',
       video_url: 'https://lhnamtkpjkrawgql.public.blob.vercel-storage.com/Ai%20Enhancer-Ultra%20Hd-Luxury%20Perfume%20Bottle%20Animationonline-Video-Cutter.Com2-Ezgif.Com-Reverse-Video.mp4',
       link: '/products',
-      display_order: -1
-    },
-    {
-      id: 'floral-collection',
-      title: 'Explore Meena',
-      image_url: 'https://images.unsplash.com/photo-1590736704728-f4730bb30770?auto=format&fit=crop&q=80&w=1600',
-      link: '/products/floral',
-      display_order: 3
-    },
-    {
-      id: 'noir-collection',
-      title: 'Our Wild Stones',
-      image_url: 'https://lhnamtkpjkrawgql.public.blob.vercel-storage.com/ChatGPT%20Image%20Apr%2021%2C%202026%2C%2006_05_32%20PM.webp',
-      link: '/products/noir',
-      display_order: 4,
-      button_label: 'GO TO COLLECTIONS'
+      display_order: -1,
+      button_label: 'Shop Now'
     },
     ...slides ?? []
   ]
