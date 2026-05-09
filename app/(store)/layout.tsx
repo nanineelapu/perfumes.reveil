@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 // ... existing metadata ...
   metadataBase: new URL('https://perfumesreveil.vercel.app'),
   title: {
-    default: 'REVEIL — Premium Perfumes & Luxury Fragrances India',
+    default: 'REVEIL — Premium & Luxury Fragrances India',
     template: '%s | REVEIL',
   },
   description: 'Discover the olfactory archive of REVEIL. Buy original perfumes, long-lasting fragrances, and luxury scents online at best prices. Free shipping across India.',
