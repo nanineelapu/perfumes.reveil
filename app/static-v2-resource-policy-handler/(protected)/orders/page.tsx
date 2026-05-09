@@ -55,14 +55,14 @@ export default async function AdminOrdersPage() {
                     <table className="w-full text-left">
                         <thead>
                             <tr className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400 border-b border-gray-50 bg-gray-50/30">
-                                <th className="px-8 py-5">Manifest ID</th>
-                                <th className="px-8 py-5">Clientele</th>
-                                <th className="px-8 py-5">Inventory</th>
-                                <th className="px-8 py-5">Valuation</th>
-                                <th className="px-8 py-5">Liquidity</th>
-                                <th className="px-8 py-5">Status</th>
-                                <th className="px-8 py-5">Logistics</th>
-                                <th className="px-8 py-5 text-right">Process</th>
+                                <th className="px-4 py-4">Manifest ID</th>
+                                <th className="px-4 py-4">Clientele</th>
+                                <th className="px-4 py-4">Inventory</th>
+                                <th className="px-4 py-4">Valuation</th>
+                                <th className="px-4 py-4">Liquidity</th>
+                                <th className="px-4 py-4">Status</th>
+                                <th className="px-4 py-4">Logistics</th>
+                                <th className="px-4 py-4 text-right">Process</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
@@ -70,7 +70,7 @@ export default async function AdminOrdersPage() {
                                 const profile = Array.isArray(order.profiles) ? order.profiles[0] : order.profiles as any
                                 return (
                                     <tr key={order.id} className="group hover:bg-gray-50/50 transition-colors">
-                                        <td className="px-8 py-6">
+                                        <td className="px-4 py-5">
                                             <div className="text-[10px] font-mono text-gray-400 uppercase">
                                                 #{order.id?.slice(0, 8)}
                                             </div>
@@ -78,7 +78,7 @@ export default async function AdminOrdersPage() {
                                                 {new Date(order.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
                                             </div>
                                         </td>
-                                        <td className="px-8 py-6">
+                                        <td className="px-4 py-5">
                                             <div className="text-xs font-semibold text-gray-900">
                                                 {profile?.full_name ?? 'Anonymous Client'}
                                             </div>
@@ -86,7 +86,7 @@ export default async function AdminOrdersPage() {
                                                 {profile?.phone ?? 'N/A'}
                                             </div>
                                         </td>
-                                        <td className="px-8 py-6">
+                                        <td className="px-4 py-5">
                                             <div className="text-[10px] text-gray-500 font-medium leading-relaxed">
                                                 {order.order_items?.map((item: any, i: number) => (
                                                     <span key={i} className="block whitespace-nowrap">
@@ -95,7 +95,7 @@ export default async function AdminOrdersPage() {
                                                 ))}
                                             </div>
                                         </td>
-                                        <td className="px-8 py-6">
+                                        <td className="px-4 py-5">
                                             <div className="text-xs font-semibold text-black">
                                                 ₹{order.total?.toLocaleString()}
                                             </div>
@@ -105,7 +105,7 @@ export default async function AdminOrdersPage() {
                                                 </div>
                                             )}
                                         </td>
-                                        <td className="px-8 py-6">
+                                        <td className="px-4 py-5">
                                             <div className={cn(
                                                 "inline-flex px-2 py-0.5 rounded text-[9px] font-bold tracking-widest uppercase",
                                                 order.payment_status === 'paid' ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600"
@@ -113,10 +113,10 @@ export default async function AdminOrdersPage() {
                                                 {order.payment_status ?? 'Pending'}
                                             </div>
                                         </td>
-                                        <td className="px-8 py-6">
+                                        <td className="px-4 py-5">
                                             <OrderStatusBadge status={getAutomaticStatus(order.status ?? 'pending', order.created_at)} />
                                         </td>
-                                        <td className="px-8 py-6">
+                                        <td className="px-4 py-5">
                                             <div className="flex flex-col gap-1.5">
                                                 {order.shiprocket_order_id ? (
                                                     <>
@@ -136,7 +136,7 @@ export default async function AdminOrdersPage() {
                                                 )}
                                             </div>
                                         </td>
-                                        <td className="px-8 py-6">
+                                        <td className="px-4 py-5">
                                             <div className="flex items-center justify-end gap-4">
                                                 <Link href={`/static-v2-resource-policy-handler/orders/${order.id}`} className="text-[10px] font-bold tracking-widest uppercase text-gray-400 hover:text-black flex items-center gap-1 transition-colors">
                                                     Details <ExternalLink className="w-3 h-3" />

@@ -117,9 +117,18 @@ export class ShiprocketService {
 }
 
 /**
- * Helper for authenticated Shiprocket requests
+ * Cached token shared by `shiprocketFetch`. Shiprocket tokens are valid for ~10 days;
+ * we refresh after 9 to be safe. Reusing the token avoids triggering their
+ * "too many failed login attempts" lockout when the same account makes many calls.
  */
-export async function shiprocketFetch(endpoint: string, options: RequestInit = {}) {
+let cachedToken: string | null = null;
+let cachedTokenExpiry: number | null = null;
+
+async function getCachedToken(): Promise<string> {
+    if (cachedToken && cachedTokenExpiry && Date.now() < cachedTokenExpiry) {
+        return cachedToken;
+    }
+
     const email = process.env.SHIPROCKET_EMAIL;
     const password = process.env.SHIPROCKET_PASSWORD;
 
@@ -127,7 +136,6 @@ export async function shiprocketFetch(endpoint: string, options: RequestInit = {
         throw new Error('Shiprocket credentials missing. Set SHIPROCKET_EMAIL and SHIPROCKET_PASSWORD in .env.local and restart the server.');
     }
 
-    // Login to get token
     const authRes = await fetch(`${SHIPROCKET_API_BASE}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -141,7 +149,17 @@ export async function shiprocketFetch(endpoint: string, options: RequestInit = {
         throw new Error(`Shiprocket authentication failed: ${reason}`);
     }
 
-    const token: string = authData.token;
+    cachedToken = authData.token;
+    cachedTokenExpiry = Date.now() + 9 * 24 * 60 * 60 * 1000; // 9 days
+    return cachedToken!;
+}
+
+/**
+ * Helper for authenticated Shiprocket requests. Reuses a cached token so we
+ * don't re-login on every call.
+ */
+export async function shiprocketFetch(endpoint: string, options: RequestInit = {}) {
+    const token = await getCachedToken();
 
     const res = await fetch(`${SHIPROCKET_API_BASE}${endpoint}`, {
         ...options,
@@ -151,6 +169,13 @@ export async function shiprocketFetch(endpoint: string, options: RequestInit = {
             'Authorization': `Bearer ${token}`
         }
     });
+
+    if (res.status === 401) {
+        // Token may have been invalidated server-side — clear the cache so the
+        // next call re-authenticates instead of repeatedly sending a bad token.
+        cachedToken = null;
+        cachedTokenExpiry = null;
+    }
 
     return res.json();
 }

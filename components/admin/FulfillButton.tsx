@@ -88,22 +88,20 @@ export default function FulfillButton({ orderId, isFulfilled }: FulfillButtonPro
             <AnimatePresence>
                 {error && (
                     <motion.div
-                        initial={{ opacity: 0, y: 10 }}
+                        initial={{ opacity: 0, y: 4 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0 }}
                         style={{
-                            position: 'absolute',
-                            top: '100%',
-                            right: 0,
-                            marginTop: '8px',
+                            marginTop: '6px',
                             background: '#fee2e2',
                             color: '#ef4444',
-                            padding: '6px 12px',
+                            padding: '6px 10px',
                             borderRadius: '6px',
                             fontSize: '9px',
                             fontWeight: 600,
-                            whiteSpace: 'nowrap',
-                            zIndex: 10,
+                            lineHeight: 1.4,
+                            maxWidth: '220px',
+                            wordBreak: 'break-word',
                             border: '1px solid #fecaca'
                         }}
                     >
