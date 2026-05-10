@@ -36,7 +36,16 @@ export function ProductContent({ product, initialReviews }: ProductContentProps)
 
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) {
-            router.push(`/auth?next=/products/${product.slug}`)
+            const next = type === 'buy'
+                ? `/checkout?buyNow=${product.id}&qty=1`
+                : `/products/${product.slug}`
+            router.push(`/auth?next=${encodeURIComponent(next)}`)
+            return
+        }
+
+        // BUY NOW — bypass the cart entirely so the existing cart isn't touched
+        if (type === 'buy') {
+            router.push(`/checkout?buyNow=${product.id}&qty=1`)
             return
         }
 
@@ -52,12 +61,8 @@ export function ProductContent({ product, initialReviews }: ProductContentProps)
                 throw new Error(data.error || 'Could not add to cart')
             }
             window.dispatchEvent(new Event('cart-updated'))
-            if (type === 'buy') {
-                router.push('/checkout')
-            } else {
-                setAdded(true)
-                setTimeout(() => setAdded(false), 1800)
-            }
+            setAdded(true)
+            setTimeout(() => setAdded(false), 1800)
         } catch (err: any) {
             setActionError(err.message || 'Something went wrong')
         } finally {

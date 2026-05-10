@@ -17,7 +17,14 @@ export async function POST(request: Request) {
             razorpay_payment_id,
             razorpay_signature,
             address_id,
-        } = body
+            buy_now,
+        } = body as {
+            razorpay_order_id: string
+            razorpay_payment_id: string
+            razorpay_signature: string
+            address_id: string
+            buy_now?: { product_id: string; quantity: number }
+        }
 
         if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !address_id) {
             return NextResponse.json({ error: 'Missing payment verification fields' }, { status: 400 })
@@ -44,22 +51,39 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Address not found' }, { status: 404 })
         }
 
-        // 3. Re-read cart from DB (single source of truth)
-        const { data: cartItems, error: cartError } = await supabase
-            .from('cart_items')
-            .select('id, quantity, products ( id, name, price, stock )')
-            .eq('user_id', user.id)
+        // 3. Build line items: buy-now (single product) or whole cart
+        type LineItem = { quantity: number; products: { id: string; name: string; price: number; stock: number } }
+        let lineItems: LineItem[] = []
 
-        if (cartError) return NextResponse.json({ error: cartError.message }, { status: 500 })
-        if (!cartItems || cartItems.length === 0) {
-            return NextResponse.json({ error: 'Cart is empty' }, { status: 400 })
+        if (buy_now?.product_id) {
+            const qty = Math.max(1, Number(buy_now.quantity) || 1)
+            const { data: product, error: prodErr } = await supabase
+                .from('products')
+                .select('id, name, price, stock')
+                .eq('id', buy_now.product_id)
+                .single()
+            if (prodErr || !product) {
+                return NextResponse.json({ error: 'Product not found' }, { status: 404 })
+            }
+            lineItems = [{ quantity: qty, products: product as any }]
+        } else {
+            const { data: cartItems, error: cartError } = await supabase
+                .from('cart_items')
+                .select('id, quantity, products ( id, name, price, stock )')
+                .eq('user_id', user.id)
+
+            if (cartError) return NextResponse.json({ error: cartError.message }, { status: 500 })
+            if (!cartItems || cartItems.length === 0) {
+                return NextResponse.json({ error: 'Cart is empty' }, { status: 400 })
+            }
+            lineItems = cartItems.map((c: any) => ({ quantity: c.quantity, products: c.products }))
         }
 
         let subtotal = 0
-        for (const item of cartItems) {
-            const product = item.products as any
+        for (const item of lineItems) {
+            const product = item.products
             if (!product) {
-                return NextResponse.json({ error: 'A product in your cart is no longer available' }, { status: 400 })
+                return NextResponse.json({ error: 'A product is no longer available' }, { status: 400 })
             }
             if (product.stock < item.quantity) {
                 return NextResponse.json(
@@ -103,8 +127,8 @@ export async function POST(request: Request) {
         }
 
         // 5. Insert items with DB prices
-        const orderItems = cartItems.map((item) => {
-            const product = item.products as any
+        const orderItems = lineItems.map((item) => {
+            const product = item.products
             return {
                 order_id: order.id,
                 product_id: product.id,
@@ -123,16 +147,18 @@ export async function POST(request: Request) {
         }
 
         // 6. Decrement stock
-        for (const item of cartItems) {
-            const product = item.products as any
+        for (const item of lineItems) {
+            const product = item.products
             await supabase
                 .from('products')
                 .update({ stock: product.stock - item.quantity })
                 .eq('id', product.id)
         }
 
-        // 7. Clear cart
-        await supabase.from('cart_items').delete().eq('user_id', user.id)
+        // 7. Clear cart — only when this wasn't a "Buy Now" flow
+        if (!buy_now?.product_id) {
+            await supabase.from('cart_items').delete().eq('user_id', user.id)
+        }
 
         // 8. Fire-and-forget Shiprocket
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'

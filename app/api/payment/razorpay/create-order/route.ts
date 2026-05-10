@@ -12,7 +12,10 @@ export async function POST(request: Request) {
         }
 
         const body = await request.json().catch(() => ({}))
-        const { address_id } = body as { address_id?: string }
+        const { address_id, buy_now } = body as {
+            address_id?: string
+            buy_now?: { product_id: string; quantity: number }
+        }
 
         if (!address_id) {
             return NextResponse.json({ error: 'address_id is required' }, { status: 400 })
@@ -30,25 +33,42 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Address not found' }, { status: 404 })
         }
 
-        // Pull the live cart and price from DB — never trust client values
-        const { data: cartItems, error: cartError } = await supabase
-            .from('cart_items')
-            .select('id, quantity, products ( id, name, price, stock )')
-            .eq('user_id', user.id)
+        // Build line items: from buy_now (single product) or from cart_items
+        type LineItem = { quantity: number; products: { id: string; name: string; price: number; stock: number } }
+        let lineItems: LineItem[] = []
 
-        if (cartError) {
-            return NextResponse.json({ error: cartError.message }, { status: 500 })
-        }
-        if (!cartItems || cartItems.length === 0) {
-            return NextResponse.json({ error: 'Cart is empty' }, { status: 400 })
+        if (buy_now?.product_id) {
+            const qty = Math.max(1, Number(buy_now.quantity) || 1)
+            const { data: product, error: prodErr } = await supabase
+                .from('products')
+                .select('id, name, price, stock')
+                .eq('id', buy_now.product_id)
+                .single()
+            if (prodErr || !product) {
+                return NextResponse.json({ error: 'Product not found' }, { status: 404 })
+            }
+            lineItems = [{ quantity: qty, products: product as any }]
+        } else {
+            const { data: cartItems, error: cartError } = await supabase
+                .from('cart_items')
+                .select('id, quantity, products ( id, name, price, stock )')
+                .eq('user_id', user.id)
+
+            if (cartError) {
+                return NextResponse.json({ error: cartError.message }, { status: 500 })
+            }
+            if (!cartItems || cartItems.length === 0) {
+                return NextResponse.json({ error: 'Cart is empty' }, { status: 400 })
+            }
+            lineItems = cartItems.map((c: any) => ({ quantity: c.quantity, products: c.products }))
         }
 
         // Stock + subtotal
         let subtotal = 0
-        for (const item of cartItems) {
-            const product = item.products as any
+        for (const item of lineItems) {
+            const product = item.products
             if (!product) {
-                return NextResponse.json({ error: 'A product in your cart is no longer available' }, { status: 400 })
+                return NextResponse.json({ error: 'A product is no longer available' }, { status: 400 })
             }
             if (product.stock < item.quantity) {
                 return NextResponse.json(

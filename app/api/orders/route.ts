@@ -71,7 +71,7 @@ export async function POST(request: Request) {
 
     // 2. Parse body
     const body = await request.json()
-    const { items, shipping_address, payment_method = 'cod' } = body
+    const { items, shipping_address, payment_method = 'cod', buy_now = false } = body
 
     // 3. Validate
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -168,11 +168,13 @@ export async function POST(request: Request) {
             .eq('id', item.product_id)
     }
 
-    // 9. Clear user's cart
-    await supabase
-        .from('cart_items')
-        .delete()
-        .eq('user_id', user.id)
+    // 9. Clear user's cart — skip when this was a "Buy Now" flow
+    if (!buy_now) {
+        await supabase
+            .from('cart_items')
+            .delete()
+            .eq('user_id', user.id)
+    }
 
     // 10. Return full order with items
     const { data: fullOrder } = await supabase

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Script from 'next/script'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Loader2, ShieldCheck, Truck, MapPin, Plus, ArrowRight, Check, CreditCard, Wallet } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -44,6 +44,10 @@ const SHIPPING_FEE = 50
 
 export default function CheckoutPage() {
     const router = useRouter()
+    const searchParams = useSearchParams()
+    const buyNowProductId = searchParams.get('buyNow')
+    const buyNowQty = Math.max(1, parseInt(searchParams.get('qty') || '1', 10))
+    const isBuyNow = !!buyNowProductId
     const supabase = createClient()
 
     const [loading, setLoading] = useState(true)
@@ -68,30 +72,47 @@ export default function CheckoutPage() {
             try {
                 const { data: { user } } = await supabase.auth.getUser()
                 if (!user) {
-                    router.push('/auth?next=/checkout')
+                    const next = isBuyNow
+                        ? `/checkout?buyNow=${buyNowProductId}&qty=${buyNowQty}`
+                        : '/checkout'
+                    router.push(`/auth?next=${encodeURIComponent(next)}`)
                     return
                 }
                 setUserEmail(user.email || '')
 
-                const [cartRes, addrRes] = await Promise.all([
-                    fetch('/api/cart'),
-                    fetch('/api/user/address'),
-                ])
-
-                if (cartRes.status === 401) {
+                const addrRes = await fetch('/api/user/address')
+                if (addrRes.status === 401) {
                     router.push('/auth?next=/checkout')
                     return
                 }
-
-                const cartData = await cartRes.json()
                 const addrData = await addrRes.json()
 
-                const cartItems: CartItem[] = cartData.items || []
-                if (cartItems.length === 0) {
-                    router.push('/cart')
-                    return
+                if (isBuyNow) {
+                    // Fetch the single product directly — bypass cart entirely
+                    const { data: product, error: prodErr } = await supabase
+                        .from('products')
+                        .select('id, name, price, images, category, stock')
+                        .eq('id', buyNowProductId)
+                        .single()
+                    if (prodErr || !product) {
+                        setError('That product is not available.')
+                        return
+                    }
+                    setItems([{ id: 'buy-now', quantity: buyNowQty, products: product as any }])
+                } else {
+                    const cartRes = await fetch('/api/cart')
+                    if (cartRes.status === 401) {
+                        router.push('/auth?next=/checkout')
+                        return
+                    }
+                    const cartData = await cartRes.json()
+                    const cartItems: CartItem[] = cartData.items || []
+                    if (cartItems.length === 0) {
+                        router.push('/cart')
+                        return
+                    }
+                    setItems(cartItems)
                 }
-                setItems(cartItems)
 
                 const addrs: Address[] = addrData.addresses || []
                 setAddresses(addrs)
@@ -105,7 +126,7 @@ export default function CheckoutPage() {
             }
         }
         load()
-    }, [])
+    }, [isBuyNow, buyNowProductId, buyNowQty])
 
     const subtotal = items.reduce((sum, item) => sum + (item.products?.price ?? 0) * item.quantity, 0)
     const shipping = subtotal >= FREE_THRESHOLD ? 0 : SHIPPING_FEE
@@ -134,6 +155,7 @@ export default function CheckoutPage() {
                     pincode: selectedAddress.pincode,
                 },
                 payment_method: 'cod',
+                buy_now: isBuyNow,
             }),
         })
         const data = await res.json()
@@ -171,7 +193,10 @@ export default function CheckoutPage() {
         const createRes = await fetch('/api/payment/razorpay/create-order', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ address_id: selectedAddress.id }),
+            body: JSON.stringify({
+                address_id: selectedAddress.id,
+                buy_now: isBuyNow ? { product_id: buyNowProductId, quantity: buyNowQty } : undefined,
+            }),
         })
         const createData = await createRes.json()
         if (!createRes.ok) throw new Error(createData.error || 'Failed to start payment')
@@ -206,6 +231,7 @@ export default function CheckoutPage() {
                                 razorpay_payment_id: response.razorpay_payment_id,
                                 razorpay_signature: response.razorpay_signature,
                                 address_id: selectedAddress.id,
+                                buy_now: isBuyNow ? { product_id: buyNowProductId, quantity: buyNowQty } : undefined,
                             }),
                         })
                         const verifyData = await verifyRes.json()
