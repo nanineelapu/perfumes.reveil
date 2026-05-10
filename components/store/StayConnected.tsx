@@ -12,6 +12,7 @@ export function StayConnected({ theme = 'light' }: StayConnectedProps) {
     const [email, setEmail] = useState('')
     const [isSubmitted, setIsSubmitted] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [submitError, setSubmitError] = useState<string | null>(null)
     const [isMobile, setIsMobile] = useState(false)
 
     useEffect(() => {
@@ -29,15 +30,26 @@ export function StayConnected({ theme = 'light' }: StayConnectedProps) {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (!email) return
+        if (!email || isSubmitting) return
+        setSubmitError(null)
         setIsSubmitting(true)
 
-        // Mocking API call
-        setTimeout(() => {
-            setIsSubmitting(false)
+        try {
+            const res = await fetch('/api/newsletter/subscribe', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email }),
+            })
+            const data = await res.json().catch(() => ({}))
+            if (!res.ok) throw new Error(data.error || 'Could not subscribe. Please try again.')
+
             setIsSubmitted(true)
             setEmail('')
-        }, 1000)
+        } catch (err: any) {
+            setSubmitError(err.message || 'Something went wrong. Please try again.')
+        } finally {
+            setIsSubmitting(false)
+        }
     }
 
     return (
@@ -152,6 +164,11 @@ export function StayConnected({ theme = 'light' }: StayConnectedProps) {
                         </motion.div>
                     )}
                 </AnimatePresence>
+                {submitError && !isSubmitted && (
+                    <p style={{ marginTop: '12px', fontSize: '12px', color: '#c0392b', fontFamily: 'var(--font-baskerville)' }}>
+                        {submitError}
+                    </p>
+                )}
             </motion.div>
         </section>
     )

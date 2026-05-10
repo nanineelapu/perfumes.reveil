@@ -292,22 +292,35 @@ export function Footer({ theme = 'dark' }: FooterProps) {
                                 Odisha, India - 760002
                             </div>
                         ) : (
-                            <>
-                                <div onClick={handleSecretClick} style={{ cursor: 'default', userSelect: 'none' }}>© 2026 REVEIL. ALL RIGHTS RESERVED.</div>
-                                <div style={{ display: 'flex', gap: '32px' }}>
-                                    <Link href="/terms" style={{ color: 'inherit', textDecoration: 'none' }}>TERMS OF SERVICE</Link>
-                                    <Link href="/refund" style={{ color: 'inherit', textDecoration: 'none' }}>REFUND POLICY</Link>
-                                </div>
-                            </>
+                            <div onClick={handleSecretClick} style={{ cursor: 'default', userSelect: 'none' }}>© 2026 REVEIL. ALL RIGHTS RESERVED.</div>
                         )}
                     </div>
 
-                    {/* Payment Logos */}
-                    <div style={{ display: 'flex', gap: '24px', alignItems: 'center', opacity: isLight ? 0.8 : 0.4, flexWrap: isMobile ? 'wrap' : 'nowrap', justifyContent: 'center' }}>
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" style={{ height: '10px', filter: isLight ? 'none' : 'brightness(0) invert(1)' }} />
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" style={{ height: '15px', filter: isLight ? 'none' : 'brightness(0) invert(1)' }} />
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c7/Google_Pay_Logo_%282020%29.svg" alt="GPay" style={{ height: '12px', filter: isLight ? 'none' : 'brightness(0) invert(1)' }} />
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/7/71/PhonePe_Logo.svg" alt="PhonePe" style={{ height: '14px', filter: isLight ? 'none' : 'brightness(0) invert(1)' }} />
+                    {/* UPI Payment Apps */}
+                    <div style={{ display: 'flex', gap: '24px', alignItems: 'center', opacity: isLight ? 0.8 : 0.5, flexWrap: isMobile ? 'wrap' : 'nowrap', justifyContent: 'center' }}>
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c7/Google_Pay_Logo_%282020%29.svg" alt="Google Pay" style={{ height: '14px', filter: isLight ? 'none' : 'brightness(0) invert(1)' }} />
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/7/71/PhonePe_Logo.svg" alt="PhonePe" style={{ height: '16px', filter: isLight ? 'none' : 'brightness(0) invert(1)' }} />
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/2/24/Paytm_Logo_%28standalone%29.svg" alt="Paytm" style={{ height: '14px', filter: isLight ? 'none' : 'brightness(0) invert(1)' }} />
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/8/89/BHIM_SVG_Logo.svg" alt="BHIM UPI" style={{ height: '18px', filter: isLight ? 'none' : 'brightness(0) invert(1)' }} />
+                    </div>
+
+                    {/* Designed By */}
+                    <div style={{
+                        fontSize: '10px',
+                        letterSpacing: '0.3em',
+                        textTransform: 'uppercase',
+                        color: isLight ? '#888' : 'rgba(255,255,255,0.4)',
+                        fontFamily: 'var(--font-baskerville)',
+                        textAlign: 'center'
+                    }}>
+                        Designed by <a
+                            href="https://webcros.com"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ color: '#d4af37', textDecoration: 'none', fontWeight: 600, letterSpacing: '0.2em' }}
+                        >
+                            WebCros
+                        </a>
                     </div>
                 </div>
             </div>

@@ -7,6 +7,7 @@ export function NewsletterSection() {
     const [email, setEmail] = useState('')
     const [isSubmitted, setIsSubmitted] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [submitError, setSubmitError] = useState<string | null>(null)
     const [isMobile, setIsMobile] = useState(false)
     const containerRef = useRef(null)
 
@@ -19,15 +20,26 @@ export function NewsletterSection() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (!email) return
+        if (!email || isSubmitting) return
+        setSubmitError(null)
         setIsSubmitting(true)
 
-        // Mocking API call
-        setTimeout(() => {
-            setIsSubmitting(false)
+        try {
+            const res = await fetch('/api/newsletter/subscribe', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email }),
+            })
+            const data = await res.json().catch(() => ({}))
+            if (!res.ok) throw new Error(data.error || 'Could not subscribe. Please try again.')
+
             setIsSubmitted(true)
             setEmail('')
-        }, 1000)
+        } catch (err: any) {
+            setSubmitError(err.message || 'Something went wrong. Please try again.')
+        } finally {
+            setIsSubmitting(false)
+        }
     }
     const { scrollYProgress } = useScroll({
         target: containerRef,
@@ -228,8 +240,13 @@ export function NewsletterSection() {
                                     style={{ fontFamily: 'var(--font-baskerville)' }}
                                     className="mt-4 text-[8px] text-gray-400 uppercase tracking-widest font-medium"
                                 >
-                                    Get the latest perfume news and offers
+                                    {isSubmitting ? 'Submitting…' : 'Get the latest perfume news and offers'}
                                 </p>
+                                {submitError && (
+                                    <p style={{ marginTop: '8px', fontSize: '11px', color: '#c0392b', fontFamily: 'var(--font-baskerville)' }}>
+                                        {submitError}
+                                    </p>
+                                )}
                             </motion.form>
                         ) : (
                             <motion.div

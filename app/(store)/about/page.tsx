@@ -3,7 +3,6 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import { AnimatedNavbar } from '@/components/store/AnimatedNavbar'
 import { StayConnected } from '@/components/store/StayConnected'
-import { Footer } from '@/components/store/Footer'
 
 export default function AboutPage() {
     const [isMobile, setIsMobile] = React.useState(false)
@@ -193,7 +192,6 @@ export default function AboutPage() {
             </section>
 
             <StayConnected theme="light" />
-            <Footer />
         </main>
     )
 }
