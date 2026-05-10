@@ -54,7 +54,7 @@ export default async function AdminOrdersPage() {
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
-                            <tr className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400 border-b border-gray-50 bg-gray-50/30">
+                            <tr className="text-[12px] font-bold tracking-[0.2em] uppercase text-gray-400 border-b border-gray-50 bg-gray-50/30">
                                 <th className="px-4 py-4">Manifest ID</th>
                                 <th className="px-4 py-4">Clientele</th>
                                 <th className="px-4 py-4">Inventory</th>
@@ -71,23 +71,23 @@ export default async function AdminOrdersPage() {
                                 return (
                                     <tr key={order.id} className="group hover:bg-gray-50/50 transition-colors">
                                         <td className="px-4 py-5">
-                                            <div className="text-[10px] font-mono text-gray-400 uppercase">
+                                            <div className="text-[12px] font-mono text-gray-400 uppercase">
                                                 #{order.id?.slice(0, 8)}
                                             </div>
-                                            <div className="text-[9px] text-gray-300 mt-1 uppercase tracking-tighter">
+                                            <div className="text-[11px] text-gray-300 mt-1 uppercase tracking-tighter">
                                                 {new Date(order.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
                                             </div>
                                         </td>
                                         <td className="px-4 py-5">
-                                            <div className="text-xs font-semibold text-gray-900">
+                                            <div className="text-sm font-semibold text-gray-900">
                                                 {profile?.full_name ?? 'Anonymous Client'}
                                             </div>
-                                            <div className="text-[9px] text-gray-400 uppercase tracking-widest mt-1">
+                                            <div className="text-[11px] text-gray-400 uppercase tracking-widest mt-1">
                                                 {profile?.phone ?? 'N/A'}
                                             </div>
                                         </td>
                                         <td className="px-4 py-5">
-                                            <div className="text-[10px] text-gray-500 font-medium leading-relaxed">
+                                            <div className="text-[12px] text-gray-500 font-medium leading-relaxed">
                                                 {order.order_items?.map((item: any, i: number) => (
                                                     <span key={i} className="block whitespace-nowrap">
                                                         {item.quantity}× {item.products?.name}
@@ -96,18 +96,18 @@ export default async function AdminOrdersPage() {
                                             </div>
                                         </td>
                                         <td className="px-4 py-5">
-                                            <div className="text-xs font-semibold text-black">
+                                            <div className="text-sm font-semibold text-black">
                                                 ₹{order.total?.toLocaleString()}
                                             </div>
                                             {order.payment_method === 'cod' && (
-                                                <div className="text-[8px] text-[#d4af37] font-bold tracking-widest uppercase mt-1">
+                                                <div className="text-[10px] text-[#d4af37] font-bold tracking-widest uppercase mt-1">
                                                     COD
                                                 </div>
                                             )}
                                         </td>
                                         <td className="px-4 py-5">
                                             <div className={cn(
-                                                "inline-flex px-2 py-0.5 rounded text-[9px] font-bold tracking-widest uppercase",
+                                                "inline-flex px-2.5 py-1 rounded text-[11px] font-bold tracking-widest uppercase",
                                                 order.payment_status === 'paid' ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600"
                                             )}>
                                                 {order.payment_status ?? 'Pending'}
@@ -121,12 +121,12 @@ export default async function AdminOrdersPage() {
                                                 {order.shiprocket_order_id ? (
                                                     <>
                                                         {order.awb_code && (
-                                                            <Link href={`/track/${order.awb_code}`} target="_blank" className="text-[9px] font-bold tracking-widest text-indigo-500 hover:text-indigo-700 flex items-center gap-1 uppercase transition-colors">
+                                                            <Link href={`/track/${order.awb_code}`} target="_blank" className="text-[11px] font-bold tracking-widest text-indigo-500 hover:text-indigo-700 flex items-center gap-1 uppercase transition-colors">
                                                                 <Truck className="w-3 h-3" /> {order.awb_code}
                                                             </Link>
                                                         )}
                                                         {order.label_url && (
-                                                            <a href={order.label_url} target="_blank" className="text-[9px] font-bold tracking-widest text-emerald-500 hover:text-emerald-700 flex items-center gap-1 uppercase transition-colors">
+                                                            <a href={order.label_url} target="_blank" className="text-[11px] font-bold tracking-widest text-emerald-500 hover:text-emerald-700 flex items-center gap-1 uppercase transition-colors">
                                                                 <Printer className="w-3 h-3" /> Label
                                                             </a>
                                                         )}
@@ -138,7 +138,7 @@ export default async function AdminOrdersPage() {
                                         </td>
                                         <td className="px-4 py-5">
                                             <div className="flex items-center justify-end gap-4">
-                                                <Link href={`/static-v2-resource-policy-handler/orders/${order.id}`} className="text-[10px] font-bold tracking-widest uppercase text-gray-400 hover:text-black flex items-center gap-1 transition-colors">
+                                                <Link href={`/static-v2-resource-policy-handler/orders/${order.id}`} className="text-[12px] font-bold tracking-widest uppercase text-gray-400 hover:text-black flex items-center gap-1 transition-colors">
                                                     Details <ExternalLink className="w-3 h-3" />
                                                 </Link>
                                                 <StatusUpdateMenu orderId={order.id} currentStatus={order.status ?? 'pending'} />

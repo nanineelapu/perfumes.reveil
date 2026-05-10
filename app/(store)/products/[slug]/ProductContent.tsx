@@ -1,10 +1,12 @@
 'use client'
 import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Product } from '@/types/store'
-import { ShoppingBag, ArrowLeft, Star } from 'lucide-react'
+import { ShoppingBag, ArrowLeft, Star, Loader2, Check } from 'lucide-react'
 import Link from 'next/link'
 import { ReviewsSection } from '@/components/store/ReviewsSection'
+import { createClient } from '@/lib/supabase/client'
 
 interface ProductContentProps {
     product: Product
@@ -12,9 +14,14 @@ interface ProductContentProps {
 }
 
 export function ProductContent({ product, initialReviews }: ProductContentProps) {
+    const router = useRouter()
+    const supabase = createClient()
     const [isMobile, setIsMobile] = useState(false)
     const [reviews, setReviews] = useState(initialReviews)
     const [selectedVolume, setSelectedVolume] = useState(product.technical_specs?.volume || '100ML')
+    const [adding, setAdding] = useState(false)
+    const [added, setAdded] = useState(false)
+    const [actionError, setActionError] = useState<string | null>(null)
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 1024)
@@ -22,6 +29,41 @@ export function ProductContent({ product, initialReviews }: ProductContentProps)
         window.addEventListener('resize', checkMobile)
         return () => window.removeEventListener('resize', checkMobile)
     }, [])
+
+    const handleAction = async (type: 'cart' | 'buy') => {
+        if (adding) return
+        setActionError(null)
+
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+            router.push(`/auth?next=/products/${product.slug}`)
+            return
+        }
+
+        setAdding(true)
+        try {
+            const res = await fetch('/api/cart', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ product_id: product.id, quantity: 1 }),
+            })
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}))
+                throw new Error(data.error || 'Could not add to cart')
+            }
+            window.dispatchEvent(new Event('cart-updated'))
+            if (type === 'buy') {
+                router.push('/checkout')
+            } else {
+                setAdded(true)
+                setTimeout(() => setAdded(false), 1800)
+            }
+        } catch (err: any) {
+            setActionError(err.message || 'Something went wrong')
+        } finally {
+            setAdding(false)
+        }
+    }
 
     return (
         <main style={{
@@ -204,8 +246,11 @@ export function ProductContent({ product, initialReviews }: ProductContentProps)
                         {/* Actions */}
                         <div style={{ display: 'flex', gap: '20px' }}>
                             <motion.button
-                                whileHover={{ backgroundColor: '#d4af37', color: '#000', borderColor: '#d4af37' }}
-                                whileTap={{ scale: 0.98 }}
+                                type="button"
+                                onClick={() => handleAction('buy')}
+                                disabled={adding}
+                                whileHover={!adding ? { backgroundColor: '#d4af37', color: '#000', borderColor: '#d4af37' } : {}}
+                                whileTap={!adding ? { scale: 0.98 } : {}}
                                 style={{
                                     flex: 1,
                                     background: 'rgba(10, 10, 10, 0.6)',
@@ -213,27 +258,38 @@ export function ProductContent({ product, initialReviews }: ProductContentProps)
                                     WebkitBackdropFilter: 'blur(12px)',
                                     border: '1px solid rgba(212, 175, 55, 0.3)',
                                     color: '#fff',
-                                    padding: '20px', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.4em', cursor: 'pointer', transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
+                                    padding: '20px', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.4em',
+                                    cursor: adding ? 'not-allowed' : 'pointer',
+                                    transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px'
                                 }}
                             >
-                                BUY NOW
+                                {adding ? <><Loader2 size={14} className="animate-spin" /> Processing</> : 'BUY NOW'}
                             </motion.button>
                             <motion.button
-                                whileHover={{ backgroundColor: 'rgba(212, 175, 55, 0.1)', borderColor: '#d4af37' }}
+                                type="button"
+                                onClick={() => handleAction('cart')}
+                                disabled={adding}
+                                whileHover={!adding ? { backgroundColor: 'rgba(212, 175, 55, 0.1)', borderColor: '#d4af37' } : {}}
+                                aria-label="Add to cart"
                                 style={{
                                     width: '60px',
-                                    background: 'rgba(10, 10, 10, 0.6)',
+                                    background: added ? 'rgba(16, 185, 129, 0.15)' : 'rgba(10, 10, 10, 0.6)',
                                     backdropFilter: 'blur(12px)',
                                     WebkitBackdropFilter: 'blur(12px)',
-                                    border: '1px solid rgba(212, 175, 55, 0.2)',
-                                    color: '#fff',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+                                    border: `1px solid ${added ? 'rgba(16,185,129,0.4)' : 'rgba(212, 175, 55, 0.2)'}`,
+                                    color: added ? '#10b981' : '#fff',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    cursor: adding ? 'not-allowed' : 'pointer',
                                     transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
                                 }}
                             >
-                                <ShoppingBag size={18} strokeWidth={1} />
+                                {adding ? <Loader2 size={16} className="animate-spin" /> : added ? <Check size={18} strokeWidth={1.5} /> : <ShoppingBag size={18} strokeWidth={1} />}
                             </motion.button>
                         </div>
+                        {actionError && (
+                            <p style={{ color: '#ff6b6b', fontSize: '11px', marginTop: '12px' }}>{actionError}</p>
+                        )}
                     </motion.div>
                 </section>
             </div>

@@ -674,7 +674,7 @@ export function AnimatedNavbar() {
                         initial={{ x: '100%' }}
                         animate={{ x: 0 }}
                         exit={{ x: '100%' }}
-                        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                        transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
                         style={{
                             position: 'fixed', inset: 0,
                             background: '#050505', zIndex: 110,
@@ -682,7 +682,10 @@ export function AnimatedNavbar() {
                             padding: '80px 40px 40px',
                             overflowY: 'auto',
                             overscrollBehavior: 'contain',
-                            WebkitOverflowScrolling: 'touch'
+                            WebkitOverflowScrolling: 'touch',
+                            willChange: 'transform',
+                            transform: 'translate3d(0,0,0)',
+                            backfaceVisibility: 'hidden'
                         }}
                     >
                         {/* Decorative Background Element */}
@@ -810,11 +813,12 @@ export function AnimatedNavbar() {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
+                            transition={{ duration: 0.25 }}
                             onClick={() => setIsCartOpen(false)}
                             style={{
                                 position: 'fixed', inset: 0,
-                                background: 'rgba(0,0,0,0.6)',
-                                backdropFilter: 'blur(4px)',
+                                background: isMobile ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.6)',
+                                ...(isMobile ? {} : { backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }),
                                 zIndex: 200,
                                 touchAction: 'none'
                             }}
@@ -825,7 +829,7 @@ export function AnimatedNavbar() {
                             initial={{ x: '100%' }}
                             animate={{ x: 0 }}
                             exit={{ x: '100%' }}
-                            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                            transition={{ duration: isMobile ? 0.32 : 0.5, ease: [0.22, 1, 0.36, 1] }}
                             style={{
                                 position: 'fixed', top: 0, right: 0,
                                 height: isMobile ? '100dvh' : '100vh',
@@ -834,9 +838,12 @@ export function AnimatedNavbar() {
                                 zIndex: 201,
                                 display: 'flex',
                                 flexDirection: 'column',
-                                boxShadow: '-40px 0 80px rgba(0,0,0,0.8)',
+                                boxShadow: isMobile ? 'none' : '-40px 0 80px rgba(0,0,0,0.8)',
                                 borderLeft: '1px solid rgba(212,175,55,0.2)',
-                                overflow: 'hidden'
+                                overflow: 'hidden',
+                                willChange: 'transform',
+                                transform: 'translate3d(0,0,0)',
+                                backfaceVisibility: 'hidden'
                             }}
                         >
                             {/* Decorative Top Glow */}
