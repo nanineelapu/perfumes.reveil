@@ -162,8 +162,9 @@ export default function AddressBookPage() {
     const inputStyle: React.CSSProperties = {
         width: '100%', background: 'transparent', border: 'none',
         borderBottom: '1px solid rgba(255,255,255,0.1)', color: '#fff',
-        fontSize: '14px', padding: '8px 0', outline: 'none',
-        fontFamily: 'var(--font-baskerville)'
+        fontSize: '14px', padding: '12px 14px', outline: 'none',
+        fontFamily: 'var(--font-baskerville)',
+        boxSizing: 'border-box'
     }
 
     const labelStyle: React.CSSProperties = {
@@ -337,7 +338,7 @@ export default function AddressBookPage() {
                             <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? '20px' : '28px' }}>
                                 <div>
                                     <label style={labelStyle}>Full Name *</label>
-                                    <input style={inputStyle} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="e.g. Nani Reddy" required />
+                                    <input style={inputStyle} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="e.g. Jyoti Ranjan Sahoo" required />
                                 </div>
                                 <div>
                                     <label style={labelStyle}>Phone</label>
@@ -345,23 +346,23 @@ export default function AddressBookPage() {
                                 </div>
                                 <div style={{ gridColumn: 'span 2' }}>
                                     <label style={labelStyle}>Address Line 1 *</label>
-                                    <input style={inputStyle} value={form.line1} onChange={e => setForm({ ...form, line1: e.target.value })} placeholder="House no, Street name" required />
+                                    <input style={inputStyle} value={form.line1} onChange={e => setForm({ ...form, line1: e.target.value })} placeholder="e.g. Plot 12, Bada Bazaar" required />
                                 </div>
                                 <div style={{ gridColumn: 'span 2' }}>
                                     <label style={labelStyle}>Address Line 2</label>
-                                    <input style={inputStyle} value={form.line2} onChange={e => setForm({ ...form, line2: e.target.value })} placeholder="Landmark, Area (optional)" />
+                                    <input style={inputStyle} value={form.line2} onChange={e => setForm({ ...form, line2: e.target.value })} placeholder="e.g. Near Jagannath Temple (optional)" />
                                 </div>
                                 <div>
                                     <label style={labelStyle}>City *</label>
-                                    <input style={inputStyle} value={form.city} onChange={e => setForm({ ...form, city: e.target.value })} placeholder="e.g. Hyderabad" required />
+                                    <input style={inputStyle} value={form.city} onChange={e => setForm({ ...form, city: e.target.value })} placeholder="e.g. Brahmapur" required />
                                 </div>
                                 <div>
                                     <label style={labelStyle}>State</label>
-                                    <input style={inputStyle} value={form.state} onChange={e => setForm({ ...form, state: e.target.value })} placeholder="e.g. Telangana" />
+                                    <input style={inputStyle} value={form.state} onChange={e => setForm({ ...form, state: e.target.value })} placeholder="e.g. Odisha" />
                                 </div>
                                 <div>
                                     <label style={labelStyle}>Pincode *</label>
-                                    <input style={inputStyle} value={form.pincode} onChange={e => setForm({ ...form, pincode: e.target.value })} placeholder="500001" maxLength={6} required />
+                                    <input style={inputStyle} value={form.pincode} onChange={e => setForm({ ...form, pincode: e.target.value })} placeholder="760001" maxLength={6} required />
                                 </div>
                             </div>
 
