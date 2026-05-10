@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import Script from 'next/script'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -43,6 +43,19 @@ const FREE_THRESHOLD = 249
 const SHIPPING_FEE = 50
 
 export default function CheckoutPage() {
+    return (
+        <Suspense fallback={
+            <div style={{ minHeight: '100vh', background: '#050505', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '14px' }}>
+                <Loader2 className="animate-spin" size={28} color="#d4af37" />
+                <span style={{ fontSize: '10px', color: '#d4af37', letterSpacing: '0.4em', textTransform: 'uppercase' }}>Preparing checkout...</span>
+            </div>
+        }>
+            <CheckoutInner />
+        </Suspense>
+    )
+}
+
+function CheckoutInner() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const buyNowProductId = searchParams.get('buyNow')
