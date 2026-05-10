@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 // You can use a service like Resend (recommended) or Nodemailer
-// For now, we will store the inquiry in Supabase and log the intention to send to: naniatworkmail@gmail.com
+// For now, we will store the inquiry in Supabase and log the intention to send to: reveilfragrances@gmail.com
 
 export async function POST(req: Request) {
     try {
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
                     email, 
                     phone, 
                     message, 
-                    admin_recipient: 'naniatworkmail@gmail.com',
+                    admin_recipient: 'reveilfragrances@gmail.com',
                     created_at: new Date().toISOString()
                 }
             ])
@@ -47,7 +47,7 @@ export async function POST(req: Request) {
          * 
          * await resend.emails.send({
          *   from: 'REVEIL <onboarding@resend.dev>',
-         *   to: 'naniatworkmail@gmail.com',
+         *   to: 'reveilfragrances@gmail.com',
          *   subject: `New Inquiry from ${name}`,
          *   html: `<p><strong>Name:</strong> ${name}</p>
          *          <p><strong>Email:</strong> ${email}</p>
@@ -56,7 +56,7 @@ export async function POST(req: Request) {
          * });
          */
 
-        console.log(`[MAIL SENT] To: naniatworkmail@gmail.com | From: ${email} | Subject: New Inquiry from ${name}`)
+        console.log(`[MAIL SENT] To: reveilfragrances@gmail.com | From: ${email} | Subject: New Inquiry from ${name}`)
 
         return NextResponse.json({ success: true })
 

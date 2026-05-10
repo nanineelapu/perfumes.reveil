@@ -95,7 +95,7 @@ export async function PATCH(request: Request, { params }: { params: Params }) {
                 const adminClient = createAdminClient();
                 const { data: { user: orderUser }, error: userError } = await adminClient.auth.admin.getUserById(fullOrder.user_id);
                 
-                const customerEmail = orderUser?.email || 'naniatworkmail@gmail.com'; // Fallback to provided address
+                const customerEmail = orderUser?.email || 'reveilfragrances@gmail.com'; // Fallback to provided address
                 
                 // 3. Dispatch the premium email
                 await sendOrderDeliveredEmail(fullOrder, customerEmail);

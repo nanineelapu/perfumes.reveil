@@ -31,7 +31,7 @@ export async function sendOrderDeliveredEmail(order: any, userEmail: string) {
 
         const { data, error } = await resend.emails.send({
             from: 'REVEIL <orders@reveil-perfumes.com>', // Replace with your verified domain
-            to: userEmail || 'naniatworkmail@gmail.com', // Using provided address as fallback
+            to: userEmail || 'reveilfragrances@gmail.com', // Using provided address as fallback
             subject: `REVEIL | Order Delivered & E-Invoice [${id.slice(0, 8).toUpperCase()}]`,
             html: `
                 <div style="background-color: #050505; color: #fff; font-family: 'Georgia', serif; padding: 40px; max-width: 600px; margin: 0 auto; border: 1px solid #1a1a1a;">

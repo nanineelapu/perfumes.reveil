@@ -131,7 +131,7 @@ export default function ContactPage() {
                 <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '1px solid rgba(212,175,55,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#d4af37' }}>
                   <Mail size={12} />
                 </div>
-                <span style={{ fontSize: '12px', letterSpacing: '0.1em', color: '#ffffff' }}>naniatworkmail@gmail.com</span>
+                <span style={{ fontSize: '12px', letterSpacing: '0.1em', color: '#ffffff' }}>reveilfragrances@gmail.com</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '1px solid rgba(212,175,55,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#d4af37' }}>
