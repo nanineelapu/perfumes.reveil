@@ -1,27 +1,50 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { requireUser } from '@/lib/auth/require'
 import { getRazorpay, computeShipping } from '@/lib/razorpay'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { isUuid, clampInt } from '@/lib/validators'
+import { rateLimit, getClientIp, rateLimitResponse } from '@/lib/rate-limit'
 
 export async function POST(request: Request) {
     try {
-        const supabase = await createClient()
+        const auth = await requireUser()
+        if (!auth.ok) return auth.response
+        const { user, supabase } = auth
 
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-        if (authError || !user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        // 10 order-creations / minute / user is plenty; protects Razorpay quota.
+        const rl = await rateLimit({ key: `rp:create:${user.id}`, limit: 10, windowSec: 60 })
+        if (!rl.ok) return rateLimitResponse(rl)
+        const ipRl = await rateLimit({ key: `rp:create:ip:${getClientIp(request)}`, limit: 30, windowSec: 60 })
+        if (!ipRl.ok) return rateLimitResponse(ipRl)
+
+        let body: any
+        try {
+            body = await request.json()
+        } catch {
+            return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
         }
 
-        const body = await request.json().catch(() => ({}))
         const { address_id, buy_now } = body as {
             address_id?: string
             buy_now?: { product_id: string; quantity: number }
         }
 
-        if (!address_id) {
-            return NextResponse.json({ error: 'address_id is required' }, { status: 400 })
+        if (!isUuid(address_id)) {
+            return NextResponse.json({ error: 'Invalid address_id' }, { status: 400 })
         }
 
-        // Verify the address belongs to this user
+        let buyNowProductId: string | null = null
+        let buyNowQty = 0
+        if (buy_now) {
+            if (!isUuid(buy_now.product_id)) {
+                return NextResponse.json({ error: 'Invalid buy_now.product_id' }, { status: 400 })
+            }
+            const qty = clampInt(buy_now.quantity, 1, 20)
+            if (!qty) return NextResponse.json({ error: 'Invalid buy_now.quantity' }, { status: 400 })
+            buyNowProductId = buy_now.product_id
+            buyNowQty = qty
+        }
+
         const { data: address, error: addressError } = await supabase
             .from('addresses')
             .select('*')
@@ -33,50 +56,56 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Address not found' }, { status: 404 })
         }
 
-        // Build line items: from buy_now (single product) or from cart_items
-        type LineItem = { quantity: number; products: { id: string; name: string; price: number; stock: number } }
+        type LineItem = { product_id: string; name: string; price: number; stock: number; quantity: number }
         let lineItems: LineItem[] = []
 
-        if (buy_now?.product_id) {
-            const qty = Math.max(1, Number(buy_now.quantity) || 1)
+        if (buyNowProductId) {
             const { data: product, error: prodErr } = await supabase
                 .from('products')
                 .select('id, name, price, stock')
-                .eq('id', buy_now.product_id)
+                .eq('id', buyNowProductId)
                 .single()
             if (prodErr || !product) {
                 return NextResponse.json({ error: 'Product not found' }, { status: 404 })
             }
-            lineItems = [{ quantity: qty, products: product as any }]
+            lineItems = [{
+                product_id: product.id,
+                name: product.name,
+                price: product.price,
+                stock: product.stock,
+                quantity: buyNowQty,
+            }]
         } else {
             const { data: cartItems, error: cartError } = await supabase
                 .from('cart_items')
                 .select('id, quantity, products ( id, name, price, stock )')
                 .eq('user_id', user.id)
 
-            if (cartError) {
-                return NextResponse.json({ error: cartError.message }, { status: 500 })
-            }
+            if (cartError) return NextResponse.json({ error: 'Could not read cart' }, { status: 500 })
             if (!cartItems || cartItems.length === 0) {
                 return NextResponse.json({ error: 'Cart is empty' }, { status: 400 })
             }
-            lineItems = cartItems.map((c: any) => ({ quantity: c.quantity, products: c.products }))
+            lineItems = cartItems.map((c: any) => ({
+                product_id: c.products?.id,
+                name: c.products?.name,
+                price: c.products?.price,
+                stock: c.products?.stock,
+                quantity: c.quantity,
+            }))
         }
 
-        // Stock + subtotal
         let subtotal = 0
         for (const item of lineItems) {
-            const product = item.products
-            if (!product) {
+            if (!item.product_id) {
                 return NextResponse.json({ error: 'A product is no longer available' }, { status: 400 })
             }
-            if (product.stock < item.quantity) {
+            if (item.stock < item.quantity) {
                 return NextResponse.json(
-                    { error: `Not enough stock for "${product.name}". Available: ${product.stock}` },
+                    { error: `Not enough stock for "${item.name}". Available: ${item.stock}` },
                     { status: 400 }
                 )
             }
-            subtotal += product.price * item.quantity
+            subtotal += item.price * item.quantity
         }
 
         const shippingFee = computeShipping(subtotal)
@@ -93,6 +122,30 @@ export async function POST(request: Request) {
             },
         })
 
+        // Persist a snapshot that /verify (and the webhook) will load — this is
+        // the ONLY trusted source of truth for what the user paid for.
+        const admin = createAdminClient()
+        const { error: snapshotError } = await admin.from('pending_orders').insert({
+            razorpay_order_id: rpOrder.id,
+            user_id: user.id,
+            address_id,
+            buy_now_product_id: buyNowProductId,
+            buy_now_quantity: buyNowProductId ? buyNowQty : null,
+            line_items: lineItems.map(i => ({
+                product_id: i.product_id, name: i.name, price: i.price, quantity: i.quantity,
+            })),
+            subtotal,
+            shipping_fee: shippingFee,
+            total,
+            expected_amount_paise: Math.round(total * 100),
+            currency: 'INR',
+            status: 'created',
+        })
+        if (snapshotError) {
+            console.error('[razorpay] pending_orders insert failed:', snapshotError.message)
+            return NextResponse.json({ error: 'Could not initialise payment' }, { status: 500 })
+        }
+
         return NextResponse.json({
             razorpay_order_id: rpOrder.id,
             amount: rpOrder.amount,
@@ -103,8 +156,7 @@ export async function POST(request: Request) {
             total,
         })
     } catch (err: any) {
-        console.error('Razorpay create-order error:', err)
-        const message = err?.error?.description || err?.message || 'Failed to create payment order'
-        return NextResponse.json({ error: message }, { status: 500 })
+        console.error('Razorpay create-order error:', err?.message)
+        return NextResponse.json({ error: 'Failed to create payment order' }, { status: 500 })
     }
 }

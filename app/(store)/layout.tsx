@@ -56,14 +56,23 @@ export const metadata: Metadata = {
   },
 }
 
+// Every store page reads the user's auth cookie via Supabase, so prerendering
+// is never appropriate here. Mark the segment dynamic so Next.js doesn't even
+// attempt static generation (and stops logging DYNAMIC_SERVER_USAGE warnings).
+export const dynamic = 'force-dynamic'
+
 export default async function StoreLayout({ children }: { children: React.ReactNode }) {
   let user = null
   try {
     const supabase = await createClient()
     const { data } = await supabase.auth.getUser()
     user = data?.user
-  } catch (e) {
-    console.error('Layout Auth Error:', e)
+  } catch (e: any) {
+    // DYNAMIC_SERVER_USAGE is Next.js' internal signal that a route bailed
+    // out of static rendering — it's expected here, not a real error.
+    if (e?.digest !== 'DYNAMIC_SERVER_USAGE') {
+      console.error('Layout Auth Error:', e)
+    }
   }
 
   return (

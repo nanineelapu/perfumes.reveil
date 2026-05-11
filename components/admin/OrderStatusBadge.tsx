@@ -6,12 +6,17 @@ const statusStyles: Record<string, { bg: string, text: string, label: string }> 
     confirmed: { bg: '#f0f9ff', text: '#075985', label: 'Confirmed' },
     shipped: { bg: '#f5f3ff', text: '#5b21b6', label: 'Shipped' },
     'in transit': { bg: '#fdf4ff', text: '#701a75', label: 'In Transit' },
+    'out for delivery': { bg: '#ecfeff', text: '#155e75', label: 'Out for Delivery' },
     delivered: { bg: '#f0fdf4', text: '#166534', label: 'Delivered' },
     cancelled: { bg: '#fef2f2', text: '#991b1b', label: 'Cancelled' },
+    returned: { bg: '#fef2f2', text: '#991b1b', label: 'Returned' },
+    'return initiated': { bg: '#fef2f2', text: '#991b1b', label: 'Return Initiated' },
+    'delivery failed': { bg: '#fef2f2', text: '#991b1b', label: 'Delivery Failed' },
 }
 
 export default function OrderStatusBadge({ status }: { status: string }) {
-    const style = statusStyles[status] || { bg: '#f1f5f9', text: '#475569', label: status }
+    const key = (status || '').toLowerCase()
+    const style = statusStyles[key] || { bg: '#f1f5f9', text: '#475569', label: status }
 
     return (
         <span style={{
@@ -23,7 +28,8 @@ export default function OrderStatusBadge({ status }: { status: string }) {
             fontWeight: 600,
             backgroundColor: style.bg,
             color: style.text,
-            border: `1px solid ${style.text}20`
+            border: `1px solid ${style.text}20`,
+            whiteSpace: 'nowrap'
         }}>
             <span style={{
                 width: '6px',

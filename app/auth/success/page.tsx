@@ -1,10 +1,36 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import Link from 'next/link'
-import { CheckCircle, ArrowRight, User, ShoppingBag } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { CheckCircle, LogIn } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
+
+const REDIRECT_SECONDS = 5
+const LOGIN_PATH = '/auth?mode=login'
 
 export default function AuthSuccessPage() {
+    const router = useRouter()
+    const [secondsLeft, setSecondsLeft] = useState(REDIRECT_SECONDS)
+
+    // Sign the user out so they go through the proper login flow on redirect
+    useEffect(() => {
+        const supabase = createClient()
+        supabase.auth.signOut().catch(() => {
+            // Ignore — even if signOut fails, the redirect still works
+        })
+    }, [])
+
+    // Countdown + auto-redirect to login
+    useEffect(() => {
+        if (secondsLeft <= 0) {
+            router.push(LOGIN_PATH)
+            return
+        }
+        const t = setTimeout(() => setSecondsLeft((s) => s - 1), 1000)
+        return () => clearTimeout(t)
+    }, [secondsLeft, router])
+
     return (
         <div style={{
             minHeight: '100vh',
@@ -58,84 +84,66 @@ export default function AuthSuccessPage() {
                     fontFamily: 'var(--font-baskerville)',
                     letterSpacing: '-0.02em'
                 }}>
-                    Welcome to <span style={{ color: '#d4af37' }}>Reveil</span>
+                    You're <span style={{ color: '#d4af37' }}>Registered</span>
                 </h1>
 
                 <p style={{
                     color: '#888',
-                    fontSize: '16px',
+                    fontSize: '15px',
                     lineHeight: 1.6,
-                    marginBottom: '48px',
+                    marginBottom: '32px',
                     fontWeight: 300
                 }}>
-                    Your account has been successfully created. You are now part of our exclusive circle of fragrance collectors.
+                    Your account has been created successfully. Please log in to continue — or wait, and we'll take you there automatically.
                 </p>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                    <Link href="/profile" style={{ textDecoration: 'none' }}>
-                        <motion.button
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            style={{
-                                width: '100%',
-                                background: '#d4af37',
-                                color: '#000',
-                                border: 'none',
-                                padding: '16px',
-                                borderRadius: '12px',
-                                fontSize: '15px',
-                                fontWeight: 600,
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '10px',
-                                transition: 'all 0.3s'
-                            }}
-                        >
-                            <User size={18} />
-                            View My Profile
-                        </motion.button>
-                    </Link>
+                <motion.button
+                    onClick={() => router.push(LOGIN_PATH)}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    style={{
+                        width: '100%',
+                        background: '#d4af37',
+                        color: '#000',
+                        border: 'none',
+                        padding: '16px',
+                        borderRadius: '12px',
+                        fontSize: '14px',
+                        fontWeight: 700,
+                        letterSpacing: '0.2em',
+                        textTransform: 'uppercase',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '10px',
+                        transition: 'all 0.3s'
+                    }}
+                >
+                    <LogIn size={18} />
+                    Go to Login
+                </motion.button>
 
-                    <Link href="/" style={{ textDecoration: 'none' }}>
-                        <motion.button
-                            whileHover={{ scale: 1.02, background: 'rgba(255,255,255,0.05)' }}
-                            whileTap={{ scale: 0.98 }}
-                            style={{
-                                width: '100%',
-                                background: 'transparent',
-                                color: '#fff',
-                                border: '1px solid rgba(255,255,255,0.1)',
-                                padding: '16px',
-                                borderRadius: '12px',
-                                fontSize: '15px',
-                                fontWeight: 500,
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '10px',
-                                transition: 'all 0.3s'
-                            }}
-                        >
-                            <ShoppingBag size={18} />
-                            Start Shopping
-                            <ArrowRight size={18} />
-                        </motion.button>
-                    </Link>
+                <div style={{
+                    marginTop: '20px',
+                    fontSize: '11px',
+                    color: '#666',
+                    letterSpacing: '0.2em',
+                    textTransform: 'uppercase'
+                }}>
+                    Redirecting in <span style={{ color: '#d4af37', fontWeight: 700 }}>{secondsLeft}s</span>
                 </div>
 
                 <div style={{
-                    marginTop: '48px',
+                    marginTop: '40px',
                     paddingTop: '24px',
                     borderTop: '1px solid rgba(255,255,255,0.05)',
-                    fontSize: '12px',
+                    fontSize: '11px',
                     color: '#444',
-                    letterSpacing: '0.1em',
+                    letterSpacing: '0.2em',
                     textTransform: 'uppercase'
                 }}>
-                    Experience Elegance
+                    Welcome to Réveil
                 </div>
             </motion.div>
         </div>

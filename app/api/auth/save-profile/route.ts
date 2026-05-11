@@ -1,46 +1,56 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { autoRefreshToken: false, persistSession: false } }
-)
+import { requireUser } from '@/lib/auth/require'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { isPersonName, normalizeIndianPhone } from '@/lib/validators'
 
 export async function POST(request: Request) {
+  const auth = await requireUser()
+  if (!auth.ok) return auth.response
+
+  let body: any
   try {
-    const { user_id, first_name, last_name, phone, email } = await request.json()
-    console.log('Saving profile:', user_id, first_name, last_name, email)
-
-    if (!user_id || !first_name) {
-      return NextResponse.json(
-        { error: 'user_id and first_name required' },
-        { status: 400 }
-      )
-    }
-
-    const full_name = `${first_name.trim()} ${(last_name ?? '').trim()}`.trim()
-
-    const { error } = await supabaseAdmin
-      .from('profiles')
-      .upsert({
-        id:         user_id,
-        first_name: first_name.trim(),
-        last_name:  (last_name ?? '').trim(),
-        full_name,
-        phone,
-        role:       'user',
-      })
-
-    if (error) {
-      console.error('Profile save error:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
-    }
-
-    console.log('Profile saved:', full_name)
-    return NextResponse.json({ success: true, full_name })
-  } catch (err: any) {
-    console.error('Save Profile Route Error:', err)
-    return NextResponse.json({ error: err.message }, { status: 500 })
+    body = await request.json()
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
+
+  const { first_name, last_name, phone } = body || {}
+
+  if (!isPersonName(first_name)) {
+    return NextResponse.json({ error: 'Invalid first name' }, { status: 400 })
+  }
+  if (last_name !== undefined && last_name !== null && last_name !== '' && !isPersonName(last_name)) {
+    return NextResponse.json({ error: 'Invalid last name' }, { status: 400 })
+  }
+  let cleanPhone: string | null = null
+  if (phone !== undefined && phone !== null && phone !== '') {
+    const digits = normalizeIndianPhone(phone)
+    if (!digits) return NextResponse.json({ error: 'Invalid phone' }, { status: 400 })
+    cleanPhone = `+91${digits}`
+  }
+
+  const first = (first_name as string).trim()
+  const last = (last_name ?? '').trim()
+  const full_name = `${first} ${last}`.trim()
+
+  // Always use the authenticated user's id from the session cookie. Never
+  // trust a client-supplied user_id. role is hard-set to 'user' here.
+  const admin = createAdminClient()
+  const upsertRow: Record<string, unknown> = {
+    id: auth.user.id,
+    first_name: first,
+    last_name: last,
+    full_name,
+    role: 'user',
+  }
+  if (cleanPhone) upsertRow.phone = cleanPhone
+
+  const { error } = await admin.from('profiles').upsert(upsertRow, { onConflict: 'id' })
+
+  if (error) {
+    console.error('Profile save error:', error.message)
+    return NextResponse.json({ error: 'Could not save profile' }, { status: 500 })
+  }
+
+  return NextResponse.json({ success: true, full_name })
 }

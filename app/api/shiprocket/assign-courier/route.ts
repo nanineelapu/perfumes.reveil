@@ -1,70 +1,78 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/auth/require'
 import { shiprocketFetch } from '@/lib/shiprocket'
+import { isUuid } from '@/lib/validators'
 
 export async function POST(request: Request) {
-  const supabase = await createClient()
-  const { order_id, shipment_id } = await request.json()
+  const auth = await requireAdmin()
+  if (!auth.ok) return auth.response
 
-  // 1. Check serviceability
-  const { data: order, error: orderError } = await supabase
+  let body: { order_id?: unknown; shipment_id?: unknown }
+  try {
+    body = await request.json()
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
+  }
+  if (!isUuid(body.order_id) || !body.shipment_id) {
+    return NextResponse.json({ error: 'order_id and shipment_id required' }, { status: 400 })
+  }
+  const order_id = body.order_id as string
+  const shipment_id = String(body.shipment_id)
+
+  const { data: order, error: orderError } = await auth.supabase
     .from('orders')
     .select('shipping_address')
     .eq('id', order_id)
     .single()
 
   if (orderError || !order) {
-      return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+    return NextResponse.json({ error: 'Order not found' }, { status: 404 })
   }
 
-  const address    = order?.shipping_address as any
-  const pincode    = address.pincode || address.postal_code || '000000'
-  
+  const address = order?.shipping_address as any
+  const pincode = address?.pincode || address?.postal_code || '000000'
+
   try {
     const serviceRes = await shiprocketFetch(
-      `/courier/serviceability/?pickup_postcode=${process.env.SHIPROCKET_PICKUP_PINCODE || '500001'}&delivery_postcode=${pincode}&weight=0.5&cod=1`
+      `/courier/serviceability/?pickup_postcode=${encodeURIComponent(process.env.SHIPROCKET_PICKUP_PINCODE || '500001')}&delivery_postcode=${encodeURIComponent(pincode)}&weight=0.5&cod=1`
     )
 
-    // 2. Pick cheapest recommended courier
-    const couriers        = serviceRes.data?.available_courier_companies ?? []
-    const bestCourier     = couriers.sort((a: any, b: any) => Number(a.rate) - Number(b.rate))[0]
+    const couriers = serviceRes.data?.available_courier_companies ?? []
+    const bestCourier = couriers.sort((a: any, b: any) => Number(a.rate) - Number(b.rate))[0]
 
     if (!bestCourier) {
       return NextResponse.json({ error: 'No courier available for this pincode' }, { status: 400 })
     }
 
-    // 3. Assign courier + get AWB
     const assignRes = await shiprocketFetch('/courier/assign/awb', {
       method: 'POST',
-      body:   JSON.stringify({
-        shipment_id: String(shipment_id),
+      body: JSON.stringify({
+        shipment_id,
         courier_id: String(bestCourier.courier_company_id),
       }),
     })
 
-    // Check for AWB in response
     const awbData = assignRes.response?.data
-    const awb     = (assignRes.awb_assign_status === 1 || assignRes.status === 1) ? (awbData?.awb_code || assignRes.awb_code) : null
+    const awb = (assignRes.awb_assign_status === 1 || assignRes.status === 1) ? (awbData?.awb_code || assignRes.awb_code) : null
     const courierName = bestCourier.courier_name
 
     if (!awb) {
-      console.error('Shiprocket AWB Error:', assignRes)
-      return NextResponse.json({ error: assignRes.message || 'AWB assignment failed' }, { status: 500 })
+      console.error('Shiprocket AWB Error:', assignRes?.message)
+      return NextResponse.json({ error: 'AWB assignment failed' }, { status: 500 })
     }
 
-    // 4. Save AWB + courier to Supabase
-    await supabase
+    await auth.supabase
       .from('orders')
       .update({
-        awb_code:     awb,
+        awb_code: awb,
         courier_name: courierName,
-        status:       'shipped',
+        status: 'shipped',
       })
       .eq('id', order_id)
 
     return NextResponse.json({ success: true, awb, courier_name: courierName })
   } catch (err: any) {
-    console.error('Courier Assignment Error:', err)
-    return NextResponse.json({ error: err.message }, { status: 500 })
+    console.error('Courier Assignment Error:', err?.message)
+    return NextResponse.json({ error: 'Courier assignment failed' }, { status: 500 })
   }
 }

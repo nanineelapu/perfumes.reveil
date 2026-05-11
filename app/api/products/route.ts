@@ -17,9 +17,13 @@ export async function GET(request: Request) {
 
     const category = searchParams.get('category')
     const featured = searchParams.get('featured')
-    const search = searchParams.get('search')
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '12')
+    const rawSearch = searchParams.get('search')
+    // Cap search length and strip ilike wildcards so the regex match is bounded.
+    const search = rawSearch && rawSearch.length <= 80 ? rawSearch.replace(/[%_]/g, ' ') : null
+    const pageRaw = parseInt(searchParams.get('page') || '1')
+    const limitRaw = parseInt(searchParams.get('limit') || '12')
+    const page = Math.max(1, Math.min(pageRaw || 1, 100000))
+    const limit = Math.max(1, Math.min(limitRaw || 12, 100))
     const offset = (page - 1) * limit
 
     let query = supabase

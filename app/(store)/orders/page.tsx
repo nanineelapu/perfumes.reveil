@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Footer } from '@/components/store/Footer'
-import { getAutomaticStatus } from '@/lib/utils/order-status'
+import { getDisplayStatus } from '@/lib/utils/order-status'
 import { ReviewModal } from '@/components/store/ReviewModal'
 import { PremiumLoader } from '@/components/store/PremiumLoader'
 
@@ -57,8 +57,11 @@ export default function OrdersPage() {
                     id,
                     total,
                     status,
-                    created_at,
+                    payment_status,
+                    payment_method,
+                    shiprocket_order_id,
                     awb_code,
+                    created_at,
                     order_items (
                         id,
                         quantity,
@@ -192,7 +195,7 @@ export default function OrdersPage() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
                     {orders.length > 0 ? (
                         orders.map((order, idx) => {
-                            const autoStatus = getAutomaticStatus(order.status, order.created_at)
+                            const autoStatus = getDisplayStatus(order as any)
                             const statusStyles = getStatusStyles(autoStatus)
                             return (
                                 <motion.div

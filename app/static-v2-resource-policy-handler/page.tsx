@@ -10,6 +10,13 @@ export default async function AdminDashboard() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) redirect('/static-v2-resource-policy-handler/login')
 
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+    if (profile?.role !== 'admin') redirect('/')
+
     const [{ count: productCount }, { count: orderCount }, { count: userCount }, { data: recentOrders }] =
         await Promise.all([
             supabase.from('products').select('*', { count: 'exact', head: true }),

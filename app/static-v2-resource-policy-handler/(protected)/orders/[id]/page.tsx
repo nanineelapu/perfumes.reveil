@@ -2,7 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import OrderStatusBadge from '@/components/admin/OrderStatusBadge'
-import StatusUpdateMenu from '@/components/admin/StatusUpdateMenu'
+import CancelOrderButton from '@/components/admin/CancelOrderButton'
+import { getDisplayStatus } from '@/lib/utils/order-status'
 
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -21,6 +22,8 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
             payment_status,
             payment_id,
             shipping_address,
+            shiprocket_order_id,
+            awb_code,
             created_at,
             profiles (
                 full_name,
@@ -61,9 +64,9 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                 </div>
                 <div style={{ textAlign: 'right' }}>
                     <div style={{ marginBottom: '8px' }}>
-                        <OrderStatusBadge status={order.status} />
+                        <OrderStatusBadge status={getDisplayStatus(order)} />
                     </div>
-                    <StatusUpdateMenu orderId={order.id} currentStatus={order.status} />
+                    <CancelOrderButton orderId={order.id} currentStatus={order.status} />
                 </div>
             </div>
 

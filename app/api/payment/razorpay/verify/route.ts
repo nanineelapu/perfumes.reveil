@@ -1,176 +1,88 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
-import { verifyRazorpaySignature, computeShipping } from '@/lib/razorpay'
+import { requireUser } from '@/lib/auth/require'
+import { getRazorpay, verifyRazorpaySignature } from '@/lib/razorpay'
+import { finaliseRazorpayOrder } from '@/lib/orders'
+import { createShiprocketOrderForOrderId } from '@/lib/fulfillment'
 
 export async function POST(request: Request) {
     try {
-        const supabase = await createClient()
+        const auth = await requireUser()
+        if (!auth.ok) return auth.response
+        const { user } = auth
 
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-        if (authError || !user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        let body: any
+        try {
+            body = await request.json()
+        } catch {
+            return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
         }
 
-        const body = await request.json()
-        const {
-            razorpay_order_id,
-            razorpay_payment_id,
-            razorpay_signature,
-            address_id,
-            buy_now,
-        } = body as {
-            razorpay_order_id: string
-            razorpay_payment_id: string
-            razorpay_signature: string
-            address_id: string
-            buy_now?: { product_id: string; quantity: number }
-        }
-
-        if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !address_id) {
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = body || {}
+        if (
+            typeof razorpay_order_id !== 'string' ||
+            typeof razorpay_payment_id !== 'string' ||
+            typeof razorpay_signature !== 'string'
+        ) {
             return NextResponse.json({ error: 'Missing payment verification fields' }, { status: 400 })
         }
 
-        // 1. Verify HMAC signature — anyone can call this endpoint, signature is the only proof of payment
-        const valid = verifyRazorpaySignature({
+        // 1. HMAC verify (constant-time)
+        const sigValid = verifyRazorpaySignature({
             razorpay_order_id,
             razorpay_payment_id,
             razorpay_signature,
         })
-        if (!valid) {
+        if (!sigValid) {
             return NextResponse.json({ error: 'Invalid payment signature' }, { status: 400 })
         }
 
-        // 2. Confirm address belongs to user
-        const { data: address, error: addressError } = await supabase
-            .from('addresses')
-            .select('*')
-            .eq('id', address_id)
-            .eq('user_id', user.id)
-            .single()
-        if (addressError || !address) {
-            return NextResponse.json({ error: 'Address not found' }, { status: 404 })
+        // 2. Authoritatively fetch the payment from Razorpay — never trust the
+        //    client's reported amount or status.
+        const razorpay = getRazorpay()
+        const payment = await razorpay.payments.fetch(razorpay_payment_id)
+        if (!payment) {
+            return NextResponse.json({ error: 'Payment not found' }, { status: 400 })
+        }
+        if (payment.order_id !== razorpay_order_id) {
+            return NextResponse.json({ error: 'Payment does not belong to this order' }, { status: 400 })
+        }
+        if (payment.status !== 'captured' && payment.status !== 'authorized') {
+            return NextResponse.json({ error: `Payment is in status: ${payment.status}` }, { status: 400 })
         }
 
-        // 3. Build line items: buy-now (single product) or whole cart
-        type LineItem = { quantity: number; products: { id: string; name: string; price: number; stock: number } }
-        let lineItems: LineItem[] = []
-
-        if (buy_now?.product_id) {
-            const qty = Math.max(1, Number(buy_now.quantity) || 1)
-            const { data: product, error: prodErr } = await supabase
-                .from('products')
-                .select('id, name, price, stock')
-                .eq('id', buy_now.product_id)
-                .single()
-            if (prodErr || !product) {
-                return NextResponse.json({ error: 'Product not found' }, { status: 404 })
-            }
-            lineItems = [{ quantity: qty, products: product as any }]
-        } else {
-            const { data: cartItems, error: cartError } = await supabase
-                .from('cart_items')
-                .select('id, quantity, products ( id, name, price, stock )')
-                .eq('user_id', user.id)
-
-            if (cartError) return NextResponse.json({ error: cartError.message }, { status: 500 })
-            if (!cartItems || cartItems.length === 0) {
-                return NextResponse.json({ error: 'Cart is empty' }, { status: 400 })
-            }
-            lineItems = cartItems.map((c: any) => ({ quantity: c.quantity, products: c.products }))
+        // 3. Confirm the Razorpay order's notes link to this user — protects
+        //    against a captured payment being claimed by a different cookie.
+        const rpOrder = await razorpay.orders.fetch(razorpay_order_id)
+        const notesUser = (rpOrder?.notes as any)?.user_id
+        if (notesUser && notesUser !== user.id) {
+            return NextResponse.json({ error: 'Order does not belong to this user' }, { status: 403 })
         }
 
-        let subtotal = 0
-        for (const item of lineItems) {
-            const product = item.products
-            if (!product) {
-                return NextResponse.json({ error: 'A product is no longer available' }, { status: 400 })
-            }
-            if (product.stock < item.quantity) {
-                return NextResponse.json(
-                    { error: `Not enough stock for "${product.name}". Available: ${product.stock}` },
-                    { status: 400 }
-                )
-            }
-            subtotal += product.price * item.quantity
-        }
-        const shippingFee = computeShipping(subtotal)
-        const total = subtotal + shippingFee
-
-        // 4. Create order with paid status
-        const shippingAddress = {
-            label: address.label,
-            full_name: address.full_name,
-            phone: address.phone,
-            address_line1: address.address_line1,
-            address_line2: address.address_line2,
-            city: address.city,
-            state: address.state,
-            pincode: address.pincode,
-        }
-
-        const { data: order, error: orderError } = await supabase
-            .from('orders')
-            .insert({
-                user_id: user.id,
-                total,
-                status: 'confirmed',
-                payment_method: 'razorpay',
-                payment_status: 'paid',
-                payment_id: razorpay_payment_id,
-                shipping_address: shippingAddress,
-            })
-            .select()
-            .single()
-
-        if (orderError) {
-            return NextResponse.json({ error: orderError.message }, { status: 500 })
-        }
-
-        // 5. Insert items with DB prices
-        const orderItems = lineItems.map((item) => {
-            const product = item.products
-            return {
-                order_id: order.id,
-                product_id: product.id,
-                quantity: item.quantity,
-                price: product.price,
-            }
+        // 4. Finalise via shared helper — idempotent on payment_id, uses the
+        //    pending_orders snapshot for line items, validates amount, runs
+        //    the atomic stock RPC.
+        const result = await finaliseRazorpayOrder({
+            razorpayOrderId: razorpay_order_id,
+            razorpayPaymentId: razorpay_payment_id,
+            paidAmountPaise: Number(payment.amount),
+            capturedCurrency: String(payment.currency),
         })
-
-        const { error: itemsError } = await supabase
-            .from('order_items')
-            .insert(orderItems)
-
-        if (itemsError) {
-            await supabase.from('orders').delete().eq('id', order.id)
-            return NextResponse.json({ error: itemsError.message }, { status: 500 })
+        if (!result.ok) {
+            return NextResponse.json({ error: result.error }, { status: result.status })
         }
 
-        // 6. Decrement stock
-        for (const item of lineItems) {
-            const product = item.products
-            await supabase
-                .from('products')
-                .update({ stock: product.stock - item.quantity })
-                .eq('id', product.id)
-        }
+        // 5. Fire-and-forget Shiprocket — call lib directly, not the HTTP route.
+        ;(async () => {
+            try {
+                await createShiprocketOrderForOrderId(result.orderId)
+            } catch (err: any) {
+                console.error('[Shiprocket trigger]', err?.message)
+            }
+        })()
 
-        // 7. Clear cart — only when this wasn't a "Buy Now" flow
-        if (!buy_now?.product_id) {
-            await supabase.from('cart_items').delete().eq('user_id', user.id)
-        }
-
-        // 8. Fire-and-forget Shiprocket
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-        fetch(`${baseUrl}/api/shiprocket/create-order`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ order_id: order.id }),
-        }).catch((err) => console.error('Shiprocket trigger error:', err))
-
-        return NextResponse.json({ success: true, order_id: order.id }, { status: 201 })
+        return NextResponse.json({ success: true, order_id: result.orderId }, { status: 201 })
     } catch (err: any) {
-        console.error('Razorpay verify error:', err)
-        return NextResponse.json({ error: err.message || 'Payment verification failed' }, { status: 500 })
+        console.error('Razorpay verify error:', err?.message)
+        return NextResponse.json({ error: 'Payment verification failed' }, { status: 500 })
     }
 }

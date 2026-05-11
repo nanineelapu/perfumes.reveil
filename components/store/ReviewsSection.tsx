@@ -68,7 +68,7 @@ export function ReviewsSection({ reviews = [] }: { reviews?: Review[] }) {
                     fontWeight: 400,
                     letterSpacing: '-0.02em'
                 }}>
-                    Customer <span style={{ fontStyle: 'italic', opacity: 0.7 }}>Insights_</span>
+                    Customer <span style={{ fontStyle: 'italic', color: '#d4af37' }}>Insights</span>
                 </h2>
             </header>
 

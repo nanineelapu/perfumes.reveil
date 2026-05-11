@@ -1,29 +1,51 @@
 import { NextResponse } from 'next/server'
 import { sendMessageCentralOTP } from '@/lib/messageCentral'
+import { recordOtpSend } from '@/lib/auth/otp-store'
+import { normalizeIndianPhone } from '@/lib/validators'
+import { rateLimit, getClientIp, rateLimitResponse } from '@/lib/rate-limit'
+import { verifyTurnstile } from '@/lib/captcha'
 
 export async function POST(request: Request) {
     try {
-        const body = await request.text()
-        if (!body) {
-            return NextResponse.json({ error: 'Request body is empty' }, { status: 400 })
-        }
-
-        let parsed: { phone?: string }
+        let body: any
         try {
-            parsed = JSON.parse(body)
+            body = await request.json()
         } catch {
-            return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 })
+            return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
         }
 
-        const { phone } = parsed
-
-        if (!phone) {
-            return NextResponse.json({ error: 'Phone number is required' }, { status: 400 })
+        const phoneDigits = normalizeIndianPhone(body?.phone)
+        if (!phoneDigits) {
+            return NextResponse.json({ error: 'Please enter a valid 10-digit Indian mobile number.' }, { status: 400 })
         }
 
-        const result = await sendMessageCentralOTP(phone)
+        // Captcha is optional in dev — required in prod (see lib/captcha.ts).
+        const captchaToken: string | undefined = typeof body?.captchaToken === 'string' ? body.captchaToken : undefined
+        const ip = getClientIp(request)
+        const captchaOk = await verifyTurnstile(captchaToken, ip)
+        if (!captchaOk) {
+            return NextResponse.json({ error: 'Captcha verification failed. Please refresh and try again.' }, { status: 400 })
+        }
+
+        // Rate-limit: 1 OTP per 60s per phone, 5 per hour per phone, 30 per hour per IP.
+        const perPhoneShort = await rateLimit({ key: `otp:send:phone:short:${phoneDigits}`, limit: 1, windowSec: 60 })
+        if (!perPhoneShort.ok) return rateLimitResponse(perPhoneShort)
+        const perPhoneHour = await rateLimit({ key: `otp:send:phone:hour:${phoneDigits}`, limit: 5, windowSec: 3600 })
+        if (!perPhoneHour.ok) return rateLimitResponse(perPhoneHour)
+        const perIpHour = await rateLimit({ key: `otp:send:ip:hour:${ip}`, limit: 30, windowSec: 3600 })
+        if (!perIpHour.ok) return rateLimitResponse(perIpHour)
+
+        const result = await sendMessageCentralOTP(phoneDigits)
 
         if (result.success && result.verificationId) {
+            // Bind verificationId to this phone so /verify can refuse cross-phone use.
+            try {
+                await recordOtpSend(result.verificationId, phoneDigits)
+            } catch (err) {
+                console.error('[OTP Send] Failed to record binding')
+                return NextResponse.json({ error: 'OTP service error. Please try again.' }, { status: 500 })
+            }
+
             return NextResponse.json({
                 success: true,
                 verificationId: result.verificationId,
@@ -32,11 +54,11 @@ export async function POST(request: Request) {
         }
 
         return NextResponse.json(
-            { error: result.message || 'Failed to send OTP. Please try again.' },
+            { error: 'Failed to send OTP. Please try again.' },
             { status: 400 }
         )
     } catch (error: any) {
-        console.error('[OTP Send Route] Error:', error)
-        return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 })
+        console.error('[OTP Send Route] Error')
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     }
 }

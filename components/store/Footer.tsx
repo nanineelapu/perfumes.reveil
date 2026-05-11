@@ -301,7 +301,6 @@ export function Footer({ theme = 'dark' }: FooterProps) {
                         <img src="https://upload.wikimedia.org/wikipedia/commons/c/c7/Google_Pay_Logo_%282020%29.svg" alt="Google Pay" style={{ height: '14px', filter: isLight ? 'none' : 'brightness(0) invert(1)' }} />
                         <img src="https://upload.wikimedia.org/wikipedia/commons/7/71/PhonePe_Logo.svg" alt="PhonePe" style={{ height: '16px', filter: isLight ? 'none' : 'brightness(0) invert(1)' }} />
                         <img src="https://upload.wikimedia.org/wikipedia/commons/2/24/Paytm_Logo_%28standalone%29.svg" alt="Paytm" style={{ height: '14px', filter: isLight ? 'none' : 'brightness(0) invert(1)' }} />
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/8/89/BHIM_SVG_Logo.svg" alt="BHIM UPI" style={{ height: '18px', filter: isLight ? 'none' : 'brightness(0) invert(1)' }} />
                     </div>
 
                     {/* Designed By */}

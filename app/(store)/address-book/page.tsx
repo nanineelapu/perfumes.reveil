@@ -338,7 +338,7 @@ export default function AddressBookPage() {
                             <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? '20px' : '28px' }}>
                                 <div>
                                     <label style={labelStyle}>Full Name *</label>
-                                    <input style={inputStyle} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="e.g. Jyoti Ranjan Sahoo" required />
+                                    <input style={inputStyle} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Your full name" required />
                                 </div>
                                 <div>
                                     <label style={labelStyle}>Phone</label>
@@ -346,23 +346,23 @@ export default function AddressBookPage() {
                                 </div>
                                 <div style={{ gridColumn: 'span 2' }}>
                                     <label style={labelStyle}>Address Line 1 *</label>
-                                    <input style={inputStyle} value={form.line1} onChange={e => setForm({ ...form, line1: e.target.value })} placeholder="e.g. Plot 12, Bada Bazaar" required />
+                                    <input style={inputStyle} value={form.line1} onChange={e => setForm({ ...form, line1: e.target.value })} placeholder="Your house, street name" required />
                                 </div>
                                 <div style={{ gridColumn: 'span 2' }}>
                                     <label style={labelStyle}>Address Line 2</label>
-                                    <input style={inputStyle} value={form.line2} onChange={e => setForm({ ...form, line2: e.target.value })} placeholder="e.g. Near Jagannath Temple (optional)" />
+                                    <input style={inputStyle} value={form.line2} onChange={e => setForm({ ...form, line2: e.target.value })} placeholder="Your landmark or area (optional)" />
                                 </div>
                                 <div>
                                     <label style={labelStyle}>City *</label>
-                                    <input style={inputStyle} value={form.city} onChange={e => setForm({ ...form, city: e.target.value })} placeholder="e.g. Brahmapur" required />
+                                    <input style={inputStyle} value={form.city} onChange={e => setForm({ ...form, city: e.target.value })} placeholder="Your city" required />
                                 </div>
                                 <div>
                                     <label style={labelStyle}>State</label>
-                                    <input style={inputStyle} value={form.state} onChange={e => setForm({ ...form, state: e.target.value })} placeholder="e.g. Odisha" />
+                                    <input style={inputStyle} value={form.state} onChange={e => setForm({ ...form, state: e.target.value })} placeholder="Your state" />
                                 </div>
                                 <div>
                                     <label style={labelStyle}>Pincode *</label>
-                                    <input style={inputStyle} value={form.pincode} onChange={e => setForm({ ...form, pincode: e.target.value })} placeholder="760001" maxLength={6} required />
+                                    <input style={inputStyle} value={form.pincode} onChange={e => setForm({ ...form, pincode: e.target.value })} placeholder="Your pincode" maxLength={6} required />
                                 </div>
                             </div>
 

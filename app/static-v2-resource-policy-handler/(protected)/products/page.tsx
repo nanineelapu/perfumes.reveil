@@ -2,10 +2,9 @@ import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import DeleteProductButton from '@/components/admin/DeleteProductButton'
-import { Button } from '@/components/ui/button'
 import CategoryFilter from '@/components/admin/CategoryFilter'
 import PageHeader from '../_components/PageHeader'
-import { Plus, Search, Filter, Tag } from 'lucide-react'
+import { Plus, Search, Tag } from 'lucide-react'
 
 export default async function AdminProductsPage({
     searchParams,
@@ -41,33 +40,33 @@ export default async function AdminProductsPage({
     const categories = categoriesRes.data || []
 
     return (
-        <div className="space-y-12">
+        <div className="space-y-10">
             <PageHeader
-                title="Product Gallery"
-                subtitle="Manage and organize your luxury fragrance inventory."
+                title="Products"
+                subtitle="Manage your fragrance catalogue."
             >
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
                     <CategoryFilter
                         categories={categories}
                         currentCategory={categoryFilter}
                     />
                     <Link href="/static-v2-resource-policy-handler/products/new">
-                        <button className="flex items-center gap-2 px-6 py-2.5 bg-black text-white text-xs font-bold tracking-widest uppercase rounded-full hover:bg-[#d4af37] transition-all duration-300">
+                        <button className="flex items-center gap-2 px-5 py-2.5 bg-black text-white text-sm font-semibold rounded-full hover:bg-[#d4af37] transition-all duration-300">
                             <Plus className="w-4 h-4" />
-                            New Fragrance
+                            Add Product
                         </button>
                     </Link>
                 </div>
             </PageHeader>
 
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-                <div className="p-8 border-b border-gray-50 bg-[#fcfcfc]/50 flex flex-col md:flex-row justify-between gap-4">
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <div className="p-5 border-b border-gray-100 bg-gray-50/40 flex flex-col md:flex-row justify-between gap-4">
                     <div className="relative flex-1 max-w-md">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <input
                             type="text"
-                            placeholder="Search collection..."
-                            className="w-full pl-12 pr-4 py-3 bg-white border border-gray-100 rounded-2xl text-xs focus:ring-2 focus:ring-[#d4af37]/20 focus:border-[#d4af37] outline-none transition-all"
+                            placeholder="Search products…"
+                            className="w-full pl-11 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#d4af37]/20 focus:border-[#d4af37] outline-none transition-all"
                         />
                     </div>
                 </div>
@@ -75,69 +74,71 @@ export default async function AdminProductsPage({
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
-                            <tr className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400 border-b border-gray-50 bg-gray-50/30">
-                                <th className="px-8 py-5">Essence</th>
-                                <th className="px-8 py-5">Collection Name</th>
-                                <th className="px-8 py-5">Valuation</th>
-                                <th className="px-8 py-5">Stock Level</th>
-                                <th className="px-8 py-5">Category</th>
-                                <th className="px-8 py-5">Featured</th>
-                                <th className="px-8 py-5 text-right">Actions</th>
+                            <tr className="text-xs font-semibold uppercase tracking-wider text-gray-500 border-b border-gray-100 bg-gray-50">
+                                <th className="px-5 py-4">Image</th>
+                                <th className="px-5 py-4">Name</th>
+                                <th className="px-5 py-4">Price</th>
+                                <th className="px-5 py-4">Stock</th>
+                                <th className="px-5 py-4">Category</th>
+                                <th className="px-5 py-4">Featured</th>
+                                <th className="px-5 py-4 text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-50">
+                        <tbody className="divide-y divide-gray-100">
                             {products?.map((product) => (
-                                <tr key={product.id} className="group hover:bg-gray-50/50 transition-colors">
-                                    <td className="px-8 py-6">
+                                <tr key={product.id} className="hover:bg-gray-50 transition-colors">
+                                    <td className="px-5 py-5">
                                         {product.images?.[0] ? (
-                                            <div className="relative w-14 h-14 rounded-2xl overflow-hidden border border-gray-100 shadow-sm group-hover:border-[#d4af37]/30 transition-all duration-500">
+                                            <div className="relative w-14 h-14 rounded-xl overflow-hidden border border-gray-100 shadow-sm">
                                                 <img
                                                     src={product.images[0]}
                                                     alt={product.name}
-                                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                                    className="w-full h-full object-cover"
                                                 />
                                             </div>
                                         ) : (
-                                            <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center text-[8px] text-gray-300 uppercase tracking-tighter text-center px-1 border border-dashed border-gray-200">
-                                                No Image
+                                            <div className="w-14 h-14 bg-gray-50 rounded-xl flex items-center justify-center text-xs text-gray-300 border border-dashed border-gray-200">
+                                                No image
                                             </div>
                                         )}
                                     </td>
-                                    <td className="px-8 py-6">
-                                        <div className="text-sm font-semibold text-gray-900 group-hover:text-black transition-colors">{product.name}</div>
-                                        <div className="text-[9px] text-gray-400 uppercase tracking-widest mt-1">REF: {product.id.slice(0, 8)}</div>
+                                    <td className="px-5 py-5">
+                                        <div className="text-sm font-semibold text-gray-900">{product.name}</div>
+                                        <div className="text-xs text-gray-400 mt-1 font-mono">REF: {product.id.slice(0, 8).toUpperCase()}</div>
                                     </td>
-                                    <td className="px-8 py-6 text-xs font-medium text-black">₹{product.price.toLocaleString()}</td>
-                                    <td className="px-8 py-6">
+                                    <td className="px-5 py-5">
+                                        <div className="text-sm font-semibold text-black">₹{product.price.toLocaleString()}</div>
+                                    </td>
+                                    <td className="px-5 py-5">
                                         <div className="flex items-center gap-2">
                                             <div className={cn(
-                                                "w-1.5 h-1.5 rounded-full",
+                                                "w-2 h-2 rounded-full",
                                                 product.stock < 5 ? "bg-red-500 animate-pulse" : "bg-emerald-500"
                                             )} />
-                                            <span className="text-[10px] font-bold tracking-widest uppercase text-gray-700">
-                                                {product.stock} <span className="text-gray-400 font-medium lowercase">units</span>
+                                            <span className="text-sm font-semibold text-gray-800">
+                                                {product.stock} <span className="text-gray-400 font-normal">in stock</span>
                                             </span>
                                         </div>
                                     </td>
-                                    <td className="px-8 py-6">
-                                        <span className="px-3 py-1 rounded-full bg-gray-100 text-[9px] font-bold tracking-widest uppercase text-gray-500">
+                                    <td className="px-5 py-5">
+                                        <span className="inline-flex px-3 py-1 rounded-full bg-gray-100 text-xs font-semibold text-gray-700 capitalize">
                                             {product.category ?? 'Uncategorized'}
                                         </span>
                                     </td>
-                                    <td className="px-8 py-6">
+                                    <td className="px-5 py-5">
                                         {product.is_featured ? (
-                                            <span className="text-[#d4af37] text-[9px] font-bold tracking-widest uppercase px-3 py-1 bg-[#d4af37]/10 rounded-full border border-[#d4af37]/20">
+                                            <span className="inline-flex px-3 py-1 rounded-full bg-[#d4af37]/10 text-[#d4af37] text-xs font-semibold border border-[#d4af37]/20">
                                                 Featured
                                             </span>
                                         ) : (
-                                            <span className="text-gray-300 text-[9px] tracking-widest uppercase">Standard</span>
+                                            <span className="text-sm text-gray-400">Standard</span>
                                         )}
                                     </td>
-                                    <td className="px-8 py-6">
-                                        <div className="flex items-center justify-end gap-4">
+                                    <td className="px-5 py-5">
+                                        <div className="flex items-center justify-end gap-3">
                                             <Link
                                                 href={`/static-v2-resource-policy-handler/products/${product.id}/edit`}
-                                                className="text-[10px] font-bold tracking-widest uppercase text-gray-400 hover:text-black transition-colors"
+                                                className="text-sm font-semibold text-gray-600 hover:text-black transition-colors"
                                             >
                                                 Edit
                                             </Link>
@@ -151,15 +152,13 @@ export default async function AdminProductsPage({
                 </div>
 
                 {(!products || products.length === 0) && (
-                    <div className="py-32 text-center bg-gray-50/30">
-                        <div className="w-16 h-16 bg-white rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-sm">
-                            <Tag className="w-6 h-6 text-gray-200" />
+                    <div className="py-24 text-center bg-gray-50">
+                        <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
+                            <Tag className="w-6 h-6 text-gray-300" />
                         </div>
-                        <p className="text-sm font-light tracking-wide text-gray-400">
-                            No collections found in the system.
-                        </p>
-                        <Link href="/static-v2-resource-policy-handler/products/new" className="text-[#d4af37] text-[10px] font-bold tracking-widest uppercase mt-6 inline-block hover:underline underline-offset-8">
-                            + Initialize your first fragrance
+                        <p className="text-base font-semibold text-gray-500">No products yet</p>
+                        <Link href="/static-v2-resource-policy-handler/products/new" className="text-[#d4af37] text-sm font-semibold mt-3 inline-block hover:underline underline-offset-4">
+                            + Add your first product
                         </Link>
                     </div>
                 )}
@@ -167,4 +166,3 @@ export default async function AdminProductsPage({
         </div>
     )
 }
-

@@ -162,6 +162,9 @@ function AuthPageContent() {
                     otp: formData.otp,
                     verificationId,
                     mode: authMode,
+                    email: formData.email?.trim() || undefined,
+                    firstName: formData.firstName?.trim() || undefined,
+                    lastName: formData.lastName?.trim() || undefined,
                 }),
             })
 

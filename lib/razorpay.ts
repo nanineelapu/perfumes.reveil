@@ -14,18 +14,46 @@ export function getRazorpay(): Razorpay {
     return cached
 }
 
+function safeEqualHex(a: string, b: string): boolean {
+    if (typeof a !== 'string' || typeof b !== 'string') return false
+    if (a.length !== b.length) return false
+    try {
+        return crypto.timingSafeEqual(Buffer.from(a, 'hex'), Buffer.from(b, 'hex'))
+    } catch {
+        return false
+    }
+}
+
 export function verifyRazorpaySignature(params: {
     razorpay_order_id: string
     razorpay_payment_id: string
     razorpay_signature: string
 }): boolean {
     const secret = process.env.RAZORPAY_KEY_SECRET
-    if (!secret) return false
+    if (!secret) {
+        console.error('[razorpay] RAZORPAY_KEY_SECRET not configured — refusing verification')
+        return false
+    }
     const expected = crypto
         .createHmac('sha256', secret)
         .update(`${params.razorpay_order_id}|${params.razorpay_payment_id}`)
         .digest('hex')
-    return expected === params.razorpay_signature
+    return safeEqualHex(expected, params.razorpay_signature)
+}
+
+/**
+ * Verify a Razorpay webhook signature. The webhook secret is separate from the
+ * key secret and is configured per-webhook in the Razorpay dashboard.
+ */
+export function verifyRazorpayWebhookSignature(rawBody: string, signature: string | null): boolean {
+    const secret = process.env.RAZORPAY_WEBHOOK_SECRET
+    if (!secret) {
+        console.error('[razorpay] RAZORPAY_WEBHOOK_SECRET not configured — refusing webhook')
+        return false
+    }
+    if (!signature) return false
+    const expected = crypto.createHmac('sha256', secret).update(rawBody).digest('hex')
+    return safeEqualHex(expected, signature)
 }
 
 // Free delivery threshold (rupees). Orders >= this value ship free.

@@ -1,17 +1,22 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/auth/require'
 import { NextResponse } from 'next/server'
 
 export async function PATCH(
     request: Request,
     { params }: { params: Promise<{ id: string }> }
 ) {
-    const { id } = await params;
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { id } = await params
+    const auth = await requireAdmin()
+    if (!auth.ok) return auth.response
 
-    const body = await request.json()
-    const { data, error } = await supabase
+    let body: Record<string, unknown>
+    try {
+        body = await request.json()
+    } catch {
+        return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
+    }
+
+    const { data, error } = await auth.supabase
         .from('homepage_curation')
         .update(body)
         .eq('id', id)
@@ -23,15 +28,14 @@ export async function PATCH(
 }
 
 export async function DELETE(
-    request: Request,
+    _request: Request,
     { params }: { params: Promise<{ id: string }> }
 ) {
-    const { id } = await params;
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { id } = await params
+    const auth = await requireAdmin()
+    if (!auth.ok) return auth.response
 
-    const { error } = await supabase
+    const { error } = await auth.supabase
         .from('homepage_curation')
         .delete()
         .eq('id', id)

@@ -1,8 +1,13 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { requireUser, requireAdmin } from '@/lib/auth/require'
 import { NextResponse } from 'next/server'
+import { clampInt, clampString, isUuid } from '@/lib/validators'
 
-// GET — fetch reviews
+const REVIEW_ALLOWED_UPDATE_FIELDS = [
+    'rating', 'comment', 'is_featured', 'reviewer_name', 'reviewer_avatar',
+] as const
+
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const product_id = searchParams.get('product_id')
@@ -10,23 +15,14 @@ export async function GET(request: Request) {
     const featured = searchParams.get('featured') === 'true'
 
     const supabase = await createClient()
-    const activeClient = createAdminClient()
 
-    // If admin, check authorization
     if (admin) {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-        
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', user.id)
-            .single()
-        
-        if (profile?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+        const auth = await requireAdmin()
+        if (!auth.ok) return auth.response
     }
 
-    let query = activeClient
+    const adminClient = createAdminClient()
+    let query = adminClient
         .from('reviews')
         .select(`
             id,
@@ -42,79 +38,90 @@ export async function GET(request: Request) {
         `)
         .order('created_at', { ascending: false })
 
-    if (product_id) query = query.eq('product_id', product_id)
+    if (product_id) {
+        if (!isUuid(product_id)) return NextResponse.json({ error: 'Bad product_id' }, { status: 400 })
+        query = query.eq('product_id', product_id)
+    }
     if (featured) query = query.eq('is_featured', true)
-    if (!admin && !product_id && !featured) query = query.limit(10) // default limit for public feed
+    if (!admin && !product_id && !featured) query = query.limit(10)
 
     const { data, error } = await query
-
-    if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 })
-    }
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
     return NextResponse.json({ reviews: data ?? [] })
 }
 
-// POST — submit/create a review
 export async function POST(request: Request) {
-    const supabase = await createClient()
+    const auth = await requireUser()
+    if (!auth.ok) return auth.response
+    const { user, supabase } = auth
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    let body: any
+    try {
+        body = await request.json()
+    } catch {
+        return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
     }
 
-    // Check if admin is creating a manual review
+    const rating = clampInt(body?.rating, 1, 5)
+    if (!rating) return NextResponse.json({ error: 'rating must be 1-5' }, { status: 400 })
+
+    const comment = body?.comment != null ? clampString(body.comment, 2000) : null
+    if (body?.comment != null && !comment) {
+        return NextResponse.json({ error: 'Invalid comment' }, { status: 400 })
+    }
+
+    const productId = body?.product_id
+    if (productId && !isUuid(productId)) {
+        return NextResponse.json({ error: 'Invalid product_id' }, { status: 400 })
+    }
+    const orderId = body?.order_id
+    if (orderId && !isUuid(orderId)) {
+        return NextResponse.json({ error: 'Invalid order_id' }, { status: 400 })
+    }
+
     const { data: profile } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', user.id)
         .single()
-    
     const isAdmin = profile?.role === 'admin'
 
-    const body = await request.json()
-    const { product_id, rating, comment, order_id, reviewer_name, reviewer_avatar, is_featured } = body
-
-    if (!rating) {
-        return NextResponse.json({ error: 'rating is required' }, { status: 400 })
-    }
-
-    // 1. If not admin, check if user already reviewed this specific product
-    if (!isAdmin && product_id) {
+    if (!isAdmin && productId) {
         const { data: existing } = await supabase
             .from('reviews')
             .select('id')
             .eq('user_id', user.id)
-            .eq('product_id', product_id)
-            .single()
-
+            .eq('product_id', productId)
+            .maybeSingle()
         if (existing) {
             return NextResponse.json({ error: 'You have already reviewed this product' }, { status: 400 })
         }
     }
 
-    // 2. Insert review
-    const insertData: any = {
+    const insertData: Record<string, unknown> = {
         rating,
         comment,
-        is_featured: is_featured ?? false
+        is_featured: isAdmin ? !!body?.is_featured : false,
     }
 
     if (isAdmin) {
-        // Admin can set everything
-        insertData.reviewer_name = reviewer_name
-        insertData.reviewer_avatar = reviewer_avatar
-        insertData.product_id = product_id || null
-        insertData.user_id = body.user_id || user.id // Default to admin but allow impersonation or just leave user_id out
+        // Admin may create reviews under a synthetic reviewer (e.g. seeded
+        // reviews) but the user_id is ALWAYS the admin's own — never trust
+        // body.user_id (used to allow arbitrary impersonation).
+        const reviewerName = clampString(body?.reviewer_name, 80)
+        if (reviewerName) insertData.reviewer_name = reviewerName
+        const reviewerAvatar = clampString(body?.reviewer_avatar, 500)
+        if (reviewerAvatar) insertData.reviewer_avatar = reviewerAvatar
+        insertData.product_id = productId || null
+        insertData.user_id = user.id
     } else {
         insertData.user_id = user.id
-        insertData.product_id = product_id
-        insertData.order_id = order_id
+        insertData.product_id = productId
+        insertData.order_id = orderId
     }
 
     const activeClient = isAdmin ? createAdminClient() : supabase
-
     const { data: review, error: reviewError } = await activeClient
         .from('reviews')
         .insert(insertData)
@@ -122,47 +129,58 @@ export async function POST(request: Request) {
         .single()
 
     if (reviewError) {
-        console.error('Supabase review insert error:', reviewError)
-        return NextResponse.json({ error: reviewError.message, details: reviewError }, { status: 500 })
+        console.error('Supabase review insert error')
+        return NextResponse.json({ error: 'Could not submit review' }, { status: 500 })
     }
 
-    // 3. Update Product Average Rating if product_id exists
-    if (product_id) {
+    if (productId) {
         try {
             const { data: allRatings } = await supabase
                 .from('reviews')
                 .select('rating')
-                .eq('product_id', product_id)
-
+                .eq('product_id', productId)
             if (allRatings && allRatings.length > 0) {
-                const avgRating = allRatings.reduce((sum: number, r: any) => sum + r.rating, 0) / allRatings.length
-                
-                await supabase
+                const avg = allRatings.reduce((s: number, r: any) => s + r.rating, 0) / allRatings.length
+                await createAdminClient()
                     .from('products')
-                    .update({ rating: parseFloat(avgRating.toFixed(1)) })
-                    .eq('id', product_id)
+                    .update({ rating: parseFloat(avg.toFixed(1)) })
+                    .eq('id', productId)
             }
-        } catch (err) {
-            console.error('Error updating product rating:', err)
+        } catch {
+            // best-effort
         }
     }
 
     return NextResponse.json({ review, action: 'submitted' }, { status: 201 })
 }
 
-// PATCH — update a review (Admin only)
 export async function PATCH(request: Request) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const auth = await requireAdmin()
+    if (!auth.ok) return auth.response
 
-    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-    if (profile?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    let body: any
+    try {
+        body = await request.json()
+    } catch {
+        return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
+    }
+    const { id, ...rest } = body || {}
+    if (!isUuid(id)) return NextResponse.json({ error: 'ID is required' }, { status: 400 })
 
-    const body = await request.json()
-    const { id, ...updates } = body
-
-    if (!id) return NextResponse.json({ error: 'ID is required' }, { status: 400 })
+    const updates: Record<string, unknown> = {}
+    for (const f of REVIEW_ALLOWED_UPDATE_FIELDS) {
+        if (f in rest) updates[f] = rest[f]
+    }
+    if (typeof updates.comment === 'string') {
+        const c = clampString(updates.comment, 2000)
+        if (!c) return NextResponse.json({ error: 'Invalid comment' }, { status: 400 })
+        updates.comment = c
+    }
+    if ('rating' in updates) {
+        const r = clampInt(updates.rating, 1, 5)
+        if (!r) return NextResponse.json({ error: 'Invalid rating' }, { status: 400 })
+        updates.rating = r
+    }
 
     const adminClient = createAdminClient()
     const { data, error } = await adminClient
@@ -176,19 +194,13 @@ export async function PATCH(request: Request) {
     return NextResponse.json(data)
 }
 
-// DELETE — remove a review (Admin only)
 export async function DELETE(request: Request) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-    if (profile?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    const auth = await requireAdmin()
+    if (!auth.ok) return auth.response
 
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
-
-    if (!id) return NextResponse.json({ error: 'ID is required' }, { status: 400 })
+    if (!id || !isUuid(id)) return NextResponse.json({ error: 'ID is required' }, { status: 400 })
 
     const adminClient = createAdminClient()
     const { error } = await adminClient

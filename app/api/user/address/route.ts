@@ -1,31 +1,62 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { requireUser } from '@/lib/auth/require'
+import { clampString, isUuid, normalizeIndianPhone } from '@/lib/validators'
 
 export async function POST(request: Request) {
     try {
-        const supabase = await createClient()
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
+        const auth = await requireUser()
+        if (!auth.ok) return auth.response
+        const { user, supabase } = auth
 
-        if (authError || !user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        let body: any
+        try {
+            body = await request.json()
+        } catch {
+            return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
         }
 
-        const body = await request.json()
-        const { 
-            id,
-            label, 
-            full_name, 
-            phone, 
-            address_line1, 
-            address_line2, 
-            city, 
-            state, 
-            pincode,
-            is_default,
-            updateOnly
-        } = body
+        const {
+            id, label, full_name, phone, address_line1, address_line2,
+            city, state, pincode, is_default, updateOnly,
+        } = body || {}
 
-        // 1. If this is set as default, unset others first
+        if (id !== undefined && id !== null && !isUuid(id)) {
+            return NextResponse.json({ error: 'Invalid id' }, { status: 400 })
+        }
+
+        // ── set-default-only shortcut ───────────────────────────────
+        if (updateOnly && id) {
+            await supabase
+                .from('addresses')
+                .update({ is_default: false })
+                .eq('user_id', user.id)
+            const { error } = await supabase
+                .from('addresses')
+                .update({ is_default: true })
+                .eq('id', id)
+                .eq('user_id', user.id)
+            if (error) return NextResponse.json({ error: 'Could not set default' }, { status: 500 })
+            return NextResponse.json({ success: true })
+        }
+
+        // ── full upsert: validate everything ────────────────────────
+        const safe = {
+            label: clampString(label, 40),
+            full_name: clampString(full_name, 80),
+            address_line1: clampString(address_line1, 200),
+            address_line2: address_line2 ? clampString(address_line2, 200) : null,
+            city: clampString(city, 80),
+            state: clampString(state, 80),
+            pincode: typeof pincode === 'string' && /^[1-9][0-9]{5}$/.test(pincode) ? pincode : null,
+        }
+        if (!safe.label || !safe.full_name || !safe.address_line1 || !safe.city || !safe.state || !safe.pincode) {
+            return NextResponse.json({ error: 'Missing or invalid address fields' }, { status: 400 })
+        }
+        const phoneDigits = normalizeIndianPhone(phone)
+        if (!phoneDigits) {
+            return NextResponse.json({ error: 'Invalid phone' }, { status: 400 })
+        }
+
         if (is_default) {
             await supabase
                 .from('addresses')
@@ -33,86 +64,70 @@ export async function POST(request: Request) {
                 .eq('user_id', user.id)
         }
 
-        // 2. If updateOnly (for set default), just update that row
-        if (updateOnly && id) {
-            const { error } = await supabase
-                .from('addresses')
-                .update({ is_default: true })
-                .eq('id', id)
-                .eq('user_id', user.id)
-            if (error) throw error
-            return NextResponse.json({ success: true })
-        }
-
-        // 3. Upsert the address
         const { data, error } = await supabase
             .from('addresses')
             .upsert({
                 ...(id ? { id } : {}),
                 user_id: user.id,
-                label,
-                full_name,
-                phone,
-                address_line1,
-                address_line2,
-                city,
-                state,
-                pincode,
-                is_default: is_default || false
+                label: safe.label,
+                full_name: safe.full_name,
+                phone: `+91${phoneDigits}`,
+                address_line1: safe.address_line1,
+                address_line2: safe.address_line2,
+                city: safe.city,
+                state: safe.state,
+                pincode: safe.pincode,
+                is_default: !!is_default,
             }, { onConflict: 'id' })
             .select()
             .single()
 
-        if (error) throw error
+        if (error) return NextResponse.json({ error: 'Could not save address' }, { status: 500 })
 
         return NextResponse.json({ success: true, address: data })
-
     } catch (err: any) {
-        console.error('Save Address Error:', err)
-        return NextResponse.json({ error: err.message }, { status: 500 })
+        console.error('Save Address Error')
+        return NextResponse.json({ error: 'Internal error' }, { status: 500 })
     }
 }
 
 export async function DELETE(request: Request) {
+    const auth = await requireUser()
+    if (!auth.ok) return auth.response
+    const { user, supabase } = auth
+
+    let body: any
     try {
-        const supabase = await createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-        const { id } = await request.json()
-        if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 })
-
-        const { error } = await supabase
-            .from('addresses')
-            .delete()
-            .eq('id', id)
-            .eq('user_id', user.id)
-
-        if (error) throw error
-        return NextResponse.json({ success: true })
-    } catch (err: any) {
-        return NextResponse.json({ error: err.message }, { status: 500 })
+        body = await request.json()
+    } catch {
+        return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
     }
+    const { id } = body || {}
+    if (!isUuid(id)) return NextResponse.json({ error: 'ID required' }, { status: 400 })
+
+    const { error } = await supabase
+        .from('addresses')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.id)
+
+    if (error) return NextResponse.json({ error: 'Could not delete' }, { status: 500 })
+    return NextResponse.json({ success: true })
 }
 
 export async function GET() {
-    try {
-        const supabase = await createClient()
-        const { data: { user } } = await supabase.auth.getUser()
+    const auth = await requireUser()
+    if (!auth.ok) return auth.response
+    const { user, supabase } = auth
 
-        if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { data, error } = await supabase
+        .from('addresses')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('is_default', { ascending: false })
+        .order('created_at', { ascending: false })
 
-        const { data, error } = await supabase
-            .from('addresses')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('is_default', { ascending: false })
-            .order('created_at', { ascending: false })
+    if (error) return NextResponse.json({ error: 'Could not load addresses' }, { status: 500 })
 
-        if (error) throw error
-
-        return NextResponse.json({ addresses: data })
-    } catch (err: any) {
-        return NextResponse.json({ error: err.message }, { status: 500 })
-    }
+    return NextResponse.json({ addresses: data })
 }

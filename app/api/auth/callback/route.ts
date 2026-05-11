@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { isSafeInternalPath } from '@/lib/validators'
 
 /**
  * Supabase Auth Callback Handler
@@ -18,7 +19,11 @@ import { cookies } from 'next/headers'
 export async function GET(request: Request) {
     const requestUrl = new URL(request.url)
     const code = requestUrl.searchParams.get('code')
-    const next = requestUrl.searchParams.get('next') ?? '/orders'
+    const requestedNext = requestUrl.searchParams.get('next') ?? '/orders'
+    // Reject absolute URLs, protocol-relative URLs, and anything that doesn't
+    // look like a safe internal path — otherwise the magic link becomes an
+    // open redirect to any attacker domain.
+    const next = isSafeInternalPath(requestedNext) ? requestedNext : '/orders'
 
     // If no code is present, redirect to home
     if (!code) {

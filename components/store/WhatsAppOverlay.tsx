@@ -4,8 +4,7 @@ import React from 'react'
 import { motion } from 'framer-motion'
 
 export function WhatsAppOverlay() {
-    // Client can replace this with their actual WhatsApp link later
-    const whatsappLink = "https://wa.me/1234567890"
+    const whatsappLink = "https://wa.me/917008879914"
 
     return (
         <>

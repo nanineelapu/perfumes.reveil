@@ -1,16 +1,27 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { requireUser } from '@/lib/auth/require'
+import { isUuid, clampInt } from '@/lib/validators'
+import { rateLimit, getClientIp, rateLimitResponse } from '@/lib/rate-limit'
+import { createShiprocketOrderForOrderId } from '@/lib/fulfillment'
+import { computeShipping } from '@/lib/razorpay'
 import { NextResponse } from 'next/server'
+
+const COD_MAX_TOTAL_INR = 5000
+const VALID_STATUSES = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled']
 
 export async function GET(request: Request) {
     const supabase = await createClient()
     const { searchParams } = new URL(request.url)
 
-    const status = searchParams.get('status')
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '20')
+    const statusFilter = searchParams.get('status')
+    if (statusFilter && !VALID_STATUSES.includes(statusFilter)) {
+        return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
+    }
+    const page = clampInt(searchParams.get('page') || '1', 1, 100000) || 1
+    const limit = clampInt(searchParams.get('limit') || '20', 1, 100) || 20
     const offset = (page - 1) * limit
 
-    // Check if admin (admins see all orders, users see only their own)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -42,66 +53,79 @@ export async function GET(request: Request) {
         .order('created_at', { ascending: false })
         .range(offset, offset + limit - 1)
 
-    // Non-admin users only see their own orders
     if (!isAdmin) query = query.eq('user_id', user.id)
-
-    // Optional status filter
-    if (status) query = query.eq('status', status)
+    if (statusFilter) query = query.eq('status', statusFilter)
 
     const { data, error, count } = await query
-
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
     return NextResponse.json({
         orders: data,
         total: count,
         page,
-        totalPages: Math.ceil((count ?? 0) / limit)
+        totalPages: Math.ceil((count ?? 0) / limit),
     })
 }
 
 export async function POST(request: Request) {
-    const supabase = await createClient()
+    const auth = await requireUser()
+    if (!auth.ok) return auth.response
+    const { user, supabase } = auth
 
-    // 1. Auth check
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const rl = await rateLimit({ key: `orders:post:${user.id}`, limit: 10, windowSec: 60 })
+    if (!rl.ok) return rateLimitResponse(rl)
+    const ipRl = await rateLimit({ key: `orders:post:ip:${getClientIp(request)}`, limit: 30, windowSec: 60 })
+    if (!ipRl.ok) return rateLimitResponse(ipRl)
+
+    let body: any
+    try {
+        body = await request.json()
+    } catch {
+        return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
     }
 
-    // 2. Parse body
-    const body = await request.json()
-    const { items, shipping_address, payment_method = 'cod', buy_now = false } = body
+    const { items, shipping_address, payment_method = 'cod', buy_now = false } = body || {}
 
-    // 3. Validate
-    if (!items || !Array.isArray(items) || items.length === 0) {
+    if (!Array.isArray(items) || items.length === 0 || items.length > 50) {
         return NextResponse.json({ error: 'items array is required' }, { status: 400 })
     }
-    if (!shipping_address) {
+    if (!shipping_address || typeof shipping_address !== 'object') {
         return NextResponse.json({ error: 'shipping_address is required' }, { status: 400 })
     }
+    if (payment_method !== 'cod' && payment_method !== 'razorpay') {
+        return NextResponse.json({ error: 'Invalid payment_method' }, { status: 400 })
+    }
+    // Only allow direct creation for COD here — Razorpay must go through
+    // /api/payment/razorpay/verify so the payment is bound to the order.
+    if (payment_method !== 'cod') {
+        return NextResponse.json(
+            { error: 'Use /api/payment/razorpay/verify for online payments' },
+            { status: 400 }
+        )
+    }
 
-    // 4. Verify stock and get live prices from DB
-    //    Never trust prices sent from the client — always read from DB
-    const productIds = items.map((i: any) => i.product_id)
+    // Normalise + validate every line item
+    const normalisedItems: { product_id: string; quantity: number }[] = []
+    for (const it of items) {
+        if (!isUuid(it?.product_id)) return NextResponse.json({ error: 'Invalid product_id' }, { status: 400 })
+        const qty = clampInt(it?.quantity, 1, 20)
+        if (!qty) return NextResponse.json({ error: 'Invalid quantity' }, { status: 400 })
+        normalisedItems.push({ product_id: it.product_id, quantity: qty })
+    }
 
     const { data: products, error: productError } = await supabase
         .from('products')
         .select('id, name, price, stock')
-        .in('id', productIds)
+        .in('id', normalisedItems.map(i => i.product_id))
 
     if (productError) {
-        return NextResponse.json({ error: productError.message }, { status: 500 })
+        return NextResponse.json({ error: 'Could not load products' }, { status: 500 })
     }
 
-    // Check every product exists and has enough stock
-    for (const item of items) {
+    for (const item of normalisedItems) {
         const product = products?.find(p => p.id === item.product_id)
         if (!product) {
-            return NextResponse.json(
-                { error: `Product ${item.product_id} not found` },
-                { status: 404 }
-            )
+            return NextResponse.json({ error: `Product ${item.product_id} not found` }, { status: 404 })
         }
         if (product.stock < item.quantity) {
             return NextResponse.json(
@@ -111,72 +135,37 @@ export async function POST(request: Request) {
         }
     }
 
-    // 5. Calculate total using DB prices (not client prices)
-    const subtotal = items.reduce((sum: number, item: any) => {
+    const subtotal = normalisedItems.reduce((sum, item) => {
         const product = products!.find(p => p.id === item.product_id)!
         return sum + product.price * item.quantity
     }, 0)
-
-    const shippingFee = subtotal >= 249 ? 0 : 50
+    const shippingFee = computeShipping(subtotal)
     const total = subtotal + shippingFee
 
-    // 6. Create order
-    const { data: order, error: orderError } = await supabase
-        .from('orders')
-        .insert({
-            user_id: user.id,
-            total,
-            status: 'pending',
-            payment_method,
-            payment_status: payment_method === 'cod' ? 'pending' : 'pending',
-            shipping_address,
-        })
-        .select()
-        .single()
-
-    if (orderError) {
-        return NextResponse.json({ error: orderError.message }, { status: 500 })
+    if (total > COD_MAX_TOTAL_INR) {
+        return NextResponse.json(
+            { error: `COD is unavailable for orders above ₹${COD_MAX_TOTAL_INR}. Please pay online.` },
+            { status: 400 }
+        )
     }
 
-    // 7. Insert order items with DB prices
-    const orderItems = items.map((item: any) => {
-        const product = products!.find(p => p.id === item.product_id)!
-        return {
-            order_id: order.id,
-            product_id: item.product_id,
-            quantity: item.quantity,
-            price: product.price,   // always use DB price
-        }
+    // Atomic create-order + decrement stock via RPC (see security.sql).
+    const admin = createAdminClient()
+    const { data: orderId, error: rpcError } = await admin.rpc('create_cod_order', {
+        p_user_id: user.id,
+        p_shipping_address: shipping_address,
+        p_items: normalisedItems,
+        p_total: total,
     })
-
-    const { error: itemsError } = await supabase
-        .from('order_items')
-        .insert(orderItems)
-
-    if (itemsError) {
-        // Rollback: delete the order if items failed
-        await supabase.from('orders').delete().eq('id', order.id)
-        return NextResponse.json({ error: itemsError.message }, { status: 500 })
+    if (rpcError || !orderId) {
+        console.error('[orders] create_cod_order RPC error:', rpcError?.message)
+        return NextResponse.json({ error: 'Could not place order' }, { status: 500 })
     }
 
-    // 8. Decrement stock for each product
-    for (const item of items) {
-        const product = products!.find(p => p.id === item.product_id)!
-        await supabase
-            .from('products')
-            .update({ stock: product.stock - item.quantity })
-            .eq('id', item.product_id)
-    }
-
-    // 9. Clear user's cart — skip when this was a "Buy Now" flow
     if (!buy_now) {
-        await supabase
-            .from('cart_items')
-            .delete()
-            .eq('user_id', user.id)
+        await supabase.from('cart_items').delete().eq('user_id', user.id)
     }
 
-    // 10. Return full order with items
     const { data: fullOrder } = await supabase
         .from('orders')
         .select(`
@@ -186,16 +175,16 @@ export async function POST(request: Request) {
         products ( name, images )
       )
     `)
-        .eq('id', order.id)
+        .eq('id', orderId as string)
         .single()
 
-    // 10. TRIGGER SHIPROCKET (Background)
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-    fetch(`${baseUrl}/api/shiprocket/create-order`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ order_id: order.id }),
-    }).catch(err => console.error('Shiprocket Background Trigger Error:', err))
+    ;(async () => {
+        try {
+            await createShiprocketOrderForOrderId(orderId as string)
+        } catch (err: any) {
+            console.error('[orders] Shiprocket trigger failed:', err?.message)
+        }
+    })()
 
     return NextResponse.json(fullOrder, { status: 201 })
 }
