@@ -24,6 +24,16 @@ export default function ContactPage() {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
+  useEffect(() => {
+    const orderId = new URLSearchParams(window.location.search).get('orderId')
+    if (orderId) {
+      setFormData((prev) => ({
+        ...prev,
+        message: `Hi, I need help with my order #${orderId}.\n\n`,
+      }))
+    }
+  }, [])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)

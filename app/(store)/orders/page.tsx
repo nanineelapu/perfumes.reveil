@@ -352,12 +352,22 @@ export default function OrdersPage() {
                                         gap: isMobile ? '20px' : '40px'
                                     }}>
                                         <div style={{ display: 'flex', gap: '32px', justifyContent: isMobile ? 'center' : 'flex-end' }}>
-                                            <button style={{ background: 'none', border: 'none', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '8px', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', fontFamily: 'var(--font-baskerville)' }}>
-                                                <Download size={14} /> Invoices
+                                            <button
+                                                onClick={() => window.open(`/api/orders/${order.id}/invoice`, '_blank', 'noopener,noreferrer')}
+                                                style={{ background: 'none', border: 'none', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '8px', color: 'rgba(255,255,255,0.55)', cursor: 'pointer', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', fontFamily: 'var(--font-baskerville)' }}
+                                                onMouseEnter={(e) => (e.currentTarget.style.color = '#d4af37')}
+                                                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.55)')}
+                                            >
+                                                <Download size={14} /> Invoice
                                             </button>
-                                            <button style={{ background: 'none', border: 'none', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '8px', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', fontFamily: 'var(--font-baskerville)' }}>
+                                            <Link
+                                                href={`/contact?orderId=${order.id.slice(0, 8).toUpperCase()}`}
+                                                style={{ background: 'none', border: 'none', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '8px', color: 'rgba(255,255,255,0.55)', cursor: 'pointer', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', fontFamily: 'var(--font-baskerville)', textDecoration: 'none' }}
+                                                onMouseEnter={(e) => (e.currentTarget.style.color = '#d4af37')}
+                                                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.55)')}
+                                            >
                                                 <HelpCircle size={14} /> Get Help
-                                            </button>
+                                            </Link>
                                         </div>
                                         {order.awb_code ? (
                                             <Link
@@ -432,9 +442,9 @@ export default function OrdersPage() {
 
                 {/* Membership Footer */}
                 <div style={{
-                    marginTop: isMobile ? '100px' : '160px',
+                    marginTop: isMobile ? '48px' : '72px',
                     textAlign: 'center',
-                    padding: isMobile ? '60px 24px' : '100px 40px',
+                    padding: isMobile ? '48px 24px' : '72px 40px',
                     borderRadius: '4px',
                     background: 'linear-gradient(135deg, #111 0%, #050505 100%)',
                     border: '1px solid rgba(255,255,255,0.03)'
