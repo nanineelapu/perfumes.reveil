@@ -20,7 +20,7 @@ export default async function HomePage() {
 
   const [
     { data: slides },
-    { data: trending },
+    { data: allInStockProducts },
     { data: featured },
     { data: categories },
     { data: latestReviews },
@@ -32,9 +32,9 @@ export default async function HomePage() {
       .order('display_order', { ascending: true }),
 
     supabase
-      .from('homepage_curation')
-      .select('*')
-      .order('display_order', { ascending: true }),
+      .from('products')
+      .select('id, name, slug, price, images, category, rating, stock')
+      .gt('stock', 0),
 
     supabase
       .from('products')
@@ -67,6 +67,33 @@ export default async function HomePage() {
 
   // Deduplicate categories with safety fallback
   const uniqueCategories = [...new Set((categories || []).map(p => p.category))] as string[]
+
+  // Pick 4 products for Trending Curation, rotating daily.
+  // Uses today's date (YYYY-MM-DD in IST) as a seed so the selection is
+  // stable for the whole day and shuffles to a new set when the date rolls
+  // over. If the admin has fewer than 4 products, we just show whatever is
+  // available — no padding with placeholders.
+  const seedFromDate = () => {
+    const istNow = new Date(Date.now() + 5.5 * 60 * 60 * 1000)
+    const key = istNow.toISOString().slice(0, 10) // "2026-05-12"
+    let h = 0
+    for (let i = 0; i < key.length; i++) h = ((h << 5) - h + key.charCodeAt(i)) | 0
+    return Math.abs(h) || 1
+  }
+  const mulberry32 = (a: number) => () => {
+    a |= 0; a = (a + 0x6D2B79F5) | 0
+    let t = a
+    t = Math.imul(t ^ (t >>> 15), t | 1)
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+  const rng = mulberry32(seedFromDate())
+  const shuffled = [...(allInStockProducts ?? [])]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1))
+    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  const trending = shuffled.slice(0, 4)
 
   const homepageJsonLd = {
     '@context': 'https://schema.org',
@@ -121,50 +148,6 @@ export default async function HomePage() {
       button_label: 'Shop Now'
     },
     ...slides ?? []
-  ]
-
-  // Premium Mock Data for Editorial Consistency
-  const mockFeatured = [
-    {
-      id: 'perfume-1',
-      name: 'Oudh Noir',
-      slug: 'oudh-noir',
-      price: 12500,
-      images: ['https://images.unsplash.com/photo-1547887538-e3a2f32cb1cc?auto=format&fit=crop&q=80&w=800'],
-      category: 'EXTRAIT',
-      rating: 5,
-      stock: 10
-    },
-    {
-      id: 'perfume-2',
-      name: 'Saffron Silk',
-      slug: 'saffron-silk',
-      price: 8900,
-      images: ['https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&q=80&w=800'],
-      category: 'ESSENCE',
-      rating: 5,
-      stock: 5
-    },
-    {
-      id: 'perfume-3',
-      name: 'Velvet Rose',
-      slug: 'velvet-rose',
-      price: 15200,
-      images: ['https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&q=80&w=800'],
-      category: 'LIMITED',
-      rating: 5,
-      stock: 2
-    },
-    {
-      id: 'perfume-4',
-      name: 'Midnight Musk',
-      slug: 'midnight-musk',
-      price: 11000,
-      images: ['https://images.unsplash.com/photo-1590736704728-f4730bb30770?auto=format&fit=crop&q=80&w=800'],
-      category: 'SERIES',
-      rating: 5,
-      stock: 8
-    }
   ]
 
   return (
