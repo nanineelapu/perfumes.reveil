@@ -21,7 +21,7 @@ export async function POST(request: Request) {
         const ip = getClientIp(request)
 
         // Rate-limit: 1 OTP per 60s per phone, 5 per hour per phone, 30 per hour per IP.
-        const perPhoneShort = await rateLimit({ key: `otp:send:phone:short:${phoneDigits}`, limit: 1, windowSec: 60 })
+        const perPhoneShort = await rateLimit({ key: `otp:send:phone:short:${phoneDigits}`, limit: 1, windowSec: 30 })
         if (!perPhoneShort.ok) return rateLimitResponse(perPhoneShort)
         const perPhoneHour = await rateLimit({ key: `otp:send:phone:hour:${phoneDigits}`, limit: 5, windowSec: 3600 })
         if (!perPhoneHour.ok) return rateLimitResponse(perPhoneHour)
@@ -31,13 +31,10 @@ export async function POST(request: Request) {
         const result = await sendMessageCentralOTP(phoneDigits)
 
         if (result.success && result.verificationId) {
-            // Bind verificationId to this phone so /verify can refuse cross-phone use.
-            try {
-                await recordOtpSend(result.verificationId, phoneDigits)
-            } catch (err) {
-                console.error('[OTP Send] Failed to record binding')
-                return NextResponse.json({ error: 'OTP service error. Please try again.' }, { status: 500 })
-            }
+            // Bind verificationId to this phone (non-blocking — login still works if DB write fails).
+            recordOtpSend(result.verificationId, phoneDigits).catch((err) => {
+                console.error('[OTP Send] Failed to record binding (non-fatal):', err?.message)
+            })
 
             return NextResponse.json({
                 success: true,

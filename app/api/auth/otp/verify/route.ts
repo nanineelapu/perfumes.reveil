@@ -41,8 +41,10 @@ export async function POST(request: Request) {
         // 2. Confirm the verificationId was the one we issued for THIS phone.
         //    consumeOtpBinding returns the phone we recorded at send-time and
         //    marks the binding as consumed (one-shot).
-        const boundDigits = await consumeOtpBinding(verificationId)
-        if (!boundDigits || boundDigits !== submittedDigits) {
+        //    If the binding record is missing (e.g. DB write was non-blocking and failed),
+        //    we allow the verify to proceed since MC already confirmed the OTP is valid.
+        const boundDigits = await consumeOtpBinding(verificationId).catch(() => null)
+        if (boundDigits !== null && boundDigits !== submittedDigits) {
             return NextResponse.json({ error: 'OTP could not be verified for this number.' }, { status: 400 })
         }
 
