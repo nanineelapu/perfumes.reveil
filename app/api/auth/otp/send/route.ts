@@ -3,7 +3,6 @@ import { sendMessageCentralOTP } from '@/lib/messageCentral'
 import { recordOtpSend } from '@/lib/auth/otp-store'
 import { normalizeIndianPhone } from '@/lib/validators'
 import { rateLimit, getClientIp, rateLimitResponse } from '@/lib/rate-limit'
-import { verifyTurnstile } from '@/lib/captcha'
 
 export async function POST(request: Request) {
     try {
@@ -19,13 +18,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Please enter a valid 10-digit Indian mobile number.' }, { status: 400 })
         }
 
-        // Captcha is optional in dev — required in prod (see lib/captcha.ts).
-        const captchaToken: string | undefined = typeof body?.captchaToken === 'string' ? body.captchaToken : undefined
         const ip = getClientIp(request)
-        const captchaOk = await verifyTurnstile(captchaToken, ip)
-        if (!captchaOk) {
-            return NextResponse.json({ error: 'Captcha verification failed. Please refresh and try again.' }, { status: 400 })
-        }
 
         // Rate-limit: 1 OTP per 60s per phone, 5 per hour per phone, 30 per hour per IP.
         const perPhoneShort = await rateLimit({ key: `otp:send:phone:short:${phoneDigits}`, limit: 1, windowSec: 60 })
