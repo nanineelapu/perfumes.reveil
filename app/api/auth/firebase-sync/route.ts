@@ -1,18 +1,17 @@
 /**
  * /api/auth/firebase-sync
  *
- * Originally a phone-existence pre-check. That endpoint was an account
- * enumeration oracle (different error for "registered" vs "not registered"),
- * so it has been neutralised: it now only validates the phone shape and
- * returns a generic success. The actual exists/not-exists branching happens
- * silently inside /api/auth/otp/verify after a real OTP succeeds.
- *
- * Kept at the same URL purely to avoid breaking the auth page while it is
- * refactored to call /api/auth/otp/send directly.
+ * Pre-check before sending OTP:
+ *   - For LOGIN mode: verify the phone exists in our profiles table.
+ *     If not found → return user_not_found so the frontend shows
+ *     "Please register first" popup.
+ *   - For SIGNUP mode: passes through (phone may or may not exist,
+ *     the verify step handles upsert).
  */
 import { NextResponse } from 'next/server'
 import { normalizeIndianPhone } from '@/lib/validators'
 import { rateLimit, getClientIp, rateLimitResponse } from '@/lib/rate-limit'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function POST(request: Request) {
     let body: any
@@ -34,6 +33,31 @@ export async function POST(request: Request) {
     const rl = await rateLimit({ key: `precheck:ip:${ip}`, limit: 60, windowSec: 3600 })
     if (!rl.ok) return rateLimitResponse(rl)
 
-    // Deliberately do NOT reveal whether this number is registered.
+    const mode = body?.mode
+
+    // For login mode: check if user exists in profiles table.
+    // Signup mode passes through without checking.
+    if (mode === 'login') {
+        try {
+            const admin = createAdminClient()
+            const cleanPhone = `+91${digits}`
+            const { data: profile } = await admin
+                .from('profiles')
+                .select('id')
+                .or(`phone.eq.${cleanPhone},phone.eq.${digits}`)
+                .maybeSingle()
+
+            if (!profile) {
+                return NextResponse.json(
+                    { error: 'No account found for this number. Please create an account first.', error_code: 'user_not_found' },
+                    { status: 404 }
+                )
+            }
+        } catch (err) {
+            // If DB check fails, allow through — verify step will handle it
+            console.error('[firebase-sync] DB check failed:', err)
+        }
+    }
+
     return NextResponse.json({ success: true })
 }

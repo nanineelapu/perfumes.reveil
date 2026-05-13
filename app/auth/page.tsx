@@ -28,6 +28,7 @@ function AuthPageContent() {
 
     // Message Central verification ID — returned after OTP send
     const [verificationId, setVerificationId] = useState<string | null>(null)
+    const [showNotRegistered, setShowNotRegistered] = useState(false)
 
     const [formData, setFormData] = useState({
         firstName: '',
@@ -95,6 +96,11 @@ function AuthPageContent() {
             }
 
             if (!checkRes.ok) {
+                if (checkData?.error_code === 'user_not_found') {
+                    setShowNotRegistered(true)
+                    setLoading(false)
+                    return
+                }
                 setError(checkData.error || 'Something went wrong.')
                 setLoading(false)
                 return
@@ -261,7 +267,93 @@ function AuthPageContent() {
             fontFamily: 'var(--font-baskerville)',
             padding: isMobile ? '16px' : '24px'
         }}>
+            {/* Not Registered Popup Modal */}
+            <AnimatePresence>
+                {showNotRegistered && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setShowNotRegistered(false)}
+                        style={{
+                            position: 'fixed', inset: 0, zIndex: 100,
+                            background: 'rgba(0,0,0,0.45)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            padding: '20px',
+                        }}
+                    >
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.92, y: 16 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.92, y: 16 }}
+                            transition={{ type: 'spring', stiffness: 300, damping: 28 }}
+                            onClick={(e) => e.stopPropagation()}
+                            style={{
+                                background: '#fff',
+                                borderRadius: '8px',
+                                padding: '40px 36px 32px',
+                                maxWidth: '380px',
+                                width: '100%',
+                                textAlign: 'center',
+                                boxShadow: '0 24px 80px rgba(0,0,0,0.18)',
+                            }}
+                        >
+                            {/* Icon */}
+                            <div style={{
+                                width: '52px', height: '52px', borderRadius: '50%',
+                                background: 'rgba(212,175,55,0.1)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                margin: '0 auto 20px',
+                            }}>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="#d4af37"/>
+                                </svg>
+                            </div>
+
+                            <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#000', marginBottom: '10px', letterSpacing: '0.02em' }}>
+                                Not Registered Yet
+                            </h3>
+                            <p style={{ fontSize: '13px', color: 'rgba(0,0,0,0.5)', lineHeight: 1.6, marginBottom: '28px' }}>
+                                We couldn't find an account for this number.<br />
+                                Please create an account first to continue.
+                            </p>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                <motion.button
+                                    whileHover={{ backgroundColor: '#c5a02e' }}
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={() => {
+                                        setShowNotRegistered(false)
+                                        setAuthMode('signup')
+                                        setError(null)
+                                    }}
+                                    style={{
+                                        width: '100%', background: '#d4af37', color: '#000',
+                                        border: 'none', padding: '14px', borderRadius: '3px',
+                                        fontSize: '11px', fontWeight: 800, letterSpacing: '0.4em',
+                                        textTransform: 'uppercase', cursor: 'pointer',
+                                        transition: 'background-color 0.2s ease',
+                                    }}
+                                >
+                                    Create Account →
+                                </motion.button>
+                                <button
+                                    onClick={() => setShowNotRegistered(false)}
+                                    style={{
+                                        background: 'none', border: 'none', color: 'rgba(0,0,0,0.4)',
+                                        fontSize: '12px', cursor: 'pointer', padding: '6px',
+                                    }}
+                                >
+                                    Back to Login
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {/* Form Side */}
+
             <div style={{
                 width: '100%',
                 maxWidth: '480px',
