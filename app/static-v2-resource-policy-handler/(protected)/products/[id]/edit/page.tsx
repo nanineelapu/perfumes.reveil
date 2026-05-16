@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/client'
 import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Save, Trash2, Image as ImageIcon, Sparkles } from 'lucide-react'
+import { ArrowLeft, Save, Trash2, Image as ImageIcon, Sparkles, Upload, X } from 'lucide-react'
 import Link from 'next/link'
 
 type Params = Promise<{ id: string }>
@@ -18,6 +18,9 @@ export default function EditProductPage(props: { params: Params }) {
     const [saving, setSaving] = useState(false)
     const [product, setProduct] = useState<any>(null)
     const [categories, setCategories] = useState<{id: string, name: string}[]>([])
+    const [images, setImages] = useState<string[]>([])
+    const [uploading, setUploading] = useState(false)
+    const [uploadError, setUploadError] = useState<string>('')
 
     useEffect(() => {
         async function fetchData() {
@@ -27,17 +30,69 @@ export default function EditProductPage(props: { params: Params }) {
                 .select('*')
                 .eq('id', id)
                 .single()
-            
+
             const cRes = await fetch('/api/categories')
             const cData = await cRes.json()
 
-            if (pData) setProduct(pData)
+            if (pData) {
+                setProduct(pData)
+                setImages(Array.isArray(pData.images) ? pData.images : [])
+            }
             if (Array.isArray(cData)) setCategories(cData)
-            
+
             setLoading(false)
         }
         fetchData()
     }, [id, supabase])
+
+    async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+        const files = e.target.files
+        if (!files || files.length === 0) return
+
+        setUploadError('')
+        setUploading(true)
+        const uploaded: string[] = []
+
+        for (const file of Array.from(files)) {
+            // Accept only webp, jpg/jpeg, png
+            const allowed = ['image/webp', 'image/jpeg', 'image/jpg', 'image/png']
+            if (!allowed.includes(file.type)) {
+                setUploadError(`${file.name}: only webp, jpg, png are allowed`)
+                continue
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                setUploadError(`${file.name} exceeds 5MB limit`)
+                continue
+            }
+
+            const ext = (file.name.split('.').pop() || 'webp').toLowerCase()
+            const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+
+            const { error: uploadErr } = await supabase.storage
+                .from('product-images')
+                .upload(fileName, file, { contentType: file.type, cacheControl: '3600', upsert: false })
+
+            if (uploadErr) {
+                setUploadError(`Upload failed: ${uploadErr.message}`)
+                continue
+            }
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('product-images')
+                .getPublicUrl(fileName)
+
+            uploaded.push(publicUrl)
+        }
+
+        setImages(prev => [...prev, ...uploaded])
+        setUploading(false)
+        // Reset the file input so re-selecting the same file works
+        e.target.value = ''
+    }
+
+    function removeImage(url: string) {
+        setImages(prev => prev.filter(img => img !== url))
+    }
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -61,8 +116,8 @@ export default function EditProductPage(props: { params: Params }) {
             stock: Number(formData.get('stock')),
             category: formData.get('category'),
             is_featured: formData.get('is_featured') === 'on',
-            // Handle images as a comma-separated list converted to array
-            images: (formData.get('images') as string).split(',').map(s => s.trim()).filter(s => s !== ''),
+            // Images managed via controlled state (upload + manual URL fallback)
+            images,
             scent_profile: {
                 top: top || null,
                 heart: heart || null,
@@ -192,23 +247,81 @@ export default function EditProductPage(props: { params: Params }) {
                             <ImageIcon className="w-4 h-4" />
                             <h2 className="text-[10px] font-bold tracking-[.3em] uppercase">Visual Assets</h2>
                         </div>
+
+                        {/* Upload button */}
                         <div className="space-y-2">
-                            <label className="text-[10px] font-bold tracking-widest uppercase text-gray-400">Image URLs (Comma Separated)</label>
-                            <textarea
-                                name="images"
-                                defaultValue={product.images?.join(', ')}
-                                rows={3}
-                                className="w-full bg-gray-50 border-none rounded-xl px-4 py-4 text-[11px] font-mono focus:ring-1 focus:ring-accent transition-all"
-                                placeholder="https://image1.jpg, https://image2.jpg..."
-                            />
+                            <label className="text-[10px] font-bold tracking-widest uppercase text-gray-400">
+                                Upload Images <span className="text-gray-300 normal-case font-normal tracking-normal">(webp, jpg, png · max 5MB each)</span>
+                            </label>
+                            <label
+                                className={`flex items-center justify-center gap-3 px-4 py-6 rounded-xl border-2 border-dashed transition-colors ${
+                                    uploading
+                                        ? 'border-gray-200 bg-gray-50 cursor-not-allowed'
+                                        : 'border-gray-300 bg-gray-50 hover:border-accent hover:bg-amber-50 cursor-pointer'
+                                }`}
+                            >
+                                <input
+                                    type="file"
+                                    accept="image/webp,image/jpeg,image/jpg,image/png"
+                                    multiple
+                                    disabled={uploading}
+                                    onChange={handleImageUpload}
+                                    className="hidden"
+                                />
+                                <Upload className="w-4 h-4 text-gray-500" />
+                                <span className="text-[11px] font-bold tracking-widest uppercase text-gray-600">
+                                    {uploading ? 'Uploading…' : 'Click to upload (you can pick multiple)'}
+                                </span>
+                            </label>
+                            {uploadError && (
+                                <p className="text-[11px] text-red-500 mt-2">{uploadError}</p>
+                            )}
                         </div>
-                        <div className="grid grid-cols-4 gap-4 pt-2">
-                            {product.images?.map((img: string, i: number) => (
-                                <div key={i} className="aspect-square bg-gray-50 rounded-xl overflow-hidden border border-gray-100 group">
-                                    <img src={img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Preview" />
-                                </div>
-                            ))}
+
+                        {/* Manual URL fallback — kept for cases where you already have a CDN link */}
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-bold tracking-widest uppercase text-gray-400">Or paste an image URL</label>
+                            <div className="flex gap-2">
+                                <input
+                                    type="url"
+                                    placeholder="https://..."
+                                    className="flex-1 bg-gray-50 border-none rounded-xl px-4 py-3 text-[11px] font-mono focus:ring-1 focus:ring-accent transition-all"
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault()
+                                            const v = (e.target as HTMLInputElement).value.trim()
+                                            if (v) {
+                                                setImages(prev => [...prev, v])
+                                                ;(e.target as HTMLInputElement).value = ''
+                                            }
+                                        }
+                                    }}
+                                />
+                                <span className="text-[9px] text-gray-400 self-center uppercase tracking-widest whitespace-nowrap">Press Enter</span>
+                            </div>
                         </div>
+
+                        {/* Preview grid with delete buttons */}
+                        {images.length > 0 && (
+                            <div className="grid grid-cols-4 gap-4 pt-2">
+                                {images.map((img, i) => (
+                                    <div key={`${img}-${i}`} className="aspect-square bg-gray-50 rounded-xl overflow-hidden border border-gray-100 group relative">
+                                        <img src={img} className="w-full h-full object-cover" alt={`Preview ${i + 1}`} />
+                                        <button
+                                            type="button"
+                                            onClick={() => removeImage(img)}
+                                            className="absolute top-1 right-1 w-6 h-6 rounded-full bg-white/90 hover:bg-red-500 hover:text-white text-gray-700 flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-all"
+                                            aria-label="Remove image"
+                                        >
+                                            <X className="w-3.5 h-3.5" />
+                                        </button>
+                                        {i === 0 && (
+                                            <span className="absolute bottom-1 left-1 text-[8px] font-bold tracking-widest uppercase bg-black/70 text-white px-2 py-0.5 rounded">Main</span>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </section>
 
                     <section className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm space-y-6">

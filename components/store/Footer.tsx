@@ -137,14 +137,15 @@ export function Footer({ theme = 'light' }: FooterProps) {
                             ].map((s, idx) => (
                                 <motion.a
                                     key={idx} href={s.href}
-                                    whileHover={{ y: -5, borderColor: gold, color: gold }}
+                                    whileHover={{ y: -5, backgroundColor: gold, color: '#1a1a1a' }}
                                     style={{
                                         width: isMobile ? '36px' : '44px', height: isMobile ? '36px' : '44px',
                                         borderRadius: '50%',
-                                        background: isMobile ? gold : 'transparent',
-                                        border: isMobile ? 'none' : `1px solid ${isLight ? '#eee' : 'rgba(255,255,255,0.1)'}`,
+                                        background: isMobile ? gold : '#1a1a1a',
+                                        border: isMobile ? 'none' : `1px solid ${gold}`,
+                                        boxShadow: isMobile ? 'none' : '0 4px 12px rgba(0,0,0,0.12)',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        color: isMobile ? '#000' : isLight ? '#999' : '#666',
+                                        color: isMobile ? '#1a1a1a' : gold,
                                         transition: 'all 0.4s'
                                     }}
                                 >
