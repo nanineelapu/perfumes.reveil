@@ -202,7 +202,7 @@ function SlideMedia({ slide, isActive, emblaApi, isMobile }: { slide: Slide, isA
                         style={{
                             position: 'absolute', inset: 0, width: '100%', height: '100%',
                             objectFit: 'cover',
-                            objectPosition: isMobile ? '75% center' : 'center',
+                            objectPosition: isMobile ? '18% center' : 'center',
                             filter: 'brightness(1.02) contrast(0.96) saturate(0.95)',
                             opacity: (slide.video_url && isLoaded) ? 0 : 1,
                             transition: 'opacity 1s ease'
@@ -252,7 +252,7 @@ function SlideMedia({ slide, isActive, emblaApi, isMobile }: { slide: Slide, isA
             <div style={{
                 position: 'absolute', inset: 0,
                 display: 'flex', alignItems: 'center', justifyContent: 'flex-start',
-                padding: isMobile ? '0 24px' : '0 120px',
+                padding: isMobile ? '0 16px 0 12px' : '0 80px 0 60px',
                 textAlign: 'left', zIndex: 2,
                 pointerEvents: isActive ? 'auto' : 'none'
             }}>
