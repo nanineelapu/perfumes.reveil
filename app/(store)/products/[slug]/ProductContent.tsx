@@ -136,7 +136,10 @@ export function ProductContent({ product, initialReviews, relatedProducts = [] }
             minHeight: '100vh',
             color: '#1a1a1a',
             position: 'relative',
-            padding: isMobile ? '120px 20px 60px' : '140px 80px 60px'
+            padding: isMobile ? '120px 24px 60px' : '140px 80px 60px',
+            overflowX: 'hidden',
+            maxWidth: '100vw',
+            boxSizing: 'border-box'
         }}>
             <div style={{
                 display: 'flex',
