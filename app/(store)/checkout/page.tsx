@@ -213,7 +213,16 @@ function CheckoutInner() {
             }),
         })
         const createData = await createRes.json()
-        if (!createRes.ok) throw new Error(createData.error || 'Failed to start payment')
+        if (!createRes.ok) {
+            // Server already wrote a structured error. Surface the operator
+            // hint when present so a misconfigured DB shows up in plain English
+            // instead of a vague "Could not initialise payment".
+            const detail = createData.hint || createData.reason
+            const message = detail
+                ? `${createData.error || 'Failed to start payment'} — ${detail}`
+                : createData.error || 'Failed to start payment'
+            throw new Error(message)
+        }
 
         if (!createData.key_id) {
             throw new Error('Razorpay is not configured yet. Please contact support.')

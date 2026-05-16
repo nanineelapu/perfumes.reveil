@@ -122,11 +122,15 @@ export async function POST(request: Request) {
             },
         })
 
+        // razorpay-node types `id` as `string | number`; coerce so the text PK
+        // doesn't silently get a JS number in some SDK builds.
+        const rpOrderId = String(rpOrder.id)
+
         // Persist a snapshot that /verify (and the webhook) will load — this is
         // the ONLY trusted source of truth for what the user paid for.
         const admin = createAdminClient()
         const { error: snapshotError } = await admin.from('pending_orders').insert({
-            razorpay_order_id: rpOrder.id,
+            razorpay_order_id: rpOrderId,
             user_id: user.id,
             address_id,
             buy_now_product_id: buyNowProductId,
@@ -142,12 +146,51 @@ export async function POST(request: Request) {
             status: 'created',
         })
         if (snapshotError) {
-            console.error('[razorpay] pending_orders insert failed:', snapshotError.message)
-            return NextResponse.json({ error: 'Could not initialise payment' }, { status: 500 })
+            // Log full Supabase error context — code/details/hint usually pinpoint
+            // missing tables, FK violations, or schema drift.
+            console.error('[razorpay] pending_orders insert failed', {
+                code: snapshotError.code,
+                message: snapshotError.message,
+                details: snapshotError.details,
+                hint: snapshotError.hint,
+                razorpay_order_id: rpOrderId,
+            })
+
+            // We already charged a quota slot at Razorpay for an order we now
+            // can't fulfil. Best-effort tag the order as abandoned so the
+            // dashboard reflects reality and the user can retry cleanly.
+            try {
+                // @ts-expect-error – razorpay-node typings omit edit(), but the REST endpoint exists.
+                await razorpay.orders.edit(rpOrderId, { notes: { abandoned: 'true', reason: snapshotError.code || 'snapshot_failed' } })
+            } catch (cleanupErr: any) {
+                console.error('[razorpay] orphan-order cleanup failed:', cleanupErr?.message)
+            }
+
+            // Translate the most common Postgres error codes into something the
+            // operator can act on without grepping logs. 42P01 = undefined_table,
+            // 42703 = undefined_column, 23503 = foreign_key_violation.
+            const operatorHint =
+                snapshotError.code === '42P01'
+                    ? 'pending_orders table is missing. Run supabase/security.sql against the database.'
+                    : snapshotError.code === '42703'
+                    ? `pending_orders is missing a column (${snapshotError.message}). Re-run supabase/security.sql.`
+                    : snapshotError.code === '23503'
+                    ? 'A referenced row was not found (foreign key violation). Confirm the address belongs to this user.'
+                    : null
+
+            return NextResponse.json(
+                {
+                    error: 'Could not initialise payment',
+                    reason: snapshotError.message,
+                    code: snapshotError.code,
+                    ...(operatorHint ? { hint: operatorHint } : {}),
+                },
+                { status: 500 },
+            )
         }
 
         return NextResponse.json({
-            razorpay_order_id: rpOrder.id,
+            razorpay_order_id: rpOrderId,
             amount: rpOrder.amount,
             currency: rpOrder.currency,
             key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID,
