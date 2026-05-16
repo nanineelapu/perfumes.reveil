@@ -405,7 +405,7 @@ export function ProductContent({ product, initialReviews, relatedProducts = [] }
                         </div>
 
                         {/* Actions */}
-                        <div style={{ display: 'flex', gap: '14px', alignItems: 'stretch' }}>
+                        <div style={{ display: 'flex', gap: '14px', alignItems: 'stretch', paddingRight: isMobile ? '12px' : '0' }}>
                             <motion.button
                                 type="button"
                                 onClick={() => handleAction('buy')}
