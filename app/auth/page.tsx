@@ -135,7 +135,12 @@ function AuthPageContent() {
             }
 
             if (!otpRes.ok || !otpData.verificationId) {
-                setError(otpData.error || 'Failed to send OTP. Please try again.')
+                // Server attaches `hint`/`reason` for operator-facing errors
+                // (missing env vars, expired MC token, etc.). Surface them so
+                // we don't stare at "Failed to send OTP" with no context.
+                const detail = otpData.hint || otpData.reason
+                const base = otpData.error || 'Failed to send OTP. Please try again.'
+                setError(detail ? `${base} — ${detail}` : base)
                 setLoading(false)
                 return
             }
