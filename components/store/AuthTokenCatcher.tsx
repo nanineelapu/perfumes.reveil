@@ -49,6 +49,9 @@ export function AuthTokenCatcher() {
                                             first_name: pending.first_name,
                                             last_name: pending.last_name,
                                             phone: pending.phone,
+                                            // Pass the email through only if it's real — skip empty strings
+                                            // so we don't blank-out a previously saved value server-side.
+                                            ...(pending.email ? { email: pending.email } : {}),
                                         }),
                                     }).catch((err) => console.error('AuthTokenCatcher: profile save failed', err))
                                 }

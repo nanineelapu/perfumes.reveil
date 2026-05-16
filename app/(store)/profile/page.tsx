@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { User, Mail, Phone, MapPin, Package, LogOut, ChevronRight, Edit2, Check, X, Loader2 } from 'lucide-react'
 import { PremiumLoader } from '@/components/store/PremiumLoader'
+import { realEmail } from '@/lib/validators'
 
 export default function ProfilePage() {
     const [user, setUser] = useState<any>(null)
@@ -169,7 +170,7 @@ export default function ProfilePage() {
                                 wordBreak: 'break-word',
                                 lineHeight: 1.2
                             }}>
-                                Hi, <span style={{ color: '#d4af37' }}>{profile?.first_name || user?.user_metadata?.first_name || user?.email?.split('@')[0] || 'Collector'}</span>
+                                Hi, <span style={{ color: '#d4af37' }}>{profile?.first_name || user?.user_metadata?.first_name || realEmail(user?.email)?.split('@')[0] || 'Collector'}</span>
                             </motion.h1>
                             <motion.p variants={itemVariants} style={{ color: '#666', fontSize: isMobile ? '13px' : '15px', lineHeight: 1.5 }}>
                                 Manage your personal details and order history.
@@ -285,7 +286,7 @@ export default function ProfilePage() {
                                     <label style={{ display: 'block', fontSize: '11px', textTransform: 'uppercase', color: '#555', letterSpacing: '0.1em', marginBottom: '8px' }}>Email Address</label>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                         <Mail size={16} color="#d4af37" />
-                                        <p style={{ fontSize: isMobile ? '14px' : '16px', fontWeight: 400, wordBreak: 'break-all' }}>{user?.email}</p>
+                                        <p style={{ fontSize: isMobile ? '14px' : '16px', fontWeight: 400, wordBreak: 'break-all' }}>{profile?.email || realEmail(user?.email) || 'Not provided'}</p>
                                     </div>
                                 </div>
                                 <div style={{ gridColumn: isMobile ? 'auto' : 'span 2' }}>

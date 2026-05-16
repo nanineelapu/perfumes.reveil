@@ -89,6 +89,13 @@ create index if not exists orders_user_id_idx on public.orders (user_id);
 create index if not exists orders_awb_code_idx on public.orders (awb_code) where awb_code is not null;
 create index if not exists profiles_phone_idx on public.profiles (phone);
 
+-- profiles.email is the *real*, user-supplied contact email. It is intentionally
+-- separate from auth.users.email (which may hold a synthetic "<phone>@reveil.internal"
+-- placeholder used only as a Supabase login identifier for phone-OTP signups).
+-- Frontend & admin surfaces read from this column so the placeholder is never shown.
+alter table public.profiles add column if not exists email text;
+create index if not exists profiles_email_idx on public.profiles ((lower(email))) where email is not null;
+
 
 -- ────────────────────────────────────────────────────────────────────────────
 -- 3. RPC FUNCTIONS

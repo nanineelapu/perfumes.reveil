@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Loader2, ShieldCheck, Truck, MapPin, Plus, ArrowRight, Check, CreditCard, Wallet } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { isOdishaPincode } from '@/lib/validators'
 
 type Address = {
     id: string
@@ -268,6 +269,10 @@ function CheckoutInner() {
     const handlePlaceOrder = async () => {
         if (!selectedAddress) {
             setError('Please select a delivery address.')
+            return
+        }
+        if (!isOdishaPincode(selectedAddress.pincode)) {
+            setError('Reveil currently delivers only within Odisha. Please choose an Odisha address (pincode 751xxx–770xxx).')
             return
         }
         setPlacing(true)

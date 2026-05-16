@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import Link from 'next/link'
 import PageHeader from '../_components/PageHeader'
 import { Users, Mail, Phone, Calendar, ArrowRight } from 'lucide-react'
+import { realEmail } from '@/lib/validators'
 
 export default async function UsersPage() {
     const supabase = await createClient()
@@ -15,13 +16,15 @@ export default async function UsersPage() {
         `)
         .order('created_at', { ascending: false })
 
-    // Pull emails from auth.users (profiles often missing for phone-OTP signups)
+    // Backstop: pull real (non-placeholder) emails from auth.users for users
+    // whose profiles.email is missing. We strip the "<phone>@reveil.internal"
+    // placeholder so the admin panel never displays it.
     const emailById = new Map<string, string | null>()
     try {
         const admin = createAdminClient()
         const { data: authData } = await admin.auth.admin.listUsers({ perPage: 1000 })
         for (const u of authData?.users ?? []) {
-            emailById.set(u.id, u.email ?? null)
+            emailById.set(u.id, realEmail(u.email))
         }
     } catch (e) {
         console.error('[Admin Users] Failed to load auth emails:', e)
@@ -31,7 +34,7 @@ export default async function UsersPage() {
         ?.filter(u => u.role !== 'admin')
         .map(u => ({
             ...u,
-            email: u.email || emailById.get(u.id) || null,
+            email: realEmail(u.email) || emailById.get(u.id) || null,
         }))
 
     return (

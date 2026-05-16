@@ -9,6 +9,7 @@ import { ReviewsSection } from '@/components/store/ReviewsSection'
 import { ReviewInvitation } from '@/components/store/ReviewInvitation'
 import ProductCard from '@/components/store/ProductCard'
 import { createClient } from '@/lib/supabase/client'
+import { isOdishaPincode } from '@/lib/validators'
 
 interface ProductContentProps {
     product: Product
@@ -37,12 +38,6 @@ export function ProductContent({ product, initialReviews, relatedProducts = [] }
         | null
     >(null)
 
-    const isOdishaPin = (pin: string) => {
-        if (!/^\d{6}$/.test(pin)) return false
-        const prefix = parseInt(pin.slice(0, 3), 10)
-        return prefix >= 751 && prefix <= 770
-    }
-
     const checkPincode = async () => {
         const pin = pincode.trim()
         setPinResult(null)
@@ -50,7 +45,7 @@ export function ProductContent({ product, initialReviews, relatedProducts = [] }
             setPinResult({ ok: false, reason: 'Enter a valid 6-digit pincode.' })
             return
         }
-        if (!isOdishaPin(pin)) {
+        if (!isOdishaPincode(pin)) {
             setPinResult({ ok: false, reason: 'We currently deliver only within Odisha.' })
             return
         }

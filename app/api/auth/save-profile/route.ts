@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { requireUser } from '@/lib/auth/require'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { isPersonName, normalizeIndianPhone } from '@/lib/validators'
+import { isPersonName, normalizeIndianPhone, isEmail } from '@/lib/validators'
 
 export async function POST(request: Request) {
   const auth = await requireUser()
@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  const { first_name, last_name, phone } = body || {}
+  const { first_name, last_name, phone, email } = body || {}
 
   if (!isPersonName(first_name)) {
     return NextResponse.json({ error: 'Invalid first name' }, { status: 400 })
@@ -27,6 +27,18 @@ export async function POST(request: Request) {
     const digits = normalizeIndianPhone(phone)
     if (!digits) return NextResponse.json({ error: 'Invalid phone' }, { status: 400 })
     cleanPhone = `+91${digits}`
+  }
+  let cleanEmail: string | null = null
+  if (email !== undefined && email !== null && email !== '') {
+    if (!isEmail(email)) {
+      return NextResponse.json({ error: 'Invalid email' }, { status: 400 })
+    }
+    const normalized = (email as string).trim().toLowerCase()
+    // Never let the internal placeholder back into profiles.email.
+    if (/@reveil\.internal$/i.test(normalized)) {
+      return NextResponse.json({ error: 'Invalid email' }, { status: 400 })
+    }
+    cleanEmail = normalized
   }
 
   const first = (first_name as string).trim()
@@ -44,6 +56,7 @@ export async function POST(request: Request) {
     role: 'user',
   }
   if (cleanPhone) upsertRow.phone = cleanPhone
+  if (cleanEmail) upsertRow.email = cleanEmail
 
   const { error } = await admin.from('profiles').upsert(upsertRow, { onConflict: 'id' })
 

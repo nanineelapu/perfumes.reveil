@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { verifyMessageCentralOTP } from '@/lib/messageCentral'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { consumeOtpBinding } from '@/lib/auth/otp-store'
-import { normalizeIndianPhone, isPersonName } from '@/lib/validators'
+import { normalizeIndianPhone, isPersonName, isEmail } from '@/lib/validators'
 import { rateLimit, getClientIp, rateLimitResponse } from '@/lib/rate-limit'
 import { isSafeInternalPath } from '@/lib/validators'
 
@@ -14,7 +14,7 @@ export async function POST(request: Request) {
         } catch {
             return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
         }
-        const { phone, otp, verificationId, mode, firstName, lastName } = body || {}
+        const { phone, otp, verificationId, mode, firstName, lastName, email } = body || {}
 
         if (!verificationId || typeof verificationId !== 'string' || !otp || typeof otp !== 'string' || otp.length > 10) {
             return NextResponse.json({ error: 'OTP and verification ID are required.' }, { status: 400 })
@@ -66,6 +66,22 @@ export async function POST(request: Request) {
             safeLast = lastName.trim()
         }
 
+        // Optional, user-supplied email. Stored in profiles.email so it
+        // can be shown back in the UI and used for transactional mail.
+        // We deliberately do NOT fall back to a synthetic "<phone>@reveil.internal"
+        // here — if the user doesn't provide one, profiles.email stays NULL.
+        let safeEmail: string | null = null
+        if (email !== undefined && email !== null && email !== '') {
+            if (!isEmail(email)) {
+                return NextResponse.json({ error: 'Invalid email address.' }, { status: 400 })
+            }
+            safeEmail = email.trim().toLowerCase()
+            // Block the internal placeholder from sneaking back in via the client.
+            if (/@reveil\.internal$/i.test(safeEmail)) {
+                return NextResponse.json({ error: 'Invalid email address.' }, { status: 400 })
+            }
+        }
+
         const supabaseAdmin = createAdminClient()
 
         // 4. Find user by phone in profiles table (indexed) instead of listUsers (which caps at 1000)
@@ -82,20 +98,26 @@ export async function POST(request: Request) {
         if (profileByPhone?.id) {
             userId = profileByPhone.id
             const { data: { user: authUser } } = await supabaseAdmin.auth.admin.getUserById(userId)
+            // Magic-link generation requires *some* email on auth.users. If the
+            // existing user has none, we fall back to an internal placeholder
+            // purely as a login identifier — it is never displayed to anyone.
             userEmail = authUser?.email || `${submittedDigits}@reveil.internal`
 
-            // If the existing profile has no name but the client just provided one
+            // If the existing profile is missing data the client just provided
             // (e.g. user is signing up with an account that was half-created),
-            // persist it now so we don't drop the data.
+            // persist it now so we don't drop it.
+            const existingUpdate: Record<string, unknown> = {}
             if (!profileByPhone.first_name && !profileByPhone.full_name && safeFirst) {
-                const fullName = `${safeFirst} ${safeLast ?? ''}`.trim()
+                existingUpdate.first_name = safeFirst
+                existingUpdate.last_name = safeLast ?? ''
+                existingUpdate.full_name = `${safeFirst} ${safeLast ?? ''}`.trim()
+            }
+            if (safeEmail) existingUpdate.email = safeEmail
+
+            if (Object.keys(existingUpdate).length > 0) {
                 const { error: existingUpsertError } = await supabaseAdmin
                     .from('profiles')
-                    .update({
-                        first_name: safeFirst,
-                        last_name: safeLast ?? '',
-                        full_name: fullName,
-                    })
+                    .update(existingUpdate)
                     .eq('id', userId)
                 if (existingUpsertError) {
                     console.error('[OTP Verify] Profile update (existing user) failed:', existingUpsertError.message)
@@ -104,10 +126,13 @@ export async function POST(request: Request) {
 
             needsName = !profileByPhone.first_name && !profileByPhone.full_name && !safeFirst
         } else {
-            const internalEmail = `${submittedDigits}@reveil.internal`
+            // auth.users.email is a login-identifier only. Use the real email
+            // when the user gave us one, otherwise fall back to an internal
+            // placeholder. The placeholder NEVER reaches profiles.email.
+            const authEmail = safeEmail ?? `${submittedDigits}@reveil.internal`
             const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
                 phone: cleanPhone,
-                email: internalEmail,
+                email: authEmail,
                 phone_confirm: true,
                 email_confirm: true,
                 user_metadata: safeFirst ? { first_name: safeFirst, last_name: safeLast ?? '' } : {},
@@ -121,6 +146,8 @@ export async function POST(request: Request) {
                 id: userId,
                 phone: cleanPhone,
                 role: 'user',
+                // Only persist a real email — null when the user didn't supply one.
+                email: safeEmail,
                 ...(safeFirst && { first_name: safeFirst, last_name: safeLast ?? '', full_name: fullName }),
             }, { onConflict: 'id' })
             if (upsertError) {

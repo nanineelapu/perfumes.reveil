@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { requireUser } from '@/lib/auth/require'
-import { clampString, isUuid, normalizeIndianPhone } from '@/lib/validators'
+import { clampString, isOdishaPincode, isUuid, normalizeIndianPhone } from '@/lib/validators'
 
 export async function POST(request: Request) {
     try {
@@ -51,6 +51,12 @@ export async function POST(request: Request) {
         }
         if (!safe.label || !safe.full_name || !safe.address_line1 || !safe.city || !safe.state || !safe.pincode) {
             return NextResponse.json({ error: 'Missing or invalid address fields' }, { status: 400 })
+        }
+        if (!isOdishaPincode(safe.pincode)) {
+            return NextResponse.json(
+                { error: 'Reveil currently delivers only within Odisha. Please use an Odisha pincode (751xxx–770xxx).' },
+                { status: 400 },
+            )
         }
         const phoneDigits = normalizeIndianPhone(phone)
         if (!phoneDigits) {

@@ -433,8 +433,8 @@ function AuthPageContent() {
                                 </div>
 
                                 <motion.div whileHover={{ borderBottomColor: '#d4af37' }} style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '4px' }}>
-                                    <label style={{ fontSize: '9px', color: '#d4af37', textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Email Address *</label>
-                                    <input type="email" name="email" value={formData.email} onChange={handleChange} required style={{ width: '100%', border: 'none', background: 'none', fontSize: '14px', outline: 'none', color: '#000' }} />
+                                    <label style={{ fontSize: '9px', color: '#d4af37', textTransform: 'uppercase', marginBottom: '2px', display: 'block', letterSpacing: '0.15em' }}>Email (optional)</label>
+                                    <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="you@example.com" style={{ width: '100%', border: 'none', background: 'none', fontSize: '14px', outline: 'none', color: '#000' }} />
                                 </motion.div>
 
                                 <motion.button
@@ -459,18 +459,60 @@ function AuthPageContent() {
 
                                 {!otpSent ? (
                                     <>
-                                        {/* Signup-only: collect names upfront so OTP-verify can persist them */}
+                                        {/* Signup-only: collect names + optional email upfront so OTP-verify can persist them */}
                                         {authMode === 'signup' && (
-                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', textAlign: 'left' }}>
-                                                <div>
-                                                    <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '6px', display: 'block', letterSpacing: '0.15em' }}>First Name *</label>
+                                            <>
+                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', textAlign: 'left' }}>
+                                                    <div>
+                                                        <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '6px', display: 'block', letterSpacing: '0.15em' }}>First Name *</label>
+                                                        <input
+                                                            type="text"
+                                                            name="firstName"
+                                                            placeholder="First name"
+                                                            value={formData.firstName}
+                                                            onChange={handleChange}
+                                                            required
+                                                            style={{
+                                                                width: '100%',
+                                                                background: '#fff',
+                                                                border: '1px solid rgba(0,0,0,0.08)',
+                                                                borderRadius: '4px',
+                                                                padding: isMobile ? '14px 16px' : '18px 20px',
+                                                                fontSize: isMobile ? '14px' : '15px',
+                                                                color: '#000', outline: 'none'
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '6px', display: 'block', letterSpacing: '0.15em' }}>Last Name</label>
+                                                        <input
+                                                            type="text"
+                                                            name="lastName"
+                                                            placeholder="Last name"
+                                                            value={formData.lastName}
+                                                            onChange={handleChange}
+                                                            style={{
+                                                                width: '100%',
+                                                                background: '#fff',
+                                                                border: '1px solid rgba(0,0,0,0.08)',
+                                                                borderRadius: '4px',
+                                                                padding: isMobile ? '14px 16px' : '18px 20px',
+                                                                fontSize: isMobile ? '14px' : '15px',
+                                                                color: '#000', outline: 'none'
+                                                            }}
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div style={{ textAlign: 'left' }}>
+                                                    <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '6px', display: 'block', letterSpacing: '0.15em' }}>Email (optional)</label>
                                                     <input
-                                                        type="text"
-                                                        name="firstName"
-                                                        placeholder="First name"
-                                                        value={formData.firstName}
+                                                        type="email"
+                                                        name="email"
+                                                        placeholder="you@example.com"
+                                                        value={formData.email}
                                                         onChange={handleChange}
-                                                        required
+                                                        autoComplete="email"
                                                         style={{
                                                             width: '100%',
                                                             background: '#fff',
@@ -481,27 +523,11 @@ function AuthPageContent() {
                                                             color: '#000', outline: 'none'
                                                         }}
                                                     />
+                                                    <p style={{ fontSize: '10px', color: 'rgba(0,0,0,0.4)', margin: '6px 2px 0', letterSpacing: '0.02em' }}>
+                                                        We&apos;ll use it for order receipts. Leave blank if you don&apos;t have one.
+                                                    </p>
                                                 </div>
-                                                <div>
-                                                    <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '6px', display: 'block', letterSpacing: '0.15em' }}>Last Name</label>
-                                                    <input
-                                                        type="text"
-                                                        name="lastName"
-                                                        placeholder="Last name"
-                                                        value={formData.lastName}
-                                                        onChange={handleChange}
-                                                        style={{
-                                                            width: '100%',
-                                                            background: '#fff',
-                                                            border: '1px solid rgba(0,0,0,0.08)',
-                                                            borderRadius: '4px',
-                                                            padding: isMobile ? '14px 16px' : '18px 20px',
-                                                            fontSize: isMobile ? '14px' : '15px',
-                                                            color: '#000', outline: 'none'
-                                                        }}
-                                                    />
-                                                </div>
-                                            </div>
+                                            </>
                                         )}
 
                                         <div style={{ textAlign: 'left' }}>

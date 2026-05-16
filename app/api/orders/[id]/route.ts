@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { sendOrderDeliveredEmail } from '@/lib/utils/email'
 import { sendOrderConfirmationSMS, sendOrderDeliveredSMS } from '@/lib/utils/sms'
+import { realEmail } from '@/lib/validators'
 
 type Params = Promise<{ id: string }>
 
@@ -91,14 +92,24 @@ export async function PATCH(request: Request, { params }: { params: Params }) {
                 .single();
 
             if (fullOrder) {
-                // 2. Fetch user's email from auth.users using admin client
+                // 2. Prefer the real email saved on profiles. Fall back to
+                //    auth.users only if it's a real (non-placeholder) address.
                 const adminClient = createAdminClient();
-                const { data: { user: orderUser }, error: userError } = await adminClient.auth.admin.getUserById(fullOrder.user_id);
-                
-                const customerEmail = orderUser?.email || 'reveilfragrances@gmail.com'; // Fallback to provided address
-                
-                // 3. Dispatch the premium email
-                await sendOrderDeliveredEmail(fullOrder, customerEmail);
+                const { data: profileRow } = await adminClient
+                    .from('profiles')
+                    .select('email')
+                    .eq('id', fullOrder.user_id)
+                    .maybeSingle();
+                const { data: { user: orderUser } } = await adminClient.auth.admin.getUserById(fullOrder.user_id);
+
+                const customerEmail = realEmail(profileRow?.email) || realEmail(orderUser?.email);
+
+                // 3. Dispatch the premium email only if we have a real address.
+                if (customerEmail) {
+                    await sendOrderDeliveredEmail(fullOrder, customerEmail);
+                } else {
+                    console.info('[Order Delivered] Skipping email — customer has no real email on file');
+                }
 
                 // 4. Dispatch the SMS
                 if (fullOrder.profiles?.phone) {

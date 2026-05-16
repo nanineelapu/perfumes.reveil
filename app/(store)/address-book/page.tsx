@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { MapPin, Plus, Trash2, Home, Briefcase, ArrowLeft, Check, Loader2 } from 'lucide-react'
 import Link from 'next/link'
+import { isOdishaPincode } from '@/lib/validators'
 
 type Address = {
     id: string
@@ -67,6 +68,10 @@ export default function AddressBookPage() {
         e.preventDefault()
         if (!form.name || !form.line1 || !form.city || !form.pincode) {
             setError('Please fill in all required fields.')
+            return
+        }
+        if (!isOdishaPincode(form.pincode)) {
+            setError('Reveil currently delivers only within Odisha. Please use an Odisha pincode (751xxx–770xxx).')
             return
         }
 
@@ -362,7 +367,23 @@ export default function AddressBookPage() {
                                 </div>
                                 <div>
                                     <label style={labelStyle}>Pincode *</label>
-                                    <input style={inputStyle} value={form.pincode} onChange={e => setForm({ ...form, pincode: e.target.value })} placeholder="Your pincode" maxLength={6} required />
+                                    <input
+                                        style={inputStyle}
+                                        value={form.pincode}
+                                        onChange={e => setForm({ ...form, pincode: e.target.value.replace(/\D/g, '').slice(0, 6) })}
+                                        placeholder="6-digit Odisha pincode"
+                                        inputMode="numeric"
+                                        maxLength={6}
+                                        required
+                                    />
+                                    <p style={{ fontSize: '10px', color: 'rgba(0,0,0,0.5)', margin: '6px 0 0', letterSpacing: '0.05em' }}>
+                                        Reveil currently delivers only within Odisha (pincode 751xxx–770xxx).
+                                    </p>
+                                    {form.pincode.length === 6 && !isOdishaPincode(form.pincode) && (
+                                        <p style={{ fontSize: '11px', color: '#b00020', margin: '6px 0 0' }}>
+                                            This pincode isn’t in our Odisha delivery zone.
+                                        </p>
+                                    )}
                                 </div>
                             </div>
 
