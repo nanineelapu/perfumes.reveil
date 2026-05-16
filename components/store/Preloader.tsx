@@ -42,7 +42,7 @@ export default function Preloader() {
                         position: 'fixed',
                         inset: 0,
                         zIndex: 99999,
-                        background: '#050505',
+                        background: '#f8f7f2',
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
@@ -56,7 +56,7 @@ export default function Preloader() {
                         fontSize: '30vw',
                         fontWeight: 900,
                         fontFamily: 'var(--font-baskerville)',
-                        color: 'rgba(212,175,55,0.015)',
+                        color: 'rgba(212,175,55,0.08)',
                         whiteSpace: 'nowrap',
                         zIndex: 0,
                         pointerEvents: 'none',
@@ -73,7 +73,7 @@ export default function Preloader() {
                             style={{
                                 fontSize: 'clamp(28px, 6vw, 56px)',
                                 fontFamily: 'var(--font-baskerville)',
-                                color: '#fff',
+                                color: '#1a1a1a',
                                 letterSpacing: '0.5em',
                                 textTransform: 'uppercase',
                                 fontWeight: 400,
@@ -86,7 +86,7 @@ export default function Preloader() {
                         <div style={{
                             width: '200px',
                             height: '1px',
-                            background: 'rgba(212,175,55,0.1)',
+                            background: 'rgba(212,175,55,0.3)',
                             margin: '0 auto',
                             position: 'relative',
                             overflow: 'hidden'
@@ -115,7 +115,7 @@ export default function Preloader() {
                                 marginTop: '40px',
                                 fontSize: '8px',
                                 letterSpacing: '1em',
-                                color: '#444',
+                                color: '#888',
                                 textTransform: 'uppercase',
                                 fontWeight: 600
                             }}
@@ -135,7 +135,7 @@ export default function Preloader() {
                         gap: '8px'
                     }}>
                         <div style={{ width: '40px', height: '1px', background: 'rgba(212,175,55,0.3)' }} />
-                        <div style={{ fontSize: '8px', color: '#333', letterSpacing: '0.2em' }}>PULLING_ASSETS_V1.02</div>
+                        <div style={{ fontSize: '8px', color: '#888', letterSpacing: '0.2em' }}>PULLING_ASSETS_V1.02</div>
                     </div>
                 </motion.div>
             )}

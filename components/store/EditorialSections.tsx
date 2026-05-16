@@ -209,7 +209,7 @@ export function NotesSection() {
     return (
         <section ref={containerRef} style={{
             padding: isMobile ? '40px 24px 16px' : '80px 80px',
-            background: '#0a0a0a',
+            background: '#f8f7f2',
             position: 'relative',
             overflow: 'hidden'
         }}>
@@ -230,7 +230,7 @@ export function NotesSection() {
                             <span
                                 style={{
                                     fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.6em',
-                                    color: '#fff', display: 'block', marginBottom: '12px', opacity: 0.5
+                                    color: '#1a1a1a', display: 'block', marginBottom: '12px', opacity: 0.5
                                 }}
                             >
                                 # BEST SELLERS
@@ -240,7 +240,7 @@ export function NotesSection() {
                             style={{
                                 fontSize: isMobile ? 'clamp(22px, 6vw, 28px)' : 'clamp(24px, 4vw, 48px)',
                                 fontFamily: 'var(--font-baskerville)',
-                                color: '#fff', margin: 0, letterSpacing: '-0.02em',
+                                color: '#1a1a1a', margin: 0, letterSpacing: '-0.02em',
                                 lineHeight: 1
                             }}
                         >
@@ -253,7 +253,7 @@ export function NotesSection() {
                             <span
                                 style={{
                                     fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1em',
-                                    color: '#fff', display: 'block'
+                                    color: '#1a1a1a', display: 'block'
                                 }}
                             >
                                 # BEST SELLERS
@@ -292,9 +292,9 @@ export function NotesSection() {
                                 flex: isMobile ? '0 0 auto' : 'auto',
                                 overflow: 'hidden',
                                 cursor: 'pointer',
-                                borderRadius: '4px',
+                                borderRadius: '28px',
                                 scrollSnapAlign: 'start',
-                                boxShadow: isMobile ? '0 10px 30px rgba(0,0,0,0.3)' : 'none'
+                                boxShadow: isMobile ? '0 10px 30px rgba(0,0,0,0.15)' : '0 8px 24px rgba(0,0,0,0.06)'
                             }}
                         >
                             <div onClick={(e) => handleAction(e, '/products')} style={{ display: 'block', height: '100%' }}>
@@ -499,7 +499,7 @@ export function ReveilCollectionSection() {
 
     return (
         <section ref={containerRef} style={{
-            background: '#050505',
+            background: '#f8f7f2',
             padding: isMobile ? '40px 0' : '100px 80px',
             position: 'relative',
             overflow: 'hidden'

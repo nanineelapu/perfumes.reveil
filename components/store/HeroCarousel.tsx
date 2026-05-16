@@ -101,9 +101,10 @@ export default function HeroCarousel({ slides }: { slides: Slide[] }) {
                                 style={{
                                     width: i === current ? (isMobile ? '40px' : '60px') : '15px',
                                     height: '3px',
-                                    background: i === current ? '#fff' : 'rgba(255,255,255,0.2)',
+                                    background: i === current ? '#fff' : 'rgba(255,255,255,0.4)',
                                     border: 'none', cursor: 'pointer', padding: 0,
                                     borderRadius: '10px',
+                                    boxShadow: '0 1px 3px rgba(0,0,0,0.25)',
                                     transition: 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
                                 }}
                             />
@@ -113,18 +114,19 @@ export default function HeroCarousel({ slides }: { slides: Slide[] }) {
                     <div style={{
                         display: 'flex',
                         gap: isMobile ? '8px' : '16px',
-                        borderLeft: isMobile ? 'none' : '1px solid rgba(255,255,255,0.1)',
+                        borderLeft: isMobile ? 'none' : '1px solid rgba(255,255,255,0.25)',
                         paddingLeft: isMobile ? '0' : '32px'
                     }}>
                         <button
                             onClick={scrollPrev}
                             style={{
                                 background: 'transparent', border: 'none', cursor: 'pointer',
-                                color: '#fff', opacity: 0.5, padding: '8px',
+                                color: '#fff', opacity: 0.75, padding: '8px',
+                                filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.4))',
                                 transition: 'all 0.3s'
                             }}
                             onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                            onMouseLeave={(e) => e.currentTarget.style.opacity = '0.5'}
+                            onMouseLeave={(e) => e.currentTarget.style.opacity = '0.75'}
                         >
                             <ChevronLeft size={isMobile ? 18 : 20} strokeWidth={1.5} />
                         </button>
@@ -132,11 +134,12 @@ export default function HeroCarousel({ slides }: { slides: Slide[] }) {
                             onClick={scrollNext}
                             style={{
                                 background: 'transparent', border: 'none', cursor: 'pointer',
-                                color: '#fff', opacity: 0.5, padding: '8px',
+                                color: '#fff', opacity: 0.75, padding: '8px',
+                                filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.4))',
                                 transition: 'all 0.3s'
                             }}
                             onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                            onMouseLeave={(e) => e.currentTarget.style.opacity = '0.5'}
+                            onMouseLeave={(e) => e.currentTarget.style.opacity = '0.75'}
                         >
                             <ChevronRight size={isMobile ? 18 : 20} strokeWidth={1.5} />
                         </button>
@@ -159,13 +162,13 @@ function SlideMedia({ slide, isActive, emblaApi, isMobile }: { slide: Slide, isA
     }, [slide.id])
 
     return (
-        <div style={{ position: 'relative', height: isMobile ? '90vh' : '100vh', width: '100%', overflow: 'hidden', background: '#000000' }}>
+        <div style={{ position: 'relative', height: isMobile ? '90vh' : '100vh', width: '100%', overflow: 'hidden', background: '#f8f7f2' }}>
 
             {/* Premium Placeholder State */}
             {!isLoaded && (
                 <div style={{
                     position: 'absolute', inset: 0,
-                    background: 'radial-gradient(circle at center, #111 0%, #050505 100%)',
+                    background: 'radial-gradient(circle at center, #f3eee2 0%, #f8f7f2 100%)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 0
                 }}>
                     <div style={{
@@ -200,7 +203,7 @@ function SlideMedia({ slide, isActive, emblaApi, isMobile }: { slide: Slide, isA
                             position: 'absolute', inset: 0, width: '100%', height: '100%',
                             objectFit: 'cover',
                             objectPosition: isMobile ? '75% center' : 'center',
-                            filter: 'brightness(0.3)',
+                            filter: 'brightness(1.02) contrast(0.96) saturate(0.95)',
                             opacity: (slide.video_url && isLoaded) ? 0 : 1,
                             transition: 'opacity 1s ease'
                         }}
@@ -223,7 +226,7 @@ function SlideMedia({ slide, isActive, emblaApi, isMobile }: { slide: Slide, isA
                             width: '100%',
                             height: '100%',
                             objectFit: 'cover',
-                            filter: 'brightness(0.2) contrast(1.1)',
+                            filter: 'brightness(0.5) contrast(1.1)',
                             opacity: isLoaded ? 1 : 0,
                             transition: 'opacity 0.8s ease'
                         }}
@@ -236,11 +239,11 @@ function SlideMedia({ slide, isActive, emblaApi, isMobile }: { slide: Slide, isA
             {/* Side Light Sweep Effect */}
             <motion.div
                 initial={{ x: '-100%', opacity: 0 }}
-                animate={isActive ? { x: '100%', opacity: [0, 0.4, 0] } : {}}
+                animate={isActive ? { x: '100%', opacity: [0, 0.25, 0] } : {}}
                 transition={{ duration: 3, ease: "easeInOut", repeat: Infinity, repeatDelay: 2 }}
                 style={{
                     position: 'absolute', inset: 0,
-                    background: 'linear-gradient(110deg, transparent 40%, rgba(255,255,255,0.1) 50%, transparent 60%)',
+                    background: 'linear-gradient(110deg, transparent 40%, rgba(255,255,255,0.5) 50%, transparent 60%)',
                     zIndex: 1, pointerEvents: 'none'
                 }}
             />
@@ -290,10 +293,10 @@ function SlideMedia({ slide, isActive, emblaApi, isMobile }: { slide: Slide, isA
                             <h2 style={{
                                 color: '#fff',
                                 // Dynamic scaling based on title length
-                                fontSize: isMobile 
-                                    ? 'clamp(32px, 10vw, 48px)' 
-                                    : (slide.title.length > 20 
-                                        ? 'clamp(24px, 4.5vw, 72px)' 
+                                fontSize: isMobile
+                                    ? 'clamp(32px, 10vw, 48px)'
+                                    : (slide.title.length > 20
+                                        ? 'clamp(24px, 4.5vw, 72px)'
                                         : 'clamp(32px, 6vw, 100px)'),
                                 fontWeight: 900,
                                 margin: isMobile ? '0 0 24px' : '0 0 40px',
@@ -301,7 +304,8 @@ function SlideMedia({ slide, isActive, emblaApi, isMobile }: { slide: Slide, isA
                                 fontFamily: 'var(--font-baskerville)',
                                 letterSpacing: '-0.03em',
                                 overflow: 'hidden',
-                                maxWidth: isMobile ? '100%' : '1100px'
+                                maxWidth: isMobile ? '100%' : '1100px',
+                                textShadow: '0 4px 24px rgba(0,0,0,0.45), 0 1px 4px rgba(0,0,0,0.35)'
                             }}>
                                 <motion.div
                                     variants={{
@@ -313,7 +317,7 @@ function SlideMedia({ slide, isActive, emblaApi, isMobile }: { slide: Slide, isA
                                 >
                                     {slide.title?.split(' ').map((word, i) => {
                                         const lowerWord = word.toLowerCase()
-                                        const isAccent = lowerWord.includes('meena') || lowerWord.includes('stones') || lowerWord.includes('scent') || lowerWord.includes('collection') || lowerWord.includes('wildstone')
+                                        const isAccent = lowerWord.includes('meena') || lowerWord.includes('stones') || lowerWord.includes('scent') || lowerWord.includes('collection') || lowerWord.includes('wildstone') || lowerWord.includes('feel') || lowerWord.includes('premium')
                                         return (
                                             <span key={i} style={{
                                                 color: isAccent ? '#d4af37' : '#fff',
@@ -351,13 +355,13 @@ function SlideMedia({ slide, isActive, emblaApi, isMobile }: { slide: Slide, isA
                                     style={{
                                         display: 'inline-block',
                                         padding: isMobile ? '14px 32px' : 'clamp(14px, 1.5vw, 20px) clamp(32px, 3.5vw, 60px)',
-                                        background: '#fff', color: '#000',
+                                        background: '#1a1a1a', color: '#fff',
                                         borderRadius: '100px', fontWeight: 700,
                                         fontSize: isMobile ? '10px' : 'clamp(10px, 0.8vw, 13px)',
                                         textTransform: 'uppercase',
                                         letterSpacing: isMobile ? '0.2em' : '0.3em',
                                         textDecoration: 'none',
-                                        boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
+                                        boxShadow: '0 12px 28px rgba(0,0,0,0.18)',
                                         border: '1px solid transparent'
                                     }}
                                 >

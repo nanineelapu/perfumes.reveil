@@ -76,7 +76,7 @@ export default async function StoreLayout({ children }: { children: React.ReactN
   }
 
   return (
-    <div style={{ background: '#000', color: '#fff', minHeight: '100vh' }}>
+    <div style={{ background: '#f8f7f2', color: '#1a1a1a', minHeight: '100vh' }}>
       <CartProvider>
         <AuthTokenCatcher />
         <AnimatedNavbar />

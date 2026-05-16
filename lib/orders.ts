@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin'
+import { triggerOrderConfirmationEmail } from '@/lib/utils/email'
 
 export type FinalizeInput = {
   razorpayOrderId: string
@@ -64,5 +65,12 @@ export async function finaliseRazorpayOrder(input: FinalizeInput): Promise<Final
   }
 
   // RPC returns the inserted order id (uuid).
-  return { ok: true, orderId: String(data) }
+  const orderId = String(data)
+
+  // Trigger confirmation email in the background
+  triggerOrderConfirmationEmail(orderId).catch(err => {
+    console.error('[finaliseRazorpayOrder] Email trigger failed:', err)
+  })
+
+  return { ok: true, orderId }
 }

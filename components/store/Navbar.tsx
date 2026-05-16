@@ -7,9 +7,9 @@ export function StoreNavbar() {
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
         <Link href="/" className="flex items-center">
           <img
-            src="https://lhnamtkpjkrawgql.public.blob.vercel-storage.com/PNG%20LOGO%20REVIL.webp"
+            src="https://lhnamtkpjkrawgql.public.blob.vercel-storage.com/LOGO.webp"
             alt="Reveil Logo"
-            className="h-22 w-auto"
+            className="h-12 w-auto"
           />
         </Link>
         <div className="flex items-center space-x-8">

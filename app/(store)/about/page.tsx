@@ -23,9 +23,9 @@ export default function AboutPage() {
         <main style={{ background: '#ffffff', color: black, minHeight: '100vh', overflowX: 'hidden' }}>
             {/* HIDDEN SEO HEADINGS - GOD LEVEL SEO */}
             <div className="sr-only">
-                <h1>REVEIL Perfumes - Premium Luxury Fragrances and Authentic Attars in India</h1>
+                <h1>REVEIL Fragrances - Premium Luxury Fragrances and Authentic Attars in India</h1>
                 <h2>Best Long Lasting Perfumes for Men and Women - Designer Scents Archive</h2>
-                <p>Explore the art of perfumery with REVEIL. Our signature laboratory fragrances are crafted for longevity, sophistication, and elegance. Buy luxury perfumes, Oudh, Musk, and Floral scents online.</p>
+                <p>Explore the art of perfumery with REVEIL Fragrances. Our signature laboratory fragrances are crafted for longevity, sophistication, and elegance. Buy luxury perfumes, Oudh, Musk, and Floral scents online.</p>
                 <h3>Top Rated Designer Fragrances India - REVEIL Laboratory</h3>
             </div>
 
@@ -116,7 +116,7 @@ export default function AboutPage() {
                         </h2>
                         <div style={{ fontSize: isMobile ? '16px' : '18px', lineHeight: 1.8, color: textGray }}>
                             <p style={{ marginBottom: '24px' }}>
-                                In 2023, we took a big step. We launched <strong>Refreshub.com</strong> to reach more people across the country.
+                                In 2023, we took a big step. We launched <strong>reveilfragrances.in</strong> to reach more people across the country.
                             </p>
                             <p>
                                 Today, we bring you the best brands like Denver, Wild Stone, and Secret Temptation. We choose each item carefully to make sure you get only the best quality.
@@ -134,8 +134,9 @@ export default function AboutPage() {
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 whileInView={{ opacity: 1, scale: 1 }}
                                 viewport={{ once: true }}
-                                src="https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&q=80"
-                                style={{ width: '100%', height: isMobile ? '200px' : '350px', objectFit: 'cover' }}
+                                src="https://lhnamtkpjkrawgql.public.blob.vercel-storage.com/1.jpg"
+                                alt="Reveil perfume bottle"
+                                style={{ width: '100%', height: isMobile ? '200px' : '350px', objectFit: 'cover', borderRadius: '12px' }}
                             />
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}

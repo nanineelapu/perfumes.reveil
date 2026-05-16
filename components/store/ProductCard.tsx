@@ -124,73 +124,84 @@ export default function ProductCard({ product }: { product: Product }) {
         setImageIndex((i) => (i + 1) % images.length)
     }
 
+    // Disable all hover-driven animations on mobile so taps don't leave one
+    // card in a "lifted" state while siblings stay flat, which makes cards
+    // look unequal in size. Mobile also doesn't have a hover concept, so the
+    // motion adds nothing but inconsistency.
+    const interactiveHover = !isMobile
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            whileHover="cardHover"
+            whileHover={interactiveHover ? 'cardHover' : undefined}
             style={{
-                background: 'linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(212,175,55,0.03) 100%)',
+                background: 'linear-gradient(180deg, #ffffff 0%, rgba(212,175,55,0.05) 100%)',
                 position: 'relative',
                 cursor: 'pointer',
-                borderRadius: '8px',
-                padding: isMobile ? '8px' : '16px',
-                border: '1px solid rgba(255,255,255,0.03)',
+                borderRadius: isMobile ? '20px' : '28px',
+                padding: isMobile ? '8px' : '18px',
+                border: '1px solid rgba(0,0,0,0.06)',
                 transition: 'all 0.6s cubic-bezier(0.22, 1, 0.36, 1)',
                 width: '100%',
                 height: '100%',
                 display: 'flex',
                 flexDirection: 'column',
+                minWidth: 0,
+                boxSizing: 'border-box'
             }}
         >
-            {/* Atmospheric Chassis Glow (Animated on Hover) */}
-            <motion.div
-                variants={{
-                    cardHover: { opacity: 1, scale: 1.1 }
-                }}
-                initial={{ opacity: 0, scale: 1 }}
-                transition={{ duration: 0.8 }}
-                style={{
-                    position: 'absolute',
-                    bottom: '-40px',
-                    left: '10%',
-                    right: '10%',
-                    height: '100px',
-                    background: 'radial-gradient(circle, rgba(212,175,55,0.08) 0%, transparent 70%)',
-                    filter: 'blur(30px)',
-                    zIndex: 0,
-                    pointerEvents: 'none'
-                }}
-            />
+            {/* Atmospheric Chassis Glow (Animated on Hover, desktop only) */}
+            {interactiveHover && (
+                <motion.div
+                    variants={{
+                        cardHover: { opacity: 1, scale: 1.1 }
+                    }}
+                    initial={{ opacity: 0, scale: 1 }}
+                    transition={{ duration: 0.8 }}
+                    style={{
+                        position: 'absolute',
+                        bottom: '-40px',
+                        left: '10%',
+                        right: '10%',
+                        height: '100px',
+                        background: 'radial-gradient(circle, rgba(212,175,55,0.08) 0%, transparent 70%)',
+                        filter: 'blur(30px)',
+                        zIndex: 0,
+                        pointerEvents: 'none'
+                    }}
+                />
+            )}
             {/* Visual Media Container */}
             <motion.div
                 onClick={() => router.push(`/products/${product.slug}`)}
-                onMouseEnter={() => setHovered(true)}
-                onMouseLeave={() => setHovered(false)}
-                animate={{
+                onMouseEnter={interactiveHover ? () => setHovered(true) : undefined}
+                onMouseLeave={interactiveHover ? () => setHovered(false) : undefined}
+                animate={interactiveHover ? {
                     y: hovered ? -10 : 0,
-                    boxShadow: hovered ? '0 30px 60px rgba(0,0,0,0.5)' : '0 0 0 rgba(0,0,0,0)'
-                }}
+                    boxShadow: hovered ? '0 30px 60px rgba(0,0,0,0.15)' : '0 0 0 rgba(0,0,0,0)'
+                } : { y: 0, boxShadow: '0 0 0 rgba(0,0,0,0)' }}
                 transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                 style={{
                     position: 'relative',
                     overflow: 'hidden',
+                    width: '100%',
                     ...(isMobile
-                        ? { height: '200px' }
+                        ? { aspectRatio: '1 / 1', flexShrink: 0 }
                         : { paddingBottom: '140%' }
                     ),
-                    background: '#111',
-                    borderRadius: '2px',
-                    border: '1px solid rgba(255,255,255,0.05)'
+                    background: '#f3eee2',
+                    borderRadius: '20px',
+                    border: '1px solid rgba(0,0,0,0.06)'
                 }}
             >
-                {/* Background Image with Cinematic Focus */}
+                {/* Background Image with Cinematic Focus (desktop hover only) */}
                 <motion.div
-                    animate={{
+                    animate={interactiveHover ? {
                         scale: hovered ? 1.05 : 1,
-                        filter: hovered ? 'brightness(0.7) blur(0.5px)' : 'brightness(0.8) blur(0px)'
-                    }}
+                        filter: hovered ? 'brightness(1) blur(0.5px)' : 'brightness(1) blur(0px)'
+                    } : { scale: 1, filter: 'brightness(1) blur(0px)' }}
                     transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
                     style={{ position: 'absolute', inset: 0, zIndex: 0 }}
                 >
@@ -207,7 +218,7 @@ export default function ProductCard({ product }: { product: Product }) {
                         <div style={{
                             position: 'absolute', inset: 0,
                             display: 'flex', alignItems: 'center',
-                            justifyContent: 'center', color: 'rgba(255,255,255,0.05)', fontSize: '8px',
+                            justifyContent: 'center', color: 'rgba(0,0,0,0.2)', fontSize: '8px',
                             letterSpacing: '0.4em', textTransform: 'uppercase'
                         }}>
                             Fragrance <br /> Archive
@@ -323,7 +334,7 @@ export default function ProductCard({ product }: { product: Product }) {
             <div style={{ padding: isMobile ? '12px 0' : '24px 0', textAlign: 'left', flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <Link href={`/products/${product.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                     <div style={{
-                        fontSize: isMobile ? '7px' : '8px', color: '#666',
+                        fontSize: isMobile ? '7px' : '8px', color: '#888',
                         letterSpacing: isMobile ? '0.2em' : '0.4em', marginBottom: '8px',
                         fontWeight: 400, textTransform: 'uppercase',
                         display: 'flex', alignItems: 'center', gap: '8px',
@@ -341,10 +352,16 @@ export default function ProductCard({ product }: { product: Product }) {
                         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{product.category}</span>
                     </div>
                     <h3 style={{
-                        margin: '0 0 8px', fontSize: isMobile ? '12px' : '15px', fontWeight: 300,
-                        color: '#fff', fontFamily: 'var(--font-cormorant)',
+                        margin: '0 0 8px', fontSize: isMobile ? '12px' : '15px', fontWeight: 400,
+                        color: '#1a1a1a', fontFamily: 'var(--font-cormorant)',
                         letterSpacing: '0.02em', textTransform: 'none', lineHeight: 1.2,
-                        ...(isMobile && { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' })
+                        ...(isMobile && {
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                            minHeight: '29px'
+                        })
                     }}>
                         {product.name}
                     </h3>
@@ -380,19 +397,19 @@ export default function ProductCard({ product }: { product: Product }) {
                             initial="initial"
                             style={{
                                 width: '100%',
-                                background: isMobile ? '#d4af37' : 'rgba(255,255,255,0.02)',
-                                color: isMobile ? '#000' : '#d4af37',
-                                border: isMobile ? 'none' : '1px solid rgba(212,175,55,0.2)',
-                                padding: isMobile ? '8px 2px' : '14px 0',
-                                fontSize: '8px',
+                                background: isMobile ? '#d4af37' : 'rgba(0,0,0,0.02)',
+                                color: isMobile ? '#000' : '#1a1a1a',
+                                border: isMobile ? 'none' : '1px solid rgba(212,175,55,0.4)',
+                                padding: isMobile ? '10px 8px' : '14px 0',
+                                fontSize: isMobile ? '9px' : '8px',
                                 fontWeight: 900,
-                                letterSpacing: isMobile ? '0' : '0.3em',
+                                letterSpacing: isMobile ? '0.1em' : '0.3em',
                                 textTransform: 'uppercase',
                                 cursor: adding ? 'not-allowed' : 'pointer',
                                 fontFamily: 'var(--font-tenor)',
                                 position: 'relative',
                                 overflow: 'hidden',
-                                borderRadius: '2px',
+                                borderRadius: '999px',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
@@ -412,7 +429,7 @@ export default function ProductCard({ product }: { product: Product }) {
 
                             <motion.div
                                 variants={!isMobile ? {
-                                    initial: { color: '#d4af37' },
+                                    initial: { color: '#1a1a1a' },
                                     hover: { color: '#000' }
                                 } : {}}
                                 style={{ position: 'relative', zIndex: 1, color: isMobile ? '#000' : 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}
@@ -449,19 +466,19 @@ export default function ProductCard({ product }: { product: Product }) {
                         initial="initial"
                         style={{
                             flex: 1,
-                            background: isMobile ? '#fff' : 'rgba(255,255,255,0.02)',
-                            color: isMobile ? '#000' : '#d4af37',
-                            border: isMobile ? 'none' : '1px solid rgba(212,175,55,0.2)',
-                            padding: isMobile ? '8px 2px' : '14px 0',
-                            fontSize: '8px',
+                            background: isMobile ? '#1a1a1a' : 'rgba(0,0,0,0.02)',
+                            color: isMobile ? '#fff' : '#1a1a1a',
+                            border: isMobile ? 'none' : '1px solid rgba(212,175,55,0.4)',
+                            padding: isMobile ? '10px 8px' : '14px 0',
+                            fontSize: isMobile ? '9px' : '8px',
                             fontWeight: 900,
-                            letterSpacing: isMobile ? '0' : '0.3em',
+                            letterSpacing: isMobile ? '0.1em' : '0.3em',
                             textTransform: 'uppercase',
                             cursor: adding ? 'not-allowed' : 'pointer',
                             fontFamily: 'var(--font-tenor)',
                             position: 'relative',
                             overflow: 'hidden',
-                            borderRadius: '2px',
+                            borderRadius: '999px',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -481,17 +498,17 @@ export default function ProductCard({ product }: { product: Product }) {
 
                         <motion.div
                             variants={!isMobile ? {
-                                initial: { color: '#d4af37' },
+                                initial: { color: '#1a1a1a' },
                                 hover: { color: '#000' }
                             } : {}}
-                            style={{ position: 'relative', zIndex: 1, color: isMobile ? '#000' : 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}
+                            style={{ position: 'relative', zIndex: 1, color: isMobile ? '#fff' : 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}
                         >
                             <motion.span
                                 variants={!isMobile ? {
                                     initial: { y: 0, opacity: 1 },
                                     hover: { y: -20, opacity: 0 }
                                 } : {}}
-                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: isMobile ? '4px' : '8px', color: isMobile ? '#000' : 'inherit', whiteSpace: 'nowrap' }}
+                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: isMobile ? '4px' : '8px', color: isMobile ? '#fff' : 'inherit', whiteSpace: 'nowrap' }}
                             >
                                 {adding ? <span style={{ paddingTop: '2px' }}>...</span> : <><ShoppingCart size={isMobile ? 12 : 14} /> <span style={{ paddingTop: '2px' }}>CART</span></>}
                             </motion.span>

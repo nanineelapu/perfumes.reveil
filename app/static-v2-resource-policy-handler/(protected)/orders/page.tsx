@@ -3,7 +3,8 @@ import Link from 'next/link'
 import OrderStatusBadge from '@/components/admin/OrderStatusBadge'
 import CancelOrderButton from '@/components/admin/CancelOrderButton'
 import { cn } from '@/lib/utils'
-import { Truck, ExternalLink, Printer, ShoppingBag } from 'lucide-react'
+import { Truck, ExternalLink, Printer, ShoppingBag, Mail } from 'lucide-react'
+import ResendConfirmationButton from '@/components/admin/ResendConfirmationButton'
 import FulfillButton from '../../../../components/admin/FulfillButton'
 import { getDisplayStatus } from '@/lib/utils/order-status'
 import PageHeader from '../_components/PageHeader'
@@ -162,6 +163,7 @@ export default async function AdminOrdersPage() {
                                             <Link href={`/static-v2-resource-policy-handler/orders/${order.id}`} className="text-xs font-semibold text-gray-600 hover:text-black flex items-center gap-0.5 transition-colors">
                                                 Details <ExternalLink className="w-3 h-3" />
                                             </Link>
+                                            <ResendConfirmationButton orderId={order.id} />
                                             <CancelOrderButton orderId={order.id} currentStatus={order.status ?? 'pending'} />
                                         </div>
                                     </td>

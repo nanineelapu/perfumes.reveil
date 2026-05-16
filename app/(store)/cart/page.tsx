@@ -90,7 +90,7 @@ export default function CartPage() {
 
     if (loading) {
         return (
-            <div style={{ height: '100vh', background: '#050505', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '24px' }}>
+            <div style={{ height: '100vh', background: '#f8f7f2', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '24px' }}>
                 <Loader2 className="animate-spin" size={32} color="#d4af37" />
                 <span style={{ fontSize: '10px', color: '#d4af37', letterSpacing: '0.4em', textTransform: 'uppercase' }}>Loading your cart...</span>
             </div>
@@ -98,7 +98,7 @@ export default function CartPage() {
     }
 
     return (
-        <main style={{ background: '#050505', minHeight: '100vh', color: '#fff', paddingTop: '80px', paddingBottom: '100px', position: 'relative' }}>
+        <main style={{ background: '#f8f7f2', minHeight: '100vh', color: '#1a1a1a', paddingTop: '80px', paddingBottom: '100px', position: 'relative' }}>
             <div style={{ maxWidth: '1300px', margin: '0 auto', padding: '0 40px' }}>
 
                 {/* Header */}
@@ -118,8 +118,8 @@ export default function CartPage() {
                         animate={{ opacity: 1, y: 0 }}
                         style={{ 
                             marginBottom: '48px', 
-                            background: 'rgba(212,175,55,0.03)', 
-                            border: '1px solid rgba(212,175,55,0.1)',
+                            background: 'rgba(212,175,55,0.06)',
+                            border: '1px solid rgba(212,175,55,0.3)',
                             padding: '24px 32px',
                             borderRadius: '2px',
                             display: 'flex',
@@ -130,13 +130,13 @@ export default function CartPage() {
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                 <Truck size={16} color="#d4af37" />
-                                <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: totals.subtotal >= 249 ? '#16a34a' : '#fff' }}>
+                                <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: totals.subtotal >= 249 ? '#16a34a' : '#1a1a1a' }}>
                                     {totals.subtotal >= 249 ? 'Free delivery unlocked! 🎉' : `Add ₹${(249 - totals.subtotal).toLocaleString()} more for free shipping`}
                                 </span>
                             </div>
                             <span style={{ fontSize: '10px', color: '#666', letterSpacing: '0.1em' }}>THRESHOLD: ₹249</span>
                         </div>
-                        <div style={{ width: '100%', height: '2px', background: 'rgba(255,255,255,0.05)', position: 'relative', overflow: 'hidden' }}>
+                        <div style={{ width: '100%', height: '2px', background: 'rgba(0,0,0,0.05)', position: 'relative', overflow: 'hidden' }}>
                             <motion.div
                                 initial={{ width: 0 }}
                                 animate={{ width: `${Math.min((totals.subtotal / 249) * 100, 100)}%` }}
@@ -165,25 +165,25 @@ export default function CartPage() {
                                             gridTemplateColumns: '140px 1fr auto',
                                             gap: '32px',
                                             padding: '24px',
-                                            background: '#0a0a0a',
+                                            background: '#ffffff',
                                             borderRadius: '2px',
-                                            border: '1px solid rgba(255,255,255,0.05)',
+                                            border: '1px solid rgba(0,0,0,0.05)',
                                             alignItems: 'center',
                                             opacity: updatingId === item.id ? 0.5 : 1,
                                             pointerEvents: updatingId === item.id ? 'none' : 'auto'
                                         }}
                                     >
-                                        <div style={{ width: '140px', height: '180px', background: '#000', borderRadius: '2px', overflow: 'hidden' }}>
+                                        <div style={{ width: '140px', height: '180px', background: '#f3eee2', borderRadius: '2px', overflow: 'hidden' }}>
                                             <img src={item.products.images?.[0]} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                         </div>
 
                                         <div style={{ display: 'flex', flexDirection: 'column' }}>
                                             <p style={{ fontSize: '9px', color: '#d4af37', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px', fontFamily: 'var(--font-baskerville)' }}>{item.products.category}</p>
                                             <h3 style={{ fontSize: '20px', fontFamily: 'var(--font-baskerville)', margin: 0, fontWeight: 400 }}>{item.products.name}</h3>
-                                            <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', marginTop: '6px', fontFamily: 'var(--font-baskerville)' }}>Premium Quality Fragrance</p>
+                                            <p style={{ fontSize: '11px', color: 'rgba(0,0,0,0.3)', marginTop: '6px', fontFamily: 'var(--font-baskerville)' }}>Premium Quality Fragrance</p>
 
                                             <div style={{ marginTop: '24px', display: 'flex', alignItems: 'center', gap: '24px' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', border: '1px solid #222', padding: '4px 12px' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', border: '1px solid rgba(0,0,0,0.12)', padding: '4px 12px' }}>
                                                     <button onClick={() => updateQuantity(item.id, item.quantity - 1)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer' }}><Minus size={10} /></button>
                                                     <span style={{ fontSize: '12px', fontWeight: 600, minWidth: '20px', textAlign: 'center' }}>{item.quantity}</span>
                                                     <button onClick={() => updateQuantity(item.id, item.quantity + 1)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer' }}><Plus size={10} /></button>
@@ -192,10 +192,10 @@ export default function CartPage() {
                                                     whileHover={{ color: '#ff4d4d', scale: 1.05 }}
                                                     whileTap={{ scale: 0.95 }}
                                                     onClick={() => removeItem(item.id)} 
-                                                    style={{ 
-                                                        background: 'rgba(255,255,255,0.03)', 
-                                                        border: '1px solid rgba(255,255,255,0.05)', 
-                                                        color: 'rgba(255,255,255,0.4)', 
+                                                    style={{
+                                                        background: 'rgba(0,0,0,0.03)',
+                                                        border: '1px solid rgba(0,0,0,0.05)',
+                                                        color: 'rgba(0,0,0,0.4)',
                                                         cursor: 'pointer', 
                                                         fontSize: '8px', 
                                                         fontWeight: 800, 
@@ -223,21 +223,21 @@ export default function CartPage() {
                         </div>
 
                         {/* SUMMARY PANEL */}
-                        <aside style={{ background: '#0a0a0a', padding: '32px', borderRadius: '2px', border: '1px solid rgba(255,255,255,0.05)', position: 'sticky', top: '140px' }}>
+                        <aside style={{ background: '#ffffff', padding: '32px', borderRadius: '2px', border: '1px solid rgba(0,0,0,0.05)', position: 'sticky', top: '140px' }}>
                             <h2 style={{ fontSize: '9px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4em', marginBottom: '32px', color: '#d4af37', fontFamily: 'var(--font-baskerville)' }}>Order Summary</h2>
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
-                                    <span style={{ color: 'rgba(255,255,255,0.4)' }}>Subtotal</span>
+                                    <span style={{ color: 'rgba(0,0,0,0.4)' }}>Subtotal</span>
                                     <span>₹{totals.subtotal.toLocaleString()}</span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
-                                    <span style={{ color: 'rgba(255,255,255,0.4)' }}>Shipping</span>
-                                    <span style={{ color: totals.shipping === 0 ? '#16a34a' : '#fff' }}>
+                                    <span style={{ color: 'rgba(0,0,0,0.4)' }}>Shipping</span>
+                                    <span style={{ color: totals.shipping === 0 ? '#16a34a' : '#1a1a1a' }}>
                                         {totals.shipping === 0 ? 'FREE' : `₹${totals.shipping.toLocaleString()}`}
                                     </span>
                                 </div>
-                                <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', margin: '16px 0' }} />
+                                <div style={{ height: '1px', background: 'rgba(0,0,0,0.05)', margin: '16px 0' }} />
                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '20px', fontWeight: 400 }}>
                                     <span>TOTAL</span>
                                     <span>₹{totals.total.toLocaleString()}</span>
@@ -254,7 +254,7 @@ export default function CartPage() {
                                     router.push('/checkout')
                                 }}
                                 style={{
-                                    width: '100%', background: '#fff', color: '#000', border: 'none',
+                                    width: '100%', background: '#1a1a1a', color: '#fff', border: 'none',
                                     padding: '18px', fontSize: '10px', fontWeight: 900,
                                     textTransform: 'uppercase', letterSpacing: '0.3em', cursor: 'pointer',
                                     marginTop: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px'
@@ -262,7 +262,7 @@ export default function CartPage() {
                                 Checkout <ArrowRight size={14} />
                             </button>
 
-                            <div style={{ marginTop: '32px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '32px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                            <div style={{ marginTop: '32px', borderTop: '1px solid rgba(0,0,0,0.05)', paddingTop: '32px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                                 <div style={{ display: 'flex', gap: '12px' }}>
                                     <ShieldCheck size={14} color="#d4af37" />
                                     <p style={{ fontSize: '9px', fontWeight: 900, margin: 0, textTransform: 'uppercase' }}>Secure Transaction</p>
@@ -275,13 +275,13 @@ export default function CartPage() {
                         </aside>
                     </div>
                 ) : (
-                    <div style={{ textAlign: 'center', padding: '120px 0', border: '1px dashed rgba(255,255,255,0.05)' }}>
-                        <h2 style={{ fontSize: '13px', fontWeight: 300, color: '#444', textTransform: 'uppercase', letterSpacing: '0.4em' }}>Your cart is empty</h2>
+                    <div style={{ textAlign: 'center', padding: '120px 0', border: '1px dashed rgba(0,0,0,0.1)' }}>
+                        <h2 style={{ fontSize: '13px', fontWeight: 300, color: '#555', textTransform: 'uppercase', letterSpacing: '0.4em' }}>Your cart is empty</h2>
                         <Link href="/products" style={{ textDecoration: 'none' }}>
                             <motion.button
                                 whileHover={{ scale: 1.05 }}
                                 style={{
-                                    marginTop: '32px', background: 'transparent', border: '1px solid #d4af37', color: '#d4af37',
+                                    marginTop: '32px', background: 'transparent', border: '1px solid #d4af37', color: '#1a1a1a',
                                     padding: '14px 32px', cursor: 'pointer', fontSize: '9px', fontWeight: 900,
                                     textTransform: 'uppercase', letterSpacing: '0.2em'
                                 }}

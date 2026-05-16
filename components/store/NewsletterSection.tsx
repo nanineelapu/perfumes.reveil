@@ -63,8 +63,10 @@ export function NewsletterSection() {
     return (
         <section
             ref={containerRef}
-            className="relative overflow-hidden bg-white text-[#1a1a1a]"
+            className="relative overflow-hidden text-[#1a1a1a]"
+            // cream bg consistent with the rest of the home page
             style={{
+                background: '#f8f7f2',
                 padding: isMobile ? '60px 20px' : '80px 80px',
                 minHeight: isMobile ? 'auto' : '50vh',
                 display: 'flex',

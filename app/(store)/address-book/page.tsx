@@ -154,26 +154,26 @@ export default function AddressBookPage() {
     }
 
     if (loading) return (
-        <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#050505' }}>
+        <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f7f2' }}>
             <Loader2 size={32} color="#d4af37" className="animate-spin" />
         </div>
     )
 
     const inputStyle: React.CSSProperties = {
-        width: '100%', background: 'transparent', border: 'none',
-        borderBottom: '1px solid rgba(255,255,255,0.1)', color: '#fff',
+        width: '100%', background: '#ffffff', border: 'none',
+        borderBottom: '1px solid rgba(0,0,0,0.12)', color: '#1a1a1a',
         fontSize: '14px', padding: '12px 14px', outline: 'none',
         fontFamily: 'var(--font-baskerville)',
         boxSizing: 'border-box'
     }
 
     const labelStyle: React.CSSProperties = {
-        fontSize: '9px', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase',
+        fontSize: '9px', color: 'rgba(0,0,0,0.5)', textTransform: 'uppercase',
         letterSpacing: '0.2em', display: 'block', marginBottom: '6px'
     }
 
     return (
-        <main style={{ background: '#050505', minHeight: '100vh', color: '#fff', paddingTop: isMobile ? '80px' : '120px', paddingBottom: '100px' }}>
+        <main style={{ background: '#f8f7f2', minHeight: '100vh', color: '#1a1a1a', paddingTop: isMobile ? '80px' : '120px', paddingBottom: '100px' }}>
             {/* HIDDEN SEO HEADINGS - GOD LEVEL SEO */}
             <div className="sr-only">
                 <h1>REVEIL Address Book - Luxury Perfume Delivery Management</h1>
@@ -196,15 +196,15 @@ export default function AddressBookPage() {
                     <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ fontSize: 'clamp(32px, 6vw, 56px)', fontFamily: 'var(--font-baskerville)', fontWeight: 300, margin: '0 0 16px', letterSpacing: '-0.02em' }}>
                         Your <span style={{ color: '#d4af37', fontStyle: 'italic' }}>Addresses</span>
                     </motion.h1>
-                    <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', fontFamily: 'var(--font-baskerville)', fontStyle: 'italic' }}>
+                    <p style={{ color: 'rgba(0,0,0,0.5)', fontSize: '13px', fontFamily: 'var(--font-baskerville)', fontStyle: 'italic' }}>
                         Save your delivery addresses so checkout is faster.
                     </p>
 
                     {/* Counter */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '32px' }}>
-                        <div style={{ padding: '8px 20px', background: 'rgba(212,175,55,0.05)', border: '1px solid rgba(212,175,55,0.1)', borderRadius: '2px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{ padding: '8px 20px', background: 'rgba(212,175,55,0.05)', border: '1px solid rgba(212,175,55,0.3)', borderRadius: '2px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                             <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#d4af37' }} />
-                            <span style={{ fontSize: '9px', fontWeight: 900, color: '#fff', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
+                            <span style={{ fontSize: '9px', fontWeight: 900, color: '#1a1a1a', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
                                 {addresses.length.toString().padStart(2, '0')} Saved
                             </span>
                         </div>
@@ -226,12 +226,12 @@ export default function AddressBookPage() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '32px' }}>
                     {addresses.length === 0 && !showForm && (
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                            style={{ padding: '60px 40px', textAlign: 'center', border: '1px dashed rgba(255,255,255,0.08)', borderRadius: '4px' }}>
-                            <MapPin size={32} color="rgba(212,175,55,0.3)" style={{ margin: '0 auto 16px' }} />
-                            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '14px', fontFamily: 'var(--font-baskerville)', fontStyle: 'italic', marginBottom: '8px' }}>
+                            style={{ padding: '60px 40px', textAlign: 'center', border: '1px dashed rgba(0,0,0,0.12)', borderRadius: '4px' }}>
+                            <MapPin size={32} color="rgba(212,175,55,0.5)" style={{ margin: '0 auto 16px' }} />
+                            <p style={{ color: 'rgba(0,0,0,0.5)', fontSize: '14px', fontFamily: 'var(--font-baskerville)', fontStyle: 'italic', marginBottom: '8px' }}>
                                 No addresses saved yet.
                             </p>
-                            <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: '11px' }}>Add one below to make checkout faster.</p>
+                            <p style={{ color: 'rgba(0,0,0,0.35)', fontSize: '11px' }}>Add one below to make checkout faster.</p>
                         </motion.div>
                     )}
 
@@ -241,13 +241,13 @@ export default function AddressBookPage() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: idx * 0.05 }}
                             style={{
-                                background: addr.is_default ? 'rgba(212,175,55,0.04)' : 'rgba(255,255,255,0.02)',
-                                border: `1px solid ${addr.is_default ? 'rgba(212,175,55,0.2)' : 'rgba(255,255,255,0.06)'}`,
+                                background: addr.is_default ? 'rgba(212,175,55,0.08)' : '#ffffff',
+                                border: `1px solid ${addr.is_default ? 'rgba(212,175,55,0.4)' : 'rgba(0,0,0,0.08)'}`,
                                 borderRadius: '4px', padding: isMobile ? '20px' : '28px 32px',
                                 position: 'relative', overflow: 'hidden'
                             }}>
                             {/* Ghost index */}
-                            <div style={{ position: 'absolute', top: '10px', right: '20px', fontSize: '48px', fontWeight: 900, color: 'rgba(255,255,255,0.02)', fontFamily: 'var(--font-baskerville)', pointerEvents: 'none' }}>
+                            <div style={{ position: 'absolute', top: '10px', right: '20px', fontSize: '48px', fontWeight: 900, color: 'rgba(0,0,0,0.04)', fontFamily: 'var(--font-baskerville)', pointerEvents: 'none' }}>
                                 {String(idx + 1).padStart(2, '0')}
                             </div>
 
@@ -263,27 +263,27 @@ export default function AddressBookPage() {
                                             </span>
                                         )}
                                     </div>
-                                    <p style={{ fontSize: '15px', fontWeight: 500, margin: '0 0 4px', color: '#fff' }}>{addr.name}</p>
-                                    <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', margin: '0 0 2px', fontFamily: 'var(--font-baskerville)' }}>
+                                    <p style={{ fontSize: '15px', fontWeight: 500, margin: '0 0 4px', color: '#1a1a1a' }}>{addr.name}</p>
+                                    <p style={{ fontSize: '13px', color: 'rgba(0,0,0,0.6)', margin: '0 0 2px', fontFamily: 'var(--font-baskerville)' }}>
                                         {addr.line1}{addr.line2 ? `, ${addr.line2}` : ''}
                                     </p>
-                                    <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', margin: '0 0 8px', fontFamily: 'var(--font-baskerville)' }}>
+                                    <p style={{ fontSize: '13px', color: 'rgba(0,0,0,0.6)', margin: '0 0 8px', fontFamily: 'var(--font-baskerville)' }}>
                                         {addr.city}, {addr.state} — {addr.pincode}
                                     </p>
-                                    {addr.phone && <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', margin: 0 }}>{addr.phone}</p>}
+                                    {addr.phone && <p style={{ fontSize: '11px', color: 'rgba(0,0,0,0.4)', margin: 0 }}>{addr.phone}</p>}
                                 </div>
 
                                 {/* Actions */}
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end', marginLeft: '24px' }}>
-                                    <button onClick={() => handleEdit(addr)} style={{ background: 'none', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)', padding: '6px 14px', borderRadius: '2px', cursor: 'pointer', fontSize: '9px', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
+                                    <button onClick={() => handleEdit(addr)} style={{ background: 'none', border: '1px solid rgba(0,0,0,0.12)', color: 'rgba(0,0,0,0.6)', padding: '6px 14px', borderRadius: '2px', cursor: 'pointer', fontSize: '9px', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
                                         Edit
                                     </button>
                                     {!addr.is_default && (
-                                        <button onClick={() => handleSetDefault(addr.id)} style={{ background: 'none', border: '1px solid rgba(212,175,55,0.2)', color: '#d4af37', padding: '6px 14px', borderRadius: '2px', cursor: 'pointer', fontSize: '9px', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
+                                        <button onClick={() => handleSetDefault(addr.id)} style={{ background: 'none', border: '1px solid rgba(212,175,55,0.4)', color: '#d4af37', padding: '6px 14px', borderRadius: '2px', cursor: 'pointer', fontSize: '9px', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
                                             Set Default
                                         </button>
                                     )}
-                                    <button onClick={() => handleDelete(addr.id)} style={{ background: 'none', border: 'none', color: 'rgba(255,75,75,0.5)', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                                    <button onClick={() => handleDelete(addr.id)} style={{ background: 'none', border: 'none', color: 'rgba(255,75,75,0.7)', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
                                         <Trash2 size={12} /> Remove
                                     </button>
                                 </div>
@@ -295,11 +295,11 @@ export default function AddressBookPage() {
                 {/* Add Button */}
                 {!showForm && (
                     <motion.button
-                        whileHover={{ borderColor: 'rgba(212,175,55,0.4)' }}
+                        whileHover={{ borderColor: 'rgba(212,175,55,0.6)' }}
                         onClick={() => { setShowForm(true); setEditingId(null); setForm(emptyForm) }}
                         style={{
                             width: '100%', padding: '20px', background: 'transparent',
-                            border: '1px dashed rgba(212,175,55,0.2)', borderRadius: '4px',
+                            border: '1px dashed rgba(212,175,55,0.4)', borderRadius: '4px',
                             color: '#d4af37', cursor: 'pointer', display: 'flex', alignItems: 'center',
                             justifyContent: 'center', gap: '10px', fontSize: '10px', fontWeight: 900,
                             textTransform: 'uppercase', letterSpacing: '0.3em', transition: 'border-color 0.3s'
@@ -316,7 +316,7 @@ export default function AddressBookPage() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
                             onSubmit={handleSubmit}
-                            style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(212,175,55,0.15)', borderRadius: '4px', padding: isMobile ? '24px' : '40px' }}>
+                            style={{ background: '#ffffff', border: '1px solid rgba(212,175,55,0.3)', borderRadius: '4px', padding: isMobile ? '24px' : '40px' }}>
 
                             <h3 style={{ fontSize: '12px', fontWeight: 900, letterSpacing: '0.4em', textTransform: 'uppercase', color: '#d4af37', marginBottom: '32px' }}>
                                 {editingId ? 'Edit Address' : 'New Address'}
@@ -328,7 +328,7 @@ export default function AddressBookPage() {
                                 <div style={{ display: 'flex', gap: '12px' }}>
                                     {['Home', 'Work', 'Other'].map(l => (
                                         <button key={l} type="button" onClick={() => setForm({ ...form, label: l })}
-                                            style={{ padding: '8px 20px', background: form.label === l ? '#d4af37' : 'transparent', border: `1px solid ${form.label === l ? '#d4af37' : 'rgba(255,255,255,0.1)'}`, color: form.label === l ? '#000' : 'rgba(255,255,255,0.5)', borderRadius: '2px', cursor: 'pointer', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em' }}>
+                                            style={{ padding: '8px 20px', background: form.label === l ? '#d4af37' : 'transparent', border: `1px solid ${form.label === l ? '#d4af37' : 'rgba(0,0,0,0.12)'}`, color: form.label === l ? '#000' : 'rgba(0,0,0,0.6)', borderRadius: '2px', cursor: 'pointer', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em' }}>
                                             {l}
                                         </button>
                                     ))}
@@ -375,7 +375,7 @@ export default function AddressBookPage() {
                                     {saving ? 'Saving...' : 'Save Address'}
                                 </motion.button>
                                 <button type="button" onClick={() => { setShowForm(false); setEditingId(null); setError(null) }}
-                                    style={{ padding: '16px 28px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)', borderRadius: '2px', cursor: 'pointer', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em' }}>
+                                    style={{ padding: '16px 28px', background: 'transparent', border: '1px solid rgba(0,0,0,0.12)', color: 'rgba(0,0,0,0.6)', borderRadius: '2px', cursor: 'pointer', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em' }}>
                                     Cancel
                                 </button>
                             </div>

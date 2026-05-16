@@ -18,16 +18,16 @@ export default function ProductGrid({ items }: { items: (Product | Collection)[]
 
     if (!items || items.length === 0) {
         return (
-            <div style={{ textAlign: 'center', padding: '120px', color: '#666', background: '#050505' }}>
+            <div style={{ textAlign: 'center', padding: '120px', color: '#666', background: '#f8f7f2' }}>
                 <div style={{ fontSize: '12px', letterSpacing: '0.4em', textTransform: 'uppercase' }}>No curation found at this moment.</div>
             </div>
         )
     }
 
     return (
-        <AnimatedPageSection delay={0.1} style={{ background: '#050505', padding: isMobile ? '60px 20px' : '100px 80px', position: 'relative', overflow: 'hidden' }}>
+        <AnimatedPageSection delay={0.1} style={{ background: '#f8f7f2', padding: isMobile ? '40px 20px 60px' : '60px 80px 100px', position: 'relative', overflow: 'hidden' }}>
             {/* Architectural Border Accents */}
-            <div style={{ position: 'absolute', top: 0, left: '5%', right: '5%', height: '1px', background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.05), transparent)' }} />
+            <div style={{ position: 'absolute', top: 0, left: '5%', right: '5%', height: '1px', background: 'linear-gradient(to right, transparent, rgba(0,0,0,0.08), transparent)' }} />
 
             <div style={{ maxWidth: '1440px', margin: '0 auto', position: 'relative' }}>
                 <div style={{
@@ -62,7 +62,7 @@ export default function ProductGrid({ items }: { items: (Product | Collection)[]
                             <h2 style={{
                                 fontSize: isMobile ? '20px' : 'clamp(24px, 4vw, 42px)',
                                 fontFamily: 'var(--font-baskerville)',
-                                color: '#fff', margin: 0, lineHeight: 1,
+                                color: '#1a1a1a', margin: 0, lineHeight: 1,
                                 letterSpacing: '0.02em', textTransform: 'uppercase',
                                 whiteSpace: isMobile ? 'nowrap' : 'normal'
                             }}>
@@ -71,7 +71,7 @@ export default function ProductGrid({ items }: { items: (Product | Collection)[]
 
                             {isMobile && (
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', opacity: 0.6, marginTop: '12px' }}>
-                                    <span style={{ fontSize: '8px', fontWeight: 900, letterSpacing: '0.6em', textTransform: 'uppercase', color: '#fff' }}># CURATED SELECTION</span>
+                                    <span style={{ fontSize: '8px', fontWeight: 900, letterSpacing: '0.6em', textTransform: 'uppercase', color: '#1a1a1a' }}># CURATED SELECTION</span>
                                 </div>
                             )}
                         </motion.div>
@@ -85,7 +85,7 @@ export default function ProductGrid({ items }: { items: (Product | Collection)[]
                             transition={{ duration: 1, delay: 0.2 }}
                             style={{ opacity: 0.6 }}
                         >
-                            <span style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.6em', textTransform: 'uppercase', color: '#fff' }}># CURATED SELECTION</span>
+                            <span style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.6em', textTransform: 'uppercase', color: '#1a1a1a' }}># CURATED SELECTION</span>
                         </motion.div>
                     )}
 

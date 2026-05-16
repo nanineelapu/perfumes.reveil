@@ -1,7 +1,7 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Star, X, Loader2, CheckCircle } from 'lucide-react'
+import { Star, X, Loader2, CheckCircle, Image as ImageIcon, Video, Trash2 } from 'lucide-react'
 
 interface ReviewModalProps {
     isOpen: boolean
@@ -11,14 +11,51 @@ interface ReviewModalProps {
         name: string
     }
     orderId?: string
+    initialRating?: number
 }
 
-export function ReviewModal({ isOpen, onClose, product, orderId }: ReviewModalProps) {
-    const [rating, setRating] = useState(0)
+export function ReviewModal({ isOpen, onClose, product, orderId, initialRating = 0 }: ReviewModalProps) {
+    const [rating, setRating] = useState(initialRating)
     const [hoveredRating, setHoveredRating] = useState(0)
+
+    useEffect(() => {
+        if (isOpen && initialRating > 0) {
+            setRating(initialRating)
+        }
+    }, [isOpen, initialRating])
+    const [heading, setHeading] = useState('')
     const [comment, setComment] = useState('')
+    const [isAnonymous, setIsAnonymous] = useState(false)
+    const [mediaUrls, setMediaUrls] = useState<string[]>([])
+    const [uploading, setUploading] = useState(false)
     const [submitting, setSubmitting] = useState(false)
     const [submitted, setSubmitted] = useState(false)
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+        setUploading(true)
+        const formData = new FormData()
+        formData.append('file', file)
+        try {
+            const res = await fetch('/api/reviews/upload', {
+                method: 'POST',
+                body: formData
+            })
+            const data = await res.json()
+            if (data.url) {
+                setMediaUrls(prev => [...prev, data.url])
+            }
+        } catch (error) {
+            console.error('Upload failed:', error)
+        } finally {
+            setUploading(false)
+        }
+    }
+
+    const removeMedia = (url: string) => {
+        setMediaUrls(prev => prev.filter(u => u !== url))
+    }
 
     const handleSubmit = async () => {
         if (rating === 0) return
@@ -30,7 +67,10 @@ export function ReviewModal({ isOpen, onClose, product, orderId }: ReviewModalPr
                 body: JSON.stringify({
                     product_id: product.id,
                     rating,
+                    heading,
                     comment,
+                    media_urls: mediaUrls,
+                    reviewer_name: isAnonymous ? 'Anonymous' : null,
                     order_id: orderId
                 })
             })
@@ -117,8 +157,37 @@ export function ReviewModal({ isOpen, onClose, product, orderId }: ReviewModalPr
                                     ))}
                                 </div>
 
-                                <div style={{ marginBottom: '40px' }}>
-                                    <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '12px' }}>Personal Notes (Optional)</p>
+                                <div style={{ marginBottom: '24px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', cursor: 'pointer' }} onClick={() => setIsAnonymous(!isAnonymous)}>
+                                        <div style={{ width: '14px', height: '14px', border: '1px solid #d4af37', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            {isAnonymous && <div style={{ width: '8px', height: '8px', background: '#d4af37', borderRadius: '1px' }} />}
+                                        </div>
+                                        <span style={{ fontSize: '11px', color: '#fff', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Post review as anonymous</span>
+                                    </div>
+                                </div>
+
+                                <div style={{ marginBottom: '24px' }}>
+                                    <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '12px' }}>Review Heading</p>
+                                    <input
+                                        type="text"
+                                        value={heading}
+                                        onChange={(e) => setHeading(e.target.value)}
+                                        placeholder="Summarize your experience..."
+                                        style={{
+                                            width: '100%',
+                                            background: 'rgba(255,255,255,0.02)',
+                                            border: '1px solid rgba(255,255,255,0.1)',
+                                            borderRadius: '2px',
+                                            color: '#fff',
+                                            padding: '12px 16px',
+                                            fontSize: '14px',
+                                            outline: 'none',
+                                        }}
+                                    />
+                                </div>
+
+                                <div style={{ marginBottom: '24px' }}>
+                                    <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '12px' }}>Review Description</p>
                                     <textarea
                                         value={comment}
                                         onChange={(e) => setComment(e.target.value)}
@@ -131,12 +200,41 @@ export function ReviewModal({ isOpen, onClose, product, orderId }: ReviewModalPr
                                             color: '#fff',
                                             padding: '16px',
                                             fontSize: '14px',
-                                            fontFamily: 'var(--font-baskerville)',
-                                            minHeight: '120px',
+                                            fontFamily: 'inherit',
+                                            minHeight: '100px',
                                             outline: 'none',
                                             resize: 'none'
                                         }}
                                     />
+                                </div>
+
+                                <div style={{ marginBottom: '40px' }}>
+                                    <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '12px' }}>Add Image or Video</p>
+                                    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                                        {mediaUrls.map((url) => (
+                                            <div key={url} style={{ position: 'relative', width: '80px', height: '80px', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden' }}>
+                                                {url.match(/\.(mp4|mov)$/) ? (
+                                                    <video src={url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                ) : (
+                                                    <img src={url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
+                                                )}
+                                                <button onClick={() => removeMedia(url)} style={{ position: 'absolute', top: '4px', right: '4px', background: 'rgba(0,0,0,0.5)', border: 'none', color: '#fff', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                                                    <Trash2 size={12} />
+                                                </button>
+                                            </div>
+                                        ))}
+                                        <label style={{ width: '80px', height: '80px', border: '1px dashed rgba(212,175,55,0.3)', borderRadius: '4px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: '0.3s' }}>
+                                            <input type="file" onChange={handleFileUpload} style={{ display: 'none' }} accept="image/*,video/*" disabled={uploading} />
+                                            {uploading ? (
+                                                <Loader2 size={16} className="animate-spin" color="#d4af37" />
+                                            ) : (
+                                                <>
+                                                    <ImageIcon size={16} color="#d4af37" />
+                                                    <span style={{ fontSize: '8px', color: '#d4af37', marginTop: '4px', textTransform: 'uppercase' }}>Browse</span>
+                                                </>
+                                            )}
+                                        </label>
+                                    </div>
                                 </div>
 
                                 <button

@@ -34,8 +34,8 @@ export default function AuthSuccessPage() {
     return (
         <div style={{
             minHeight: '100vh',
-            background: 'radial-gradient(circle at top right, #1a140a 0%, #050505 50%)',
-            color: '#fff',
+            background: 'radial-gradient(circle at top right, #f3eee2 0%, #f8f7f2 50%)',
+            color: '#1a1a1a',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -50,12 +50,11 @@ export default function AuthSuccessPage() {
                     maxWidth: '450px',
                     width: '100%',
                     textAlign: 'center',
-                    background: 'rgba(15, 15, 15, 0.6)',
-                    backdropFilter: 'blur(20px)',
+                    background: '#ffffff',
                     padding: '60px 40px',
-                    borderRadius: '24px',
-                    border: '1px solid rgba(212, 175, 55, 0.1)',
-                    boxShadow: '0 20px 50px rgba(0,0,0,0.5)'
+                    borderRadius: '28px',
+                    border: '1px solid rgba(212, 175, 55, 0.3)',
+                    boxShadow: '0 20px 50px rgba(0,0,0,0.08)'
                 }}
             >
                 <motion.div
@@ -79,37 +78,38 @@ export default function AuthSuccessPage() {
 
                 <h1 style={{
                     fontSize: '32px',
-                    fontWeight: 300,
+                    fontWeight: 400,
                     marginBottom: '16px',
                     fontFamily: 'var(--font-baskerville)',
-                    letterSpacing: '-0.02em'
+                    letterSpacing: '-0.02em',
+                    color: '#1a1a1a'
                 }}>
                     You're <span style={{ color: '#d4af37' }}>Registered</span>
                 </h1>
 
                 <p style={{
-                    color: '#888',
+                    color: '#666',
                     fontSize: '15px',
                     lineHeight: 1.6,
                     marginBottom: '32px',
-                    fontWeight: 300
+                    fontWeight: 400
                 }}>
                     Your account has been created successfully. Please log in to continue — or wait, and we'll take you there automatically.
                 </p>
 
                 <motion.button
                     onClick={() => router.push(LOGIN_PATH)}
-                    whileHover={{ scale: 1.02 }}
+                    whileHover={{ scale: 1.02, backgroundColor: '#1a1a1a', color: '#d4af37' }}
                     whileTap={{ scale: 0.98 }}
                     style={{
                         width: '100%',
                         background: '#d4af37',
-                        color: '#000',
+                        color: '#1a1a1a',
                         border: 'none',
                         padding: '16px',
-                        borderRadius: '12px',
+                        borderRadius: '999px',
                         fontSize: '14px',
-                        fontWeight: 700,
+                        fontWeight: 800,
                         letterSpacing: '0.2em',
                         textTransform: 'uppercase',
                         cursor: 'pointer',
@@ -117,6 +117,7 @@ export default function AuthSuccessPage() {
                         alignItems: 'center',
                         justifyContent: 'center',
                         gap: '10px',
+                        boxShadow: '0 8px 18px rgba(212,175,55,0.3)',
                         transition: 'all 0.3s'
                     }}
                 >
@@ -127,7 +128,7 @@ export default function AuthSuccessPage() {
                 <div style={{
                     marginTop: '20px',
                     fontSize: '11px',
-                    color: '#666',
+                    color: '#888',
                     letterSpacing: '0.2em',
                     textTransform: 'uppercase'
                 }}>
@@ -137,9 +138,9 @@ export default function AuthSuccessPage() {
                 <div style={{
                     marginTop: '40px',
                     paddingTop: '24px',
-                    borderTop: '1px solid rgba(255,255,255,0.05)',
+                    borderTop: '1px solid rgba(0,0,0,0.06)',
                     fontSize: '11px',
-                    color: '#444',
+                    color: '#888',
                     letterSpacing: '0.2em',
                     textTransform: 'uppercase'
                 }}>

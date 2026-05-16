@@ -48,7 +48,7 @@ export async function POST(request: Request) {
             { status: 400 }
         )
     } catch (error: any) {
-        console.error('[OTP Send Route] Error')
+        console.error('[OTP Send Route] Error:', error?.message || error)
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     }
 }

@@ -45,7 +45,7 @@ const SHIPPING_FEE = 50
 export default function CheckoutPage() {
     return (
         <Suspense fallback={
-            <div style={{ minHeight: '100vh', background: '#050505', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '14px' }}>
+            <div style={{ minHeight: '100vh', background: '#f8f7f2', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '14px' }}>
                 <Loader2 className="animate-spin" size={28} color="#d4af37" />
                 <span style={{ fontSize: '10px', color: '#d4af37', letterSpacing: '0.4em', textTransform: 'uppercase' }}>Preparing checkout...</span>
             </div>
@@ -290,7 +290,7 @@ function CheckoutInner() {
 
     if (loading) {
         return (
-            <div style={{ minHeight: '100vh', background: '#050505', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '14px' }}>
+            <div style={{ minHeight: '100vh', background: '#f8f7f2', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '14px' }}>
                 <Loader2 className="animate-spin" size={28} color="#d4af37" />
                 <span style={{ fontSize: '10px', color: '#d4af37', letterSpacing: '0.4em', textTransform: 'uppercase' }}>Preparing checkout...</span>
             </div>
@@ -305,7 +305,7 @@ function CheckoutInner() {
                 data-rzp="1"
             />
 
-            <main style={{ background: '#050505', minHeight: '100vh', color: '#fff', paddingTop: isMobile ? '90px' : '120px', paddingBottom: isMobile ? '60px' : '120px' }}>
+            <main style={{ background: '#f8f7f2', minHeight: '100vh', color: '#1a1a1a', paddingTop: isMobile ? '90px' : '120px', paddingBottom: isMobile ? '60px' : '120px' }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto', padding: isMobile ? '0 16px' : '0 40px' }}>
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#d4af37', fontSize: isMobile ? '8px' : '9px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: isMobile ? '0.4em' : '0.6em', marginBottom: '16px', fontFamily: 'var(--font-baskerville)' }}>
                         Secure Checkout <div style={{ width: '30px', height: '1px', background: 'rgba(212,175,55,0.3)' }} />
@@ -318,16 +318,16 @@ function CheckoutInner() {
                         {/* LEFT — address + payment */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '20px' : '32px' }}>
                             {/* Addresses */}
-                            <section style={{ background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '2px', padding: isMobile ? '20px' : '32px' }}>
+                            <section style={{ background: '#ffffff', border: '1px solid rgba(0,0,0,0.05)', borderRadius: '2px', padding: isMobile ? '20px' : '32px' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                                     <h2 style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4em', color: '#d4af37', fontFamily: 'var(--font-baskerville)', margin: 0 }}>Delivery Address</h2>
-                                    <Link href="/address-book" style={{ fontSize: '9px', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.2em', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <Link href="/address-book" style={{ fontSize: '9px', color: 'rgba(0,0,0,0.5)', textTransform: 'uppercase', letterSpacing: '0.2em', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                         <Plus size={12} /> Add New
                                     </Link>
                                 </div>
 
                                 {addresses.length === 0 ? (
-                                    <div style={{ padding: '32px', border: '1px dashed rgba(255,255,255,0.1)', textAlign: 'center' }}>
+                                    <div style={{ padding: '32px', border: '1px dashed rgba(0,0,0,0.1)', textAlign: 'center' }}>
                                         <MapPin size={20} color="#666" style={{ marginBottom: '12px' }} />
                                         <p style={{ fontSize: '12px', color: '#888', margin: '0 0 16px' }}>You don't have any saved addresses yet.</p>
                                         <Link href="/address-book" style={{ display: 'inline-block', padding: '12px 24px', border: '1px solid #d4af37', color: '#d4af37', fontSize: '9px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', textDecoration: 'none' }}>
@@ -345,26 +345,26 @@ function CheckoutInner() {
                                                     style={{
                                                         textAlign: 'left',
                                                         padding: '20px',
-                                                        background: active ? 'rgba(212,175,55,0.05)' : 'transparent',
-                                                        border: `1px solid ${active ? '#d4af37' : 'rgba(255,255,255,0.08)'}`,
+                                                        background: active ? 'rgba(212,175,55,0.08)' : 'transparent',
+                                                        border: `1px solid ${active ? '#d4af37' : 'rgba(0,0,0,0.12)'}`,
                                                         cursor: 'pointer',
-                                                        color: '#fff',
+                                                        color: '#1a1a1a',
                                                         display: 'grid',
                                                         gridTemplateColumns: '24px 1fr',
                                                         gap: '16px',
                                                         alignItems: 'start',
                                                     }}
                                                 >
-                                                    <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: `1px solid ${active ? '#d4af37' : '#333'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '2px' }}>
+                                                    <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: `1px solid ${active ? '#d4af37' : 'rgba(0,0,0,0.2)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '2px' }}>
                                                         {active && <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#d4af37' }} />}
                                                     </div>
                                                     <div>
                                                         <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '6px' }}>
                                                             <span style={{ fontSize: '9px', letterSpacing: '0.3em', color: '#d4af37', fontWeight: 900, textTransform: 'uppercase' }}>{a.label}</span>
-                                                            {a.is_default && <span style={{ fontSize: '8px', padding: '2px 8px', border: '1px solid rgba(255,255,255,0.1)', color: '#888', textTransform: 'uppercase', letterSpacing: '0.2em' }}>Default</span>}
+                                                            {a.is_default && <span style={{ fontSize: '8px', padding: '2px 8px', border: '1px solid rgba(0,0,0,0.1)', color: '#888', textTransform: 'uppercase', letterSpacing: '0.2em' }}>Default</span>}
                                                         </div>
                                                         <div style={{ fontSize: '13px', fontWeight: 500 }}>{a.full_name} · {a.phone}</div>
-                                                        <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', marginTop: '4px', lineHeight: 1.5 }}>
+                                                        <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.5)', marginTop: '4px', lineHeight: 1.5 }}>
                                                             {a.address_line1}{a.address_line2 ? `, ${a.address_line2}` : ''}, {a.city}, {a.state} {a.pincode}
                                                         </div>
                                                     </div>
@@ -376,7 +376,7 @@ function CheckoutInner() {
                             </section>
 
                             {/* Payment Method */}
-                            <section style={{ background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '2px', padding: isMobile ? '20px' : '32px' }}>
+                            <section style={{ background: '#ffffff', border: '1px solid rgba(0,0,0,0.05)', borderRadius: '2px', padding: isMobile ? '20px' : '32px' }}>
                                 <h2 style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4em', color: '#d4af37', fontFamily: 'var(--font-baskerville)', margin: '0 0 24px' }}>Payment Method</h2>
 
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -392,22 +392,22 @@ function CheckoutInner() {
                                                 style={{
                                                     textAlign: 'left',
                                                     padding: '20px',
-                                                    background: active ? 'rgba(212,175,55,0.05)' : 'transparent',
-                                                    border: `1px solid ${active ? '#d4af37' : 'rgba(255,255,255,0.08)'}`,
+                                                    background: active ? 'rgba(212,175,55,0.08)' : 'transparent',
+                                                    border: `1px solid ${active ? '#d4af37' : 'rgba(0,0,0,0.12)'}`,
                                                     cursor: 'pointer',
-                                                    color: '#fff',
+                                                    color: '#1a1a1a',
                                                     display: 'grid',
                                                     gridTemplateColumns: '24px 1fr auto',
                                                     gap: '16px',
                                                     alignItems: 'center',
                                                 }}
                                             >
-                                                <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: `1px solid ${active ? '#d4af37' : '#333'}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: `1px solid ${active ? '#d4af37' : 'rgba(0,0,0,0.2)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                     {active && <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#d4af37' }} />}
                                                 </div>
                                                 <div>
                                                     <div style={{ fontSize: '13px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{label}</div>
-                                                    <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', marginTop: '4px' }}>{desc}</div>
+                                                    <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.5)', marginTop: '4px' }}>{desc}</div>
                                                 </div>
                                                 <Icon size={18} color={active ? '#d4af37' : '#666'} />
                                             </button>
@@ -418,13 +418,13 @@ function CheckoutInner() {
                         </div>
 
                         {/* RIGHT — summary */}
-                        <aside style={{ background: '#0a0a0a', padding: isMobile ? '20px' : '32px', borderRadius: '2px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <aside style={{ background: '#ffffff', padding: isMobile ? '20px' : '32px', borderRadius: '2px', border: '1px solid rgba(0,0,0,0.05)' }}>
                             <h2 style={{ fontSize: '9px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4em', marginBottom: '24px', color: '#d4af37', fontFamily: 'var(--font-baskerville)' }}>Order Summary</h2>
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '24px', maxHeight: '240px', overflowY: 'auto' }}>
                                 {items.map((item) => (
                                     <div key={item.id} style={{ display: 'grid', gridTemplateColumns: '48px 1fr auto', gap: '12px', alignItems: 'center' }}>
-                                        <div style={{ width: '48px', height: '60px', background: '#000', overflow: 'hidden' }}>
+                                        <div style={{ width: '48px', height: '60px', background: '#f3eee2', overflow: 'hidden' }}>
                                             {item.products?.images?.[0] && (
                                                 <img src={item.products.images[0]} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                             )}
@@ -438,16 +438,16 @@ function CheckoutInner() {
                                 ))}
                             </div>
 
-                            <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', margin: '8px 0 24px' }} />
+                            <div style={{ height: '1px', background: 'rgba(0,0,0,0.08)', margin: '8px 0 24px' }} />
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
-                                    <span style={{ color: 'rgba(255,255,255,0.5)' }}>Subtotal</span>
+                                    <span style={{ color: 'rgba(0,0,0,0.5)' }}>Subtotal</span>
                                     <span>₹{subtotal.toLocaleString()}</span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
-                                    <span style={{ color: 'rgba(255,255,255,0.5)' }}>Shipping</span>
-                                    <span style={{ color: shipping === 0 ? '#16a34a' : '#fff' }}>
+                                    <span style={{ color: 'rgba(0,0,0,0.5)' }}>Shipping</span>
+                                    <span style={{ color: shipping === 0 ? '#16a34a' : '#1a1a1a' }}>
                                         {shipping === 0 ? 'FREE' : `₹${shipping}`}
                                     </span>
                                 </div>
@@ -456,7 +456,7 @@ function CheckoutInner() {
                                         <Check size={12} /> Free delivery unlocked (orders over ₹{FREE_THRESHOLD})
                                     </div>
                                 )}
-                                <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', margin: '8px 0' }} />
+                                <div style={{ height: '1px', background: 'rgba(0,0,0,0.08)', margin: '8px 0' }} />
                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '20px', fontWeight: 400, fontFamily: 'var(--font-baskerville)' }}>
                                     <span>TOTAL</span>
                                     <span>₹{total.toLocaleString()}</span>
@@ -474,8 +474,8 @@ function CheckoutInner() {
                                 disabled={placing || !selectedAddressId}
                                 style={{
                                     width: '100%',
-                                    background: placing || !selectedAddressId ? '#444' : '#fff',
-                                    color: '#000',
+                                    background: placing || !selectedAddressId ? '#888' : '#1a1a1a',
+                                    color: '#fff',
                                     border: 'none',
                                     padding: '18px',
                                     fontSize: '10px',
@@ -497,7 +497,7 @@ function CheckoutInner() {
                                 )}
                             </button>
 
-                            <div style={{ marginTop: '24px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            <div style={{ marginTop: '24px', borderTop: '1px solid rgba(0,0,0,0.08)', paddingTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                                     <ShieldCheck size={12} color="#d4af37" />
                                     <p style={{ fontSize: '9px', fontWeight: 900, margin: 0, textTransform: 'uppercase', letterSpacing: '0.2em' }}>Secure 256-bit Encrypted</p>

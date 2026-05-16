@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server'
 import { clampInt, clampString, isUuid } from '@/lib/validators'
 
 const REVIEW_ALLOWED_UPDATE_FIELDS = [
-    'rating', 'comment', 'is_featured', 'reviewer_name', 'reviewer_avatar',
+    'rating', 'comment', 'is_featured', 'reviewer_name', 'reviewer_avatar', 'heading', 'media_urls'
 ] as const
 
 export async function GET(request: Request) {
@@ -27,7 +27,9 @@ export async function GET(request: Request) {
         .select(`
             id,
             rating,
+            heading,
             comment,
+            media_urls,
             created_at,
             reviewer_name,
             reviewer_avatar,
@@ -101,7 +103,9 @@ export async function POST(request: Request) {
 
     const insertData: Record<string, unknown> = {
         rating,
+        heading: body?.heading != null ? clampString(body.heading, 200) : null,
         comment,
+        media_urls: Array.isArray(body?.media_urls) ? body.media_urls : [],
         is_featured: isAdmin ? !!body?.is_featured : false,
     }
 

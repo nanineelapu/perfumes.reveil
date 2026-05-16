@@ -127,6 +127,7 @@ export default async function AdminDashboard() {
                                 { label: 'Manage Carousel', href: '/static-v2-resource-policy-handler/carousel' },
                                 { label: 'Review Moderation', href: '/static-v2-resource-policy-handler/reviews' },
                                 { label: 'Collection Tags', href: '/static-v2-resource-policy-handler/collections' },
+                                { label: 'Resend Credentials', href: '/api/admin/resend-login', method: 'POST' },
                             ].map((link) => (
                                 <Link 
                                     key={link.label}

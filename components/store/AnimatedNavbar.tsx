@@ -257,7 +257,7 @@ export function AnimatedNavbar() {
             animate="visible"
             variants={containerVariants}
             style={{
-                background: isMobileMenuOpen ? '#050505' : 'transparent',
+                background: isMobileMenuOpen ? '#f8f7f2' : 'transparent',
                 position: 'fixed', top: isMobileMenuOpen ? 0 : (isMobile ? '10px' : '20px'), left: 0, right: 0, zIndex: 100,
                 padding: isMobile ? '0 24px' : '0 75px',
                 transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
@@ -269,7 +269,7 @@ export function AnimatedNavbar() {
             <div style={{
                 maxWidth: '1400px', margin: '0 auto',
                 display: 'flex',
-                height: '56px',
+                height: isMobile ? '48px' : '68px',
                 alignItems: 'center', justifyContent: 'space-between',
                 transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)'
             }}>
@@ -280,7 +280,7 @@ export function AnimatedNavbar() {
                     variants={itemVariants}
                     style={{
                         ...capsuleStyle,
-                        padding: '0 24px',
+                        padding: isMobile ? '0 16px' : '0 24px',
                         height: '100%',
                         marginLeft: '0'
                     }}
@@ -292,12 +292,12 @@ export function AnimatedNavbar() {
                         display: 'flex', alignItems: 'center', height: '100%'
                     }}>
                         <img
-                            src="https://lhnamtkpjkrawgql.public.blob.vercel-storage.com/Untitled%20%282%29.webp"
+                            src="https://lhnamtkpjkrawgql.public.blob.vercel-storage.com/LOGO.webp"
                             alt="Reveil Logo"
                             style={{
-                                height: isMobile ? '30px' : '40px',
+                                height: isMobile ? '36px' : '54px',
                                 width: 'auto',
-                                filter: isDarkPage ? 'brightness(1.2)' : 'none',
+                                filter: isDarkPage ? 'brightness(1.1)' : 'none',
                                 transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)'
                             }}
 
@@ -677,7 +677,7 @@ export function AnimatedNavbar() {
                         transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
                         style={{
                             position: 'fixed', inset: 0,
-                            background: '#050505', zIndex: 110,
+                            background: '#f8f7f2', zIndex: 110,
                             display: 'flex', flexDirection: 'column',
                             padding: '80px 40px 40px',
                             overflowY: 'auto',
@@ -706,12 +706,12 @@ export function AnimatedNavbar() {
                                 initial={{ opacity: 0, y: -10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.2 }}
-                                style={{ marginBottom: '20px', marginLeft: '-20px' }}
+                                style={{ marginBottom: '24px' }}
                             >
                                 <img
-                                    src="https://lhnamtkpjkrawgql.public.blob.vercel-storage.com/Untitled%20%282%29.webp"
+                                    src="https://lhnamtkpjkrawgql.public.blob.vercel-storage.com/LOGO.webp"
                                     alt="Reveil Logo"
-                                    style={{ height: '32px', width: 'auto' }}
+                                    style={{ height: '48px', width: 'auto', display: 'block' }}
                                 />
                             </motion.div>
 
@@ -740,18 +740,18 @@ export function AnimatedNavbar() {
                                         href={link.href}
                                         onClick={() => setIsMobileMenuOpen(false)}
                                         style={{
-                                            fontSize: 'clamp(18px, 6vw, 24px)',
+                                            fontSize: 'clamp(20px, 6.5vw, 28px)',
                                             fontFamily: 'var(--font-baskerville)',
-                                            color: textColor,
+                                            color: '#1a1a1a',
                                             textDecoration: 'none',
                                             display: 'block',
-                                            letterSpacing: '0.02em',
-                                            fontWeight: 300,
+                                            letterSpacing: '0.01em',
+                                            fontWeight: 500,
                                             lineHeight: 1
                                         }}
                                     >
                                         <motion.span
-                                            whileTap={{ x: 20, color: '#fff' }}
+                                            whileTap={{ x: 20, color: '#d4af37' }}
                                             style={{ display: 'inline-block' }}
                                         >
                                             {link.name}
@@ -769,11 +769,11 @@ export function AnimatedNavbar() {
                                         onClick={() => { handleLogout(); setIsMobileMenuOpen(false) }}
                                         style={{
                                             background: 'none', border: 'none', padding: 0, cursor: 'pointer',
-                                            fontSize: 'clamp(18px, 6vw, 24px)',
+                                            fontSize: 'clamp(20px, 6.5vw, 28px)',
                                             fontFamily: 'var(--font-baskerville)',
-                                            color: '#ff4b4b',
-                                            letterSpacing: '0.02em',
-                                            fontWeight: 300,
+                                            color: '#c0392b',
+                                            letterSpacing: '0.01em',
+                                            fontWeight: 500,
                                             lineHeight: 1,
                                             textAlign: 'left'
                                         }}
@@ -794,11 +794,14 @@ export function AnimatedNavbar() {
                             transition={{ delay: 0.5 }}
                             style={{
                                 position: 'absolute', top: '24px', right: '24px',
-                                background: 'transparent', border: 'none', color: '#fff',
-                                cursor: 'pointer', padding: '10px'
+                                background: 'rgba(0,0,0,0.04)',
+                                border: '1px solid rgba(0,0,0,0.08)',
+                                color: '#1a1a1a',
+                                cursor: 'pointer', padding: '10px',
+                                borderRadius: '50%'
                             }}
                         >
-                            <X size={32} strokeWidth={1} />
+                            <X size={28} strokeWidth={1.5} />
                         </motion.button>
                     </motion.div>
                 )}
@@ -834,12 +837,12 @@ export function AnimatedNavbar() {
                                 position: 'fixed', top: 0, right: 0,
                                 height: isMobile ? '100dvh' : '100vh',
                                 width: isMobile ? '100%' : '480px',
-                                background: 'linear-gradient(180deg, #0a0a0a 0%, #000000 100%)',
+                                background: 'linear-gradient(180deg, #ffffff 0%, #f8f7f2 100%)',
                                 zIndex: 201,
                                 display: 'flex',
                                 flexDirection: 'column',
-                                boxShadow: isMobile ? 'none' : '-40px 0 80px rgba(0,0,0,0.8)',
-                                borderLeft: '1px solid rgba(212,175,55,0.2)',
+                                boxShadow: isMobile ? 'none' : '-40px 0 80px rgba(0,0,0,0.15)',
+                                borderLeft: '1px solid rgba(212,175,55,0.3)',
                                 overflow: 'hidden',
                                 willChange: 'transform',
                                 transform: 'translate3d(0,0,0)',
@@ -863,14 +866,14 @@ export function AnimatedNavbar() {
                                     }}>
                                         Your Cart
                                     </h2>
-                                    <span style={{ fontSize: '9px', color: 'rgba(212,175,55,0.5)', letterSpacing: '0.3em', textTransform: 'uppercase' }}>
+                                    <span style={{ fontSize: '9px', color: '#d4af37', letterSpacing: '0.3em', textTransform: 'uppercase' }}>
                                         {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'}
                                     </span>
                                 </div>
                                 <motion.button
                                     whileHover={{ rotate: 90, scale: 1.1 }}
                                     onClick={() => setIsCartOpen(false)}
-                                    style={{ background: 'rgba(212,175,55,0.05)', border: '1px solid rgba(212,175,55,0.2)', color: '#d4af37', cursor: 'pointer', padding: '12px', borderRadius: '50%', display: 'flex' }}
+                                    style={{ background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.35)', color: '#d4af37', cursor: 'pointer', padding: '12px', borderRadius: '50%', display: 'flex' }}
                                 >
                                     <X size={20} strokeWidth={1} />
                                 </motion.button>
@@ -888,7 +891,7 @@ export function AnimatedNavbar() {
                                 }}>
                                     <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#d4af37', boxShadow: '0 0 10px #d4af37' }} />
                                     <span style={{
-                                        color: '#fff',
+                                        color: '#1a1a1a',
                                         fontSize: '9px',
                                         fontWeight: 600,
                                         letterSpacing: '0.2em',
@@ -927,37 +930,37 @@ export function AnimatedNavbar() {
                                                     display: 'flex',
                                                     gap: '24px',
                                                     padding: '24px',
-                                                    background: 'rgba(255,255,255,0.02)',
-                                                    border: '1px solid rgba(212,175,55,0.05)',
+                                                    background: '#ffffff',
+                                                    border: '1px solid rgba(212,175,55,0.25)',
                                                     borderRadius: '4px',
                                                     position: 'relative',
                                                     overflow: 'hidden'
                                                 }}
                                             >
                                                 {/* Decorative background number */}
-                                                <div style={{ position: 'absolute', right: '-10px', bottom: '-20px', fontSize: '100px', color: 'rgba(212,175,55,0.03)', fontFamily: 'var(--font-baskerville)', pointerEvents: 'none' }}>
+                                                <div style={{ position: 'absolute', right: '-10px', bottom: '-20px', fontSize: '100px', color: 'rgba(212,175,55,0.08)', fontFamily: 'var(--font-baskerville)', pointerEvents: 'none' }}>
                                                     {item.quantity}
                                                 </div>
 
-                                                <div style={{ width: '100px', height: '130px', background: '#000', borderRadius: '2px', overflow: 'hidden', flexShrink: 0, border: '1px solid rgba(255,255,255,0.05)' }}>
+                                                <div style={{ width: '100px', height: '130px', background: '#f3eee2', borderRadius: '2px', overflow: 'hidden', flexShrink: 0, border: '1px solid rgba(0,0,0,0.06)' }}>
                                                     <img src={item.products.images?.[0]} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={item.products.name} />
                                                 </div>
                                                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '8px' }}>
                                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                                        <h3 style={{ fontSize: '16px', fontFamily: 'var(--font-baskerville)', color: '#fff', margin: 0, fontWeight: 300, letterSpacing: '0.05em' }}>{item.products.name}</h3>
+                                                        <h3 style={{ fontSize: '16px', fontFamily: 'var(--font-baskerville)', color: '#1a1a1a', margin: 0, fontWeight: 400, letterSpacing: '0.05em' }}>{item.products.name}</h3>
                                                         <motion.button
                                                             whileHover={{ scale: 1.1, color: '#ff4d4d' }}
                                                             whileTap={{ scale: 0.9 }}
                                                             onClick={() => handleRemoveItem(item.id)}
-                                                            style={{ background: 'none', border: 'none', color: 'rgba(212,175,55,0.4)', cursor: 'pointer', padding: '4px' }}
+                                                            style={{ background: 'none', border: 'none', color: 'rgba(0,0,0,0.45)', cursor: 'pointer', padding: '4px' }}
                                                         >
                                                             <Trash2 size={14} strokeWidth={1.5} />
                                                         </motion.button>
                                                     </div>
-                                                    <p style={{ fontSize: '9px', color: '#d4af37', margin: 0, letterSpacing: '0.2em', textTransform: 'uppercase', opacity: 0.6 }}>{item.products.category || 'Atelier Collection'}</p>
+                                                    <p style={{ fontSize: '9px', color: '#d4af37', margin: 0, letterSpacing: '0.2em', textTransform: 'uppercase', opacity: 0.85 }}>{item.products.category || 'Atelier Collection'}</p>
                                                     <div style={{ marginTop: '12px', display: 'flex', alignItems: 'baseline', gap: '10px' }}>
-                                                        <span style={{ fontSize: '18px', color: '#fff', fontWeight: 300, fontFamily: 'var(--font-baskerville)' }}>₹{item.products.price.toLocaleString()}</span>
-                                                        <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)' }}>× {item.quantity}</span>
+                                                        <span style={{ fontSize: '18px', color: '#1a1a1a', fontWeight: 400, fontFamily: 'var(--font-baskerville)' }}>₹{item.products.price.toLocaleString()}</span>
+                                                        <span style={{ fontSize: '10px', color: 'rgba(0,0,0,0.4)' }}>× {item.quantity}</span>
                                                     </div>
                                                 </div>
                                             </motion.div>
@@ -966,7 +969,7 @@ export function AnimatedNavbar() {
                                 ) : (
                                     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '40px' }}>
                                         <div style={{ position: 'relative' }}>
-                                            <ShoppingBag size={64} strokeWidth={0.5} color="rgba(212,175,55,0.1)" />
+                                            <ShoppingBag size={64} strokeWidth={0.5} color="rgba(212,175,55,0.3)" />
                                             <motion.div
                                                 animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
                                                 transition={{ duration: 3, repeat: Infinity }}
@@ -974,8 +977,8 @@ export function AnimatedNavbar() {
                                             />
                                         </div>
                                         <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                            <p style={{ color: '#fff', fontSize: '14px', letterSpacing: '0.2em', textTransform: 'uppercase', margin: 0, fontWeight: 300 }}>Your cart is empty</p>
-                                            <p style={{ color: 'rgba(212,175,55,0.5)', fontSize: '10px', letterSpacing: '0.1em', margin: 0 }}>Add something to your cart to get started</p>
+                                            <p style={{ color: '#1a1a1a', fontSize: '14px', letterSpacing: '0.2em', textTransform: 'uppercase', margin: 0, fontWeight: 400 }}>Your cart is empty</p>
+                                            <p style={{ color: '#d4af37', fontSize: '10px', letterSpacing: '0.1em', margin: 0 }}>Add something to your cart to get started</p>
                                         </div>
                                         <Link href="/products" onClick={() => setIsCartOpen(false)} style={{ textDecoration: 'none' }}>
                                             <motion.button
@@ -1003,18 +1006,18 @@ export function AnimatedNavbar() {
                             {/* Summary Area - Glass Footer */}
                             <div style={{
                                 padding: '40px',
-                                borderTop: '1px solid rgba(212,175,55,0.1)',
-                                background: 'rgba(255,255,255,0.02)',
+                                borderTop: '1px solid rgba(212,175,55,0.3)',
+                                background: 'rgba(255,255,255,0.6)',
                                 backdropFilter: 'blur(20px)',
                                 position: 'relative',
                                 flexShrink: 0
                             }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '32px' }}>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                        <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.2em' }}>Subtotal</span>
+                                        <span style={{ fontSize: '10px', color: 'rgba(0,0,0,0.55)', textTransform: 'uppercase', letterSpacing: '0.2em' }}>Subtotal</span>
                                         <span style={{ fontSize: '11px', color: '#d4af37', letterSpacing: '0.1em' }}>Free Shipping Included</span>
                                     </div>
-                                    <span style={{ fontSize: '28px', color: '#fff', fontWeight: 200, fontFamily: 'var(--font-baskerville)' }}>₹{cartTotals.subtotal.toLocaleString()}</span>
+                                    <span style={{ fontSize: '28px', color: '#1a1a1a', fontWeight: 300, fontFamily: 'var(--font-baskerville)' }}>₹{cartTotals.subtotal.toLocaleString()}</span>
                                 </div>
                                 <Link href="/cart" onClick={() => setIsCartOpen(false)} style={{ textDecoration: 'none' }}>
                                     <motion.button
@@ -1022,8 +1025,8 @@ export function AnimatedNavbar() {
                                         disabled={cartItems.length === 0}
                                         style={{
                                             width: '100%',
-                                            background: cartItems.length > 0 ? 'linear-gradient(90deg, #d4af37, #f2d06b)' : 'rgba(255,255,255,0.05)',
-                                            color: cartItems.length > 0 ? '#000' : 'rgba(255,255,255,0.2)',
+                                            background: cartItems.length > 0 ? 'linear-gradient(90deg, #d4af37, #f2d06b)' : 'rgba(0,0,0,0.06)',
+                                            color: cartItems.length > 0 ? '#000' : 'rgba(0,0,0,0.35)',
                                             border: 'none',
                                             padding: '24px',
                                             borderRadius: '0',
@@ -1041,7 +1044,7 @@ export function AnimatedNavbar() {
 
                                 {/* Additional Info */}
                                 <div style={{ marginTop: '24px', textAlign: 'center' }}>
-                                    <span style={{ fontSize: '8px', color: 'rgba(255,255,255,0.2)', letterSpacing: '0.4em', textTransform: 'uppercase' }}>
+                                    <span style={{ fontSize: '8px', color: 'rgba(0,0,0,0.35)', letterSpacing: '0.4em', textTransform: 'uppercase' }}>
                                         Safe & secure checkout
                                     </span>
                                 </div>

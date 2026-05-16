@@ -5,6 +5,7 @@ import { isUuid, clampInt } from '@/lib/validators'
 import { rateLimit, getClientIp, rateLimitResponse } from '@/lib/rate-limit'
 import { createShiprocketOrderForOrderId } from '@/lib/fulfillment'
 import { computeShipping } from '@/lib/razorpay'
+import { triggerOrderConfirmationEmail } from '@/lib/utils/email'
 import { NextResponse } from 'next/server'
 
 const COD_MAX_TOTAL_INR = 5000
@@ -181,8 +182,9 @@ export async function POST(request: Request) {
     ;(async () => {
         try {
             await createShiprocketOrderForOrderId(orderId as string)
+            await triggerOrderConfirmationEmail(orderId as string)
         } catch (err: any) {
-            console.error('[orders] Shiprocket trigger failed:', err?.message)
+            console.error('[orders] Background tasks failed:', err?.message)
         }
     })()
 

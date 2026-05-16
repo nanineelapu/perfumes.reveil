@@ -43,8 +43,11 @@ function AuthPageContent() {
         const errorParam = searchParams.get('error')
         if (errorParam === 'session_failed') {
             setError('Login link expired or already used. Please request a new OTP.')
+        } else {
+            // Clear stale error if user navigated away from a failed link
+            setError((prev) => (prev?.includes('Login link expired') ? null : prev))
         }
-    }, [modeParam])
+    }, [modeParam, searchParams])
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 1024)
@@ -70,6 +73,15 @@ function AuthPageContent() {
         const digits = formData.phone.replace(/\D/g, '')
         if (digits.length !== 10) {
             setError('Please enter a valid 10-digit mobile number.')
+            return
+        }
+
+        // Signup mode: also require a first name upfront so we can persist
+        // the profile inside the OTP-verify step (where the admin client
+        // already does the upsert). Avoids the broken post-OTP save-profile
+        // path that 401's because the magic link hasn't been visited yet.
+        if (authMode === 'signup' && !formData.firstName.trim()) {
+            setError('Please enter your first name.')
             return
         }
 
@@ -208,7 +220,12 @@ function AuthPageContent() {
         }
     }
 
-    // ── STEP 3: Save Name (new users only) ────────────────────────────────────
+    // ── STEP 3: Save Name (fallback for existing users without a name) ────────
+    // At this point the OTP has been consumed but the magic link is still
+    // unvisited, so we have NO session cookie yet. Calling save-profile
+    // directly would 401. Instead, stash the name data and navigate to the
+    // magic link — AuthTokenCatcher will pick up the stashed data after the
+    // session is established and complete the profile save.
     const handleSaveName = async (e: React.FormEvent) => {
         e.preventDefault()
         setError(null)
@@ -218,38 +235,21 @@ function AuthPageContent() {
             setError('Please enter at least your first name.')
             return
         }
+        if (!loginUrl) {
+            setError('Session expired — please request a new OTP.')
+            return
+        }
         setLoading(true)
 
         try {
-            const { data: { user } } = await supabase.auth.getUser()
-            const uid = user?.id ?? userId
-
-            if (!uid) {
-                setError('Session not found — please login again.')
-                setLoading(false)
-                return
-            }
-
-            const res = await fetch('/api/auth/save-profile', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    user_id: uid,
-                    first_name: firstName,
-                    last_name: formData.lastName.trim(),
-                    phone: formData.phone,
-                    email: formData.email.trim(),
-                }),
-            })
-            const data = await res.json()
-
-            if (!res.ok || data.error) {
-                setError(data.error || 'Could not save your name.')
-                setLoading(false)
-                return
-            }
-
-            window.location.href = '/auth/success'
+            sessionStorage.setItem('reveil_pending_profile', JSON.stringify({
+                first_name: firstName,
+                last_name: formData.lastName.trim(),
+                phone: formData.phone,
+                email: formData.email.trim(),
+                ts: Date.now(),
+            }))
+            window.location.href = loginUrl
         } catch (err: any) {
             setError('Error: ' + err.message)
             setLoading(false)
@@ -306,7 +306,7 @@ function AuthPageContent() {
                                 margin: '0 auto 20px',
                             }}>
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="#d4af37"/>
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="#d4af37" />
                                 </svg>
                             </div>
 
@@ -458,27 +458,74 @@ function AuthPageContent() {
                             <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '16px' : '20px' }}>
 
                                 {!otpSent ? (
-                                    <div style={{ textAlign: 'left' }}>
-                                        <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '6px', display: 'block', letterSpacing: '0.15em' }}>Mobile Number</label>
-                                        <motion.div
-                                            whileHover={{ background: 'linear-gradient(145deg, #ffffff, #f9f9f9)', borderColor: '#000' }}
-                                            style={{
-                                                background: '#fff', border: '1px solid rgba(0,0,0,0.08)', borderRadius: '4px',
-                                                padding: isMobile ? '14px 16px' : '20px 24px',
-                                                display: 'flex', alignItems: 'center', gap: '12px', transition: 'all 0.3s ease'
-                                            }}>
-                                            <span style={{ fontSize: isMobile ? '14px' : '16px', color: '#000', opacity: 0.4, fontWeight: 500, borderRight: '1px solid rgba(0,0,0,0.1)', paddingRight: '12px' }}>+91</span>
-                                            <input
-                                                type="tel"
-                                                name="phone"
-                                                placeholder="Your phone number"
-                                                value={formData.phone}
-                                                onChange={handleChange}
-                                                style={{ flex: 1, border: 'none', background: 'none', fontSize: isMobile ? '14px' : '16px', color: '#000', outline: 'none' }}
-                                            />
-                                            <MessageCircle size={isMobile ? 16 : 18} style={{ color: '#d4af37', opacity: 0.6 }} />
-                                        </motion.div>
-                                    </div>
+                                    <>
+                                        {/* Signup-only: collect names upfront so OTP-verify can persist them */}
+                                        {authMode === 'signup' && (
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', textAlign: 'left' }}>
+                                                <div>
+                                                    <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '6px', display: 'block', letterSpacing: '0.15em' }}>First Name *</label>
+                                                    <input
+                                                        type="text"
+                                                        name="firstName"
+                                                        placeholder="First name"
+                                                        value={formData.firstName}
+                                                        onChange={handleChange}
+                                                        required
+                                                        style={{
+                                                            width: '100%',
+                                                            background: '#fff',
+                                                            border: '1px solid rgba(0,0,0,0.08)',
+                                                            borderRadius: '4px',
+                                                            padding: isMobile ? '14px 16px' : '18px 20px',
+                                                            fontSize: isMobile ? '14px' : '15px',
+                                                            color: '#000', outline: 'none'
+                                                        }}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '6px', display: 'block', letterSpacing: '0.15em' }}>Last Name</label>
+                                                    <input
+                                                        type="text"
+                                                        name="lastName"
+                                                        placeholder="Last name"
+                                                        value={formData.lastName}
+                                                        onChange={handleChange}
+                                                        style={{
+                                                            width: '100%',
+                                                            background: '#fff',
+                                                            border: '1px solid rgba(0,0,0,0.08)',
+                                                            borderRadius: '4px',
+                                                            padding: isMobile ? '14px 16px' : '18px 20px',
+                                                            fontSize: isMobile ? '14px' : '15px',
+                                                            color: '#000', outline: 'none'
+                                                        }}
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <div style={{ textAlign: 'left' }}>
+                                            <label style={{ fontSize: '9px', color: '#000', opacity: 0.4, textTransform: 'uppercase', marginBottom: '6px', display: 'block', letterSpacing: '0.15em' }}>Mobile Number</label>
+                                            <motion.div
+                                                whileHover={{ background: 'linear-gradient(145deg, #ffffff, #f9f9f9)', borderColor: '#000' }}
+                                                style={{
+                                                    background: '#fff', border: '1px solid rgba(0,0,0,0.08)', borderRadius: '4px',
+                                                    padding: isMobile ? '14px 16px' : '20px 24px',
+                                                    display: 'flex', alignItems: 'center', gap: '12px', transition: 'all 0.3s ease'
+                                                }}>
+                                                <span style={{ fontSize: isMobile ? '14px' : '16px', color: '#000', opacity: 0.4, fontWeight: 500, borderRight: '1px solid rgba(0,0,0,0.1)', paddingRight: '12px' }}>+91</span>
+                                                <input
+                                                    type="tel"
+                                                    name="phone"
+                                                    placeholder="Your phone number"
+                                                    value={formData.phone}
+                                                    onChange={handleChange}
+                                                    style={{ flex: 1, border: 'none', background: 'none', fontSize: isMobile ? '14px' : '16px', color: '#000', outline: 'none' }}
+                                                />
+                                                <MessageCircle size={isMobile ? 16 : 18} style={{ color: '#d4af37', opacity: 0.6 }} />
+                                            </motion.div>
+                                        </div>
+                                    </>
                                 ) : (
                                     <div style={{ textAlign: 'left' }}>
                                         <div style={{ borderBottom: '2px solid #d4af37', paddingBottom: '8px' }}>

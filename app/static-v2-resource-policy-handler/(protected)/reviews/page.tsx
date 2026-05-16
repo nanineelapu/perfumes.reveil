@@ -7,7 +7,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 interface Review {
     id: string
     rating: number
+    heading: string | null
     comment: string
+    media_urls: string[] | null
     created_at: string
     reviewer_name: string | null
     reviewer_avatar: string | null
@@ -28,7 +30,9 @@ export default function AdminReviewsPage() {
         reviewer_name: '',
         reviewer_avatar: '',
         rating: 5,
+        heading: '',
         comment: '',
+        media_urls: [] as string[],
         product_id: '',
         is_featured: false,
         source: 'google' // Default to Google as requested
@@ -90,7 +94,7 @@ export default function AdminReviewsPage() {
             if (res.ok) {
                 setIsModalOpen(false)
                 setEditingReview(null)
-                setForm({ reviewer_name: '', reviewer_avatar: '', rating: 5, comment: '', product_id: '', is_featured: false, source: 'google' })
+                setForm({ reviewer_name: '', reviewer_avatar: '', rating: 5, heading: '', comment: '', media_urls: [], product_id: '', is_featured: false, source: 'google' })
                 fetchReviews()
             } else {
                 const errorData = await res.json()
@@ -108,7 +112,9 @@ export default function AdminReviewsPage() {
             reviewer_name: review.reviewer_name || '',
             reviewer_avatar: review.reviewer_avatar || '',
             rating: review.rating,
+            heading: review.heading || '',
             comment: review.comment || '',
+            media_urls: review.media_urls || [],
             product_id: review.product_id || '',
             is_featured: review.is_featured,
             source: (review as any).source || 'google'
@@ -145,7 +151,7 @@ export default function AdminReviewsPage() {
                     <p style={{ marginTop: '12px', color: '#999', fontSize: '14px', letterSpacing: '0.05em' }}>Manual addition of Google and Website testimonials</p>
                 </div>
                 <button 
-                    onClick={() => { setEditingReview(null); setForm({ reviewer_name: '', reviewer_avatar: '', rating: 5, comment: '', product_id: '', is_featured: false, source: 'google' }); setIsModalOpen(true); }}
+                    onClick={() => { setEditingReview(null); setForm({ reviewer_name: '', reviewer_avatar: '', rating: 5, heading: '', comment: '', media_urls: [], product_id: '', is_featured: false, source: 'google' }); setIsModalOpen(true); }}
                     style={{ 
                         background: '#000', color: '#fff', border: '1px solid #000', 
                         padding: '18px 40px', borderRadius: '4px', cursor: 'pointer', 
@@ -226,12 +232,28 @@ export default function AdminReviewsPage() {
                                 <div style={{ fontSize: '11px', color: '#d4af37', textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '12px', fontWeight: 700 }}>
                                     Target Product: {review.products?.name || 'General Feedback'}
                                 </div>
+                                {review.heading && (
+                                    <h4 style={{ margin: '0 0 12px', fontSize: '20px', fontWeight: 600, color: '#1a1a1a' }}>{review.heading}</h4>
+                                )}
                                 <p style={{ 
                                     margin: 0, fontSize: '17px', lineHeight: 1.8, color: '#333', 
                                     fontStyle: 'italic', fontFamily: 'serif', fontWeight: 400
                                 }}>
                                     "{review.comment}"
                                 </p>
+                                {review.media_urls && review.media_urls.length > 0 && (
+                                    <div style={{ display: 'flex', gap: '12px', marginTop: '20px', flexWrap: 'wrap' }}>
+                                        {review.media_urls.map((url, i) => (
+                                            <div key={i} style={{ width: '80px', height: '80px', borderRadius: '4px', overflow: 'hidden', border: '1px solid #eee' }}>
+                                                {url.match(/\.(mp4|mov)$/) ? (
+                                                    <video src={url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                ) : (
+                                                    <img src={url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
 
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '24px', borderTop: '1px solid rgba(0,0,0,0.03)' }}>
@@ -349,6 +371,16 @@ export default function AdminReviewsPage() {
                                 </div>
 
                                 <div className="input-group">
+                                    <label style={{ display: 'block', fontSize: '9px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#999', marginBottom: '8px' }}>Review Heading</label>
+                                    <input 
+                                        style={{ width: '100%', padding: '10px 0', border: 'none', borderBottom: '1px solid #eee', fontSize: '14px', outline: 'none', background: 'transparent' }} 
+                                        value={form.heading}
+                                        onChange={e => setForm({ ...form, heading: e.target.value })}
+                                        placeholder="Heading..."
+                                    />
+                                </div>
+
+                                <div className="input-group">
                                     <label style={{ display: 'block', fontSize: '9px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#999', marginBottom: '8px' }}>Review Text</label>
                                     <textarea 
                                         style={{ width: '100%', padding: '10px 0', border: 'none', borderBottom: '1px solid #eee', fontSize: '15px', outline: 'none', minHeight: '80px', resize: 'none', fontFamily: 'serif', fontStyle: 'italic', background: 'transparent', lineHeight: 1.5 }} 
@@ -356,6 +388,21 @@ export default function AdminReviewsPage() {
                                         onChange={e => setForm({ ...form, comment: e.target.value })}
                                         placeholder="Describe the experience..."
                                         required
+                                    />
+                                </div>
+
+                                <div className="input-group">
+                                    <label style={{ display: 'block', fontSize: '9px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#999', marginBottom: '8px' }}>Media URLs (JSON Array)</label>
+                                    <textarea 
+                                        style={{ width: '100%', padding: '10px 0', border: 'none', borderBottom: '1px solid #eee', fontSize: '12px', outline: 'none', minHeight: '40px', resize: 'none', background: 'transparent' }} 
+                                        value={JSON.stringify(form.media_urls)}
+                                        onChange={e => {
+                                            try {
+                                                const parsed = JSON.parse(e.target.value)
+                                                if (Array.isArray(parsed)) setForm({ ...form, media_urls: parsed })
+                                            } catch {}
+                                        }}
+                                        placeholder='["url1", "url2"]'
                                     />
                                 </div>
 

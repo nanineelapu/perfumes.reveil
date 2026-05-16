@@ -7,6 +7,7 @@ import { ReveilCollectionSection, PhilosophySection, NotesSection } from '@/comp
 import { InfiniteIconCarousel } from '@/components/store/InfiniteIconCarousel'
 import { NewsletterSection } from '@/components/store/NewsletterSection'
 import { ReviewsSection } from '@/components/store/ReviewsSection'
+import { FreeDeliveryRibbon } from '@/components/store/FreeDeliveryRibbon'
 
 export const metadata: Metadata = {
   title: "REVEIL | The Official Online Store for Luxury Perfumes & Attars",
@@ -58,15 +59,26 @@ export default async function HomePage() {
           reviewer_name,
           reviewer_avatar,
           is_featured,
-          profiles ( full_name )
+          profiles ( full_name, role )
       `)
       .order('is_featured', { ascending: false })
       .order('created_at', { ascending: false })
-      .limit(6),
+      .limit(24),
   ])
 
   // Deduplicate categories with safety fallback
   const uniqueCategories = [...new Set((categories || []).map(p => p.category))] as string[]
+
+  // Filter out admin-authored / seeded test reviews. We match on profile.role
+  // first (proper signal), then fall back to a name heuristic so legacy test
+  // data without the role flag still gets hidden.
+  const latestReviewsFiltered = (latestReviews ?? []).filter((r: any) => {
+    const profile = Array.isArray(r.profiles) ? r.profiles[0] : r.profiles
+    if (profile?.role === 'admin') return false
+    const name = (r.reviewer_name || '').toLowerCase()
+    if (name.includes('admin') || name.includes('test')) return false
+    return true
+  }).slice(0, 6)
 
   // Pick 4 products for Trending Curation, rotating daily.
   // Uses today's date (YYYY-MM-DD in IST) as a seed so the selection is
@@ -93,7 +105,12 @@ export default async function HomePage() {
     const j = Math.floor(rng() * (i + 1))
     ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
   }
-  const trending = shuffled.slice(0, 4)
+
+  // Prioritize Featured products from the Admin Panel. 
+  // If no products are marked as featured, fall back to a random daily selection.
+  const trending = (featured && featured.length > 0) 
+    ? featured.slice(0, 4) 
+    : shuffled.slice(0, 4);
 
   const homepageJsonLd = {
     '@context': 'https://schema.org',
@@ -137,18 +154,8 @@ export default async function HomePage() {
     ],
   }
 
-  const allSlides = [
-    {
-      id: 'intro-video',
-      title: 'The Art of Scent',
-      image_url: '/images/hero-1.png',
-      video_url: 'https://lhnamtkpjkrawgql.public.blob.vercel-storage.com/Ai%20Enhancer-Ultra%20Hd-Luxury%20Perfume%20Bottle%20Animationonline-Video-Cutter.Com2-Ezgif.Com-Reverse-Video.mp4',
-      link: '/products',
-      display_order: -1,
-      button_label: 'Shop Now'
-    },
-    ...slides ?? []
-  ]
+  // Hero carousel is now driven entirely by admin-managed slides from the DB.
+  const allSlides = slides ?? []
 
   return (
     <>
@@ -160,7 +167,7 @@ export default async function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
       />
-      <main style={{ background: '#050505', color: '#fff', overflowX: 'hidden' }}>
+      <main style={{ background: '#f8f7f2', color: '#1a1a1a', overflowX: 'hidden' }}>
         {/* HIDDEN SEO HEADINGS - GOD LEVEL SEO */}
         <div className="sr-only">
           <h1>REVEIL - India's Premier Online Store for Luxury Perfumes and Designer Fragrances</h1>
@@ -172,6 +179,9 @@ export default async function HomePage() {
         {/* Hero section */}
         <HeroCarousel slides={allSlides} />
 
+        {/* Free Delivery Ribbon */}
+        <FreeDeliveryRibbon />
+
         {/* 1. Trending Curation */}
         <ProductGrid items={trending ?? []} />
 
@@ -179,7 +189,7 @@ export default async function HomePage() {
         <NotesSection />
 
         {/* 3. Reviews */}
-        <ReviewsSection reviews={latestReviews || []} />
+        <ReviewsSection reviews={latestReviewsFiltered} />
 
         {/* 4. Reveil Collection Big Image */}
         <ReveilCollectionSection />

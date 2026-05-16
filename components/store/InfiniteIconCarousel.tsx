@@ -99,11 +99,11 @@ export function InfiniteIconCarousel() {
 
     return (
         <section style={{
-            background: '#050505',
+            background: '#f8f7f2',
             padding: '80px 0',
             overflow: 'hidden',
-            borderTop: '1px solid rgba(212, 175, 55, 0.1)',
-            borderBottom: '1px solid rgba(212, 175, 55, 0.1)'
+            borderTop: '1px solid rgba(212, 175, 55, 0.25)',
+            borderBottom: '1px solid rgba(212, 175, 55, 0.25)'
         }}>
             <div className="reveil-marquee-track">
                 <div className="reveil-marquee-inner">
@@ -155,8 +155,8 @@ export function InfiniteIconCarousel() {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    background: rgba(212, 175, 55, 0.02);
-                    border: 1px solid rgba(212, 175, 55, 0.1);
+                    background: rgba(212, 175, 55, 0.08);
+                    border: 1px solid rgba(212, 175, 55, 0.35);
                     border-radius: 50%;
                 }
 

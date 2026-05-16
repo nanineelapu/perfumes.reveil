@@ -76,7 +76,7 @@ export default function TrackOrderPage() {
     const address = order?.shipping_address as any
 
     return (
-        <main style={{ background: '#050505', minHeight: '100vh', color: '#fff', paddingTop: '120px', paddingBottom: '100px' }}>
+        <main style={{ background: '#f8f7f2', minHeight: '100vh', color: '#1a1a1a', paddingTop: '120px', paddingBottom: '100px' }}>
             <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 24px' }}>
 
                 {/* Header */}
@@ -90,7 +90,7 @@ export default function TrackOrderPage() {
                         style={{ fontSize: 'clamp(32px, 6vw, 56px)', fontFamily: 'var(--font-baskerville)', fontWeight: 300, margin: '0 0 16px', letterSpacing: '-0.02em' }}>
                         Track Your <span style={{ color: '#d4af37', fontStyle: 'italic' }}>Order</span>
                     </motion.h1>
-                    <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', fontFamily: 'var(--font-baskerville)', fontStyle: 'italic' }}>
+                    <p style={{ color: 'rgba(0,0,0,0.4)', fontSize: '13px', fontFamily: 'var(--font-baskerville)', fontStyle: 'italic' }}>
                         Enter your order ID or tracking number to see where your package is.
                     </p>
                 </header>
@@ -98,8 +98,8 @@ export default function TrackOrderPage() {
                 {/* Search Box */}
                 <motion.form onSubmit={handleSearch} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
                     style={{ marginBottom: '48px' }}>
-                    <div style={{ display: 'flex', gap: '0', border: '1px solid rgba(212,175,55,0.2)', borderRadius: '4px', overflow: 'hidden', background: 'rgba(255,255,255,0.02)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', padding: '0 20px', borderRight: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div style={{ display: 'flex', gap: '0', border: '1px solid rgba(212,175,55,0.3)', borderRadius: '4px', overflow: 'hidden', background: '#ffffff' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', padding: '0 20px', borderRight: '1px solid rgba(0,0,0,0.06)' }}>
                             <Search size={18} color="rgba(212,175,55,0.6)" />
                         </div>
                         <input
@@ -108,7 +108,7 @@ export default function TrackOrderPage() {
                             onChange={e => setQuery(e.target.value)}
                             placeholder="Enter Order ID or AWB..."
                             style={{
-                                flex: 1, minWidth: 0, background: 'transparent', border: 'none', color: '#fff',
+                                flex: 1, minWidth: 0, background: 'transparent', border: 'none', color: '#1a1a1a',
                                 padding: '20px 16px', fontSize: '14px', outline: 'none',
                                 fontFamily: 'var(--font-baskerville)'
                             }}
@@ -124,7 +124,7 @@ export default function TrackOrderPage() {
                             {error}
                         </motion.p>
                     )}
-                    <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.2)', marginTop: '12px' }}>
+                    <p style={{ fontSize: '10px', color: 'rgba(0,0,0,0.2)', marginTop: '12px' }}>
                         You can find your Order ID in the <Link href="/orders" style={{ color: 'rgba(212,175,55,0.6)', textDecoration: 'none' }}>Order History</Link> page or in your order confirmation email.
                     </p>
                 </motion.form>
@@ -135,21 +135,21 @@ export default function TrackOrderPage() {
                         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
 
                             {/* Order Summary Bar */}
-                            <div style={{ background: 'rgba(212,175,55,0.04)', border: '1px solid rgba(212,175,55,0.15)', borderRadius: '4px', padding: '24px 32px', marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+                            <div style={{ background: 'rgba(212,175,55,0.06)', border: '1px solid rgba(212,175,55,0.3)', borderRadius: '4px', padding: '24px 32px', marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
                                 <div>
-                                    <p style={{ fontSize: '8px', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.3em', marginBottom: '4px' }}>Order ID</p>
+                                    <p style={{ fontSize: '8px', color: 'rgba(0,0,0,0.3)', textTransform: 'uppercase', letterSpacing: '0.3em', marginBottom: '4px' }}>Order ID</p>
                                     <p style={{ fontSize: '14px', fontFamily: 'var(--font-baskerville)', color: '#d4af37', fontWeight: 500 }}>#{order.id.slice(0, 8).toUpperCase()}</p>
                                 </div>
                                 <div>
-                                    <p style={{ fontSize: '8px', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.3em', marginBottom: '4px' }}>Placed On</p>
+                                    <p style={{ fontSize: '8px', color: 'rgba(0,0,0,0.3)', textTransform: 'uppercase', letterSpacing: '0.3em', marginBottom: '4px' }}>Placed On</p>
                                     <p style={{ fontSize: '13px' }}>{formatDate(order.created_at)}</p>
                                 </div>
                                 <div>
-                                    <p style={{ fontSize: '8px', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.3em', marginBottom: '4px' }}>Total</p>
+                                    <p style={{ fontSize: '8px', color: 'rgba(0,0,0,0.3)', textTransform: 'uppercase', letterSpacing: '0.3em', marginBottom: '4px' }}>Total</p>
                                     <p style={{ fontSize: '13px', fontWeight: 600, color: '#d4af37' }}>₹{order.total?.toLocaleString()}</p>
                                 </div>
                                 <div>
-                                    <p style={{ fontSize: '8px', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.3em', marginBottom: '4px' }}>Courier</p>
+                                    <p style={{ fontSize: '8px', color: 'rgba(0,0,0,0.3)', textTransform: 'uppercase', letterSpacing: '0.3em', marginBottom: '4px' }}>Courier</p>
                                     <p style={{ fontSize: '13px' }}>{order.courier_name || 'Processing'}</p>
                                 </div>
                                 {order.awb_code && (
@@ -161,7 +161,7 @@ export default function TrackOrderPage() {
                             </div>
 
                             {/* Status Progress */}
-                            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '4px', padding: '40px', marginBottom: '24px' }}>
+                            <div style={{ background: '#ffffff', border: '1px solid rgba(0,0,0,0.06)', borderRadius: '4px', padding: '40px', marginBottom: '24px' }}>
                                 <p style={{ fontSize: '10px', color: '#d4af37', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4em', textAlign: 'center', marginBottom: '40px' }}>
                                     Order Journey
                                 </p>
@@ -173,7 +173,7 @@ export default function TrackOrderPage() {
                                 ) : (
                                     <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative', padding: '0 20px' }}>
                                         {/* Progress line */}
-                                        <div style={{ position: 'absolute', top: '15px', left: '40px', right: '40px', height: '1px', background: 'rgba(212,175,55,0.1)' }} />
+                                        <div style={{ position: 'absolute', top: '15px', left: '40px', right: '40px', height: '1px', background: 'rgba(212,175,55,0.3)' }} />
                                         <motion.div
                                             initial={{ width: 0 }}
                                             animate={{ width: `${(currentIndex / 4) * 80}%` }}
@@ -187,10 +187,10 @@ export default function TrackOrderPage() {
                                             const Icon = step.icon
                                             return (
                                                 <div key={step.key} style={{ zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
-                                                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: done ? '#d4af37' : '#050505', border: `1px solid ${done ? '#d4af37' : 'rgba(212,175,55,0.2)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: current ? '0 0 20px rgba(212,175,55,0.4)' : 'none' }}>
-                                                        <Icon size={14} color={done ? '#000' : 'rgba(212,175,55,0.3)'} />
+                                                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: done ? '#d4af37' : '#f8f7f2', border: `1px solid ${done ? '#d4af37' : 'rgba(212,175,55,0.3)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: current ? '0 0 20px rgba(212,175,55,0.4)' : 'none' }}>
+                                                        <Icon size={14} color={done ? '#000' : 'rgba(212,175,55,0.5)'} />
                                                     </div>
-                                                    <span style={{ fontSize: '8px', textTransform: 'uppercase', letterSpacing: '0.1em', color: done ? '#fff' : 'rgba(255,255,255,0.2)', fontWeight: current ? 700 : 400, textAlign: 'center', maxWidth: '60px' }}>
+                                                    <span style={{ fontSize: '8px', textTransform: 'uppercase', letterSpacing: '0.1em', color: done ? '#1a1a1a' : 'rgba(0,0,0,0.35)', fontWeight: current ? 700 : 400, textAlign: 'center', maxWidth: '60px' }}>
                                                         {step.label}
                                                     </span>
                                                 </div>
@@ -202,10 +202,10 @@ export default function TrackOrderPage() {
 
                             {/* Delivery Address */}
                             {address && (
-                                <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '4px', padding: '28px 32px' }}>
+                                <div style={{ background: '#ffffff', border: '1px solid rgba(0,0,0,0.06)', borderRadius: '4px', padding: '28px 32px' }}>
                                     <p style={{ fontSize: '9px', color: '#d4af37', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.3em', marginBottom: '16px' }}>Delivering To</p>
                                     <p style={{ fontSize: '14px', fontWeight: 500, marginBottom: '4px' }}>{address.name}</p>
-                                    <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', fontFamily: 'var(--font-baskerville)', lineHeight: 1.6 }}>
+                                    <p style={{ fontSize: '13px', color: 'rgba(0,0,0,0.5)', fontFamily: 'var(--font-baskerville)', lineHeight: 1.6 }}>
                                         {address.line1}{address.line2 ? `, ${address.line2}` : ''}<br />
                                         {address.city}, {address.state} — {address.pincode}
                                     </p>
@@ -218,7 +218,7 @@ export default function TrackOrderPage() {
                 {/* Help note */}
                 {!order && !loading && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
-                        style={{ textAlign: 'center', padding: '60px 20px', color: 'rgba(255,255,255,0.15)' }}>
+                        style={{ textAlign: 'center', padding: '60px 20px', color: 'rgba(0,0,0,0.25)' }}>
                         <Package size={40} style={{ margin: '0 auto 16px', opacity: 0.3 }} />
                         <p style={{ fontSize: '13px', fontFamily: 'var(--font-baskerville)', fontStyle: 'italic' }}>
                             Type your order ID above and press Track.

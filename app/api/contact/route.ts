@@ -49,6 +49,7 @@ export async function POST(req: Request) {
                 phone,
                 message,
                 admin_recipient: ADMIN_RECIPIENT,
+                is_read: false,
                 created_at: new Date().toISOString(),
             }])
 

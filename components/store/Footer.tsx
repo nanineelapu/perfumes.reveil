@@ -29,7 +29,7 @@ interface FooterProps {
     theme?: 'light' | 'dark'
 }
 
-export function Footer({ theme = 'dark' }: FooterProps) {
+export function Footer({ theme = 'light' }: FooterProps) {
     const footerRef = useRef(null)
     const [isMobile, setIsMobile] = React.useState(false)
 
@@ -52,10 +52,10 @@ export function Footer({ theme = 'dark' }: FooterProps) {
     }
 
     const isLight = theme === 'light'
-    const bgColor = isLight ? '#ffffff' : '#050505'
-    const textColor = isLight ? '#111111' : '#ffffff'
+    const bgColor = isLight ? '#f8f7f2' : '#050505'
+    const textColor = isLight ? '#1a1a1a' : '#ffffff'
     const mutedTextColor = isLight ? '#666666' : '#888888'
-    const borderColor = isLight ? '#eeeeee' : 'rgba(255,255,255,0.03)'
+    const borderColor = isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.03)'
     const gold = '#d4af37'
 
     return (
@@ -99,31 +99,32 @@ export function Footer({ theme = 'dark' }: FooterProps) {
                         width: '100%',
                         marginBottom: isMobile ? '40px' : '32px'
                     }}>
-                        <div style={{ marginBottom: isMobile ? '0' : '32px', marginLeft: isMobile ? '0' : '-15px' }}>
+                        <div style={{ marginBottom: isMobile ? '0' : '24px' }}>
                             <img
-                                src="https://lhnamtkpjkrawgql.public.blob.vercel-storage.com/Untitled%20%282%29.webp"
+                                src="https://lhnamtkpjkrawgql.public.blob.vercel-storage.com/LOGO.webp"
                                 alt="Reveil"
-                                style={{ height: isMobile ? '40px' : '60px', width: 'auto', filter: isLight ? 'invert(1) brightness(0.2)' : 'none' }}
+                                style={{ height: isMobile ? '72px' : '110px', width: 'auto', display: 'block' }}
                             />
                         </div>
 
                         {!isMobile && (
                             <>
                                 <p style={{
-                                    fontSize: '14px', lineHeight: 1.9, color: mutedTextColor,
-                                    marginBottom: '20px', maxWidth: '300px',
-                                    fontFamily: 'var(--font-baskerville)', fontWeight: 300
+                                    fontSize: '15px', lineHeight: 1.7, color: textColor,
+                                    marginBottom: '20px', maxWidth: '320px',
+                                    fontFamily: 'var(--font-baskerville)', fontWeight: 600,
+                                    letterSpacing: '-0.01em'
                                 }}>
-                                    Bringing you the best scents from around the perfume world.
+                                    Bringing you the <span style={{ color: gold, fontWeight: 700 }}>best scents</span> from around the perfume world.
                                 </p>
                                 <p style={{
-                                    fontSize: '12px', lineHeight: 1.6, color: isLight ? '#999' : '#666',
+                                    fontSize: '12.5px', lineHeight: 1.7, color: isLight ? '#555' : '#aaa',
                                     marginBottom: '32px', maxWidth: '300px',
-                                    fontFamily: 'var(--font-baskerville)'
+                                    fontFamily: 'var(--font-baskerville)', fontWeight: 500
                                 }}>
-                                    Trimurty Enterprises, Marthapeta Street,<br />
+                                    <strong style={{ color: textColor, fontWeight: 700 }}>Trimurty Enterprises</strong>, Marthapeta Street,<br />
                                     Near Sano Bazar, Berhampur,<br />
-                                    Odisha, India - 760002
+                                    Odisha, India - <strong style={{ color: textColor, fontWeight: 700 }}>760002</strong>
                                 </p>
                             </>
                         )}
@@ -164,8 +165,9 @@ export function Footer({ theme = 'dark' }: FooterProps) {
                     }}>
                         <div>
                             <div style={{
-                                fontSize: isMobile ? '9px' : '10px', color: textColor, fontWeight: 900,
-                                letterSpacing: '0.3em', marginBottom: isMobile ? '24px' : '32px', textTransform: 'uppercase'
+                                fontSize: isMobile ? '12px' : '14px', color: textColor, fontWeight: 900,
+                                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
+                                letterSpacing: '0.35em', marginBottom: isMobile ? '24px' : '32px', textTransform: 'uppercase'
                             }}>
                                 COMPANY
                             </div>
@@ -177,8 +179,9 @@ export function Footer({ theme = 'dark' }: FooterProps) {
                             ].map(l => (
                                 <motion.div key={l.name} style={{ marginBottom: isMobile ? '12px' : '16px' }}>
                                     <Link href={l.href} style={{
-                                        color: isLight ? '#777' : '#999', textDecoration: 'none', fontSize: isMobile ? '11px' : '13px',
-                                        fontFamily: 'var(--font-baskerville)'
+                                        color: isLight ? '#333' : '#cfcfcf', textDecoration: 'none', fontSize: isMobile ? '12px' : '14px',
+                                        fontFamily: 'var(--font-baskerville)', fontWeight: 600,
+                                        letterSpacing: '0.01em'
                                     }}>
                                         <motion.span whileHover={{ x: 10, color: gold }} style={{ display: 'inline-block' }}>
                                             {l.name}
@@ -191,8 +194,9 @@ export function Footer({ theme = 'dark' }: FooterProps) {
                         {isMobile && (
                             <div>
                                 <div style={{
-                                    fontSize: '9px', color: textColor, fontWeight: 900,
-                                    letterSpacing: '0.3em', marginBottom: '24px', textTransform: 'uppercase'
+                                    fontSize: '12px', color: textColor, fontWeight: 900,
+                                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
+                                    letterSpacing: '0.35em', marginBottom: '24px', textTransform: 'uppercase'
                                 }}>
                                     MY ACCOUNT
                                 </div>
@@ -204,8 +208,8 @@ export function Footer({ theme = 'dark' }: FooterProps) {
                                 ].map(l => (
                                     <motion.div key={l.name} style={{ marginBottom: '12px' }}>
                                         <Link href={l.href} style={{
-                                            color: isLight ? '#777' : '#999', textDecoration: 'none', fontSize: '11px',
-                                            fontFamily: 'var(--font-baskerville)'
+                                            color: isLight ? '#333' : '#cfcfcf', textDecoration: 'none', fontSize: '12px',
+                                            fontFamily: 'var(--font-baskerville)', fontWeight: 600
                                         }}>
                                             <motion.span whileHover={{ x: 10, color: gold }} style={{ display: 'inline-block' }}>
                                                 {l.name}
@@ -221,8 +225,9 @@ export function Footer({ theme = 'dark' }: FooterProps) {
                     {!isMobile && (
                         <div>
                             <div style={{
-                                fontSize: '10px', color: textColor, fontWeight: 900,
-                                letterSpacing: '0.3em', marginBottom: '32px', textTransform: 'uppercase'
+                                fontSize: '14px', color: textColor, fontWeight: 900,
+                                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
+                                letterSpacing: '0.35em', marginBottom: '32px', textTransform: 'uppercase'
                             }}>
                                 MY ACCOUNT
                             </div>
@@ -235,8 +240,9 @@ export function Footer({ theme = 'dark' }: FooterProps) {
                             ].map(l => (
                                 <motion.div key={l.name} style={{ marginBottom: '16px' }}>
                                     <Link href={l.href} style={{
-                                        color: isLight ? '#777' : '#999', textDecoration: 'none', fontSize: '13px',
-                                        fontFamily: 'var(--font-baskerville)'
+                                        color: isLight ? '#333' : '#cfcfcf', textDecoration: 'none', fontSize: '14px',
+                                        fontFamily: 'var(--font-baskerville)', fontWeight: 600,
+                                        letterSpacing: '0.01em'
                                     }}>
                                         <motion.span whileHover={{ x: 10, color: gold }} style={{ display: 'inline-block' }}>
                                             {l.name}
@@ -251,20 +257,21 @@ export function Footer({ theme = 'dark' }: FooterProps) {
                     {!isMobile && (
                         <div style={{ textAlign: 'right' }}>
                             <div style={{
-                                fontSize: '10px', color: gold, fontWeight: 900,
+                                fontSize: '11px', color: gold, fontWeight: 900,
                                 letterSpacing: '0.4em', marginBottom: '32px', textTransform: 'uppercase'
                             }}>
                                 ESTABLISHED IN 2024
                             </div>
                             <p style={{
-                                fontSize: '20px', fontFamily: 'var(--font-baskerville)',
+                                fontSize: '22px', fontFamily: 'var(--font-baskerville)',
                                 fontStyle: 'italic', color: textColor, lineHeight: 1.4,
-                                marginBottom: '32px'
+                                marginBottom: '32px', fontWeight: 500,
+                                letterSpacing: '-0.01em'
                             }}>
-                                "Luxury is not a status, <br /> it is a sensory journey."
+                                "Luxury is not a <strong style={{ fontWeight: 700, fontStyle: 'italic' }}>status</strong>, <br /> it is a <strong style={{ color: gold, fontWeight: 700, fontStyle: 'italic' }}>sensory journey.</strong>"
                             </p>
-                            <div style={{ color: isLight ? '#bbb' : '#444', fontSize: '9px', letterSpacing: '0.1em' }}>
-                                ODISHA — BRAHMAPUR
+                            <div style={{ color: isLight ? '#555' : '#888', fontSize: '10px', letterSpacing: '0.2em', fontWeight: 700, textTransform: 'uppercase' }}>
+                                Odisha — <span style={{ color: gold }}>Brahmapur</span>
                             </div>
                         </div>
                     )}

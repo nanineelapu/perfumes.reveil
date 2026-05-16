@@ -83,7 +83,26 @@ export async function POST(request: Request) {
             userId = profileByPhone.id
             const { data: { user: authUser } } = await supabaseAdmin.auth.admin.getUserById(userId)
             userEmail = authUser?.email || `${submittedDigits}@reveil.internal`
-            needsName = !profileByPhone.first_name && !profileByPhone.full_name
+
+            // If the existing profile has no name but the client just provided one
+            // (e.g. user is signing up with an account that was half-created),
+            // persist it now so we don't drop the data.
+            if (!profileByPhone.first_name && !profileByPhone.full_name && safeFirst) {
+                const fullName = `${safeFirst} ${safeLast ?? ''}`.trim()
+                const { error: existingUpsertError } = await supabaseAdmin
+                    .from('profiles')
+                    .update({
+                        first_name: safeFirst,
+                        last_name: safeLast ?? '',
+                        full_name: fullName,
+                    })
+                    .eq('id', userId)
+                if (existingUpsertError) {
+                    console.error('[OTP Verify] Profile update (existing user) failed:', existingUpsertError.message)
+                }
+            }
+
+            needsName = !profileByPhone.first_name && !profileByPhone.full_name && !safeFirst
         } else {
             const internalEmail = `${submittedDigits}@reveil.internal`
             const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
@@ -97,12 +116,19 @@ export async function POST(request: Request) {
             userId = newUser.user.id
             userEmail = newUser.user.email!
 
-            await supabaseAdmin.from('profiles').upsert({
+            const fullName = safeFirst ? `${safeFirst} ${safeLast ?? ''}`.trim() : null
+            const { error: upsertError } = await supabaseAdmin.from('profiles').upsert({
                 id: userId,
                 phone: cleanPhone,
                 role: 'user',
-                ...(safeFirst && { first_name: safeFirst, last_name: safeLast ?? '' }),
+                ...(safeFirst && { first_name: safeFirst, last_name: safeLast ?? '', full_name: fullName }),
             }, { onConflict: 'id' })
+            if (upsertError) {
+                console.error('[OTP Verify] Profile upsert (new user) failed:', upsertError.message)
+                // Don't block the user — auth account is already created. Surface
+                // a soft error in the response so the client can prompt for a
+                // name later if needed.
+            }
 
             needsName = !safeFirst
         }
@@ -132,7 +158,7 @@ export async function POST(request: Request) {
         })
 
     } catch (error: any) {
-        console.error('[OTP Verify] Error')
+        console.error('[OTP Verify] Error:', error?.message || error)
         return NextResponse.json({ error: 'Verification failed.' }, { status: 500 })
     }
 }

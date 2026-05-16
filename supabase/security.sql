@@ -56,6 +56,18 @@ create index if not exists pending_orders_user_idx on public.pending_orders (use
 create index if not exists pending_orders_status_idx on public.pending_orders (status);
 
 
+-- Update reviews table with heading and media support
+do $$
+begin
+  if not exists (select 1 from information_schema.columns where table_name='reviews' and column_name='heading') then
+    alter table public.reviews add column heading text;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_name='reviews' and column_name='media_urls') then
+    alter table public.reviews add column media_urls text[] default '{}';
+  end if;
+end$$;
+
+
 -- ────────────────────────────────────────────────────────────────────────────
 -- 2. ORDERS — uniqueness + indexes
 -- ────────────────────────────────────────────────────────────────────────────

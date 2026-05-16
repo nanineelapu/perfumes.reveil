@@ -27,7 +27,7 @@ export function PremiumLoader({ iconName, text }: PremiumLoaderProps) {
             flexDirection: 'column',
             alignItems: 'center', 
             justifyContent: 'center',
-            background: '#050505', 
+            background: '#f8f7f2',
             color: '#d4af37',
             gap: '24px'
         }}>

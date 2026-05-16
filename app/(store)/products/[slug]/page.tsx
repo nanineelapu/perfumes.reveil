@@ -71,18 +71,53 @@ export default async function ProductExperiencePage({ params }: Props) {
         notFound()
     }
 
-    // 2. Fetch Reviews
-    const { data: reviews } = await adminClient
+    // 2. Fetch Reviews — exclude reviews authored by admins (test/seeded entries)
+    const { data: allReviews } = await adminClient
         .from('reviews')
         .select(`
             id,
             rating,
             comment,
             created_at,
-            profiles ( first_name, last_name )
+            reviewer_name,
+            reviewer_avatar,
+            heading,
+            media_urls,
+            user_id,
+            profiles ( first_name, last_name, role )
         `)
         .eq('product_id', product.id)
         .order('created_at', { ascending: false })
+
+    const reviews = (allReviews ?? []).filter((r: any) => {
+        const profile = Array.isArray(r.profiles) ? r.profiles[0] : r.profiles
+        if (profile?.role === 'admin') return false
+        // Heuristic fallback for seeded test data where the role flag may not
+        // be set: hide reviews whose reviewer_name signals admin/test entries.
+        const name = (r.reviewer_name || '').toLowerCase()
+        if (name.includes('admin') || name.includes('test')) return false
+        return true
+    })
+
+    // 3. Fetch related products — same category first, then top up with others
+    const { data: sameCategory } = await supabase
+        .from('products')
+        .select('id, name, slug, price, images, category, rating, stock')
+        .eq('category', product.category)
+        .neq('id', product.id)
+        .gt('stock', 0)
+        .limit(8)
+
+    let related = sameCategory ?? []
+    if (related.length < 4) {
+        const { data: filler } = await supabase
+            .from('products')
+            .select('id, name, slug, price, images, category, rating, stock')
+            .neq('id', product.id)
+            .gt('stock', 0)
+            .limit(8 - related.length)
+        related = [...related, ...(filler ?? [])]
+    }
 
     // 3. Prepare JSON-LD
     const jsonLd = {
@@ -139,7 +174,7 @@ export default async function ProductExperiencePage({ params }: Props) {
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
             />
-            <ProductContent product={product} initialReviews={reviews || []} />
+            <ProductContent product={product} initialReviews={reviews || []} relatedProducts={related} />
         </>
     )
 }

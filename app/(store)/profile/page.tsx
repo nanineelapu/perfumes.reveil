@@ -120,19 +120,19 @@ export default function ProfilePage() {
     }
 
     const cardStyle: React.CSSProperties = {
-        background: 'rgba(15, 15, 15, 0.6)',
+        background: '#ffffff',
         backdropFilter: 'blur(20px)',
         borderRadius: '12px',
-        border: '1px solid rgba(212, 175, 55, 0.1)',
+        border: '1px solid rgba(212, 175, 55, 0.3)',
         padding: '32px',
-        boxShadow: '0 20px 50px rgba(0,0,0,0.4)'
+        boxShadow: '0 20px 50px rgba(0,0,0,0.08)'
     }
 
     return (
         <div style={{
             minHeight: '100vh',
-            background: 'radial-gradient(circle at top right, #1a140a 0%, #050505 50%)',
-            color: '#fff',
+            background: 'radial-gradient(circle at top right, #f3eee2 0%, #f8f7f2 50%)',
+            color: '#1a1a1a',
             padding: isMobile ? '100px 16px 60px' : '140px 24px 80px',
             fontFamily: 'var(--font-geist-sans)',
             overflowX: 'hidden'
@@ -181,7 +181,7 @@ export default function ProfilePage() {
                             whileHover={{ scale: 1.05, color: '#ff4b4b' }}
                             style={{
                                 background: 'rgba(255,75,75,0.05)',
-                                border: '1px solid rgba(255,75,75,0.1)',
+                                border: '1px solid rgba(255,75,75,0.25)',
                                 color: '#ff4b4b',
                                 padding: '10px 20px',
                                 borderRadius: '8px',
@@ -212,7 +212,7 @@ export default function ProfilePage() {
                                         type="button"
                                         onClick={startEditingName}
                                         whileHover={{ scale: 1.1 }}
-                                        style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer' }}
+                                        style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer' }}
                                         aria-label="Edit name"
                                     >
                                         <Edit2 size={18} />
@@ -235,7 +235,7 @@ export default function ProfilePage() {
                                             onClick={cancelEditingName}
                                             disabled={savingName}
                                             whileHover={{ scale: 1.1 }}
-                                            style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#888', cursor: savingName ? 'not-allowed' : 'pointer', padding: '6px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px' }}
+                                            style={{ background: 'transparent', border: '1px solid rgba(0,0,0,0.12)', color: '#888', cursor: savingName ? 'not-allowed' : 'pointer', padding: '6px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px' }}
                                             aria-label="Cancel"
                                         >
                                             <X size={14} />
@@ -254,42 +254,42 @@ export default function ProfilePage() {
                                 gap: isMobile ? '24px' : '40px' 
                             }}>
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '11px', textTransform: 'uppercase', color: '#444', letterSpacing: '0.1em', marginBottom: '8px' }}>First Name</label>
+                                    <label style={{ display: 'block', fontSize: '11px', textTransform: 'uppercase', color: '#555', letterSpacing: '0.1em', marginBottom: '8px' }}>First Name</label>
                                     {isEditing ? (
                                         <input
                                             type="text"
                                             value={firstNameInput}
                                             onChange={(e) => setFirstNameInput(e.target.value)}
                                             disabled={savingName}
-                                            style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(212,175,55,0.2)', color: '#fff', fontSize: '16px', padding: '10px 12px', borderRadius: '6px', outline: 'none' }}
+                                            style={{ width: '100%', background: '#ffffff', border: '1px solid rgba(0,0,0,0.12)', color: '#1a1a1a', fontSize: '16px', padding: '10px 12px', borderRadius: '6px', outline: 'none' }}
                                         />
                                     ) : (
                                         <p style={{ fontSize: '16px', fontWeight: 400 }}>{profile?.first_name || '—'}</p>
                                     )}
                                 </div>
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '11px', textTransform: 'uppercase', color: '#444', letterSpacing: '0.1em', marginBottom: '8px' }}>Last Name</label>
+                                    <label style={{ display: 'block', fontSize: '11px', textTransform: 'uppercase', color: '#555', letterSpacing: '0.1em', marginBottom: '8px' }}>Last Name</label>
                                     {isEditing ? (
                                         <input
                                             type="text"
                                             value={lastNameInput}
                                             onChange={(e) => setLastNameInput(e.target.value)}
                                             disabled={savingName}
-                                            style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(212,175,55,0.2)', color: '#fff', fontSize: '16px', padding: '10px 12px', borderRadius: '6px', outline: 'none' }}
+                                            style={{ width: '100%', background: '#ffffff', border: '1px solid rgba(0,0,0,0.12)', color: '#1a1a1a', fontSize: '16px', padding: '10px 12px', borderRadius: '6px', outline: 'none' }}
                                         />
                                     ) : (
                                         <p style={{ fontSize: '16px', fontWeight: 400 }}>{profile?.last_name || '—'}</p>
                                     )}
                                 </div>
                                 <div style={{ gridColumn: isMobile ? 'auto' : 'span 2' }}>
-                                    <label style={{ display: 'block', fontSize: '11px', textTransform: 'uppercase', color: '#444', letterSpacing: '0.1em', marginBottom: '8px' }}>Email Address</label>
+                                    <label style={{ display: 'block', fontSize: '11px', textTransform: 'uppercase', color: '#555', letterSpacing: '0.1em', marginBottom: '8px' }}>Email Address</label>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                         <Mail size={16} color="#d4af37" />
                                         <p style={{ fontSize: isMobile ? '14px' : '16px', fontWeight: 400, wordBreak: 'break-all' }}>{user?.email}</p>
                                     </div>
                                 </div>
                                 <div style={{ gridColumn: isMobile ? 'auto' : 'span 2' }}>
-                                    <label style={{ display: 'block', fontSize: '11px', textTransform: 'uppercase', color: '#444', letterSpacing: '0.1em', marginBottom: '8px' }}>Phone Number</label>
+                                    <label style={{ display: 'block', fontSize: '11px', textTransform: 'uppercase', color: '#555', letterSpacing: '0.1em', marginBottom: '8px' }}>Phone Number</label>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                         <Phone size={16} color="#d4af37" />
                                         <p style={{ fontSize: isMobile ? '14px' : '16px', fontWeight: 400 }}>{profile?.phone || 'Not provided'}</p>
@@ -309,7 +309,7 @@ export default function ProfilePage() {
                                         <h4 style={{ fontSize: '16px', fontWeight: 500 }}>Recent Orders</h4>
                                         <p style={{ fontSize: '12px', color: '#666' }}>View your order history</p>
                                     </div>
-                                    <ChevronRight size={20} color="#333" style={{ marginLeft: 'auto' }} />
+                                    <ChevronRight size={20} color="#555" style={{ marginLeft: 'auto' }} />
                                 </div>
                                 <motion.button 
                                     onClick={() => router.push('/orders')}
@@ -340,17 +340,17 @@ export default function ProfilePage() {
                                         <h4 style={{ fontSize: '16px', fontWeight: 500 }}>Address Book</h4>
                                         <p style={{ fontSize: '12px', color: '#666' }}>Save your delivery addresses</p>
                                     </div>
-                                    <ChevronRight size={20} color="#333" style={{ marginLeft: 'auto' }} />
+                                    <ChevronRight size={20} color="#555" style={{ marginLeft: 'auto' }} />
                                 </div>
-                                <motion.button 
+                                <motion.button
                                     onClick={() => router.push('/address-book')}
-                                    whileHover={{ background: 'rgba(255,255,255,0.05)' }}
+                                    whileHover={{ background: 'rgba(0,0,0,0.04)' }}
                                     style={{
                                         width: '100%',
                                         padding: '12px',
                                         background: 'transparent',
-                                        border: '1px solid rgba(255,255,255,0.1)',
-                                        color: '#fff',
+                                        border: '1px solid rgba(0,0,0,0.12)',
+                                        color: '#1a1a1a',
                                         borderRadius: '8px',
                                         fontSize: '13px',
                                         fontWeight: 500,
