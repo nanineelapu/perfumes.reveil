@@ -54,7 +54,7 @@ export async function POST(request: Request) {
         }
         if (!isOdishaPincode(safe.pincode)) {
             return NextResponse.json(
-                { error: 'Reveil currently delivers only within Odisha. Please use an Odisha pincode (751xxx–770xxx).' },
+                { error: 'Please use a valid 6-digit Indian pincode.' },
                 { status: 400 },
             )
         }

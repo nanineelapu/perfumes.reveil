@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const supabase = await createClient()
-    const baseUrl = 'https://perfumesreveil.vercel.app'
+    const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://perfumesreveil.vercel.app').replace(/\/$/, '')
 
     // 1. Fetch all product slugs
     const { data: products } = await supabase

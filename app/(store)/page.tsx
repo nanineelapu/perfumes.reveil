@@ -86,8 +86,17 @@ export default async function HomePage() {
   // over. If the admin has fewer than 4 products, we just show whatever is
   // available — no padding with placeholders.
   const seedFromDate = () => {
-    const istNow = new Date(Date.now() + 5.5 * 60 * 60 * 1000)
-    const key = istNow.toISOString().slice(0, 10) // "2026-05-12"
+    // Use Intl to get the current IST date — robust to server timezone &
+    // DST changes (India doesn't observe DST today, but this keeps the seed
+    // correct if it ever does, or if the server runs in another zone).
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Kolkata',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).formatToParts(new Date())
+    const get = (t: string) => parts.find(p => p.type === t)?.value ?? ''
+    const key = `${get('year')}-${get('month')}-${get('day')}` // "2026-05-12"
     let h = 0
     for (let i = 0; i < key.length; i++) h = ((h << 5) - h + key.charCodeAt(i)) | 0
     return Math.abs(h) || 1

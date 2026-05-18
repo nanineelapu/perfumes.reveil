@@ -281,7 +281,7 @@ function CheckoutInner() {
             return
         }
         if (!isOdishaPincode(selectedAddress.pincode)) {
-            setError('Reveil currently delivers only within Odisha. Please choose an Odisha address (pincode 751xxx–770xxx).')
+            setError('Please choose an address with a valid 6-digit Indian pincode.')
             return
         }
         setPlacing(true)

@@ -1,9 +1,9 @@
 'use client'
-import { motion } from 'framer-motion'
-import { useEffect, useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Product } from '@/types/store'
-import { ShoppingBag, ArrowLeft, Star, Loader2, Check, MapPin, X as XIcon } from 'lucide-react'
+import { ShoppingBag, ArrowLeft, Star, Loader2, Check, MapPin, X as XIcon, ChevronLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { ReviewsSection } from '@/components/store/ReviewsSection'
 import { ReviewInvitation } from '@/components/store/ReviewInvitation'
@@ -27,9 +27,26 @@ export function ProductContent({ product, initialReviews, relatedProducts = [] }
     const [added, setAdded] = useState(false)
     const [actionError, setActionError] = useState<string | null>(null)
 
-    // Pincode delivery check — Reveil ships only within Odisha.
-    // Odisha PIN range is 751xxx – 770xxx; we treat anything outside as
-    // non-deliverable. India Post API enriches with the area name when reachable.
+    // Image carousel state — supports multiple images uploaded from admin panel.
+    const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1547887538-e3a2f32cb1cc?auto=format&fit=crop&q=80&w=1200'
+    const galleryImages: string[] = (product.images && product.images.length > 0) ? product.images : [FALLBACK_IMAGE]
+    const [currentImage, setCurrentImage] = useState(0)
+    const touchStartX = useRef<number | null>(null)
+
+    const goNext = () => setCurrentImage((i) => (i + 1) % galleryImages.length)
+    const goPrev = () => setCurrentImage((i) => (i - 1 + galleryImages.length) % galleryImages.length)
+
+    const onTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX }
+    const onTouchEnd = (e: React.TouchEvent) => {
+        if (touchStartX.current == null) return
+        const dx = e.changedTouches[0].clientX - touchStartX.current
+        if (Math.abs(dx) > 50) { dx < 0 ? goNext() : goPrev() }
+        touchStartX.current = null
+    }
+
+    // Pincode delivery check — Reveil ships pan-India. Any valid 6-digit
+    // Indian pincode is accepted. India Post API enriches with the area name
+    // and state when reachable; network failures fall back to "deliverable".
     const [pincode, setPincode] = useState('')
     const [pinChecking, setPinChecking] = useState(false)
     const [pinResult, setPinResult] = useState<
@@ -41,12 +58,8 @@ export function ProductContent({ product, initialReviews, relatedProducts = [] }
     const checkPincode = async () => {
         const pin = pincode.trim()
         setPinResult(null)
-        if (!/^\d{6}$/.test(pin)) {
-            setPinResult({ ok: false, reason: 'Enter a valid 6-digit pincode.' })
-            return
-        }
         if (!isOdishaPincode(pin)) {
-            setPinResult({ ok: false, reason: 'We currently deliver only within Odisha.' })
+            setPinResult({ ok: false, reason: 'Enter a valid 6-digit Indian pincode.' })
             return
         }
 
@@ -57,22 +70,18 @@ export function ProductContent({ product, initialReviews, relatedProducts = [] }
             const entry = Array.isArray(data) ? data[0] : null
             const office = entry?.PostOffice?.[0]
             if (entry?.Status === 'Success' && office) {
-                if ((office.State || '').toLowerCase() === 'odisha') {
-                    setPinResult({
-                        ok: true,
-                        area: office.Name || office.Block || pin,
-                        district: office.District || office.Division || '',
-                    })
-                } else {
-                    setPinResult({ ok: false, reason: 'We currently deliver only within Odisha.' })
-                }
+                setPinResult({
+                    ok: true,
+                    area: office.Name || office.Block || pin,
+                    district: [office.District || office.Division, office.State].filter(Boolean).join(', '),
+                })
             } else {
-                // API didn't find it — fall back to prefix check (already passed) and accept
-                setPinResult({ ok: true, area: 'Odisha', district: '' })
+                // API didn't find it — accept based on valid prefix check
+                setPinResult({ ok: true, area: '', district: '' })
             }
         } catch {
             // Network failure — trust the prefix check we already did
-            setPinResult({ ok: true, area: 'Odisha', district: '' })
+            setPinResult({ ok: true, area: '', district: '' })
         } finally {
             setPinChecking(false)
         }
@@ -160,6 +169,8 @@ export function ProductContent({ product, initialReviews, relatedProducts = [] }
                         initial={{ opacity: 0, x: isMobile ? 0 : -20, y: isMobile ? 20 : 0 }}
                         animate={{ opacity: 1, x: 0, y: 0 }}
                         transition={{ duration: 1.2 }}
+                        onTouchStart={onTouchStart}
+                        onTouchEnd={onTouchEnd}
                         style={{
                             position: 'relative',
                             overflow: 'hidden',
@@ -172,11 +183,18 @@ export function ProductContent({ product, initialReviews, relatedProducts = [] }
                             zIndex: 1
                         }}
                     >
-                        <img
-                            src={product.images?.[0] || 'https://images.unsplash.com/photo-1547887538-e3a2f32cb1cc?auto=format&fit=crop&q=80&w=1200'}
-                            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 35%' }}
-                            alt={product.name}
-                        />
+                        <AnimatePresence mode="wait" initial={false}>
+                            <motion.img
+                                key={galleryImages[currentImage]}
+                                src={galleryImages[currentImage]}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.4 }}
+                                style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 35%', position: 'absolute', inset: 0 }}
+                                alt={product.name}
+                            />
+                        </AnimatePresence>
 
                         {/* Luxury Concentration Badge */}
                         <div style={{
@@ -184,11 +202,115 @@ export function ProductContent({ product, initialReviews, relatedProducts = [] }
                             padding: '10px 20px', background: 'rgba(5,5,5,0.7)',
                             backdropFilter: 'blur(10px)', border: '1px solid rgba(212,175,55,0.6)',
                             fontSize: '9px', color: '#d4af37', letterSpacing: '0.25em',
-                            textTransform: 'uppercase', fontWeight: 800, borderRadius: '999px'
+                            textTransform: 'uppercase', fontWeight: 800, borderRadius: '999px',
+                            zIndex: 2
                         }}>
                             {product.technical_specs?.concentration || 'Extrait de Parfum'}
                         </div>
+
+                        {/* Carousel arrows — only show if there's more than one image */}
+                        {galleryImages.length > 1 && (
+                            <>
+                                <button
+                                    onClick={goPrev}
+                                    aria-label="Previous image"
+                                    style={{
+                                        position: 'absolute', top: '50%', left: isMobile ? '12px' : '16px', transform: 'translateY(-50%)',
+                                        width: isMobile ? '36px' : '42px', height: isMobile ? '36px' : '42px',
+                                        borderRadius: '999px',
+                                        background: 'rgba(255,255,255,0.85)',
+                                        backdropFilter: 'blur(10px)',
+                                        border: '1px solid rgba(0,0,0,0.06)',
+                                        cursor: 'pointer',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        color: '#1a1a1a', zIndex: 2,
+                                        boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
+                                    }}
+                                >
+                                    <ChevronLeft size={isMobile ? 16 : 18} strokeWidth={2} />
+                                </button>
+                                <button
+                                    onClick={goNext}
+                                    aria-label="Next image"
+                                    style={{
+                                        position: 'absolute', top: '50%', right: isMobile ? '12px' : '16px', transform: 'translateY(-50%)',
+                                        width: isMobile ? '36px' : '42px', height: isMobile ? '36px' : '42px',
+                                        borderRadius: '999px',
+                                        background: 'rgba(255,255,255,0.85)',
+                                        backdropFilter: 'blur(10px)',
+                                        border: '1px solid rgba(0,0,0,0.06)',
+                                        cursor: 'pointer',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        color: '#1a1a1a', zIndex: 2,
+                                        boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
+                                    }}
+                                >
+                                    <ChevronRight size={isMobile ? 16 : 18} strokeWidth={2} />
+                                </button>
+
+                                {/* Dots indicator */}
+                                <div style={{
+                                    position: 'absolute', bottom: '16px', left: '50%', transform: 'translateX(-50%)',
+                                    display: 'flex', gap: '8px', zIndex: 2,
+                                    padding: '8px 14px',
+                                    background: 'rgba(5,5,5,0.5)',
+                                    backdropFilter: 'blur(10px)',
+                                    borderRadius: '999px'
+                                }}>
+                                    {galleryImages.map((_, i) => (
+                                        <button
+                                            key={i}
+                                            onClick={() => setCurrentImage(i)}
+                                            aria-label={`Go to image ${i + 1}`}
+                                            style={{
+                                                width: i === currentImage ? '22px' : '6px',
+                                                height: '6px',
+                                                borderRadius: '999px',
+                                                background: i === currentImage ? '#d4af37' : 'rgba(255,255,255,0.5)',
+                                                border: 'none',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.3s ease',
+                                                padding: 0
+                                            }}
+                                        />
+                                    ))}
+                                </div>
+                            </>
+                        )}
                     </motion.section>
+
+                    {/* Thumbnail strip — desktop only, hidden if single image */}
+                    {!isMobile && galleryImages.length > 1 && (
+                        <div style={{
+                            marginTop: '16px',
+                            display: 'flex',
+                            gap: '10px',
+                            flexWrap: 'wrap'
+                        }}>
+                            {galleryImages.map((img, i) => (
+                                <button
+                                    key={i}
+                                    onClick={() => setCurrentImage(i)}
+                                    style={{
+                                        width: '64px', height: '64px',
+                                        borderRadius: '8px',
+                                        overflow: 'hidden',
+                                        border: i === currentImage ? '2px solid #d4af37' : '1px solid rgba(0,0,0,0.08)',
+                                        padding: 0,
+                                        cursor: 'pointer',
+                                        background: '#fff',
+                                        transition: 'border-color 0.2s ease'
+                                    }}
+                                >
+                                    <img
+                                        src={img}
+                                        alt={`${product.name} ${i + 1}`}
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                    />
+                                </button>
+                            ))}
+                        </div>
+                    )}
 
                     {/* Olfactory Notes Grid — sits below the image so the two columns balance */}
                     <motion.div
@@ -313,7 +435,7 @@ export function ProductContent({ product, initialReviews, relatedProducts = [] }
                             </div>
                         </div>
 
-                        {/* Delivery Pincode Check — Odisha only */}
+                        {/* Delivery Pincode Check — Pan-India */}
                         <div style={{ marginBottom: isMobile ? '28px' : '36px' }}>
                             <div style={{
                                 fontSize: '8px', color: '#d4af37', textTransform: 'uppercase',
@@ -387,7 +509,7 @@ export function ProductContent({ product, initialReviews, relatedProducts = [] }
                                     {pinResult.ok ? (
                                         <span>
                                             Delivery available
-                                            {pinResult.area && pinResult.area !== 'Odisha' && (
+                                            {pinResult.area && (
                                                 <> to <strong style={{ fontWeight: 600 }}>{pinResult.area}</strong>{pinResult.district ? `, ${pinResult.district}` : ''}</>
                                             )}
                                             . Free shipping on orders above ₹250.

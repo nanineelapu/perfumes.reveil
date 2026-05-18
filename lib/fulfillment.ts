@@ -28,6 +28,17 @@ export async function createShiprocketOrderForOrderId(orderId: string) {
 
   if (error || !order) throw new Error('Order not found')
 
+  // Idempotency: if this order is already in Shiprocket, return the existing
+  // identifiers instead of pushing a duplicate shipment. Prevents the
+  // verify ↔ webhook race from creating two Shiprocket orders for the same
+  // payment.
+  if (order.shiprocket_order_id) {
+    return {
+      shiprocket_order_id: order.shiprocket_order_id,
+      shipment_id: order.shiprocket_shipment_id,
+    }
+  }
+
   const address = (order.shipping_address as any) || {}
 
   const payload = {
@@ -74,7 +85,7 @@ export async function createShiprocketOrderForOrderId(orderId: string) {
     throw new Error(data?.message || 'Failed to create Shiprocket order')
   }
 
-  await admin
+  const { error: updateError } = await admin
     .from('orders')
     .update({
       shiprocket_order_id: String(data.order_id),
@@ -82,6 +93,23 @@ export async function createShiprocketOrderForOrderId(orderId: string) {
       status: 'processing',
     })
     .eq('id', orderId)
+
+  if (updateError) {
+    // The Shiprocket order DOES exist upstream, but we failed to persist its
+    // IDs locally. Surface this loudly so the operator can manually reconcile —
+    // otherwise tracking breaks and the next call would create a duplicate
+    // (the idempotency guard above relies on the local row being updated).
+    console.error('[fulfillment] CRITICAL — Shiprocket order created but DB update failed:', {
+      orderId,
+      shiprocket_order_id: data.order_id,
+      shipment_id: data.shipment_id,
+      error: updateError.message,
+    })
+    throw new Error(
+      `Shiprocket order ${data.order_id} created upstream but local DB update failed: ${updateError.message}. ` +
+      `Manual reconciliation needed for order ${orderId}.`
+    )
+  }
 
   return { shiprocket_order_id: data.order_id, shipment_id: data.shipment_id }
 }

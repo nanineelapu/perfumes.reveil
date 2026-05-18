@@ -29,10 +29,13 @@ export function ProductListContent() {
     useEffect(() => {
         async function fetchProducts() {
             try {
+                // Cap at 500 so a runaway catalog doesn't OOM the browser.
+                // Sufficient for current SKU count; raise when the catalog grows.
                 const { data, error } = await supabase
                     .from('products')
                     .select('*')
                     .order('created_at', { ascending: false })
+                    .limit(500)
 
                 if (error) throw error
                 setProducts(data || [])

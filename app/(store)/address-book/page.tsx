@@ -71,7 +71,7 @@ export default function AddressBookPage() {
             return
         }
         if (!isOdishaPincode(form.pincode)) {
-            setError('Reveil currently delivers only within Odisha. Please use an Odisha pincode (751xxx–770xxx).')
+            setError('Please enter a valid 6-digit Indian pincode.')
             return
         }
 
@@ -371,17 +371,17 @@ export default function AddressBookPage() {
                                         style={inputStyle}
                                         value={form.pincode}
                                         onChange={e => setForm({ ...form, pincode: e.target.value.replace(/\D/g, '').slice(0, 6) })}
-                                        placeholder="6-digit Odisha pincode"
+                                        placeholder="6-digit pincode"
                                         inputMode="numeric"
                                         maxLength={6}
                                         required
                                     />
                                     <p style={{ fontSize: '10px', color: 'rgba(0,0,0,0.5)', margin: '6px 0 0', letterSpacing: '0.05em' }}>
-                                        Reveil currently delivers only within Odisha (pincode 751xxx–770xxx).
+                                        Reveil ships pan-India.
                                     </p>
                                     {form.pincode.length === 6 && !isOdishaPincode(form.pincode) && (
                                         <p style={{ fontSize: '11px', color: '#b00020', margin: '6px 0 0' }}>
-                                            This pincode isn’t in our Odisha delivery zone.
+                                            Please enter a valid Indian pincode.
                                         </p>
                                     )}
                                 </div>

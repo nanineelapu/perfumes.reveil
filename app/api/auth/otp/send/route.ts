@@ -37,10 +37,22 @@ export async function POST(request: Request) {
             // them staring at "Too many requests" with no recourse.
             await rateLimit({ key: `otp:send:phone:short:${phoneDigits}`, limit: 1, windowSec: 30 }).catch(() => {})
 
-            // Bind verificationId to this phone (non-blocking — login still works if DB write fails).
-            recordOtpSend(result.verificationId, phoneDigits).catch((err) => {
-                console.error('[OTP Send] Failed to record binding (non-fatal):', err?.message)
-            })
+            // SECURITY: binding the verificationId → phone is fail-closed.
+            // If we cannot persist the binding, /verify cannot prove the OTP
+            // belongs to the phone in the request body, enabling account
+            // takeover. So we refuse to surface the verificationId.
+            try {
+                await recordOtpSend(result.verificationId, phoneDigits)
+            } catch (err: any) {
+                console.error('[OTP Send] Failed to record OTP binding — refusing send:', err?.message)
+                return NextResponse.json(
+                    {
+                        error: 'Could not initialise verification. Please try again.',
+                        hint: 'otp_verifications table may be missing. Run supabase/security.sql against the database.',
+                    },
+                    { status: 500 },
+                )
+            }
 
             return NextResponse.json({
                 success: true,

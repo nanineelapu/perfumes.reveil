@@ -159,8 +159,50 @@ export async function POST(request: Request) {
         p_total: total,
     })
     if (rpcError || !orderId) {
-        console.error('[orders] create_cod_order RPC error:', rpcError?.message)
-        return NextResponse.json({ error: 'Could not place order' }, { status: 500 })
+        // Surface the real reason so the operator can fix it — generic
+        // "Could not place order" makes this impossible to debug from the UI.
+        console.error('[orders] create_cod_order RPC error:', {
+            code: rpcError?.code,
+            message: rpcError?.message,
+            details: rpcError?.details,
+            hint: rpcError?.hint,
+        })
+
+        const msg = (rpcError?.message || '').toLowerCase()
+
+        // Stock conflict surfaced by the RPC — show the friendly variant.
+        if (msg.includes('out_of_stock')) {
+            return NextResponse.json(
+                { error: 'One of the items just went out of stock. Please refresh your cart and try again.' },
+                { status: 409 },
+            )
+        }
+        if (msg.includes('product_not_found')) {
+            return NextResponse.json(
+                { error: 'A product in your cart no longer exists. Please refresh and try again.' },
+                { status: 404 },
+            )
+        }
+
+        // Common operator-level misconfigurations.
+        const operatorHint =
+            msg.includes('does not exist') && msg.includes('function')
+                ? 'create_cod_order RPC is missing. Run supabase/security.sql against the database.'
+                : msg.includes('permission denied')
+                ? 'service_role does not have execute permission on create_cod_order. Re-run the grant in supabase/security.sql.'
+                : rpcError?.code === '42703'
+                ? 'A column referenced by create_cod_order is missing on the orders table. Check the schema matches security.sql.'
+                : null
+
+        return NextResponse.json(
+            {
+                error: 'Could not place order',
+                reason: rpcError?.message || 'Unknown RPC error',
+                code: rpcError?.code,
+                ...(operatorHint ? { hint: operatorHint } : {}),
+            },
+            { status: 500 },
+        )
     }
 
     if (!buy_now) {

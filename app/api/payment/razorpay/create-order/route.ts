@@ -188,11 +188,20 @@ export async function POST(request: Request) {
             )
         }
 
+        const publicKeyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID
+        if (!publicKeyId) {
+            console.error('[razorpay] NEXT_PUBLIC_RAZORPAY_KEY_ID not configured — refusing to expose any other env var to the browser')
+            return NextResponse.json(
+                { error: 'Payment is misconfigured. Please contact support.' },
+                { status: 500 },
+            )
+        }
+
         return NextResponse.json({
             razorpay_order_id: rpOrderId,
             amount: rpOrder.amount,
             currency: rpOrder.currency,
-            key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID,
+            key_id: publicKeyId,
             subtotal,
             shipping: shippingFee,
             total,

@@ -58,22 +58,22 @@ export function clampInt(input: unknown, min: number, max: number): number | nul
   return i
 }
 
-// Odisha PIN code ranges run from 751xxx (Bhubaneswar) through 770xxx
-// (Mayurbhanj border). Reveil ships only within Odisha, so this prefix
-// gate is the canonical deliverability check used by both the product
-// page widget and the address/checkout save paths.
-const ODISHA_PREFIX_MIN = 751
-const ODISHA_PREFIX_MAX = 770
+// Reveil now ships pan-India. Any valid 6-digit Indian pincode is deliverable.
+// The first digit of an Indian pincode is 1-9 (0 is reserved), followed by 5
+// more digits. We keep the legacy `isOdishaPincode` name as an alias to avoid
+// churn across every caller — the semantic is now "is a deliverable pincode".
 
 export function isIndianPincode(input: unknown): input is string {
   return typeof input === 'string' && /^[1-9][0-9]{5}$/.test(input)
 }
 
-export function isOdishaPincode(input: unknown): input is string {
-  if (!isIndianPincode(input)) return false
-  const prefix = parseInt(input.slice(0, 3), 10)
-  return prefix >= ODISHA_PREFIX_MIN && prefix <= ODISHA_PREFIX_MAX
+export function isDeliverablePincode(input: unknown): input is string {
+  return isIndianPincode(input)
 }
+
+// Deprecated alias — kept so existing imports still compile. New code should
+// use isDeliverablePincode or isIndianPincode.
+export const isOdishaPincode = isDeliverablePincode
 
 const SAFE_NEXT_RE = /^\/[a-zA-Z0-9._~!$&'()*+,;=:@%/-]*$/
 export function isSafeInternalPath(input: unknown): input is string {
