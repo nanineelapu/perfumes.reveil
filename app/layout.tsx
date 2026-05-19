@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import localFont from 'next/font/local'
 import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
+import { ALL_KEYWORDS, SITE_URL, SITE_NAME, BRAND_NAME, LEGAL_NAME } from "@/lib/seo/keywords";
+import { organizationSchema, websiteSchema, localBusinessSchema } from "@/lib/seo/schema";
 
 const bungee = localFont({
   src: '../public/fonts/Bungee-Regular.woff2',
@@ -24,48 +26,50 @@ const baskerville = localFont({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://perfumesreveil.vercel.app'),
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "REVEIL | Luxury Perfumes & Signature Fragrances",
-    template: "%s | REVEIL — The Art of Scent"
+    default: "Reveil Fragrance — Buy Luxury Perfumes Online India | Long Lasting Eau de Parfum",
+    template: "%s | Reveil Fragrance — Luxury Perfumes India"
   },
-  description: "Experience REVEIL: The ultimate destination for luxury perfumes, authentic attars, and premium air fresheners. Handcrafted signature fragrances designed for longevity and sophistication. Shop the Laboratory Archive online.",
-  keywords: [
-    "Reveil", "Reveil Perfumes", "luxury perfumes india", "best long lasting perfumes", 
-    "buy perfumes online india", "designer fragrances", "authentic attars", "oudh perfumes", 
-    "signature scents", "premium body sprays", "luxury air fresheners", "reveil diffuser", 
-    "niche perfumery", "perfume gift sets", "mens luxury perfume", "womens designer fragrance",
-    "best smelling perfumes", "perfume laboratory india"
-  ],
-  authors: [{ name: "REVEIL Studio" }],
-  creator: "REVEIL",
-  publisher: "Trimurty Enterprises",
+  description:
+    "Buy luxury perfumes online in India at Reveil Fragrance. Long-lasting eau de parfum for men & women, authentic Arabian attars, premium oudh, and luxury home fragrances. Original products. Cash on delivery. Free shipping above ₹249.",
+  keywords: ALL_KEYWORDS as unknown as string[],
+  authors: [{ name: `${BRAND_NAME} Studio` }],
+  creator: BRAND_NAME,
+  publisher: LEGAL_NAME,
+  applicationName: SITE_NAME,
+  category: 'Shopping',
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
+  alternates: {
+    canonical: SITE_URL,
+  },
   openGraph: {
     type: "website",
     locale: "en_IN",
-    url: "https://perfumesreveil.vercel.app",
-    siteName: "REVEIL",
-    title: "REVEIL | Luxury Perfumes & Signature Fragrances",
-    description: "Handcrafted luxury fragrances from the REVEIL Laboratory. Experience the art of scent with our long-lasting signature collections.",
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    title: "Reveil Fragrance — Buy Luxury Perfumes Online India",
+    description:
+      "Long-lasting luxury perfumes, Arabian attars, and premium oudh. Best perfumes for men & women in India. Cash on delivery. Free shipping above ₹249.",
     images: [
       {
         url: "/og-main.jpg",
         width: 1200,
         height: 630,
-        alt: "REVEIL Luxury Perfumes",
+        alt: "Reveil Fragrance — Luxury Perfumes India",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "REVEIL | Luxury Perfumes & Signature Fragrances",
-    description: "Shop premium handcrafted perfumes and attars from the REVEIL Studio Archive.",
-    creator: "@reveil_perfumes",
+    title: "Reveil Fragrance — Luxury Perfumes Online India",
+    description:
+      "Shop original long-lasting perfumes, authentic attars, and premium oudh from Reveil. Cash on delivery across India.",
+    creator: "@reveilfragrance",
     images: ["/og-main.jpg"],
   },
   robots: {
@@ -79,6 +83,16 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
+  verification: {
+    // Add your Google Search Console verification code here when you set up GSC.
+    // google: 'paste-your-verification-code-here',
+  },
+  other: {
+    'geo.region': 'IN-OR',
+    'geo.placename': 'Brahmapur, Odisha',
+    'geo.position': '19.3149;84.7941',
+    'ICBM': '19.3149, 84.7941',
+  },
 };
 
 export default function RootLayout({
@@ -86,12 +100,29 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Sitewide JSON-LD — Organization + WebSite + LocalBusiness. Google reads
+  // these to populate the knowledge panel, sitelinks search box, and local pack.
+  const sitewideSchema = [
+    organizationSchema(),
+    websiteSchema(),
+    localBusinessSchema(),
+  ]
+
   return (
     <html
-      lang="en"
+      lang="en-IN"
       className={`${bungee.variable} ${bungeeHairline.variable} ${markoOne.variable} ${baskerville.variable}`}
       suppressHydrationWarning
     >
+      <head>
+        <link rel="canonical" href={SITE_URL} />
+        <meta name="theme-color" content="#d4af37" />
+        <meta name="format-detection" content="telephone=no" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(sitewideSchema) }}
+        />
+      </head>
       <body className="antialiased selection:bg-black selection:text-white" suppressHydrationWarning>
         <SmoothScroll>{children}</SmoothScroll>
       </body>

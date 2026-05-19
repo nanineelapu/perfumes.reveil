@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p lib/seo 2>/dev/null; ls lib/seo 2>/dev/null)"
+    ],
+    "additionalDirectories": [
+      "N:\\REVEIL-PERFUMES\\reveil\\perfumes.reveil\\lib"
+    ]
+  }
+}

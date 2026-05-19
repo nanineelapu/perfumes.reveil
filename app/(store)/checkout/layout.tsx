@@ -1,9 +1,10 @@
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Checkout — REVEIL',
-  description: 'Securely complete your REVEIL order. Pay with Razorpay or Cash on Delivery.',
-  robots: { index: false, follow: false },
+  title: 'Secure Checkout — Reveil Fragrance',
+  description:
+    'Complete your order securely at Reveil Fragrance. Pay online via Razorpay (UPI, cards, net-banking) or choose cash on delivery.',
+  robots: { index: false, follow: false }, // checkout flow — keep private
 }
 
 export default function CheckoutLayout({ children }: { children: React.ReactNode }) {

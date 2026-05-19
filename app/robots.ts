@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next'
+import { SITE_URL } from '@/lib/seo/keywords'
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -8,14 +9,26 @@ export default function robots(): MetadataRoute.Robots {
         allow: '/',
         disallow: [
           '/admin/',
+          '/static-v2-resource-policy-handler/',
           '/api/',
           '/account/',
           '/cart',
           '/checkout',
-          '/auth'
+          '/auth',
+          '/orders',
+          '/wishlist',
+          '/address-book',
+          '/profile',
+          '/track/',
         ],
       },
+      // Block aggressive scrapers and AI crawlers that don't add SEO value
+      {
+        userAgent: ['GPTBot', 'CCBot', 'anthropic-ai', 'Claude-Web'],
+        disallow: '/',
+      },
     ],
-    sitemap: 'https://perfumesreveil.vercel.app/sitemap.xml',
+    sitemap: `${SITE_URL}/sitemap.xml`,
+    host: SITE_URL,
   }
 }

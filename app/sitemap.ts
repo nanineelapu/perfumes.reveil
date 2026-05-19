@@ -1,11 +1,12 @@
 import { MetadataRoute } from 'next'
 import { createClient } from '@/lib/supabase/server'
+import { SITE_URL } from '@/lib/seo/keywords'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const supabase = await createClient()
-    const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://perfumesreveil.vercel.app').replace(/\/$/, '')
+    const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || SITE_URL).replace(/\/$/, '')
 
-    // 1. Fetch all product slugs
+    // 1. All product slugs — highest SEO value, weekly refresh
     const { data: products } = await supabase
         .from('products')
         .select('slug, updated_at')
@@ -15,19 +16,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         url: `${baseUrl}/products/${product.slug}`,
         lastModified: product.updated_at ? new Date(product.updated_at) : new Date(),
         changeFrequency: 'weekly',
-        priority: 0.8,
+        priority: 0.9,
     }))
 
-    // 2. Category pages
-    const categories = ['PERFUMES', 'DEODRANTS', 'ATTARS', 'AIRFRESHNER']
-    const categoryEntries: MetadataRoute.Sitemap = categories.map(cat => ({
+    // 2. Category landing pages — high-traffic listing pages
+    const categories = [
+        'PERFUMES',
+        'DEODRANTS',
+        'ATTARS',
+        'AIRFRESHNER',
+        'OUDH',
+        'MUSK',
+        'FLORAL',
+    ]
+    const categoryEntries: MetadataRoute.Sitemap = categories.map((cat) => ({
         url: `${baseUrl}/products?category=${cat}`,
         lastModified: new Date(),
         changeFrequency: 'daily',
-        priority: 0.7,
+        priority: 0.85,
     }))
 
-    // 3. Main Static pages
+    // 3. Main public pages
     const staticEntries: MetadataRoute.Sitemap = [
         {
             url: baseUrl,
@@ -39,14 +48,44 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             url: `${baseUrl}/products`,
             lastModified: new Date(),
             changeFrequency: 'daily',
-            priority: 0.9,
+            priority: 0.95,
         },
         {
-            url: `${baseUrl}/wishlist`,
+            url: `${baseUrl}/about`,
             lastModified: new Date(),
-            changeFrequency: 'weekly',
+            changeFrequency: 'monthly',
+            priority: 0.6,
+        },
+        {
+            url: `${baseUrl}/contact`,
+            lastModified: new Date(),
+            changeFrequency: 'monthly',
             priority: 0.5,
-        }
+        },
+        {
+            url: `${baseUrl}/shipping`,
+            lastModified: new Date(),
+            changeFrequency: 'monthly',
+            priority: 0.4,
+        },
+        {
+            url: `${baseUrl}/refund`,
+            lastModified: new Date(),
+            changeFrequency: 'monthly',
+            priority: 0.4,
+        },
+        {
+            url: `${baseUrl}/terms`,
+            lastModified: new Date(),
+            changeFrequency: 'yearly',
+            priority: 0.3,
+        },
+        {
+            url: `${baseUrl}/track-order`,
+            lastModified: new Date(),
+            changeFrequency: 'monthly',
+            priority: 0.5,
+        },
     ]
 
     return [...staticEntries, ...categoryEntries, ...productEntries]

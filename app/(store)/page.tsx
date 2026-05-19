@@ -8,10 +8,19 @@ import { InfiniteIconCarousel } from '@/components/store/InfiniteIconCarousel'
 import { NewsletterSection } from '@/components/store/NewsletterSection'
 import { ReviewsSection } from '@/components/store/ReviewsSection'
 import { FreeDeliveryRibbon } from '@/components/store/FreeDeliveryRibbon'
+import { HIGH_INTENT_KEYWORDS, LOW_COMPETITION_KEYWORDS, SITE_URL, BRAND_KEYWORDS } from '@/lib/seo/keywords'
+import { faqSchema } from '@/lib/seo/schema'
 
 export const metadata: Metadata = {
-  title: "REVEIL | The Official Online Store for Luxury Perfumes & Attars",
-  description: "Shop the official REVEIL online store. Discover our signature long-lasting perfumes, traditional attars, and luxury diffusers. Experience the elite art of scent with Reveil Perfumes.",
+  title: "Reveil Fragrance — Buy Luxury Perfumes Online in India | Long Lasting Eau de Parfum",
+  description:
+    "Buy luxury perfumes online in India at Reveil Fragrance. Long-lasting eau de parfum for men & women, authentic Arabian attars, premium oudh, and luxury home fragrances. Original imported & Indian fragrances. Cash on delivery. Free shipping above ₹249.",
+  keywords: [
+    ...BRAND_KEYWORDS,
+    ...HIGH_INTENT_KEYWORDS,
+    ...LOW_COMPETITION_KEYWORDS.slice(0, 10),
+  ] as unknown as string[],
+  alternates: { canonical: SITE_URL },
 }
 
 
@@ -121,47 +130,38 @@ export default async function HomePage() {
     ? featured.slice(0, 4) 
     : shuffled.slice(0, 4);
 
-  const homepageJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'WebSite',
-    name: 'REVEIL',
-    url: 'https://perfumesreveil.vercel.app',
-    description: 'Premium perfumes and luxury fragrances from the REVEIL Studio Archive.',
-    potentialAction: {
-      '@type': 'SearchAction',
-      target: {
-        '@type': 'EntryPoint',
-        urlTemplate: 'https://perfumesreveil.vercel.app/products?search={search_term_string}',
-      },
-      'query-input': 'required name=search_term_string',
+  // FAQ schema — drives rich-snippet accordions in Google search results and
+  // captures "what / why / how" long-tail queries for perfume shoppers.
+  const homepageFaqs = faqSchema([
+    {
+      q: 'Where can I buy luxury perfumes online in India?',
+      a: 'Reveil Fragrance offers a curated collection of luxury perfumes, Arabian attars, premium oudh, and home fragrances online across India with free shipping above ₹249 and cash on delivery available pan-India.',
     },
-  }
-
-  const organizationJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'Organization',
-    name: 'REVEIL (Trimurty Enterprises)',
-    url: 'https://perfumesreveil.vercel.app',
-    logo: 'https://perfumesreveil.vercel.app/logo.png',
-    contactPoint: {
-      '@type': 'ContactPoint',
-      telephone: '+91-7008879914',
-      contactType: 'customer service',
-      availableLanguage: 'English',
+    {
+      q: 'Are Reveil perfumes long lasting?',
+      a: 'Yes. Reveil eau de parfum formulations are high-concentration and engineered for 8–12+ hours of longevity with strong projection. Our oudh and attar collections last even longer on skin.',
     },
-    address: {
-      '@type': 'PostalAddress',
-      streetAddress: 'Marthapeta street, Near sano Bazar, near sidherswar kalyan mandap',
-      addressLocality: 'Ganjam',
-      addressRegion: 'Odisha',
-      postalCode: '760009',
-      addressCountry: 'IN'
+    {
+      q: 'Which is the best perfume for men under ₹999 in India?',
+      a: 'Reveil offers several long-lasting masculine fragrances under ₹999, perfect for daily office wear and date nights. Explore our affordable luxury collection in the Shop section.',
     },
-    sameAs: [
-      'https://instagram.com/reveil_perfumes',
-      'https://facebook.com/reveil.perfumes',
-    ],
-  }
+    {
+      q: 'Do you ship pan-India? Is cash on delivery available?',
+      a: 'Yes. Reveil Fragrance delivers across every pincode in India via Shiprocket. Cash on delivery is available on orders below ₹5,000.',
+    },
+    {
+      q: 'Are Reveil perfumes original and authentic?',
+      a: 'Every Reveil product is 100% original, factory-sealed, and dispatched directly from our Brahmapur, Odisha facility. We do not sell testers or replicas.',
+    },
+    {
+      q: 'What is the difference between attar and perfume?',
+      a: 'Attars are concentrated, alcohol-free fragrance oils traditionally distilled from natural materials. Perfumes (eau de parfum) are alcohol-based and project further on skin. Reveil offers both for different occasions.',
+    },
+    {
+      q: 'Which perfume is best for summer in India?',
+      a: 'For Indian summers, choose fresh citrus, aquatic, or light floral notes from our floral and musk collections. They feel cooling and project without becoming overpowering in heat.',
+    },
+  ])
 
   // Hero carousel is now driven entirely by admin-managed slides from the DB.
   const allSlides = slides ?? []
@@ -170,19 +170,73 @@ export default async function HomePage() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(homepageJsonLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(homepageFaqs) }}
       />
       <main style={{ background: '#f8f7f2', color: '#1a1a1a', overflowX: 'hidden' }}>
-        {/* HIDDEN SEO HEADINGS - GOD LEVEL SEO */}
+        {/* ── HIDDEN SEO CONTENT (screen-reader only, indexed by Google) ──
+            God-level SEO: rich keyword-targeted copy spanning every major
+            commercial intent for the perfume vertical in India. Not visible
+            on screen but fully crawlable. */}
         <div className="sr-only">
-          <h1>REVEIL - India's Premier Online Store for Luxury Perfumes and Designer Fragrances</h1>
-          <h2>Buy Best Long Lasting Perfumes Online - Premium Oudh, Musk and Floral Scents</h2>
-          <p>Welcome to REVEIL, your ultimate destination for high-end perfumery. Discover our signature collection of long-lasting perfumes, authentic attars, and premium air fresheners handcrafted for sophistication.</p>
-          <h3>Designer Perfume Shop India - Signature Laboratory Archive</h3>
+          <h1>Buy Luxury Perfumes Online India — Reveil Fragrance | Long Lasting Eau de Parfum for Men &amp; Women</h1>
+          <h2>Best Perfumes for Men &amp; Women, Arabian Attars, Premium Oudh, and Luxury Home Fragrances in India</h2>
+          <p>
+            Welcome to Reveil Fragrance — India&apos;s premier destination for original luxury
+            perfumes, long lasting eau de parfum for men and women, authentic Arabian attars,
+            premium oudh, and luxury reed diffusers. Every fragrance is crafted for maximum
+            longevity, strong projection, and signature character. Cash on delivery available.
+            Free shipping above ₹249. Pan-India delivery via Shiprocket.
+          </p>
+
+          <h2>Shop by Intent</h2>
+          <ul>
+            <li>Best perfumes for men in India — masculine fragrances, office perfumes, date night perfumes</li>
+            <li>Best perfumes for women in India — floral perfumes, sweet fragrances, vanilla perfumes</li>
+            <li>Long lasting perfumes — 8 to 12+ hour projection eau de parfum</li>
+            <li>Luxury perfumes India — affordable luxury perfumes under ₹2000</li>
+            <li>Arabian perfumes India — imported attars, oudh, agarwood, royal scents</li>
+            <li>Unisex fragrances India — modern shareable signatures</li>
+            <li>Eau de parfum for men &amp; women — strong projection perfumes</li>
+            <li>Everyday perfumes for men — best office perfume for men India</li>
+            <li>Date night perfumes — sensual musk, vanilla, and oudh scents</li>
+            <li>Perfume gifts — best perfume gift for boyfriend, girlfriend, and weddings</li>
+          </ul>
+
+          <h2>Low Competition Gold Categories</h2>
+          <ul>
+            <li>Best long lasting perfume under ₹999 in India</li>
+            <li>Perfume for men under ₹1500 — affordable masculine fragrance</li>
+            <li>Best summer fragrance India — fresh citrus and aquatic perfumes</li>
+            <li>Best winter perfume for men — warm oudh, amber, and spice</li>
+            <li>Arabic perfumes for men — authentic Arabian attar India</li>
+            <li>Floral perfumes for women — rose, jasmine, freesia, peony notes</li>
+            <li>Sweet fragrances for women — vanilla perfumes India, gourmand scents</li>
+            <li>Luxury perfume under ₹2000 — affordable signature eau de parfum</li>
+            <li>Everyday perfume for women — daily wear, college, office</li>
+            <li>Long lasting perfume for girls — projection and sillage focused</li>
+            <li>Oudh perfume India price — royal oudh, agarwood fragrance</li>
+            <li>Reed diffuser for home India — luxury home fragrance, room freshener</li>
+          </ul>
+
+          <h3>Why Choose Reveil Fragrance?</h3>
+          <p>
+            Reveil Fragrance is a luxury perfumery brand based in Brahmapur, Odisha — proudly
+            shipping across India. Our laboratory crafts long-lasting signature scents
+            comparable to designer brands at fraction of the price. We source the finest
+            aromatic compounds, oudh, attars, and floral absolutes for original perfumes you
+            can trust. Every bottle is factory-sealed, authentic, and dispatched directly to
+            your door with cash on delivery and free shipping options.
+          </p>
+
+          <h3>Reveil Perfume Categories</h3>
+          <ul>
+            <li>Perfumes — luxury eau de parfum for men and women</li>
+            <li>Attars — authentic alcohol-free attar oils, oudh attar, rose attar</li>
+            <li>Deodorants — premium long-lasting body sprays</li>
+            <li>Air Fresheners — luxury reed diffusers for home and office</li>
+            <li>Oudh Collection — agarwood, royal oudh, Arabian oudh perfumes</li>
+            <li>Musk &amp; Floral — clean musk, jasmine, rose, sandalwood signatures</li>
+          </ul>
         </div>
 
         {/* Hero section */}

@@ -1,8 +1,15 @@
 import { Metadata } from 'next'
+import { SITE_URL } from '@/lib/seo/keywords'
 
 export const metadata: Metadata = {
-  title: "Contact Concierge — REVEIL Laboratory Support",
-  description: "Get in touch with the REVEIL concierge team. For inquiries regarding signature perfumes, custom orders, or support, our experts are here to guide your olfactory journey.",
+  title: 'Contact Reveil Fragrance — Customer Support India',
+  description:
+    'Contact Reveil Fragrance for product enquiries, order tracking, or customer support. We respond to perfume queries across India within 24 hours.',
+  keywords: [
+    'contact Reveil Fragrance', 'perfume customer support India', 'Reveil contact number',
+    'perfume order help', 'Reveil customer care',
+  ],
+  alternates: { canonical: `${SITE_URL}/contact` },
 }
 
 export default function ContactLayout({ children }: { children: React.ReactNode }) {

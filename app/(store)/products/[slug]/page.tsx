@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { ProductContent } from './ProductContent'
 import { notFound } from 'next/navigation'
+import { SITE_URL, BRAND_NAME, keywordsForProduct } from '@/lib/seo/keywords'
+import { breadcrumbSchema } from '@/lib/seo/schema'
 
 interface Props {
     params: Promise<{ slug: string }>
@@ -19,27 +21,26 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         .eq('slug', slug)
         .single()
 
-    if (!product) return { title: 'Product Not Found | REVEIL' }
+    if (!product) return { title: 'Product Not Found | Reveil Fragrance' }
 
-    const title = `${product.name} — ${product.category || 'Luxury Fragrance'} | REVEIL`
-    const description = product.description?.slice(0, 160) || `Experience the olfactory masterpiece ${product.name} from the REVEIL Laboratory Archive. Buy online at ₹${product.price}.`
-    const image = product.images?.[0] || '/og-image.jpg'
+    const title = `${product.name} — Buy Online India | ${product.category || 'Luxury Perfume'} | Reveil`
+    const description = product.description
+        ? `${product.description.slice(0, 140)} — Buy ${product.name} online in India at ₹${product.price}. Long lasting, original, free shipping above ₹249.`
+        : `Buy ${product.name} online in India at Reveil Fragrance. Long lasting ${product.category?.toLowerCase() || 'perfume'} — ₹${product.price}. Original product, cash on delivery, pan-India delivery.`
+    const image = product.images?.[0] || '/og-main.jpg'
+    const url = `${SITE_URL}/products/${product.slug}`
 
     return {
         title,
         description,
-        keywords: [
-            product.name,
-            `${product.name} price`,
-            `buy ${product.name} online`,
-            'luxury perfume india',
-            product.category || 'perfume'
-        ],
+        keywords: keywordsForProduct(product.name, product.category),
         openGraph: {
             title,
             description,
             type: 'website',
-            url: `https://perfumesreveil.vercel.app/products/${product.slug}`,
+            url,
+            siteName: 'Reveil Fragrance',
+            locale: 'en_IN',
             images: [{ url: image, width: 800, height: 800, alt: product.name }],
         },
         twitter: {
@@ -48,8 +49,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             description,
             images: [image],
         },
-        alternates: {
-            canonical: `https://perfumesreveil.vercel.app/products/${product.slug}`,
+        alternates: { canonical: url },
+        other: {
+            'product:price:amount': String(product.price),
+            'product:price:currency': 'INR',
+            'product:brand': BRAND_NAME,
+            'product:availability': 'instock',
         },
     }
 }
@@ -119,17 +124,20 @@ export default async function ProductExperiencePage({ params }: Props) {
         related = [...related, ...(filler ?? [])]
     }
 
-    // 3. Prepare JSON-LD
-    const jsonLd = {
+    // 3. Build rich Product + BreadcrumbList JSON-LD
+    const productUrl = `${SITE_URL}/products/${product.slug}`
+    const productSchema = {
         '@context': 'https://schema.org',
         '@type': 'Product',
         name: product.name,
         description: product.description,
         image: product.images,
         sku: product.slug,
+        mpn: product.id,
+        category: product.category,
         brand: {
             '@type': 'Brand',
-            name: 'REVEIL',
+            name: BRAND_NAME,
         },
         offers: {
             '@type': 'Offer',
@@ -138,10 +146,28 @@ export default async function ProductExperiencePage({ params }: Props) {
             availability: product.stock > 0
                 ? 'https://schema.org/InStock'
                 : 'https://schema.org/OutOfStock',
-            url: `https://perfumesreveil.vercel.app/products/${product.slug}`,
+            url: productUrl,
+            priceValidUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
             seller: {
                 '@type': 'Organization',
-                name: 'REVEIL',
+                name: BRAND_NAME,
+            },
+            shippingDetails: {
+                '@type': 'OfferShippingDetails',
+                shippingRate: {
+                    '@type': 'MonetaryAmount',
+                    value: product.price >= 249 ? 0 : 50,
+                    currency: 'INR',
+                },
+                shippingDestination: {
+                    '@type': 'DefinedRegion',
+                    addressCountry: 'IN',
+                },
+                deliveryTime: {
+                    '@type': 'ShippingDeliveryTime',
+                    handlingTime: { '@type': 'QuantitativeValue', minValue: 1, maxValue: 2, unitCode: 'DAY' },
+                    transitTime: { '@type': 'QuantitativeValue', minValue: 3, maxValue: 7, unitCode: 'DAY' },
+                },
             },
         },
         ...(reviews && reviews.length > 0 && {
@@ -168,12 +194,29 @@ export default async function ProductExperiencePage({ params }: Props) {
         }),
     }
 
+    const breadcrumb = breadcrumbSchema([
+        { name: 'Home', url: SITE_URL },
+        { name: 'Shop', url: `${SITE_URL}/products` },
+        ...(product.category
+            ? [{ name: product.category, url: `${SITE_URL}/products?category=${product.category}` }]
+            : []),
+        { name: product.name, url: productUrl },
+    ])
+
     return (
         <>
             <script
                 type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+                dangerouslySetInnerHTML={{ __html: JSON.stringify([productSchema, breadcrumb]) }}
             />
+            {/* Hidden SEO content — keywords-rich product copy crawlable by Google */}
+            <div className="sr-only">
+                <h1>{`Buy ${product.name} Online India — ${product.category || 'Luxury Perfume'} | ₹${product.price} | Reveil Fragrance`}</h1>
+                <h2>{`${product.name} Price India — Long Lasting, Original, Cash on Delivery`}</h2>
+                <p>
+                    {`${product.name} is a long-lasting ${product.category?.toLowerCase() || 'fragrance'} from the Reveil collection, available online in India at ₹${product.price}. Free shipping above ₹249. Cash on delivery available pan-India. 100% original product.`}
+                </p>
+            </div>
             <ProductContent product={product} initialReviews={reviews || []} relatedProducts={related} />
         </>
     )
