@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { triggerOrderOutForDeliveryEmail, triggerOrderDeliveredEmail } from '@/lib/utils/email'
 
 const STATUS_MAP: Record<string, string> = {
   'Picked Up':          'shipped',
@@ -45,6 +46,18 @@ export async function POST(request: Request) {
   }
 
   const supabase = createAdminClient()
+
+  // Read the current status BEFORE updating so we can detect a real
+  // transition. Shiprocket sometimes resends the same status multiple times;
+  // sending duplicate emails would feel like spam to the customer.
+  const { data: existing } = await supabase
+    .from('orders')
+    .select('id, status')
+    .eq('awb_code', awb)
+    .single()
+
+  const isNewStatus = existing && existing.status !== mappedStatus
+
   const { error } = await supabase
     .from('orders')
     .update({ status: mappedStatus })
@@ -54,5 +67,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 })
   }
 
-  return NextResponse.json({ ok: true })
+  // Fire customer notifications ONLY on a real status transition. Each
+  // milestone sends a different premium email template (see lib/utils/email).
+  if (isNewStatus) {
+    if (mappedStatus === 'out_for_delivery') {
+      triggerOrderOutForDeliveryEmail(awb).catch((err) => {
+        console.error('[delivery webhook] OFD email failed (non-fatal):', err?.message)
+      })
+    } else if (mappedStatus === 'delivered') {
+      triggerOrderDeliveredEmail(awb).catch((err) => {
+        console.error('[delivery webhook] Delivered email failed (non-fatal):', err?.message)
+      })
+    }
+  }
+
+  return NextResponse.json({ ok: true, transitioned: !!isNewStatus, newStatus: mappedStatus })
 }

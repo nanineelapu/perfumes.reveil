@@ -423,6 +423,116 @@ export async function triggerOrderFulfilledEmail(orderId: string): Promise<Email
     }
 }
 
+// ────────────────────────────────────────────────────────────────────────────
+// OUT FOR DELIVERY EMAIL
+// Triggered automatically from the Shiprocket webhook the moment courier
+// scans "Out for Delivery". Quick, exciting, one-tap track CTA.
+// ────────────────────────────────────────────────────────────────────────────
+export async function sendOrderOutForDeliveryEmail(order: any, userEmail: string) {
+    const { id, profiles, awb_code, courier_name } = order
+    const customerName = profiles?.full_name || 'there'
+    const trackUrl = awb_code
+        ? `https://www.reveilfragrance.in/track/${awb_code}`
+        : `https://www.reveilfragrance.in/orders`
+
+    if (!resend) {
+        console.log(`--- MOCK OFD EMAIL --- To: ${userEmail} | Order: ${id.slice(0, 8)}`)
+        return { success: true, mocked: true }
+    }
+
+    try {
+        const { data, error } = await resend.emails.send({
+            from: FROM_ADDRESS,
+            to: userEmail,
+            subject: `📦 Out for Delivery — your Reveil order arrives today!`,
+            html: `
+                <div style="background-color: #050505; color: #fff; font-family: 'Baskerville', 'Georgia', serif; padding: 40px; max-width: 600px; margin: 0 auto; border: 1px solid #1a1a1a;">
+                    <div style="text-align: center; margin-bottom: 36px;">
+                        <h1 style="color: #d4af37; font-weight: 300; letter-spacing: 0.3em; text-transform: uppercase; margin: 0; font-size: 28px;">REVEIL</h1>
+                        <p style="color: #666; font-size: 10px; letter-spacing: 0.5em; margin-top: 12px; text-transform: uppercase;">Fragrance House</p>
+                    </div>
+                    <div style="text-align: center; margin-bottom: 36px;">
+                        <div style="font-size: 60px; margin-bottom: 8px;">🚚</div>
+                        <h2 style="font-weight: 300; font-size: 26px; color: #fff; text-transform: uppercase; letter-spacing: 0.15em; margin: 0;">Out for Delivery</h2>
+                        <div style="width: 40px; height: 1px; background: #d4af37; margin: 18px auto;"></div>
+                        <p style="color: #aaa; font-size: 14px; line-height: 1.8; margin: 18px 24px 0;">
+                            Hi ${customerName},<br><br>
+                            Exciting news — your Reveil order is out for delivery and will arrive at your doorstep <strong style="color: #d4af37;">today</strong>. Please keep your phone handy.
+                        </p>
+                    </div>
+                    <div style="background: linear-gradient(135deg,#d4af37 0%,#b8941f 100%); padding: 24px; border-radius: 4px; margin-bottom: 28px; text-align: center;">
+                        ${courier_name ? `<p style="margin: 0 0 10px; color: rgba(0,0,0,0.7); font-size: 11px; text-transform: uppercase; letter-spacing: 0.25em; font-weight: 700;">${courier_name}</p>` : ''}
+                        <p style="margin: 0 0 18px; color: #050505; font-size: 18px; font-weight: 700; font-family: monospace; letter-spacing: 0.05em;">${awb_code || ''}</p>
+                        <a href="${trackUrl}" style="display: inline-block; background: #050505; color: #d4af37; text-decoration: none; padding: 14px 36px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.25em; border-radius: 2px;">Track Live →</a>
+                    </div>
+                    <div style="background: rgba(212,175,55,0.05); border: 1px dashed rgba(212,175,55,0.3); padding: 18px; text-align: center; margin-bottom: 28px;">
+                        <p style="color: #d4af37; font-size: 11px; text-transform: uppercase; letter-spacing: 0.25em; margin: 0 0 6px; font-weight: 700;">Order Reference</p>
+                        <p style="color: #fff; font-size: 13px; margin: 0; font-family: monospace;">#${id.toUpperCase().slice(0, 12)}</p>
+                    </div>
+                    <div style="text-align: center; border-top: 1px solid #1a1a1a; padding-top: 28px; color: #555; font-size: 11px;">
+                        <p style="margin: 0 0 14px;">Couldn't be home? Reply to this email and we'll coordinate.</p>
+                        <p style="letter-spacing: 0.3em; text-transform: uppercase; color: #666; margin: 0;">www.reveilfragrance.in</p>
+                    </div>
+                </div>
+            `
+        })
+        if (error) return { success: false, error }
+        return { success: true, data }
+    } catch (err) {
+        return { success: false, error: err }
+    }
+}
+
+/**
+ * Look up the order by AWB and send the "out for delivery" email. Called
+ * from the Shiprocket webhook when current_status becomes "Out For Delivery".
+ */
+export async function triggerOrderOutForDeliveryEmail(awbCode: string) {
+    try {
+        const { createAdminClient } = await import('@/lib/supabase/admin')
+        const admin = createAdminClient()
+        const { data: order } = await admin
+            .from('orders')
+            .select(`id, user_id, awb_code, courier_name, profiles ( full_name, email )`)
+            .eq('awb_code', awbCode)
+            .single()
+        if (!order) return
+        const profile = Array.isArray(order.profiles) ? order.profiles[0] : order.profiles
+        const email = await resolveUserEmail(order.user_id, profile?.email)
+        if (!email) return
+        await sendOrderOutForDeliveryEmail({ ...order, profiles: profile }, email)
+    } catch (err) {
+        console.error('[triggerOrderOutForDeliveryEmail] Error:', err)
+    }
+}
+
+/**
+ * Look up order by AWB and send the existing "delivered" email + invoice.
+ * Called from the Shiprocket webhook when current_status becomes "Delivered".
+ */
+export async function triggerOrderDeliveredEmail(awbCode: string) {
+    try {
+        const { createAdminClient } = await import('@/lib/supabase/admin')
+        const admin = createAdminClient()
+        const { data: order } = await admin
+            .from('orders')
+            .select(`
+                id, total, user_id,
+                profiles ( full_name, email ),
+                order_items ( quantity, price, products ( name ) )
+            `)
+            .eq('awb_code', awbCode)
+            .single()
+        if (!order) return
+        const profile = Array.isArray(order.profiles) ? order.profiles[0] : order.profiles
+        const email = await resolveUserEmail(order.user_id, profile?.email)
+        if (!email) return
+        await sendOrderDeliveredEmail({ ...order, profiles: profile }, email)
+    } catch (err) {
+        console.error('[triggerOrderDeliveredEmail] Error:', err)
+    }
+}
+
 export async function triggerOrderConfirmationEmail(orderId: string) {
     try {
         const { createAdminClient } = await import('@/lib/supabase/admin');
