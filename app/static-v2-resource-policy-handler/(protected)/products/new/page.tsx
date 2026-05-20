@@ -23,6 +23,7 @@ export default function NewProductPage() {
         top_notes: '',
         heart_notes: '',
         base_notes: '',
+        sizes: '',
     })
 
     useEffect(() => {
@@ -116,6 +117,11 @@ export default function NewProductPage() {
 
         setLoading(true)
 
+        const sizesArr = form.sizes
+            .split(',')
+            .map(s => s.trim().toUpperCase().replace(/\s+/g, ''))
+            .filter(Boolean)
+
         const res = await fetch('/api/products', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -129,6 +135,7 @@ export default function NewProductPage() {
                     heart: form.heart_notes.trim() || null,
                     base: form.base_notes.trim() || null,
                 },
+                technical_specs: sizesArr.length > 0 ? { sizes: sizesArr } : null,
             }),
         })
 
@@ -294,6 +301,18 @@ export default function NewProductPage() {
                                 placeholder="e.g. Oud, Amber"
                             />
                         </div>
+                    </div>
+
+                    <div style={{ marginTop: '20px' }}>
+                        <label style={label}>Available sizes</label>
+                        <input
+                            style={input} name="sizes" value={form.sizes}
+                            onChange={handleChange}
+                            placeholder="e.g. 10ML, 50ML, 100ML"
+                        />
+                        <p style={{ fontSize: '12px', color: '#888', marginTop: '6px', marginBottom: 0 }}>
+                            Comma-separated. Shown as selectable chips on the product page. Leave blank to use the default 50ML / 100ML.
+                        </p>
                     </div>
                 </div>
 

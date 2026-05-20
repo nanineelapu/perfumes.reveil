@@ -8,7 +8,7 @@ type Params = Promise<{ id: string }>
 const ALLOWED_FIELDS = [
     'name', 'slug', 'price', 'description', 'images', 'category',
     'stock', 'is_featured', 'meta_title', 'meta_description', 'scent_profile',
-    'rating',
+    'rating', 'technical_specs',
 ] as const
 
 function pickAllowedFields(body: Record<string, unknown>) {

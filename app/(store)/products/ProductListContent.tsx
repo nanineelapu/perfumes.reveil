@@ -106,7 +106,11 @@ export function ProductListContent() {
     }, [selectedCategory, searchQuery, products, selectedConcentrations, selectedStatus, sortBy, wishlistedIds])
 
     return (
-        <main style={{ background: '#f8f7f2', minHeight: '100vh', color: '#1a1a1a', display: 'flex', flexDirection: 'column', maxWidth: '100vw' }}>
+        <main style={{
+            background: '#f8f7f2', minHeight: '100vh', color: '#1a1a1a',
+            display: 'flex', flexDirection: 'column', maxWidth: '100vw',
+            overflowX: 'clip'
+        }}>
             {/* SECTION 1: TOP HERO (FIXED) */}
             {!isMobile && (
             <section style={{
@@ -214,21 +218,17 @@ export function ProductListContent() {
                 </div>
             )}
 
-            {/* SECTION 2 & 3 WRAPPER — sticks to viewport on desktop so only the products column scrolls */}
-            <div style={{
-                display: 'flex', width: '100%', maxWidth: '100%', minWidth: 0,
-                position: isMobile ? 'relative' : 'sticky',
-                top: isMobile ? 'auto' : '0',
-                height: isMobile ? 'auto' : '100vh',
-                overflow: isMobile ? 'visible' : 'hidden',
-                alignSelf: 'flex-start'
-            }}>
-                {/* SECTION 2: SIDEBAR (FIXED/SCROLLABLE INDEPENDENTLY) */}
+            {/* SECTION 2 & 3 WRAPPER */}
+            <div style={{ display: 'flex', flex: 1, position: 'relative', width: '100%', maxWidth: '100%', minWidth: 0, alignItems: 'flex-start' }}>
+                {/* SECTION 2: SIDEBAR — sticks to viewport while page scrolls */}
                 <aside style={{
                     width: isMobile ? '0' : '280px', padding: isMobile ? '0' : '40px 30px',
                     display: isMobile ? 'none' : 'flex', background: 'transparent', borderRight: '1px solid rgba(0,0,0,0.05)',
-                    height: isMobile ? 'auto' : '100%', flexDirection: 'column', gap: '40px', zIndex: 20,
-                    flexShrink: 0, overflowY: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none'
+                    flexDirection: 'column', gap: '40px', zIndex: 20,
+                    flexShrink: 0,
+                    position: 'sticky', top: '100px',
+                    maxHeight: 'calc(100vh - 100px)', overflowY: 'auto',
+                    scrollbarWidth: 'none', msOverflowStyle: 'none'
                 }}>
                     <div>
                         <span style={{ fontSize: '11px', fontWeight: 900, color: '#d4af37', letterSpacing: '0.4em', textTransform: 'uppercase', marginBottom: '16px', display: 'block' }}>Search</span>
@@ -286,19 +286,10 @@ export function ProductListContent() {
                         </button>
                     </div>
 
-                    <div style={{ marginTop: 'auto', padding: '20px', background: 'rgba(0,0,0,0.02)', borderRadius: '4px', border: '1px solid rgba(0,0,0,0.05)' }}>
-                        <p style={{ fontSize: '11px', color: '#555', lineHeight: 1.7, margin: 0, fontWeight: 600, letterSpacing: '0.02em' }}>
-                            All products are 100% genuine and safe to use.
-                        </p>
-                    </div>
                 </aside>
 
-                {/* SECTION 3: PRODUCTS (PRIMARY SCROLL AREA) */}
-                <section style={{
-                    flex: 1, position: 'relative', scrollBehavior: 'smooth', minWidth: 0, width: '100%',
-                    height: isMobile ? 'auto' : '100%',
-                    overflowY: isMobile ? 'visible' : 'auto'
-                }}>
+                {/* SECTION 3: PRODUCTS — scrolls naturally with the page */}
+                <section style={{ flex: 1, position: 'relative', scrollBehavior: 'smooth', minWidth: 0, width: '100%' }}>
                     <div style={{
                         position: 'sticky', top: '0', zIndex: 10,
                         padding: isMobile ? '10px 16px' : '20px 80px', background: 'rgba(248,247,242,0.85)', backdropFilter: 'blur(20px)',

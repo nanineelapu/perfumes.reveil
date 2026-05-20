@@ -110,19 +110,52 @@ export async function createShiprocketOrderForOrderId(orderId: string) {
   }
   const phone = normalizePhone(address.phone || order.profiles?.phone) || '0000000000'
 
+  // Shiprocket is strict about state names — it expects the exact official
+  // Indian state name with proper title case (e.g. "Andhra Pradesh", not
+  // "andhra pradesh" or "AP"). Anything else returns "Invalid Data".
+  const INDIAN_STATES = [
+    'Andhra Pradesh','Arunachal Pradesh','Assam','Bihar','Chhattisgarh','Goa','Gujarat',
+    'Haryana','Himachal Pradesh','Jharkhand','Karnataka','Kerala','Madhya Pradesh',
+    'Maharashtra','Manipur','Meghalaya','Mizoram','Nagaland','Odisha','Punjab','Rajasthan',
+    'Sikkim','Tamil Nadu','Telangana','Tripura','Uttar Pradesh','Uttarakhand','West Bengal',
+    'Andaman and Nicobar Islands','Chandigarh','Dadra and Nagar Haveli and Daman and Diu',
+    'Delhi','Jammu and Kashmir','Ladakh','Lakshadweep','Puducherry'
+  ]
+  const STATE_ALIASES: Record<string, string> = {
+    ap: 'Andhra Pradesh', ar: 'Arunachal Pradesh', as: 'Assam', br: 'Bihar',
+    cg: 'Chhattisgarh', ga: 'Goa', gj: 'Gujarat', hr: 'Haryana', hp: 'Himachal Pradesh',
+    jh: 'Jharkhand', ka: 'Karnataka', kl: 'Kerala', mp: 'Madhya Pradesh', mh: 'Maharashtra',
+    mn: 'Manipur', ml: 'Meghalaya', mz: 'Mizoram', nl: 'Nagaland', od: 'Odisha', or: 'Odisha',
+    pb: 'Punjab', rj: 'Rajasthan', sk: 'Sikkim', tn: 'Tamil Nadu', tg: 'Telangana', ts: 'Telangana',
+    tr: 'Tripura', up: 'Uttar Pradesh', uk: 'Uttarakhand', ut: 'Uttarakhand', wb: 'West Bengal',
+    dl: 'Delhi', jk: 'Jammu and Kashmir', la: 'Ladakh', ch: 'Chandigarh', py: 'Puducherry',
+    pondicherry: 'Puducherry', orissa: 'Odisha', 'jammu & kashmir': 'Jammu and Kashmir',
+  }
+  const normalizeState = (raw: unknown): string => {
+    const cleaned = String(raw ?? '').trim().replace(/\s+/g, ' ')
+    if (!cleaned) return ''
+    const key = cleaned.toLowerCase()
+    if (STATE_ALIASES[key]) return STATE_ALIASES[key]
+    const match = INDIAN_STATES.find(s => s.toLowerCase() === key)
+    if (match) return match
+    // Last resort: title-case it so "andhra pradesh" → "Andhra Pradesh".
+    return cleaned.split(' ').map(w => w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : w).join(' ')
+  }
+  const cleanStr = (v: unknown) => String(v ?? '').trim().replace(/\s+/g, ' ')
+
   const payload = {
     order_id: String(order.id).slice(0, 12).toUpperCase(),
     order_date: orderDate,
     pickup_location: process.env.SHIPROCKET_PICKUP_NAME || 'Primary',
 
-    billing_customer_name: String(address.full_name || address.name || order.profiles?.full_name || 'Customer'),
-    billing_address: String(address.address_line1 || address.line1 || address.address || 'Address line missing'),
-    billing_address_2: String(address.address_line2 || address.line2 || ''),
-    billing_city: String(address.city || 'City missing'),
-    billing_pincode: String(address.pincode || address.postal_code || '000000'),
-    billing_state: String(address.state || 'State missing'),
+    billing_customer_name: cleanStr(address.full_name || address.name || order.profiles?.full_name) || 'Customer',
+    billing_address: cleanStr(address.address_line1 || address.line1 || address.address) || 'Address line missing',
+    billing_address_2: cleanStr(address.address_line2 || address.line2),
+    billing_city: cleanStr(address.city) || 'City missing',
+    billing_pincode: cleanStr(address.pincode || address.postal_code) || '000000',
+    billing_state: normalizeState(address.state) || 'State missing',
     billing_country: 'India',
-    billing_email: String(order.profiles?.email || 'email@missing.com'),
+    billing_email: cleanStr(order.profiles?.email) || 'email@missing.com',
     billing_phone: phone,
 
     shipping_is_billing: true,

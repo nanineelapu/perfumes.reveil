@@ -108,6 +108,14 @@ export default function EditProductPage(props: { params: Params }) {
         const heart = ((formData.get('heart_notes') as string) || '').trim()
         const base = ((formData.get('base_notes') as string) || '').trim()
 
+        // Available sizes — comma-separated input from admin, normalised to
+        // an array of trimmed, uppercased labels (e.g. "10 ml , 50ml,100ML"
+        // → ["10ML", "50ML", "100ML"]).
+        const sizesRaw = ((formData.get('sizes') as string) || '').trim()
+        const sizes = sizesRaw
+            ? sizesRaw.split(',').map(s => s.trim().toUpperCase().replace(/\s+/g, '')).filter(Boolean)
+            : []
+
         const body = {
             name,
             slug,
@@ -122,6 +130,12 @@ export default function EditProductPage(props: { params: Params }) {
                 top: top || null,
                 heart: heart || null,
                 base: base || null,
+            },
+            // Preserve any existing technical_specs keys (volume, longevity,
+            // concentration, …) and overwrite only `sizes`.
+            technical_specs: {
+                ...(product.technical_specs || {}),
+                sizes,
             },
         }
 
@@ -357,6 +371,19 @@ export default function EditProductPage(props: { params: Params }) {
                                     placeholder="e.g. Oud, Amber"
                                 />
                             </div>
+                        </div>
+
+                        <div className="space-y-2 pt-2">
+                            <label className="text-[10px] font-bold tracking-widest uppercase text-gray-400">
+                                Available Sizes <span className="text-gray-300 normal-case font-normal tracking-normal">(comma separated, e.g. 10ML, 50ML, 100ML)</span>
+                            </label>
+                            <input
+                                name="sizes"
+                                defaultValue={Array.isArray(product.technical_specs?.sizes) ? product.technical_specs.sizes.join(', ') : ''}
+                                className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-accent transition-all"
+                                placeholder="10ML, 50ML, 100ML"
+                            />
+                            <p className="text-[10px] text-gray-400">Shown as selectable chips on the product page. Leave blank to use the default 50ML / 100ML.</p>
                         </div>
                     </section>
                 </div>

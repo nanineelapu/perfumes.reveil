@@ -22,7 +22,16 @@ export function ProductContent({ product, initialReviews, relatedProducts = [] }
     const supabase = createClient()
     const [isMobile, setIsMobile] = useState(false)
     const [reviews, setReviews] = useState(initialReviews)
-    const [selectedVolume, setSelectedVolume] = useState(product.technical_specs?.volume || '100ML')
+    // Admin-managed list of available sizes. Falls back to the legacy
+     // [50ML, 100ML] when a product hasn't had sizes configured yet.
+    const availableSizes: string[] = (() => {
+        const raw = product.technical_specs?.sizes
+        if (Array.isArray(raw) && raw.length > 0) return raw.map((s: any) => String(s).trim()).filter(Boolean)
+        return ['50ML', '100ML']
+    })()
+    const [selectedVolume, setSelectedVolume] = useState(
+        product.technical_specs?.volume || availableSizes[0] || '100ML'
+    )
     const [adding, setAdding] = useState(false)
     const [added, setAdded] = useState(false)
     const [actionError, setActionError] = useState<string | null>(null)
@@ -407,7 +416,7 @@ export function ProductContent({ product, initialReviews, relatedProducts = [] }
                             <div>
                                 <div style={{ fontSize: '8px', color: '#d4af37', textTransform: 'uppercase', marginBottom: '12px', letterSpacing: '0.2em', fontWeight: 600 }}>Select Size</div>
                                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                                    {['50ML', '100ML'].map((v) => (
+                                    {availableSizes.map((v) => (
                                         <motion.button
                                             key={v}
                                             whileTap={{ scale: 0.95 }}
