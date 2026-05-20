@@ -3,8 +3,7 @@ import Link from 'next/link'
 import OrderStatusBadge from '@/components/admin/OrderStatusBadge'
 import CancelOrderButton from '@/components/admin/CancelOrderButton'
 import { cn } from '@/lib/utils'
-import { Truck, ExternalLink, Printer, ShoppingBag, Mail } from 'lucide-react'
-import ResendConfirmationButton from '@/components/admin/ResendConfirmationButton'
+import { Truck, ExternalLink, Printer, ShoppingBag } from 'lucide-react'
 import FulfillButton from '../../../../components/admin/FulfillButton'
 import { getDisplayStatus } from '@/lib/utils/order-status'
 import PageHeader from '../_components/PageHeader'
@@ -164,7 +163,9 @@ export default async function AdminOrdersPage() {
                                         </div>
                                     </td>
 
-                                    {/* Actions — stacked vertically so they never overlap the status pill */}
+                                    {/* Actions — stacked vertically so they never overlap the status pill.
+                                        Resend was removed: the customer now gets an automated
+                                        "your order has shipped" email the moment admin clicks Fulfill. */}
                                     <td className="px-6 py-6">
                                         <div className="flex flex-col items-stretch gap-1.5 min-w-[110px] ml-auto">
                                             <Link
@@ -174,7 +175,6 @@ export default async function AdminOrdersPage() {
                                             >
                                                 <ExternalLink className="w-3 h-3" /> View
                                             </Link>
-                                            <ResendConfirmationButton orderId={order.id} />
                                             <CancelOrderButton orderId={order.id} currentStatus={order.status ?? 'pending'} />
                                         </div>
                                     </td>

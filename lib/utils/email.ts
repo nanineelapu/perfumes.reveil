@@ -2,6 +2,11 @@ import { Resend } from 'resend';
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
+// Sender address used for all transactional emails. Falls back to Resend's
+// sandbox sender so emails still deliver while you're verifying the domain.
+const FROM_ADDRESS = process.env.RESEND_FROM || 'Reveil Fragrance <onboarding@resend.dev>';
+const FROM_SECURITY = process.env.RESEND_FROM_SECURITY || FROM_ADDRESS;
+
 export async function sendOrderDeliveredEmail(order: any, userEmail: string) {
     const { id, total, order_items, profiles } = order;
     const customerName = profiles?.full_name || 'Valued Customer';
@@ -30,7 +35,7 @@ export async function sendOrderDeliveredEmail(order: any, userEmail: string) {
         `).join('');
 
         const { data, error } = await resend.emails.send({
-            from: 'REVEIL <orders@reveil-perfumes.com>', // Replace with your verified domain
+            from: FROM_ADDRESS,
             to: userEmail || 'reveilfragrances@gmail.com', // Using provided address as fallback
             subject: `REVEIL | Order Delivered & E-Invoice [${id.slice(0, 8).toUpperCase()}]`,
             html: `
@@ -117,7 +122,7 @@ export async function sendOrderConfirmationEmail(order: any, userEmail: string) 
         `).join('');
 
         const { data, error } = await resend.emails.send({
-            from: 'REVEIL <orders@reveil-perfumes.com>',
+            from: FROM_ADDRESS,
             to: userEmail,
             subject: `REVEIL | Order Confirmed [${id.slice(0, 8).toUpperCase()}]`,
             html: `
@@ -181,6 +186,243 @@ export async function sendOrderConfirmationEmail(order: any, userEmail: string) 
     }
 }
 
+// ────────────────────────────────────────────────────────────────────────────
+// ORDER FULFILLED / SHIPPED EMAIL
+// Sent automatically when admin clicks "Fulfill" in the admin panel. Includes
+// tracking info, payment summary, item list, and a one-tap track button.
+// ────────────────────────────────────────────────────────────────────────────
+export async function sendOrderFulfilledEmail(order: any, userEmail: string) {
+    const {
+        id,
+        total,
+        order_items,
+        profiles,
+        payment_method,
+        payment_status,
+        awb_code,
+        courier_name,
+        shipping_address,
+    } = order
+    const customerName = profiles?.full_name || 'Valued Customer'
+    const trackUrl = awb_code
+        ? `https://www.reveilfragrance.in/track/${awb_code}`
+        : `https://www.reveilfragrance.in/orders`
+    const paymentLabel = payment_method === 'cod' ? 'Cash on Delivery' : 'Paid Online'
+    const paymentStatusLabel = payment_status === 'paid' ? 'PAID' : (payment_method === 'cod' ? 'COD — Pay on Delivery' : 'Pending')
+    const addr = shipping_address || {}
+
+    if (!resend) {
+        console.log('--- MOCK FULFILLMENT EMAIL ---')
+        console.log(`To: ${userEmail}`)
+        console.log(`Subject: REVEIL | Your order is on its way [${id.slice(0, 8)}]`)
+        console.log(`AWB: ${awb_code || 'pending'} | Courier: ${courier_name || 'pending'}`)
+        return { success: true, mocked: true }
+    }
+
+    try {
+        const itemsHtml = (order_items || []).map((item: any) => `
+            <tr>
+                <td style="padding: 14px 0; border-bottom: 1px solid #1a1a1a;">
+                    <p style="margin: 0; color: #fff; font-size: 14px; font-weight: 500;">${item.products?.name || 'Item'}</p>
+                    <p style="margin: 4px 0 0; color: #666; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;">Qty: ${item.quantity}</p>
+                </td>
+                <td style="padding: 14px 0; border-bottom: 1px solid #1a1a1a; text-align: right; color: #d4af37; font-weight: 600;">
+                    ₹${(item.price ?? 0).toLocaleString()}
+                </td>
+            </tr>
+        `).join('')
+
+        const { data, error } = await resend.emails.send({
+            from: FROM_ADDRESS,
+            to: userEmail,
+            subject: `REVEIL | Your order is on its way 📦 [${id.slice(0, 8).toUpperCase()}]`,
+            html: `
+                <div style="background-color: #050505; color: #fff; font-family: 'Baskerville', 'Georgia', serif; padding: 40px; max-width: 620px; margin: 0 auto; border: 1px solid #1a1a1a;">
+
+                    <!-- Brand header -->
+                    <div style="text-align: center; margin-bottom: 40px;">
+                        <h1 style="color: #d4af37; font-weight: 300; letter-spacing: 0.3em; text-transform: uppercase; margin: 0; font-size: 28px;">REVEIL</h1>
+                        <p style="color: #666; font-size: 10px; letter-spacing: 0.5em; margin-top: 12px; text-transform: uppercase;">Fragrance House</p>
+                    </div>
+
+                    <!-- Headline -->
+                    <div style="margin-bottom: 36px; text-align: center;">
+                        <h2 style="font-weight: 300; font-size: 24px; color: #fff; text-transform: uppercase; letter-spacing: 0.15em; margin: 0;">Your Order Has Shipped</h2>
+                        <div style="width: 40px; height: 1px; background: #d4af37; margin: 18px auto;"></div>
+                        <p style="color: #aaa; font-size: 14px; line-height: 1.8; margin: 18px 0 0;">
+                            Dear ${customerName},<br><br>
+                            Wonderful news — your Reveil order has been dispatched and is now in transit. Below are your tracking and order details.
+                        </p>
+                    </div>
+
+                    <!-- Tracking block (hero CTA) -->
+                    <div style="background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%); padding: 28px; border-radius: 4px; margin-bottom: 32px; text-align: center;">
+                        <p style="margin: 0 0 8px; color: rgba(0,0,0,0.6); font-size: 10px; text-transform: uppercase; letter-spacing: 0.3em; font-weight: 700;">Tracking Number</p>
+                        <p style="margin: 0 0 20px; color: #050505; font-size: 22px; font-weight: 700; font-family: monospace; letter-spacing: 0.05em;">${awb_code || 'Being assigned…'}</p>
+                        ${courier_name ? `<p style="margin: 0 0 18px; color: rgba(0,0,0,0.7); font-size: 12px; text-transform: uppercase; letter-spacing: 0.2em; font-weight: 600;">via ${courier_name}</p>` : ''}
+                        <a href="${trackUrl}" style="display: inline-block; background: #050505; color: #d4af37; text-decoration: none; padding: 14px 36px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.25em; border-radius: 2px;">Track My Order →</a>
+                    </div>
+
+                    <!-- Order summary -->
+                    <div style="background: #0a0a0a; border: 1px solid #1a1a1a; padding: 28px; margin-bottom: 28px;">
+                        <h3 style="color: #d4af37; font-size: 11px; text-transform: uppercase; letter-spacing: 0.25em; margin: 0 0 22px; font-weight: 600;">Your Selection</h3>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tbody>
+                                ${itemsHtml}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td style="padding: 22px 0 0; color: #888; font-size: 13px; text-transform: uppercase; letter-spacing: 0.15em; font-weight: 600;">Total</td>
+                                    <td style="padding: 22px 0 0; text-align: right; color: #d4af37; font-size: 22px; font-weight: 700;">₹${(total ?? 0).toLocaleString()}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <!-- Payment + Order info row -->
+                    <div style="display: table; width: 100%; margin-bottom: 28px;">
+                        <div style="display: table-row;">
+                            <div style="display: table-cell; width: 50%; background: #0a0a0a; border: 1px solid #1a1a1a; padding: 20px; vertical-align: top;">
+                                <p style="color: #666; font-size: 9px; text-transform: uppercase; letter-spacing: 0.25em; margin: 0 0 8px; font-weight: 700;">Order Reference</p>
+                                <p style="color: #fff; font-size: 13px; margin: 0; font-family: monospace;">#${id.toUpperCase().slice(0, 12)}</p>
+                            </div>
+                            <div style="display: table-cell; width: 8px;"></div>
+                            <div style="display: table-cell; width: 50%; background: #0a0a0a; border: 1px solid #1a1a1a; padding: 20px; vertical-align: top;">
+                                <p style="color: #666; font-size: 9px; text-transform: uppercase; letter-spacing: 0.25em; margin: 0 0 8px; font-weight: 700;">Payment</p>
+                                <p style="color: #fff; font-size: 13px; margin: 0 0 4px;">${paymentLabel}</p>
+                                <p style="color: ${payment_status === 'paid' ? '#10b981' : '#d4af37'}; font-size: 11px; margin: 0; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600;">${paymentStatusLabel}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Delivery address -->
+                    ${addr.full_name ? `
+                    <div style="background: #0a0a0a; border: 1px solid #1a1a1a; padding: 20px; margin-bottom: 28px;">
+                        <p style="color: #666; font-size: 9px; text-transform: uppercase; letter-spacing: 0.25em; margin: 0 0 10px; font-weight: 700;">Shipping To</p>
+                        <p style="color: #fff; font-size: 14px; margin: 0 0 4px; font-weight: 500;">${addr.full_name}</p>
+                        <p style="color: #aaa; font-size: 12px; margin: 0; line-height: 1.6;">
+                            ${addr.address_line1 || ''}${addr.address_line2 ? ', ' + addr.address_line2 : ''}<br>
+                            ${addr.city || ''}, ${addr.state || ''} — ${addr.pincode || ''}<br>
+                            ${addr.phone ? '📞 ' + addr.phone : ''}
+                        </p>
+                    </div>
+                    ` : ''}
+
+                    <!-- Expected delivery -->
+                    <div style="text-align: center; padding: 18px; background: rgba(212,175,55,0.05); border: 1px dashed rgba(212,175,55,0.3); margin-bottom: 32px;">
+                        <p style="color: #d4af37; font-size: 11px; text-transform: uppercase; letter-spacing: 0.25em; margin: 0 0 6px; font-weight: 700;">Expected Delivery</p>
+                        <p style="color: #fff; font-size: 14px; margin: 0;">3 – 7 business days</p>
+                    </div>
+
+                    <!-- Footer -->
+                    <div style="text-align: center; border-top: 1px solid #1a1a1a; padding-top: 32px; color: #555; font-size: 11px;">
+                        <p style="margin: 0 0 14px; line-height: 1.7;">Questions about your delivery? Reply to this email or visit our <a href="https://www.reveilfragrance.in/orders" style="color: #d4af37; text-decoration: none;">order portal</a>.</p>
+                        <p style="margin: 0 0 24px; line-height: 1.7;">Thank you for choosing Reveil — may your presence be unforgettable.</p>
+                        <p style="letter-spacing: 0.3em; text-transform: uppercase; color: #666; margin: 0;">www.reveilfragrance.in</p>
+                    </div>
+                </div>
+            `
+        })
+
+        if (error) {
+            console.error('[sendOrderFulfilledEmail] Resend error:', error)
+            return { success: false, error }
+        }
+        return { success: true, data }
+    } catch (err) {
+        console.error('[sendOrderFulfilledEmail] Dispatch error:', err)
+        return { success: false, error: err }
+    }
+}
+
+/**
+ * Fetch the order with all data needed and send the fulfillment email.
+ * Called from /api/shiprocket/create-order after Shiprocket order creation.
+ */
+/**
+ * Resolve a real email for a given user. Profiles.email is filled at signup
+ * only when the user actually entered one — OTP-only signups store an
+ * "<phone>@reveil.internal" placeholder. So we:
+ *   1. Try profiles.email and strip placeholders via realEmail().
+ *   2. Fall back to auth.users (the real auth record) for a usable email.
+ * Returns null if no usable email exists.
+ */
+async function resolveUserEmail(userId: string, profileEmail: string | null | undefined): Promise<string | null> {
+    const { realEmail } = await import('@/lib/validators')
+    const fromProfile = realEmail(profileEmail)
+    if (fromProfile) return fromProfile
+    try {
+        const { createAdminClient } = await import('@/lib/supabase/admin')
+        const admin = createAdminClient()
+        const { data } = await admin.auth.admin.getUserById(userId)
+        return realEmail(data?.user?.email)
+    } catch (err) {
+        console.error('[resolveUserEmail] auth lookup failed:', (err as any)?.message)
+        return null
+    }
+}
+
+export type EmailTriggerResult =
+    | { ok: true; sent: true; mocked?: boolean }
+    | { ok: false; sent: false; reason: string }
+
+export async function triggerOrderFulfilledEmail(orderId: string): Promise<EmailTriggerResult> {
+    try {
+        const { createAdminClient } = await import('@/lib/supabase/admin')
+        const admin = createAdminClient()
+
+        const { data: order } = await admin
+            .from('orders')
+            .select(`
+                id,
+                user_id,
+                total,
+                payment_method,
+                payment_status,
+                awb_code,
+                courier_name,
+                shiprocket_order_id,
+                shipping_address,
+                profiles ( full_name, email ),
+                order_items (
+                    quantity,
+                    price,
+                    products ( name )
+                )
+            `)
+            .eq('id', orderId)
+            .single()
+
+        if (!order) {
+            console.error('[triggerOrderFulfilledEmail] Order not found:', orderId)
+            return { ok: false, sent: false, reason: 'order_not_found' }
+        }
+
+        const profile = Array.isArray(order.profiles) ? order.profiles[0] : order.profiles
+        const email = await resolveUserEmail(order.user_id, profile?.email)
+
+        if (!email) {
+            console.warn('[triggerOrderFulfilledEmail] No usable email for user — skipping send')
+            return { ok: false, sent: false, reason: 'no_customer_email' }
+        }
+
+        if (!process.env.RESEND_API_KEY) {
+            console.warn('[triggerOrderFulfilledEmail] RESEND_API_KEY missing — email mocked')
+            return { ok: false, sent: false, reason: 'resend_not_configured' }
+        }
+
+        const normalizedOrder = { ...order, profiles: profile }
+        const result = await sendOrderFulfilledEmail(normalizedOrder, email)
+        if (!result.success) {
+            return { ok: false, sent: false, reason: (result as any).error?.message || 'email_send_failed' }
+        }
+        return { ok: true, sent: true, mocked: (result as any).mocked }
+    } catch (err: any) {
+        console.error('[triggerOrderFulfilledEmail] Error:', err?.message || err)
+        return { ok: false, sent: false, reason: err?.message || 'unknown_error' }
+    }
+}
+
 export async function triggerOrderConfirmationEmail(orderId: string) {
     try {
         const { createAdminClient } = await import('@/lib/supabase/admin');
@@ -220,7 +462,7 @@ export async function sendAdminCredentialsEmail(recipientEmail: string) {
 
     try {
         await resend.emails.send({
-            from: 'REVEIL Security <security@reveil-perfumes.com>',
+            from: FROM_SECURITY,
             to: recipientEmail,
             subject: 'REVEIL | Your Administrative Access Credentials',
             html: `

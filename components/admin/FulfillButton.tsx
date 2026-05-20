@@ -32,6 +32,12 @@ export default function FulfillButton({ orderId, isFulfilled }: FulfillButtonPro
                 throw new Error(data.error || 'Fulfillment failed')
             }
 
+            // Shiprocket succeeded — but the customer email might have failed.
+            // Show a non-blocking warning so the admin can still see what's wrong.
+            if (data.emailWarning) {
+                alert(`${data.emailWarning}\n\n${data.emailHint || ''}`)
+            }
+
             setStatus('success')
             setTimeout(() => window.location.reload(), 1200)
         } catch (err: any) {
