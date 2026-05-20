@@ -5,7 +5,6 @@ import { Heart, ShoppingBag, Trash2, Loader2, ChevronRight, ArrowRight } from 'l
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Footer } from '@/components/store/Footer'
 import { PremiumLoader } from '@/components/store/PremiumLoader'
 
 interface WishlistItem {

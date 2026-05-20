@@ -2,7 +2,6 @@
 import { motion } from 'framer-motion'
 import { AnimatedNavbar } from '@/components/store/AnimatedNavbar'
 import { StayConnected } from '@/components/store/StayConnected'
-import { Footer } from '@/components/store/Footer'
 import { Phone, Mail, ArrowRight, Loader2, CheckCircle } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
@@ -306,7 +305,6 @@ export default function ContactPage() {
       </div>
 
       <StayConnected theme="dark" />
-      <Footer />
     </main>
   )
 }
