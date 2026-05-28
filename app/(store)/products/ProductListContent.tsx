@@ -8,6 +8,11 @@ import ProductCard from '@/components/store/ProductCard'
 import { Product } from '@/types/store'
 import { createClient } from '@/lib/supabase/client'
 
+// Slug-style normaliser so "Reveil Mini Diffusers", "REVEIL-MINI-DIFFUSERS",
+// and "reveil mini diffusers" all collide on the same key when comparing
+// the URL ?category=slug against a product's stored category name.
+const toSlug = (s: string) => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+
 export function ProductListContent() {
     const searchParams = useSearchParams()
     const initialSearch = searchParams.get('search') || ""
@@ -18,6 +23,16 @@ export function ProductListContent() {
     const [isMobile, setIsMobile] = useState(false)
     const [selectedCategory, setSelectedCategory] = useState(initialCategory)
     const [searchQuery, setSearchQuery] = useState(initialSearch)
+
+    // Sync local state when the URL ?category= changes via client-side nav
+    // (e.g. clicking the Shop dropdown). Without this, the first mount value
+    // sticks forever and the filter never updates on later navigations.
+    useEffect(() => {
+        const urlCategory = searchParams.get('category') || "ALL"
+        setSelectedCategory(urlCategory)
+        const urlSearch = searchParams.get('search') || ""
+        setSearchQuery(urlSearch)
+    }, [searchParams])
     const [isFilterOpen, setIsFilterOpen] = useState(false)
     const [sortBy, setSortBy] = useState("Featured")
     const [selectedConcentrations, setSelectedConcentrations] = useState<string[]>([])
@@ -73,8 +88,13 @@ export function ProductListContent() {
     }, [products])
 
     const filteredAndSortedProducts = useMemo(() => {
+        const selectedSlug = toSlug(selectedCategory)
         let filtered = products.filter(p => {
-            const matchesCat = selectedCategory === "ALL" || p.category?.toUpperCase() === selectedCategory.toUpperCase()
+            // Compare on slugified form so "reveil-mini-diffusers" (URL),
+            // "REVEIL MINI DIFFUSERS" (sidebar click), and the stored
+            // product.category "Reveil Mini Diffusers" all collide.
+            const matchesCat = selectedCategory === "ALL"
+                || toSlug(p.category ?? '') === selectedSlug
             const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase())
             const matchesConc = selectedConcentrations.length === 0 || (p.technical_specs?.concentration && selectedConcentrations.includes(p.technical_specs.concentration))
 
