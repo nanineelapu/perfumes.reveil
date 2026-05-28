@@ -114,9 +114,11 @@ export async function POST(request: Request) {
         normalisedItems.push({ product_id: it.product_id, quantity: qty })
     }
 
+    // Use * so the query keeps working before the migration adds the
+    // apply_delivery_fee column. Missing column → undefined → defaults to true.
     const { data: products, error: productError } = await supabase
         .from('products')
-        .select('id, name, price, stock')
+        .select('*')
         .in('id', normalisedItems.map(i => i.product_id))
 
     if (productError) {
@@ -140,10 +142,13 @@ export async function POST(request: Request) {
         const product = products!.find(p => p.id === item.product_id)!
         return sum + product.price * item.quantity
     }, 0)
+    // Per-product opt-out: if every product in the order has apply_delivery_fee=false,
+    // shipping is free regardless of subtotal.
+    const applyFee = products!.some(p => (p.apply_delivery_fee ?? true) === true && normalisedItems.some(i => i.product_id === p.id))
     // This route only creates COD orders (Razorpay goes through the verify
     // endpoint), so hardcode 'cod' here — Reveil's policy: ₹80 shipping when
     // subtotal < ₹250, free above.
-    const shippingFee = computeShipping(subtotal, 'cod')
+    const shippingFee = computeShipping(subtotal, 'cod', applyFee)
     const total = subtotal + shippingFee
 
     if (total > COD_MAX_TOTAL_INR) {

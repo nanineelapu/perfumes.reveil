@@ -426,6 +426,37 @@ export function AnimatedNavbar() {
                                 </Link>
                             </motion.div>
 
+                            <motion.div variants={itemVariants}>
+                                <a
+                                    href="https://www.refreshub.com"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{ textDecoration: 'none' }}
+                                >
+                                    <motion.span
+                                        whileHover="hover"
+                                        style={{
+                                            color: textColor, display: 'block', fontSize: '13px',
+                                            letterSpacing: '0.15em', fontWeight: 500,
+                                            fontFamily: 'var(--font-baskerville)',
+                                            position: 'relative',
+                                            padding: '0'
+                                        }}
+                                    >
+                                        Refreshub
+                                        <motion.div
+                                            variants={{ hover: { scaleX: 1, opacity: 1 } }}
+                                            initial={{ scaleX: 0, opacity: 0 }}
+                                            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                                            style={{
+                                                position: 'absolute', bottom: 0, left: 0, right: 0,
+                                                height: '1px', background: textColor, originX: 0.5
+                                            }}
+                                        />
+                                    </motion.span>
+                                </a>
+                            </motion.div>
+
                             <motion.div
                                 variants={itemVariants}
                                 onMouseEnter={() => setIsAccountHovered(true)}
@@ -741,11 +772,12 @@ export function AnimatedNavbar() {
                                 { name: 'Wishlist', href: '/wishlist', always: true },
                                 { name: 'My Addresses', href: '/address-book', loggedIn: true },
                                 { name: 'Track Order', href: '/track-order', always: true },
+                                { name: 'Refreshub', href: 'https://www.refreshub.com', always: true, external: true },
                                 ...(!user ? [
                                     { name: 'Login', href: '/auth?mode=login', always: true },
                                     { name: 'Register', href: '/auth?mode=signup', always: true }
                                 ] : [])
-                            ].map((link, i) => (
+                            ].map((link: any, i) => (
                                 <motion.div
                                     key={link.name}
                                     initial={{ opacity: 0, y: 30, rotateX: -30 }}
@@ -852,6 +884,30 @@ export function AnimatedNavbar() {
                                                 )}
                                             </AnimatePresence>
                                         </div>
+                                    ) : link.external ? (
+                                        <a
+                                            href={link.href}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            onClick={() => setIsMobileMenuOpen(false)}
+                                            style={{
+                                                fontSize: 'clamp(20px, 6.5vw, 28px)',
+                                                fontFamily: 'var(--font-baskerville)',
+                                                color: '#1a1a1a',
+                                                textDecoration: 'none',
+                                                display: 'block',
+                                                letterSpacing: '0.01em',
+                                                fontWeight: 500,
+                                                lineHeight: 1
+                                            }}
+                                        >
+                                            <motion.span
+                                                whileTap={{ x: 20, color: '#d4af37' }}
+                                                style={{ display: 'inline-block' }}
+                                            >
+                                                {link.name}
+                                            </motion.span>
+                                        </a>
                                     ) : (
                                         <Link
                                             href={link.href}

@@ -116,6 +116,8 @@ export default function EditProductPage(props: { params: Params }) {
             ? sizesRaw.split(',').map(s => s.trim().toUpperCase().replace(/\s+/g, '')).filter(Boolean)
             : []
 
+        const metaKeywordsRaw = ((formData.get('meta_keywords') as string) || '').trim()
+
         const body = {
             name,
             slug,
@@ -124,6 +126,8 @@ export default function EditProductPage(props: { params: Params }) {
             stock: Number(formData.get('stock')),
             category: formData.get('category'),
             is_featured: formData.get('is_featured') === 'on',
+            apply_delivery_fee: formData.get('apply_delivery_fee') === 'on',
+            meta_keywords: metaKeywordsRaw || null,
             // Images managed via controlled state (upload + manual URL fallback)
             images,
             scent_profile: {
@@ -432,6 +436,49 @@ export default function EditProductPage(props: { params: Params }) {
                                     Promote to Featured Selection
                                 </span>
                             </label>
+                        </div>
+
+                        <div className="pt-4 border-t border-gray-50">
+                            <label className="flex items-start gap-3 cursor-pointer group">
+                                <div className="relative flex items-center mt-1">
+                                    <input
+                                        type="checkbox"
+                                        name="apply_delivery_fee"
+                                        defaultChecked={product.apply_delivery_fee ?? true}
+                                        className="peer sr-only"
+                                    />
+                                    <div className="w-10 h-6 bg-gray-200 rounded-full peer peer-checked:bg-accent transition-colors"></div>
+                                    <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full peer-checked:translate-x-4 transition-transform shadow-sm"></div>
+                                </div>
+                                <div className="space-y-1">
+                                    <span className="text-[10px] font-bold tracking-widest uppercase text-gray-500 group-hover:text-accent transition-colors block">
+                                        Apply Delivery Fee (₹60)
+                                    </span>
+                                    <span className="text-[10px] text-gray-400 normal-case tracking-normal block leading-relaxed">
+                                        ON → standard shipping below ₹250. OFF → this product never contributes to delivery charges.
+                                    </span>
+                                </div>
+                            </label>
+                        </div>
+                    </section>
+
+                    <section className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm space-y-6">
+                        <div className="flex items-center gap-2 mb-2 text-accent">
+                            <Sparkles className="w-4 h-4" />
+                            <h2 className="text-[10px] font-bold tracking-[.3em] uppercase">SEO Keywords</h2>
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-bold tracking-widest uppercase text-gray-400">
+                                Meta Keywords <span className="text-gray-300 normal-case font-normal tracking-normal">(comma separated)</span>
+                            </label>
+                            <textarea
+                                name="meta_keywords"
+                                defaultValue={product.meta_keywords || ''}
+                                rows={3}
+                                className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-accent transition-all"
+                                placeholder="midnight oud, oud perfume india, long lasting oud"
+                            />
+                            <p className="text-[10px] text-gray-400">Merged with auto-generated keywords on the product page.</p>
                         </div>
                     </section>
 

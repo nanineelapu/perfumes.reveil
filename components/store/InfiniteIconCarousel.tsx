@@ -4,51 +4,50 @@ import React from 'react'
 
 const icons = [
     {
-        name: "Car Hanging Diffuser",
+        name: "Rare Botanicals",
         svg: (
             <svg viewBox="0 0 24 24" width="48" height="48" stroke="#d4af37" strokeWidth="1.2" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="12" y1="2" x2="12" y2="8" />
-                <circle cx="12" cy="2" r="1" fill="#d4af37" stroke="none" />
-                <rect x="9" y="8" width="6" height="3" rx="0.5" />
-                <path d="M8.5 11h7l.5 9.5a1.5 1.5 0 0 1-1.5 1.5h-5a1.5 1.5 0 0 1-1.5-1.5L8.5 11z" />
-                <path d="M5 14c-1.5 0-2 1.5-3.5 1.5M19 14c1.5 0 2 1.5 3.5 1.5" opacity="0.6" />
-                <path d="M7 17c-1 0-1.5 1-2.5 1M17 17c1 0 1.5 1 2.5 1" opacity="0.4" />
+                <path d="M12 22V8" />
+                <path d="M12 8c0-3 2-5 5-5 0 3-2 5-5 5z" />
+                <path d="M12 12c0-3-2-5-5-5 0 3 2 5 5 5z" />
+                <path d="M12 16c0-3 2-5 5-5 0 3-2 5-5 5z" opacity="0.7" />
+                <path d="M9 22h6" />
             </svg>
         )
     },
     {
-        name: "Reed Diffuser",
+        name: "Rose Damascena",
         svg: (
             <svg viewBox="0 0 24 24" width="48" height="48" stroke="#d4af37" strokeWidth="1.2" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M8 14l-1 7a1 1 0 001 1h8a1 1 0 001-1l-1-7" />
-                <path d="M10 14V11h4v3" />
-                <line x1="12" y1="11" x2="12" y2="3" />
-                <line x1="11" y1="11" x2="8" y2="4" />
-                <line x1="13" y1="11" x2="16" y2="4" />
-                <path d="M4 10c1-1 1-3 0-4M20 10c-1-1-1-3 0-4" opacity="0.5" />
+                <circle cx="12" cy="11" r="3" />
+                <path d="M12 8c-2-2-5-1-5 2 0 2 2 3 5 3" />
+                <path d="M12 14c2 2 5 1 5-2 0-2-2-3-5-3" />
+                <path d="M9 11c-2 2-1 5 2 5 2 0 3-2 3-5" />
+                <path d="M15 11c2-2 1-5-2-5-2 0-3 2-3 5" />
+                <path d="M12 14v8" />
+                <path d="M10 22h4" />
             </svg>
         )
     },
     {
-        name: "Roll-On Essence",
+        name: "Saffron Threads",
         svg: (
             <svg viewBox="0 0 24 24" width="48" height="48" stroke="#d4af37" strokeWidth="1.2" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="9" y="9" width="6" height="13" rx="1" />
-                <path d="M9 13h6" opacity="0.4" />
-                <path d="M9 18h6" opacity="0.4" />
-                <path d="M9 9V6a1 1 0 011-1h4a1 1 0 011 1v3" />
-                <circle cx="12" cy="4.5" r="1.5" />
+                <path d="M6 4c2 5 2 10 0 16" />
+                <path d="M10 4c2 5 2 10 0 16" />
+                <path d="M14 4c2 5 2 10 0 16" />
+                <path d="M18 4c2 5 2 10 0 16" />
             </svg>
         )
     },
     {
-        name: "Reveil 50ml Aqua",
+        name: "Oud Cambodge",
         svg: (
             <svg viewBox="0 0 24 24" width="48" height="48" stroke="#d4af37" strokeWidth="1.2" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M7 11l-1 9.5a1.5 1.5 0 001.5 1.5h9a1.5 1.5 0 001.5-1.5L17 11H7z" />
-                <path d="M10 11V8h4v3" />
-                <path d="M9 8V4l1.5 1.5L12 3l1.5 2.5L15 4v4H9z" />
-                <path d="M12 14l2 3h-4l2-3z" opacity="0.8" />
+                <ellipse cx="12" cy="12" rx="10" ry="8" />
+                <ellipse cx="12" cy="12" rx="6" ry="4" opacity="0.6" />
+                <path d="M4 12c4-3 12-3 16 0" opacity="0.5" />
+                <path d="M8 12c2-1 6-1 8 0" opacity="0.5" />
             </svg>
         )
     },
@@ -63,31 +62,38 @@ const icons = [
         )
     },
     {
-        name: "Rare Botanicals",
+        name: "Reveil Signature",
         svg: (
             <svg viewBox="0 0 24 24" width="48" height="48" stroke="#d4af37" strokeWidth="1.2" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 2C6.5 2 4 8.5 4 14c0 3 2 5 2 5l6-3 6 3s2-2 2-5c0-5.5-2.5-12-8-12z" />
-                <path d="M12 2v14" />
-                <path d="M12 9l3-3M12 12l2-2" opacity="0.5" />
+                <path d="M8 22V8c0-1 .5-2 1-3l3-3 3 3c.5 1 1 2 1 3v14z" />
+                <path d="M8 13h8" />
+                <path d="M10 4h4" />
+                <circle cx="12" cy="17" r="1" fill="#d4af37" stroke="none" />
             </svg>
         )
     },
     {
-        name: "Oud & Woods",
+        name: "Sandalwood & Amber",
         svg: (
             <svg viewBox="0 0 24 24" width="48" height="48" stroke="#d4af37" strokeWidth="1.2" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                <ellipse cx="12" cy="12" rx="10" ry="8" />
-                <ellipse cx="12" cy="12" rx="6" ry="4" opacity="0.7" />
-                <path d="M12 10s1 .5 1 1.5a1 1 0 01-2 0c0-1 1-1.5 1-1.5z" />
+                <path d="M4 20c0-3 2-5 4-5s4 2 4 5" />
+                <path d="M12 20c0-3 2-5 4-5s4 2 4 5" />
+                <path d="M3 20h18" />
+                <path d="M8 15v-3M16 15v-3" opacity="0.5" />
+                <circle cx="8" cy="9" r="2" opacity="0.7" />
+                <circle cx="16" cy="9" r="2" opacity="0.7" />
             </svg>
         )
     },
     {
-        name: "Night Fragrance",
+        name: "Jasmine Absolute",
         svg: (
             <svg viewBox="0 0 24 24" width="48" height="48" stroke="#d4af37" strokeWidth="1.2" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
-                <path d="M16 4l1 1 1-1-1-1-1 1zM20 8l.5.5.5-.5-.5-.5L20 8z" opacity="0.6" />
+                <circle cx="12" cy="12" r="2" />
+                <path d="M12 4a4 4 0 010 8M12 20a4 4 0 010-8" />
+                <path d="M4 12a4 4 0 018 0M20 12a4 4 0 01-8 0" />
+                <path d="M6.3 6.3a4 4 0 005.7 5.7M17.7 17.7a4 4 0 00-5.7-5.7" opacity="0.6" />
+                <path d="M6.3 17.7a4 4 0 015.7-5.7M17.7 6.3a4 4 0 01-5.7 5.7" opacity="0.6" />
             </svg>
         )
     }

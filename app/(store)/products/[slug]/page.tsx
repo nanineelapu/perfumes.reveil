@@ -15,9 +15,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { slug } = await params
     const supabase = await createClient()
 
+    // Select * so missing meta_keywords (pre-migration) doesn't crash the query.
+    // Missing column simply resolves to undefined and the fallback chain handles it.
     const { data: product } = await supabase
         .from('products')
-        .select('name, description, category, images, price, slug')
+        .select('*')
         .eq('slug', slug)
         .single()
 
@@ -28,10 +30,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         }
     }
 
-    const title = `${product.name} — Buy Online India | ${product.category || 'Luxury Perfume'} | Reveil Fragrance`
-    const description = product.description
+    const autoTitle = `${product.name} — Buy Online India | ${product.category || 'Luxury Perfume'} | Reveil Fragrance`
+    const title = product.meta_title?.trim() || autoTitle
+    const autoDescription = product.description
         ? `${product.description.slice(0, 140)} — Buy ${product.name} online in India at ₹${product.price}. Long lasting, original, free shipping above ₹250.`
         : `Buy ${product.name} online in India at Reveil Fragrance. Long lasting ${product.category?.toLowerCase() || 'perfume'} — ₹${product.price}. Original product, cash on delivery, pan-India delivery.`
+    const description = product.meta_description?.trim() || autoDescription
+
+    // Merge admin-entered keywords (comma separated) with auto-generated ones.
+    const adminKeywords = (product.meta_keywords || '')
+        .split(',')
+        .map((k: string) => k.trim())
+        .filter(Boolean)
+    const keywords = Array.from(new Set([
+        ...adminKeywords,
+        ...keywordsForProduct(product.name, product.category),
+    ]))
 
     const rawImage = product.images?.[0] || '/luxury_perfume_hero_png_1775752819988.png'
     const image = /^https?:\/\//i.test(rawImage) ? rawImage : `${SITE_URL}${rawImage.startsWith('/') ? '' : '/'}${rawImage}`
@@ -40,7 +54,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return {
         title: { absolute: title },
         description,
-        keywords: keywordsForProduct(product.name, product.category),
+        keywords,
         openGraph: {
             title,
             description,

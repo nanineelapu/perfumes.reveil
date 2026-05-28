@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
-import { computeShipping, FREE_SHIPPING_THRESHOLD, SHIPPING_FEE_COD, SHIPPING_FEE_PREPAID } from '@/lib/razorpay'
+import { computeShipping, cartAppliesDeliveryFee, FREE_SHIPPING_THRESHOLD, SHIPPING_FEE_COD, SHIPPING_FEE_PREPAID } from '@/lib/razorpay'
 
 // ── GET — fetch current user's cart ─────────────────────────────────────────
 export async function GET() {
@@ -11,20 +11,16 @@ export async function GET() {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Use products(*) instead of an explicit column list so the query
+    // succeeds even if apply_delivery_fee column has not been added yet.
+    // The flag falls back to true (legacy behaviour) until the migration
+    // is applied.
     const { data, error } = await supabase
         .from('cart_items')
         .select(`
       id,
       quantity,
-      products (
-        id,
-        name,
-        slug,
-        price,
-        images,
-        stock,
-        category
-      )
+      products (*)
     `)
         .eq('user_id', user.id)
         .order('created_at', { ascending: true })
@@ -45,8 +41,9 @@ export async function GET() {
     // On the cart page (before checkout) we show the cheaper "prepaid" rate
     // as the default — the customer's actual payment method is locked in on
     // the checkout page, where the total recomputes if they pick COD.
-    const shipping = computeShipping(subtotal, 'prepaid')
-    const shippingCod = computeShipping(subtotal, 'cod')
+    const applyFee = cartAppliesDeliveryFee(data ?? [])
+    const shipping = computeShipping(subtotal, 'prepaid', applyFee)
+    const shippingCod = computeShipping(subtotal, 'cod', applyFee)
     const total = subtotal + shipping
 
     return NextResponse.json({
@@ -56,6 +53,7 @@ export async function GET() {
         shippingPrepaid: shipping,
         shippingCod,
         total,
+        applyDeliveryFee: applyFee,
         freeShippingThreshold: FREE_SHIPPING_THRESHOLD,
         shippingRates: { cod: SHIPPING_FEE_COD, prepaid: SHIPPING_FEE_PREPAID },
         itemCount: data?.reduce((sum, item) => sum + item.quantity, 0) ?? 0,

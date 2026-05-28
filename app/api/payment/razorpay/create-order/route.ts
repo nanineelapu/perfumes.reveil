@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { requireUser } from '@/lib/auth/require'
 import { getRazorpay, computeShipping } from '@/lib/razorpay'
+
+const isFlagOn = (v: unknown) => v === undefined || v === null || v === true
 import { createAdminClient } from '@/lib/supabase/admin'
 import { isUuid, clampInt } from '@/lib/validators'
 import { rateLimit, getClientIp, rateLimitResponse } from '@/lib/rate-limit'
@@ -56,13 +58,13 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Address not found' }, { status: 404 })
         }
 
-        type LineItem = { product_id: string; name: string; price: number; stock: number; quantity: number }
+        type LineItem = { product_id: string; name: string; price: number; stock: number; quantity: number; apply_delivery_fee: boolean }
         let lineItems: LineItem[] = []
 
         if (buyNowProductId) {
             const { data: product, error: prodErr } = await supabase
                 .from('products')
-                .select('id, name, price, stock')
+                .select('*')
                 .eq('id', buyNowProductId)
                 .single()
             if (prodErr || !product) {
@@ -74,11 +76,12 @@ export async function POST(request: Request) {
                 price: product.price,
                 stock: product.stock,
                 quantity: buyNowQty,
+                apply_delivery_fee: isFlagOn(product.apply_delivery_fee),
             }]
         } else {
             const { data: cartItems, error: cartError } = await supabase
                 .from('cart_items')
-                .select('id, quantity, products ( id, name, price, stock )')
+                .select('id, quantity, products (*)')
                 .eq('user_id', user.id)
 
             if (cartError) return NextResponse.json({ error: 'Could not read cart' }, { status: 500 })
@@ -91,6 +94,7 @@ export async function POST(request: Request) {
                 price: c.products?.price,
                 stock: c.products?.stock,
                 quantity: c.quantity,
+                apply_delivery_fee: isFlagOn(c.products?.apply_delivery_fee),
             }))
         }
 
@@ -108,9 +112,12 @@ export async function POST(request: Request) {
             subtotal += item.price * item.quantity
         }
 
+        // Per-product delivery opt-out — if every line item has apply_delivery_fee=false,
+        // the order ships free regardless of subtotal threshold.
+        const applyFee = lineItems.some(i => i.apply_delivery_fee)
         // Razorpay path is online payment ('prepaid' / 'razorpay'). Below
         // ₹250 threshold customers pay ₹60 shipping — the cheaper rate.
-        const shippingFee = computeShipping(subtotal, 'razorpay')
+        const shippingFee = computeShipping(subtotal, 'razorpay', applyFee)
         const total = subtotal + shippingFee
 
         const razorpay = getRazorpay()

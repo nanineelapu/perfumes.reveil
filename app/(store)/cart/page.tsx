@@ -42,7 +42,12 @@ export default function CartPage() {
             //   - Subtotal < ₹250 + COD             → ₹80
             // Cart preview shows the cheaper online rate; final price is set
             // on checkout once the customer picks a payment method.
-            const shipping = subtotal >= 250 ? 0 : 60
+            // Per-product opt-out: if every item is flagged apply_delivery_fee=false,
+            // the cart is shipping-free regardless of subtotal.
+            const applyFee = items.length === 0
+                ? true
+                : items.some((it: any) => (it.products?.apply_delivery_fee ?? true) === true)
+            const shipping = !applyFee ? 0 : (subtotal >= 250 ? 0 : 60)
             const total = subtotal + shipping
 
             setCartItems(items)

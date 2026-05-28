@@ -73,7 +73,8 @@ export async function POST(request: Request) {
     // 3. Parse and validate body
     const body = await request.json()
     const { name, price, description, images, category, stock, is_featured,
-        meta_title, meta_description, scent_profile, technical_specs } = body
+        meta_title, meta_description, meta_keywords, scent_profile, technical_specs,
+        apply_delivery_fee } = body
 
     if (!name || !price) {
         return NextResponse.json({ error: 'name and price are required' }, { status: 400 })
@@ -109,8 +110,10 @@ export async function POST(request: Request) {
             is_featured: is_featured ?? false,
             meta_title: meta_title ?? name,
             meta_description: meta_description ?? description ?? null,
+            meta_keywords: meta_keywords ?? null,
             scent_profile: scent_profile ?? null,
             technical_specs: technical_specs ?? null,
+            apply_delivery_fee: apply_delivery_fee ?? true,
         })
         .select()
         .single()

@@ -147,15 +147,19 @@ export function ProductListContent() {
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 2, ease: [0.16, 1, 0.3, 1] }}
-                            style={{ textAlign: isMobile ? 'left' : 'center' }}
+                            style={{ textAlign: isMobile ? 'left' : 'center', display: 'flex', justifyContent: isMobile ? 'flex-start' : 'center' }}
                         >
-                            <h1 style={{ margin: 0 }}>
-                                <span style={{
-                                    fontSize: isMobile ? '32px' : 'clamp(40px, 8vw, 80px)',
-                                    fontWeight: 300, letterSpacing: '-0.04em', color: '#1a1a1a', lineHeight: 0.85, display: 'block'
-                                }}>
-                                    Re<span style={{ color: '#d4af37', fontWeight: 400 }}>veil</span>
-                                </span>
+                            <h1 style={{ margin: 0, lineHeight: 0 }}>
+                                <span className="sr-only">Reveil</span>
+                                <img
+                                    src="https://lhnamtkpjkrawgql.public.blob.vercel-storage.com/LOGO.webp"
+                                    alt="Reveil"
+                                    style={{
+                                        height: isMobile ? '56px' : 'clamp(80px, 9vw, 120px)',
+                                        width: 'auto',
+                                        display: 'block'
+                                    }}
+                                />
                             </h1>
                         </motion.div>
 

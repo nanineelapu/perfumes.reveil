@@ -110,7 +110,7 @@ function CheckoutInner() {
                     // Fetch the single product directly — bypass cart entirely
                     const { data: product, error: prodErr } = await supabase
                         .from('products')
-                        .select('id, name, price, images, category, stock')
+                        .select('*')
                         .eq('id', buyNowProductId)
                         .single()
                     if (prodErr || !product) {
@@ -148,11 +148,16 @@ function CheckoutInner() {
     }, [isBuyNow, buyNowProductId, buyNowQty])
 
     const subtotal = items.reduce((sum, item) => sum + (item.products?.price ?? 0) * item.quantity, 0)
-    // Shipping depends on the customer's selected payment method below the
-    // ₹250 threshold — COD is ₹80, online is ₹60.
-    const shipping = subtotal >= FREE_THRESHOLD
+    // Per-product opt-out: if every item has apply_delivery_fee=false, no shipping.
+    const applyFee = items.length === 0
+        ? true
+        : items.some((it: any) => (it.products?.apply_delivery_fee ?? true) === true)
+    // Otherwise standard rules: free above ₹250, else COD ₹80 / Online ₹60.
+    const shipping = !applyFee
         ? 0
-        : paymentMethod === 'cod' ? SHIPPING_FEE_COD : SHIPPING_FEE_PREPAID
+        : subtotal >= FREE_THRESHOLD
+            ? 0
+            : paymentMethod === 'cod' ? SHIPPING_FEE_COD : SHIPPING_FEE_PREPAID
     const total = subtotal + shipping
     const selectedAddress = addresses.find((a) => a.id === selectedAddressId) || null
 

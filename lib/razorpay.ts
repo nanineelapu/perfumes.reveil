@@ -78,7 +78,24 @@ export type PaymentMethod = 'cod' | 'razorpay' | 'prepaid' | string | null | und
  * updated still see the cheaper rate (matches what the cart shows pre-checkout
  * when the customer hasn't yet picked a payment method).
  */
-export function computeShipping(subtotal: number, paymentMethod: PaymentMethod = 'prepaid'): number {
+export function computeShipping(
+    subtotal: number,
+    paymentMethod: PaymentMethod = 'prepaid',
+    applyFee: boolean = true,
+): number {
+    // Per-product opt-out: if the cart contains only products flagged
+    // `apply_delivery_fee = false`, no delivery is charged regardless of subtotal.
+    if (!applyFee) return 0
     if (subtotal >= FREE_SHIPPING_THRESHOLD) return 0
     return paymentMethod === 'cod' ? SHIPPING_FEE_COD : SHIPPING_FEE_PREPAID
+}
+
+/**
+ * Returns true if at least one cart item charges delivery. When every item
+ * has apply_delivery_fee=false the cart is considered shipping-free.
+ * Defaults missing/null flags to true so legacy rows behave as before.
+ */
+export function cartAppliesDeliveryFee(items: Array<{ products?: { apply_delivery_fee?: boolean | null } | null } | null | undefined>): boolean {
+    if (!items || items.length === 0) return true
+    return items.some(it => (it?.products?.apply_delivery_fee ?? true) === true)
 }

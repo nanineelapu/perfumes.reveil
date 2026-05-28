@@ -205,18 +205,6 @@ export function ProductContent({ product, initialReviews, relatedProducts = [] }
                             />
                         </AnimatePresence>
 
-                        {/* Luxury Concentration Badge */}
-                        <div style={{
-                            position: 'absolute', top: isMobile ? '16px' : '24px', right: isMobile ? '16px' : '24px',
-                            padding: '10px 20px', background: 'rgba(5,5,5,0.7)',
-                            backdropFilter: 'blur(10px)', border: '1px solid rgba(212,175,55,0.6)',
-                            fontSize: '9px', color: '#d4af37', letterSpacing: '0.25em',
-                            textTransform: 'uppercase', fontWeight: 800, borderRadius: '999px',
-                            zIndex: 2
-                        }}>
-                            {product.technical_specs?.concentration || 'Extrait de Parfum'}
-                        </div>
-
                         {/* Carousel arrows — only show if there's more than one image */}
                         {galleryImages.length > 1 && (
                             <>

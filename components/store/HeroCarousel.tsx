@@ -206,7 +206,6 @@ function SlideMedia({ slide, isActive, emblaApi, isMobile }: { slide: Slide, isA
                         style={{
                             objectFit: 'cover',
                             objectPosition: 'center',
-                            filter: 'brightness(0.45) contrast(1.08) saturate(0.88)',
                             opacity: (slide.video_url && isLoaded) ? 0 : 1,
                             transition: 'opacity 1s ease'
                         }}
@@ -229,7 +228,6 @@ function SlideMedia({ slide, isActive, emblaApi, isMobile }: { slide: Slide, isA
                             width: '100%',
                             height: '100%',
                             objectFit: 'cover',
-                            filter: 'brightness(0.5) contrast(1.1)',
                             opacity: isLoaded ? 1 : 0,
                             transition: 'opacity 0.8s ease'
                         }}

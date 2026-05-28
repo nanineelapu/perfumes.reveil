@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import HeroCarousel from '@/components/store/HeroCarousel'
+import CategoryStrip from '@/components/store/CategoryStrip'
 import ProductGrid from '@/components/store/ProductGrid'
 import { ReveilCollectionSection, PhilosophySection, NotesSection } from '@/components/store/EditorialSections'
 import { InfiniteIconCarousel } from '@/components/store/InfiniteIconCarousel'
@@ -32,7 +33,7 @@ export default async function HomePage() {
     { data: slides },
     { data: allInStockProducts },
     { data: featured },
-    { data: categories },
+    { data: shopCategories },
     { data: latestReviews },
   ] = await Promise.all([
     supabase
@@ -54,9 +55,9 @@ export default async function HomePage() {
       .limit(8),
 
     supabase
-      .from('products')
-      .select('category')
-      .not('category', 'is', null),
+      .from('categories')
+      .select('id, name, slug')
+      .order('display_order', { ascending: true }),
 
     adminClient
       .from('reviews')
@@ -75,8 +76,7 @@ export default async function HomePage() {
       .limit(24),
   ])
 
-  // Deduplicate categories with safety fallback
-  const uniqueCategories = [...new Set((categories || []).map(p => p.category))] as string[]
+  const categoryList = (shopCategories ?? []) as { id: string; name: string; slug: string }[]
 
   // Filter out admin-authored / seeded test reviews. We match on profile.role
   // first (proper signal), then fall back to a name heuristic so legacy test
@@ -241,6 +241,9 @@ export default async function HomePage() {
 
         {/* Hero section */}
         <HeroCarousel slides={allSlides} />
+
+        {/* Shop by Category — dynamic, driven by the admin `categories` table */}
+        <CategoryStrip categories={categoryList} />
 
         {/* Free Delivery Ribbon */}
         <FreeDeliveryRibbon />

@@ -18,8 +18,10 @@ export default function NewProductPage() {
         category: '',
         stock: '',
         is_featured: false,
+        apply_delivery_fee: true,
         meta_title: '',
         meta_description: '',
+        meta_keywords: '',
         top_notes: '',
         heart_notes: '',
         base_notes: '',
@@ -130,6 +132,8 @@ export default function NewProductPage() {
                 price: parseFloat(form.price),
                 stock: parseInt(form.stock || '0'),
                 images,
+                meta_keywords: form.meta_keywords.trim() || null,
+                apply_delivery_fee: form.apply_delivery_fee,
                 scent_profile: {
                     top: form.top_notes.trim() || null,
                     heart: form.heart_notes.trim() || null,
@@ -256,6 +260,28 @@ export default function NewProductPage() {
                                 Featured product (shown on homepage)
                             </label>
                         </div>
+                    </div>
+
+                    <div style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        background: '#fafafa', border: '1px solid #eee', borderRadius: '10px',
+                        padding: '14px 16px', marginBottom: '16px'
+                    }}>
+                        <div>
+                            <div style={{ fontSize: '13px', fontWeight: 600, color: '#1a1a1a' }}>
+                                Apply delivery fee (₹60)
+                            </div>
+                            <div style={{ fontSize: '12px', color: '#888', marginTop: '4px' }}>
+                                ON → this product applies the standard ₹60 shipping when subtotal is below ₹250.
+                                OFF → this product never contributes to delivery; cart stays free if all items are OFF.
+                            </div>
+                        </div>
+                        <input
+                            type="checkbox" id="apply_delivery_fee" name="apply_delivery_fee"
+                            checked={form.apply_delivery_fee}
+                            onChange={handleChange}
+                            style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+                        />
                     </div>
 
                     <div>
@@ -404,7 +430,7 @@ export default function NewProductPage() {
                         />
                     </div>
 
-                    <div>
+                    <div style={{ marginBottom: '16px' }}>
                         <label style={label}>
                             Meta description
                             <span style={{ fontWeight: 400, color: '#aaa', marginLeft: '8px' }}>
@@ -421,6 +447,19 @@ export default function NewProductPage() {
                             onChange={handleChange}
                             placeholder="Experience the deep, mysterious notes of Midnight Oud, a signature fragrance by REVEIL..."
                         />
+                    </div>
+
+                    <div>
+                        <label style={label}>Meta keywords</label>
+                        <input
+                            style={input}
+                            name="meta_keywords" value={form.meta_keywords}
+                            onChange={handleChange}
+                            placeholder="midnight oud, oud perfume india, long lasting oud, royal oud"
+                        />
+                        <p style={{ fontSize: '12px', color: '#888', marginTop: '6px', marginBottom: 0 }}>
+                            Comma-separated. Merged with auto-generated keywords on the product page.
+                        </p>
                     </div>
 
                     {/* Google preview */}
