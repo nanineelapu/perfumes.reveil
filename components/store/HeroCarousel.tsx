@@ -2,7 +2,7 @@
 import useEmblaCarousel from 'embla-carousel-react'
 import Image from 'next/image'
 import { useEffect, useCallback, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 type Slide = {
@@ -163,7 +163,7 @@ function SlideMedia({ slide, isActive, emblaApi, isMobile }: { slide: Slide, isA
     }, [slide.id])
 
     return (
-        <div style={{ position: 'relative', height: isMobile ? '90vh' : '100vh', width: '100%', overflow: 'hidden', background: '#f8f7f2' }}>
+        <div style={{ position: 'relative', height: isMobile ? 'auto' : '100vh', aspectRatio: isMobile ? '16 / 9' : undefined, width: '100%', overflow: 'hidden', background: '#f8f7f2' }}>
 
             {/* Premium Placeholder State */}
             {!isLoaded && (
@@ -205,7 +205,7 @@ function SlideMedia({ slide, isActive, emblaApi, isMobile }: { slide: Slide, isA
                         sizes="100vw"
                         style={{
                             objectFit: 'cover',
-                            objectPosition: isMobile ? '18% center' : 'center',
+                            objectPosition: 'center',
                             filter: 'brightness(0.45) contrast(1.08) saturate(0.88)',
                             opacity: (slide.video_url && isLoaded) ? 0 : 1,
                             transition: 'opacity 1s ease'
