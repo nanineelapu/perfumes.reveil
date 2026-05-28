@@ -72,7 +72,7 @@ export async function POST(request: Request) {
 
     // 3. Parse and validate body
     const body = await request.json()
-    const { name, price, description, images, category, stock, is_featured,
+    const { name, price, mrp, description, images, category, stock, is_featured,
         meta_title, meta_description, meta_keywords, scent_profile, technical_specs,
         apply_delivery_fee } = body
 
@@ -103,6 +103,7 @@ export async function POST(request: Request) {
             name,
             slug: finalSlug,
             price,
+            mrp: mrp ?? null,
             description: description ?? null,
             images: images ?? [],
             category: category ?? null,

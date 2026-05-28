@@ -14,6 +14,7 @@ export default function NewProductPage() {
     const [form, setForm] = useState({
         name: '',
         price: '',
+        mrp: '',
         description: '',
         category: '',
         stock: '',
@@ -130,6 +131,7 @@ export default function NewProductPage() {
             body: JSON.stringify({
                 ...form,
                 price: parseFloat(form.price),
+                mrp: form.mrp ? parseFloat(form.mrp) : null,
                 stock: parseInt(form.stock || '0'),
                 images,
                 meta_keywords: form.meta_keywords.trim() || null,
@@ -215,14 +217,28 @@ export default function NewProductPage() {
                         />
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px' }}>
                         <div>
-                            <label style={label}>Price (₹) *</label>
+                            <label style={label}>MRP / Original price (₹)</label>
+                            <input
+                                style={input} name="mrp" type="number"
+                                min="0" step="0.01" value={form.mrp}
+                                onChange={handleChange} placeholder="300"
+                            />
+                            <p style={{ fontSize: '11px', color: '#888', marginTop: '4px', marginBottom: 0 }}>
+                                Optional. If set and higher than the selling price, it shows struck through.
+                            </p>
+                        </div>
+                        <div>
+                            <label style={label}>Selling price (₹) *</label>
                             <input
                                 style={input} name="price" type="number"
                                 min="0" step="0.01" value={form.price}
-                                onChange={handleChange} placeholder="499" required
+                                onChange={handleChange} placeholder="150" required
                             />
+                            <p style={{ fontSize: '11px', color: '#888', marginTop: '4px', marginBottom: 0 }}>
+                                What the customer actually pays.
+                            </p>
                         </div>
                         <div>
                             <label style={label}>Stock quantity</label>

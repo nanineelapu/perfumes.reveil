@@ -367,18 +367,47 @@ export default function ProductCard({ product }: { product: Product }) {
                         {product.name}
                     </h3>
 
-                    {/* Price Tag */}
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: isMobile ? '8px' : '12px',
-                        marginBottom: isMobile ? '12px' : '20px',
-                        fontFamily: 'var(--font-tenor)'
-                    }}>
-                        <span style={{ fontSize: isMobile ? '14px' : '18px', fontWeight: 500, color: '#d4af37' }}>
-                            ₹ {product.price}
-                        </span>
-                    </div>
+                    {/* Price Tag — MRP struck through when higher than selling price */}
+                    {(() => {
+                        const hasDiscount = typeof (product as any).mrp === 'number' && (product as any).mrp > product.price
+                        const pct = hasDiscount
+                            ? Math.round((((product as any).mrp - product.price) / (product as any).mrp) * 100)
+                            : 0
+                        return (
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'baseline',
+                                flexWrap: 'wrap',
+                                gap: isMobile ? '6px' : '10px',
+                                marginBottom: isMobile ? '12px' : '20px',
+                                fontFamily: 'var(--font-tenor)'
+                            }}>
+                                <span style={{ fontSize: isMobile ? '14px' : '18px', fontWeight: 600, color: '#d4af37' }}>
+                                    ₹{product.price.toLocaleString('en-IN')}
+                                </span>
+                                {hasDiscount && (
+                                    <>
+                                        <span style={{
+                                            fontSize: isMobile ? '11px' : '13px',
+                                            color: 'rgba(0,0,0,0.4)',
+                                            textDecoration: 'line-through',
+                                            textDecorationThickness: '1px',
+                                        }}>
+                                            ₹{(product as any).mrp.toLocaleString('en-IN')}
+                                        </span>
+                                        <span style={{
+                                            fontSize: isMobile ? '9px' : '10px',
+                                            color: '#16a34a',
+                                            fontWeight: 700,
+                                            letterSpacing: '0.05em'
+                                        }}>
+                                            {pct}% OFF
+                                        </span>
+                                    </>
+                                )}
+                            </div>
+                        )
+                    })()}
                 </Link>
 
                 {/* Integrated Static Controls for Accessibility - Theme Focused */}

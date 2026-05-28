@@ -117,16 +117,22 @@ export default function EditProductPage(props: { params: Params }) {
             : []
 
         const metaKeywordsRaw = ((formData.get('meta_keywords') as string) || '').trim()
+        const metaTitleRaw = ((formData.get('meta_title') as string) || '').trim()
+        const metaDescriptionRaw = ((formData.get('meta_description') as string) || '').trim()
+        const mrpRaw = ((formData.get('mrp') as string) || '').trim()
 
         const body = {
             name,
             slug,
             description: formData.get('description'),
             price: Number(formData.get('price')),
+            mrp: mrpRaw ? Number(mrpRaw) : null,
             stock: Number(formData.get('stock')),
             category: formData.get('category'),
             is_featured: formData.get('is_featured') === 'on',
             apply_delivery_fee: formData.get('apply_delivery_fee') === 'on',
+            meta_title: metaTitleRaw || null,
+            meta_description: metaDescriptionRaw || null,
             meta_keywords: metaKeywordsRaw || null,
             // Images managed via controlled state (upload + manual URL fallback)
             images,
@@ -396,17 +402,37 @@ export default function EditProductPage(props: { params: Params }) {
                 <div className="space-y-8">
                     <section className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm space-y-8">
                         <div className="space-y-4">
-                            <label className="text-[10px] font-bold tracking-widest uppercase text-gray-400 block">Valuation (₹)</label>
+                            <label className="text-[10px] font-bold tracking-widest uppercase text-gray-400 block">
+                                MRP / Original Price (₹) <span className="text-gray-300 normal-case font-normal tracking-normal">optional</span>
+                            </label>
+                            <div className="relative">
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-light text-sm">₹</span>
+                                <input
+                                    name="mrp"
+                                    type="number"
+                                    step="0.01"
+                                    defaultValue={product.mrp ?? ''}
+                                    className="w-full bg-gray-50 border-none rounded-xl pl-8 pr-4 py-4 text-lg font-medium focus:ring-1 focus:ring-accent transition-all"
+                                    placeholder="300"
+                                />
+                            </div>
+                            <p className="text-[10px] text-gray-400">Shows struck through next to the selling price when higher. Leave blank for no strikethrough.</p>
+                        </div>
+
+                        <div className="space-y-4">
+                            <label className="text-[10px] font-bold tracking-widest uppercase text-gray-400 block">Selling Price (₹)</label>
                             <div className="relative">
                                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-light text-sm">₹</span>
                                 <input
                                     name="price"
                                     type="number"
+                                    step="0.01"
                                     defaultValue={product.price}
                                     required
                                     className="w-full bg-gray-50 border-none rounded-xl pl-8 pr-4 py-4 text-lg font-medium focus:ring-1 focus:ring-accent transition-all"
                                 />
                             </div>
+                            <p className="text-[10px] text-gray-400">What the customer actually pays.</p>
                         </div>
 
                         <div className="space-y-4">
@@ -465,8 +491,36 @@ export default function EditProductPage(props: { params: Params }) {
                     <section className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm space-y-6">
                         <div className="flex items-center gap-2 mb-2 text-accent">
                             <Sparkles className="w-4 h-4" />
-                            <h2 className="text-[10px] font-bold tracking-[.3em] uppercase">SEO Keywords</h2>
+                            <h2 className="text-[10px] font-bold tracking-[.3em] uppercase">SEO Settings</h2>
                         </div>
+
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-bold tracking-widest uppercase text-gray-400">
+                                Meta Title <span className="text-gray-300 normal-case font-normal tracking-normal">(≤ 60 chars)</span>
+                            </label>
+                            <input
+                                name="meta_title"
+                                defaultValue={product.meta_title || ''}
+                                className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-accent transition-all"
+                                placeholder="Midnight Oud | REVEIL"
+                            />
+                            <p className="text-[10px] text-gray-400">Overrides the auto-generated browser/Google tab title. Leave blank to use the auto title.</p>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-bold tracking-widest uppercase text-gray-400">
+                                Meta Description <span className="text-gray-300 normal-case font-normal tracking-normal">(≤ 160 chars)</span>
+                            </label>
+                            <textarea
+                                name="meta_description"
+                                defaultValue={product.meta_description || ''}
+                                rows={3}
+                                className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-accent transition-all"
+                                placeholder="Experience the deep, mysterious notes of Midnight Oud..."
+                            />
+                            <p className="text-[10px] text-gray-400">Shown in Google search snippets. Leave blank to use the product description.</p>
+                        </div>
+
                         <div className="space-y-2">
                             <label className="text-[10px] font-bold tracking-widest uppercase text-gray-400">
                                 Meta Keywords <span className="text-gray-300 normal-case font-normal tracking-normal">(comma separated)</span>

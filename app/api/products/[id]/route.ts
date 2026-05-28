@@ -6,7 +6,7 @@ import { notifyGoogleOfChange } from '@/lib/utils/indexing'
 type Params = Promise<{ id: string }>
 
 const ALLOWED_FIELDS = [
-    'name', 'slug', 'price', 'description', 'images', 'category',
+    'name', 'slug', 'price', 'mrp', 'description', 'images', 'category',
     'stock', 'is_featured', 'meta_title', 'meta_description', 'meta_keywords',
     'scent_profile', 'rating', 'technical_specs', 'apply_delivery_fee',
 ] as const

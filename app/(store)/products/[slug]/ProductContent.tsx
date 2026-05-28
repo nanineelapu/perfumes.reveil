@@ -391,9 +391,44 @@ export function ProductContent({ product, initialReviews, relatedProducts = [] }
                             </span>
                         </div>
 
-                        <div style={{ fontSize: isMobile ? '18px' : '20px', color: '#1a1a1a', fontFamily: 'var(--font-tenor)', marginBottom: isMobile ? '24px' : '32px', fontWeight: 300 }}>
-                            ₹{product.price.toLocaleString()}
-                        </div>
+                        {(() => {
+                            const mrp = (product as any).mrp
+                            const hasDiscount = typeof mrp === 'number' && mrp > product.price
+                            const pct = hasDiscount ? Math.round(((mrp - product.price) / mrp) * 100) : 0
+                            return (
+                                <div style={{
+                                    display: 'flex', alignItems: 'baseline', flexWrap: 'wrap',
+                                    gap: isMobile ? '10px' : '14px',
+                                    marginBottom: isMobile ? '24px' : '32px',
+                                    fontFamily: 'var(--font-tenor)'
+                                }}>
+                                    <span style={{ fontSize: isMobile ? '22px' : '26px', color: '#1a1a1a', fontWeight: 500 }}>
+                                        ₹{product.price.toLocaleString('en-IN')}
+                                    </span>
+                                    {hasDiscount && (
+                                        <>
+                                            <span style={{
+                                                fontSize: isMobile ? '14px' : '16px',
+                                                color: 'rgba(0,0,0,0.4)',
+                                                textDecoration: 'line-through',
+                                                textDecorationThickness: '1px'
+                                            }}>
+                                                ₹{mrp.toLocaleString('en-IN')}
+                                            </span>
+                                            <span style={{
+                                                fontSize: isMobile ? '11px' : '12px',
+                                                color: '#16a34a',
+                                                fontWeight: 700,
+                                                letterSpacing: '0.08em',
+                                                textTransform: 'uppercase'
+                                            }}>
+                                                {pct}% Off
+                                            </span>
+                                        </>
+                                    )}
+                                </div>
+                            )
+                        })()}
 
                         <p style={{ fontSize: '14px', lineHeight: 1.7, color: '#888', fontFamily: 'var(--font-tenor)', maxWidth: '480px', marginBottom: isMobile ? '32px' : '40px', fontWeight: 300 }}>
                             {product.description || 'Accessing encrypted olfactory data. This composition is part of the REVEIL Laboratory Archive, designed for high-end olfactory resonance.'}
