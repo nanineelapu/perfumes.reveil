@@ -87,6 +87,11 @@ export function ProductListContent() {
         return ["ALL", ...uniqueCats]
     }, [products])
 
+    // Slug-tolerant "is this the active category?" check used by every
+    // highlight (mobile sticky bar + desktop sidebar) so URL-driven nav and
+    // click-driven nav agree on what's selected.
+    const isCategoryActive = (cat: string) => toSlug(selectedCategory) === toSlug(cat)
+
     const filteredAndSortedProducts = useMemo(() => {
         const selectedSlug = toSlug(selectedCategory)
         let filtered = products.filter(p => {
@@ -220,9 +225,9 @@ export function ProductListContent() {
                             whileTap={{ scale: 0.95 }}
                             onClick={() => setSelectedCategory(cat)}
                             style={{
-                                background: selectedCategory === cat ? 'rgba(212, 175, 55, 0.08)' : 'rgba(0,0,0,0.02)',
-                                border: `1px solid ${selectedCategory === cat ? '#d4af37' : 'rgba(0,0,0,0.1)'}`,
-                                color: selectedCategory === cat ? '#d4af37' : '#888',
+                                background: isCategoryActive(cat) ? 'rgba(212, 175, 55, 0.08)' : 'rgba(0,0,0,0.02)',
+                                border: `1px solid ${isCategoryActive(cat) ? '#d4af37' : 'rgba(0,0,0,0.1)'}`,
+                                color: isCategoryActive(cat) ? '#d4af37' : '#888',
                                 padding: '8px 18px',
                                 borderRadius: '999px',
                                 fontSize: '9px',
@@ -230,7 +235,7 @@ export function ProductListContent() {
                                 letterSpacing: '0.2em',
                                 whiteSpace: 'nowrap',
                                 transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-                                fontWeight: selectedCategory === cat ? 800 : 500,
+                                fontWeight: isCategoryActive(cat) ? 800 : 500,
                                 cursor: 'pointer',
                                 outline: 'none',
                                 flexShrink: 0
@@ -277,15 +282,15 @@ export function ProductListContent() {
                                     onClick={() => setSelectedCategory(cat)}
                                     style={{
                                          background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', textAlign: 'left',
-                                         color: selectedCategory === cat ? '#1a1a1a' : '#555', textTransform: 'uppercase', letterSpacing: '0.15em',
+                                         color: isCategoryActive(cat) ? '#1a1a1a' : '#555', textTransform: 'uppercase', letterSpacing: '0.15em',
                                          display: 'flex', alignItems: 'center', transition: 'all 0.4s ease', padding: '12px 0', borderBottom: '1px solid rgba(0,0,0,0.05)',
                                          width: '100%'
                                      }}
                                  >
                                      <span style={{ fontSize: '8px', opacity: 0.3, width: '28px', fontWeight: 700, fontFamily: 'var(--font-tenor)' }}>{String(idx + 1).padStart(2, '0')}</span>
-                                    <span style={{ position: 'relative', fontWeight: selectedCategory === cat ? 900 : 500, letterSpacing: selectedCategory === cat ? '0.3em' : '0.2em' }}>
+                                    <span style={{ position: 'relative', fontWeight: isCategoryActive(cat) ? 900 : 500, letterSpacing: isCategoryActive(cat) ? '0.3em' : '0.2em' }}>
                                         {cat}
-                                        {selectedCategory === cat && (
+                                        {isCategoryActive(cat) && (
                                             <motion.div layoutId="cat-underline" style={{ position: 'absolute', bottom: '-4px', left: 0, right: 0, height: '1px', background: '#d4af37' }} />
                                         )}
                                     </span>
