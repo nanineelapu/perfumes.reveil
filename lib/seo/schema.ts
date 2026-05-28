@@ -7,7 +7,7 @@
  * Keep one builder per schema type so pages compose only what they need.
  */
 
-import { SITE_URL, SITE_NAME, BRAND_NAME, LEGAL_NAME } from './keywords'
+import { SITE_URL, SITE_NAME, BRAND_NAME, LEGAL_NAME, SOCIAL_LINKS } from './keywords'
 
 // ── ORGANIZATION (sitewide) ─────────────────────────────────────────────────
 export function organizationSchema() {
@@ -22,8 +22,8 @@ export function organizationSchema() {
     description: `${BRAND_NAME} crafts long-lasting luxury perfumes, authentic attars, premium deodorants, and home fragrances in India.`,
     foundingDate: '2026',
     sameAs: [
-      'https://www.instagram.com/reveilfragrance/',
-      'https://www.facebook.com/reveilfragrance/',
+      SOCIAL_LINKS.instagram,
+      SOCIAL_LINKS.facebook,
     ],
     address: {
       '@type': 'PostalAddress',

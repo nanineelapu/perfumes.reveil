@@ -18,6 +18,16 @@ export const SITE_NAME = 'Reveil Fragrance'
 export const BRAND_NAME = 'REVEIL'
 export const LEGAL_NAME = 'Trimurty Enterprises'
 
+// ── SOCIAL PROFILES ────────────────────────────────────────────────────────
+// Single source of truth. Used by:
+//   • Footer (visible icons)
+//   • JSON-LD Organization.sameAs (knowledge panel association)
+// Update here and both surfaces follow.
+export const SOCIAL_LINKS = {
+  instagram: 'https://www.instagram.com/trimurty_enterprises',
+  facebook: 'https://www.facebook.com/TrimurtyEnterprises',
+} as const
+
 // ── HIGH-INTENT COMMERCIAL KEYWORDS ─────────────────────────────────────────
 export const HIGH_INTENT_KEYWORDS = [
   'buy perfumes online India',
