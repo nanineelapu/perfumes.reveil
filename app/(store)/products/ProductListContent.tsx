@@ -138,75 +138,60 @@ export function ProductListContent() {
         }}>
             {/* SECTION 1: TOP HERO (FIXED) */}
             {!isMobile && (
-            <section style={{
-                padding: isMobile ? '100px 0 20px' : '30px 0 10px',
-                position: 'relative',
-                overflow: 'hidden',
-                background: 'linear-gradient(to bottom, #f3eee2, #f8f7f2)',
-                borderBottom: '1px solid rgba(0,0,0,0.03)'
-            }}>
+            <>
+                {/* Pinned brand logo — stays fixed below the navbar while the page
+                    scrolls. Click-through (pointerEvents: none) and sits below the
+                    navbar (zIndex 40 < navbar's 100) so the capsule always wins. */}
                 <div style={{
-                    position: 'absolute', inset: 0,
-                    backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(0,0,0,0.02) 1px, transparent 0)',
-                    backgroundSize: '40px 40px',
-                    maskImage: 'linear-gradient(to bottom, black, transparent)'
-                }} />
+                    position: 'fixed', top: '92px', left: 0, right: 0, zIndex: 40,
+                    display: 'flex', flexDirection: 'column', alignItems: 'center',
+                    gap: '12px', pointerEvents: 'none'
+                }}>
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 2, ease: [0.16, 1, 0.3, 1] }}
+                    >
+                        <h1 style={{ margin: 0, lineHeight: 0 }}>
+                            <span className="sr-only">Reveil</span>
+                            <img
+                                src="/images/logo-text.webp"
+                                alt="Reveil"
+                                style={{
+                                    height: 'clamp(40px, 4.5vw, 60px)',
+                                    width: 'auto',
+                                    display: 'block'
+                                }}
+                            />
+                        </h1>
+                    </motion.div>
 
-                <div style={{ maxWidth: '1400px', margin: '0 auto', padding: isMobile ? '0 24px' : '0 60px', position: 'relative' }}>
-                    <div style={{
-                        position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-                        fontSize: '15vw', color: 'rgba(0,0,0,0.012)', fontWeight: 900,
-                        pointerEvents: 'none', zIndex: 0, letterSpacing: '-0.05em'
-                    }}>
-                        02
-                    </div>
-
-                    <div style={{ 
-                        display: 'flex', flexDirection: 'column',
-                        alignItems: isMobile ? 'flex-start' : 'center',
-                        justifyContent: 'center',
-                        position: 'relative', zIndex: 1, width: '100%',
-                        gap: isMobile ? '6px' : '14px'
-                    }}>
-                        <motion.div
-                            initial={{ opacity: 0, y: 30 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 2, ease: [0.16, 1, 0.3, 1] }}
-                            style={{ textAlign: isMobile ? 'left' : 'center', display: 'flex', justifyContent: isMobile ? 'flex-start' : 'center' }}
-                        >
-                            <h1 style={{ margin: 0, lineHeight: 0 }}>
-                                <span className="sr-only">Reveil</span>
-                                <img
-                                    src="/images/logo-text.webp"
-                                    alt="Reveil"
-                                    style={{
-                                        height: isMobile ? '30px' : 'clamp(40px, 4.5vw, 60px)',
-                                        width: 'auto',
-                                        display: 'block'
-                                    }}
-                                />
-                            </h1>
-                        </motion.div>
-
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ duration: 1.5, delay: 0.5 }}
-                            style={{ display: 'flex', alignItems: 'center', justifyContent: isMobile ? 'flex-start' : 'center', gap: '16px' }}
-                        >
-                            <div style={{ width: '24px', height: '1px', background: 'rgba(212,175,55,0.3)' }} />
-                            <span style={{
-                                fontSize: isMobile ? '8px' : '10px',
-                                letterSpacing: '0.35em',
-                                color: 'rgba(0,0,0,0.45)', textTransform: 'uppercase', fontWeight: 500
-                            }}>
-                                Studio Archive
-                            </span>
-                            <div style={{ width: '24px', height: '1px', background: 'rgba(212,175,55,0.3)' }} />
-                        </motion.div>
-                    </div>
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 1.5, delay: 0.5 }}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px' }}
+                    >
+                        <div style={{ width: '24px', height: '1px', background: 'rgba(212,175,55,0.3)' }} />
+                        <span style={{
+                            fontSize: '10px',
+                            letterSpacing: '0.35em',
+                            color: 'rgba(0,0,0,0.45)', textTransform: 'uppercase', fontWeight: 500
+                        }}>
+                            Studio Archive
+                        </span>
+                        <div style={{ width: '24px', height: '1px', background: 'rgba(212,175,55,0.3)' }} />
+                    </motion.div>
                 </div>
-            </section>
+
+                {/* Spacer reserves the logo's space at the top so the grid starts
+                    cleanly below it; keeps the gradient band, which scrolls away. */}
+                <div style={{
+                    height: '200px', flexShrink: 0,
+                    background: 'linear-gradient(to bottom, #f3eee2, #f8f7f2)',
+                    borderBottom: '1px solid rgba(0,0,0,0.03)'
+                }} />
+            </>
             )}
 
             {isMobile && (
