@@ -23,19 +23,19 @@ export default function EditProductPage(props: { params: Params }) {
     const [uploadError, setUploadError] = useState<string>('')
 
     // Pricing & discount — when discount is on, the admin enters the original
-    // (MRP) price and a discount %, and the selling price is auto-computed.
+    // (MRP) price and the discounted price; the % off is auto-calculated.
     const [discountOn, setDiscountOn] = useState(false)
     const [origPrice, setOrigPrice] = useState('')   // MRP / original
-    const [discountPct, setDiscountPct] = useState('')
+    const [salePrice, setSalePrice] = useState('')   // discounted price the admin enters
     const [basePrice, setBasePrice] = useState('')    // selling price when no discount
 
-    // Selling price derived from MRP + discount % (rounded to whole rupees).
-    const computedSelling = (() => {
+    // Discount % derived from MRP + discounted price. Null when the inputs
+    // don't describe a valid discount (e.g. sale price ≥ MRP).
+    const computedPct = (() => {
         const m = parseFloat(origPrice)
-        const p = parseFloat(discountPct)
-        if (!isFinite(m) || !isFinite(p) || m <= 0) return null
-        const clamped = Math.min(Math.max(p, 0), 100)
-        return Math.round(m * (1 - clamped / 100))
+        const s = parseFloat(salePrice)
+        if (!isFinite(m) || !isFinite(s) || m <= 0 || s <= 0 || s >= m) return null
+        return Math.round((1 - s / m) * 100)
     })()
 
     useEffect(() => {
@@ -60,7 +60,7 @@ export default function EditProductPage(props: { params: Params }) {
                 if (m && m > pData.price) {
                     setDiscountOn(true)
                     setOrigPrice(String(m))
-                    setDiscountPct(String(Math.round(((m - pData.price) / m) * 100)))
+                    setSalePrice(String(pData.price))
                     setBasePrice(String(pData.price))
                 } else {
                     setDiscountOn(false)
@@ -156,12 +156,13 @@ export default function EditProductPage(props: { params: Params }) {
         let finalMrp: number | null
         if (discountOn) {
             const m = parseFloat(origPrice)
-            if (!isFinite(m) || m <= 0 || computedSelling == null || m <= computedSelling) {
-                alert('Set an original price and a discount % so the discounted price is below the original.')
+            const s = parseFloat(salePrice)
+            if (!isFinite(m) || !isFinite(s) || m <= 0 || s <= 0 || s >= m) {
+                alert('Enter an original price and a lower discounted price.')
                 setSaving(false)
                 return
             }
-            finalPrice = computedSelling
+            finalPrice = s
             finalMrp = m
         } else {
             finalPrice = parseFloat(basePrice)
@@ -493,35 +494,35 @@ export default function EditProductPage(props: { params: Params }) {
                                 </div>
 
                                 <div className="space-y-4">
-                                    <label className="text-[10px] font-bold tracking-widest uppercase text-gray-400 block">Discount (%)</label>
+                                    <label className="text-[10px] font-bold tracking-widest uppercase text-gray-400 block">Discounted Price (₹)</label>
                                     <div className="relative">
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-light text-sm">₹</span>
                                         <input
                                             type="number"
-                                            step="1"
+                                            step="0.01"
                                             min="0"
-                                            max="100"
-                                            value={discountPct}
-                                            onChange={(e) => setDiscountPct(e.target.value)}
+                                            value={salePrice}
+                                            onChange={(e) => setSalePrice(e.target.value)}
                                             required
-                                            className="w-full bg-gray-50 border-none rounded-xl pl-4 pr-8 py-4 text-lg font-medium focus:ring-1 focus:ring-accent transition-all"
-                                            placeholder="40"
+                                            className="w-full bg-gray-50 border-none rounded-xl pl-8 pr-4 py-4 text-lg font-medium focus:ring-1 focus:ring-accent transition-all"
+                                            placeholder="399"
                                         />
-                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-light text-sm">%</span>
                                     </div>
+                                    <p className="text-[10px] text-gray-400">What the customer pays. Must be lower than the original price. The % off is calculated automatically.</p>
                                 </div>
 
                                 {/* Live preview of exactly what the storefront will show */}
                                 <div className="rounded-xl bg-amber-50/60 border border-amber-100 px-4 py-3">
-                                    {computedSelling != null && parseFloat(origPrice) > computedSelling ? (
+                                    {computedPct != null ? (
                                         <div className="flex items-baseline gap-3 flex-wrap">
-                                            <span className="text-lg font-bold text-accent">₹{computedSelling.toLocaleString('en-IN')}</span>
+                                            <span className="text-lg font-bold text-accent">₹{parseFloat(salePrice).toLocaleString('en-IN')}</span>
                                             <span className="text-sm text-gray-400 line-through">₹{parseFloat(origPrice).toLocaleString('en-IN')}</span>
                                             <span className="text-[10px] font-bold text-green-600 tracking-wide">
-                                                {Math.round((1 - computedSelling / parseFloat(origPrice)) * 100)}% OFF
+                                                {computedPct}% OFF
                                             </span>
                                         </div>
                                     ) : (
-                                        <span className="text-[11px] text-gray-400">Enter original price and discount % to preview.</span>
+                                        <span className="text-[11px] text-gray-400">Enter an original price and a lower discounted price to preview.</span>
                                     )}
                                     <p className="text-[10px] text-gray-400 mt-1">Customer pays the bold price. The original shows struck-through with the % badge.</p>
                                 </div>

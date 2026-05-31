@@ -17,7 +17,6 @@ export default function NewProductPage() {
         price: '',
         mrp: '',
         discountOn: false,
-        discountPct: '',
         description: '',
         category: '',
         stock: '',
@@ -32,13 +31,13 @@ export default function NewProductPage() {
         sizes: '',
     })
 
-    // Selling price derived from MRP + discount % (rounded to whole rupees).
-    const computedSelling = (() => {
+    // Discount % derived from MRP + discounted price. Null when the inputs
+    // don't describe a valid discount (e.g. discounted price ≥ MRP).
+    const computedPct = (() => {
         const m = parseFloat(form.mrp)
-        const p = parseFloat(form.discountPct)
-        if (!isFinite(m) || !isFinite(p) || m <= 0) return null
-        const clamped = Math.min(Math.max(p, 0), 100)
-        return Math.round(m * (1 - clamped / 100))
+        const s = parseFloat(form.price)
+        if (!isFinite(m) || !isFinite(s) || m <= 0 || s <= 0 || s >= m) return null
+        return Math.round((1 - s / m) * 100)
     })()
 
     useEffect(() => {
@@ -131,11 +130,12 @@ export default function NewProductPage() {
         let finalMrp: number | null
         if (form.discountOn) {
             const m = parseFloat(form.mrp)
-            if (!isFinite(m) || m <= 0 || computedSelling == null || m <= computedSelling) {
-                setError('Set an original price and a discount % so the discounted price is below the original.')
+            const s = parseFloat(form.price)
+            if (!isFinite(m) || !isFinite(s) || m <= 0 || s <= 0 || s >= m) {
+                setError('Enter an original price and a lower discounted price.')
                 return
             }
-            finalPrice = computedSelling
+            finalPrice = s
             finalMrp = m
         } else {
             finalPrice = parseFloat(form.price)
@@ -280,31 +280,31 @@ export default function NewProductPage() {
                                     />
                                 </div>
                                 <div>
-                                    <label style={label}>Discount (%) *</label>
+                                    <label style={label}>Discounted price (₹) *</label>
                                     <input
-                                        style={input} name="discountPct" type="number"
-                                        min="0" max="100" step="1" value={form.discountPct}
-                                        onChange={handleChange} placeholder="40"
+                                        style={input} name="price" type="number"
+                                        min="0" step="0.01" value={form.price}
+                                        onChange={handleChange} placeholder="399"
                                     />
                                 </div>
                                 <div style={{ gridColumn: '1 / -1' }}>
-                                    {computedSelling != null && parseFloat(form.mrp) > computedSelling ? (
+                                    {computedPct != null ? (
                                         <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', flexWrap: 'wrap' }}>
                                             <span style={{ fontSize: '20px', fontWeight: 700, color: '#b8860b' }}>
-                                                ₹{computedSelling.toLocaleString('en-IN')}
+                                                ₹{parseFloat(form.price).toLocaleString('en-IN')}
                                             </span>
                                             <span style={{ fontSize: '14px', color: '#999', textDecoration: 'line-through' }}>
                                                 ₹{parseFloat(form.mrp).toLocaleString('en-IN')}
                                             </span>
                                             <span style={{ fontSize: '12px', fontWeight: 700, color: '#16a34a' }}>
-                                                {Math.round((1 - computedSelling / parseFloat(form.mrp)) * 100)}% OFF
+                                                {computedPct}% OFF
                                             </span>
                                         </div>
                                     ) : (
-                                        <span style={{ fontSize: '12px', color: '#888' }}>Enter original price and discount % to preview.</span>
+                                        <span style={{ fontSize: '12px', color: '#888' }}>Enter an original price and a lower discounted price to preview.</span>
                                     )}
                                     <p style={{ fontSize: '11px', color: '#888', marginTop: '6px', marginBottom: 0 }}>
-                                        Customer pays the bold price. The original shows struck-through with the % badge.
+                                        Customer pays the bold price (the % off is calculated automatically). The original shows struck-through.
                                     </p>
                                 </div>
                             </div>
