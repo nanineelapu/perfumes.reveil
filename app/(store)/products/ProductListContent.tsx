@@ -177,10 +177,10 @@ export function ProductListContent() {
                             <h1 style={{ margin: 0, lineHeight: 0 }}>
                                 <span className="sr-only">Reveil</span>
                                 <img
-                                    src="https://lhnamtkpjkrawgql.public.blob.vercel-storage.com/LOGO.webp"
+                                    src="/images/logo-text.webp"
                                     alt="Reveil"
                                     style={{
-                                        height: isMobile ? '56px' : 'clamp(80px, 9vw, 120px)',
+                                        height: isMobile ? '30px' : 'clamp(40px, 4.5vw, 60px)',
                                         width: 'auto',
                                         display: 'block'
                                     }}

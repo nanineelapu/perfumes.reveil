@@ -22,6 +22,22 @@ export default function EditProductPage(props: { params: Params }) {
     const [uploading, setUploading] = useState(false)
     const [uploadError, setUploadError] = useState<string>('')
 
+    // Pricing & discount — when discount is on, the admin enters the original
+    // (MRP) price and a discount %, and the selling price is auto-computed.
+    const [discountOn, setDiscountOn] = useState(false)
+    const [origPrice, setOrigPrice] = useState('')   // MRP / original
+    const [discountPct, setDiscountPct] = useState('')
+    const [basePrice, setBasePrice] = useState('')    // selling price when no discount
+
+    // Selling price derived from MRP + discount % (rounded to whole rupees).
+    const computedSelling = (() => {
+        const m = parseFloat(origPrice)
+        const p = parseFloat(discountPct)
+        if (!isFinite(m) || !isFinite(p) || m <= 0) return null
+        const clamped = Math.min(Math.max(p, 0), 100)
+        return Math.round(m * (1 - clamped / 100))
+    })()
+
     useEffect(() => {
         async function fetchData() {
             setLoading(true)
@@ -37,6 +53,19 @@ export default function EditProductPage(props: { params: Params }) {
             if (pData) {
                 setProduct(pData)
                 setImages(Array.isArray(pData.images) ? pData.images : [])
+
+                // Seed the discount controls. A product has an active discount
+                // when its MRP is a number greater than the selling price.
+                const m = typeof pData.mrp === 'number' ? pData.mrp : null
+                if (m && m > pData.price) {
+                    setDiscountOn(true)
+                    setOrigPrice(String(m))
+                    setDiscountPct(String(Math.round(((m - pData.price) / m) * 100)))
+                    setBasePrice(String(pData.price))
+                } else {
+                    setDiscountOn(false)
+                    setBasePrice(String(pData.price))
+                }
             }
             if (Array.isArray(cData)) setCategories(cData)
 
@@ -119,14 +148,37 @@ export default function EditProductPage(props: { params: Params }) {
         const metaKeywordsRaw = ((formData.get('meta_keywords') as string) || '').trim()
         const metaTitleRaw = ((formData.get('meta_title') as string) || '').trim()
         const metaDescriptionRaw = ((formData.get('meta_description') as string) || '').trim()
-        const mrpRaw = ((formData.get('mrp') as string) || '').trim()
+
+        // Resolve selling price (`price`) and original price (`mrp`) from the
+        // discount controls. With discount off, mrp is cleared so no
+        // strikethrough shows on the storefront.
+        let finalPrice: number
+        let finalMrp: number | null
+        if (discountOn) {
+            const m = parseFloat(origPrice)
+            if (!isFinite(m) || m <= 0 || computedSelling == null || m <= computedSelling) {
+                alert('Set an original price and a discount % so the discounted price is below the original.')
+                setSaving(false)
+                return
+            }
+            finalPrice = computedSelling
+            finalMrp = m
+        } else {
+            finalPrice = parseFloat(basePrice)
+            finalMrp = null
+            if (!isFinite(finalPrice) || finalPrice <= 0) {
+                alert('Enter a valid selling price.')
+                setSaving(false)
+                return
+            }
+        }
 
         const body = {
             name,
             slug,
             description: formData.get('description'),
-            price: Number(formData.get('price')),
-            mrp: mrpRaw ? Number(mrpRaw) : null,
+            price: finalPrice,
+            mrp: finalMrp,
             stock: Number(formData.get('stock')),
             category: formData.get('category'),
             is_featured: formData.get('is_featured') === 'on',
@@ -263,6 +315,7 @@ export default function EditProductPage(props: { params: Params }) {
                                 className="w-full bg-gray-50 border-none rounded-xl px-4 py-4 text-sm focus:ring-1 focus:ring-accent transition-all leading-relaxed whitespace-pre-line"
                                 placeholder="Describe the olfactory journey..."
                             />
+                            <p className="text-[10px] text-gray-400">Formatting is preserved: start a line with • (or - / *) for bullets, leave a blank line for a new paragraph, and emojis work too. ✨</p>
                         </div>
                     </section>
 
@@ -401,39 +454,97 @@ export default function EditProductPage(props: { params: Params }) {
                 {/* Right Column: Inventory & Stats */}
                 <div className="space-y-8">
                     <section className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm space-y-8">
-                        <div className="space-y-4">
-                            <label className="text-[10px] font-bold tracking-widest uppercase text-gray-400 block">
-                                MRP / Original Price (₹) <span className="text-gray-300 normal-case font-normal tracking-normal">optional</span>
+                        {/* Discount toggle — admin decides per product whether to run a discount */}
+                        <div className="pb-4 border-b border-gray-50">
+                            <label className="flex items-center gap-3 cursor-pointer group">
+                                <div className="relative flex items-center">
+                                    <input
+                                        type="checkbox"
+                                        checked={discountOn}
+                                        onChange={(e) => setDiscountOn(e.target.checked)}
+                                        className="peer sr-only"
+                                    />
+                                    <div className="w-10 h-6 bg-gray-200 rounded-full peer peer-checked:bg-accent transition-colors"></div>
+                                    <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full peer-checked:translate-x-4 transition-transform shadow-sm"></div>
+                                </div>
+                                <span className="text-[10px] font-bold tracking-widest uppercase text-gray-500 group-hover:text-accent transition-colors">
+                                    Show Discount
+                                </span>
                             </label>
-                            <div className="relative">
-                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-light text-sm">₹</span>
-                                <input
-                                    name="mrp"
-                                    type="number"
-                                    step="0.01"
-                                    defaultValue={product.mrp ?? ''}
-                                    className="w-full bg-gray-50 border-none rounded-xl pl-8 pr-4 py-4 text-lg font-medium focus:ring-1 focus:ring-accent transition-all"
-                                    placeholder="300"
-                                />
-                            </div>
-                            <p className="text-[10px] text-gray-400">Shows struck through next to the selling price when higher. Leave blank for no strikethrough.</p>
                         </div>
 
-                        <div className="space-y-4">
-                            <label className="text-[10px] font-bold tracking-widest uppercase text-gray-400 block">Selling Price (₹)</label>
-                            <div className="relative">
-                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-light text-sm">₹</span>
-                                <input
-                                    name="price"
-                                    type="number"
-                                    step="0.01"
-                                    defaultValue={product.price}
-                                    required
-                                    className="w-full bg-gray-50 border-none rounded-xl pl-8 pr-4 py-4 text-lg font-medium focus:ring-1 focus:ring-accent transition-all"
-                                />
+                        {discountOn ? (
+                            <>
+                                <div className="space-y-4">
+                                    <label className="text-[10px] font-bold tracking-widest uppercase text-gray-400 block">Original Price / MRP (₹)</label>
+                                    <div className="relative">
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-light text-sm">₹</span>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            min="0"
+                                            value={origPrice}
+                                            onChange={(e) => setOrigPrice(e.target.value)}
+                                            required
+                                            className="w-full bg-gray-50 border-none rounded-xl pl-8 pr-4 py-4 text-lg font-medium focus:ring-1 focus:ring-accent transition-all"
+                                            placeholder="649"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <label className="text-[10px] font-bold tracking-widest uppercase text-gray-400 block">Discount (%)</label>
+                                    <div className="relative">
+                                        <input
+                                            type="number"
+                                            step="1"
+                                            min="0"
+                                            max="100"
+                                            value={discountPct}
+                                            onChange={(e) => setDiscountPct(e.target.value)}
+                                            required
+                                            className="w-full bg-gray-50 border-none rounded-xl pl-4 pr-8 py-4 text-lg font-medium focus:ring-1 focus:ring-accent transition-all"
+                                            placeholder="40"
+                                        />
+                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-light text-sm">%</span>
+                                    </div>
+                                </div>
+
+                                {/* Live preview of exactly what the storefront will show */}
+                                <div className="rounded-xl bg-amber-50/60 border border-amber-100 px-4 py-3">
+                                    {computedSelling != null && parseFloat(origPrice) > computedSelling ? (
+                                        <div className="flex items-baseline gap-3 flex-wrap">
+                                            <span className="text-lg font-bold text-accent">₹{computedSelling.toLocaleString('en-IN')}</span>
+                                            <span className="text-sm text-gray-400 line-through">₹{parseFloat(origPrice).toLocaleString('en-IN')}</span>
+                                            <span className="text-[10px] font-bold text-green-600 tracking-wide">
+                                                {Math.round((1 - computedSelling / parseFloat(origPrice)) * 100)}% OFF
+                                            </span>
+                                        </div>
+                                    ) : (
+                                        <span className="text-[11px] text-gray-400">Enter original price and discount % to preview.</span>
+                                    )}
+                                    <p className="text-[10px] text-gray-400 mt-1">Customer pays the bold price. The original shows struck-through with the % badge.</p>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="space-y-4">
+                                <label className="text-[10px] font-bold tracking-widest uppercase text-gray-400 block">Selling Price (₹)</label>
+                                <div className="relative">
+                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-light text-sm">₹</span>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        value={basePrice}
+                                        onChange={(e) => setBasePrice(e.target.value)}
+                                        required
+                                        className="w-full bg-gray-50 border-none rounded-xl pl-8 pr-4 py-4 text-lg font-medium focus:ring-1 focus:ring-accent transition-all"
+                                        placeholder="300"
+                                    />
+                                </div>
+                                <p className="text-[10px] text-gray-400">What the customer pays. Turn on “Show Discount” to display a struck-through original price.</p>
                             </div>
-                            <p className="text-[10px] text-gray-400">What the customer actually pays.</p>
-                        </div>
+                        )}
 
                         <div className="space-y-4">
                             <label className="text-[10px] font-bold tracking-widest uppercase text-gray-400 block">Current Inventory</label>

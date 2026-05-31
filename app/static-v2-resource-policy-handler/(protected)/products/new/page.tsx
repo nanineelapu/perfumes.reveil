@@ -15,6 +15,8 @@ export default function NewProductPage() {
         name: '',
         price: '',
         mrp: '',
+        discountOn: false,
+        discountPct: '',
         description: '',
         category: '',
         stock: '',
@@ -28,6 +30,15 @@ export default function NewProductPage() {
         base_notes: '',
         sizes: '',
     })
+
+    // Selling price derived from MRP + discount % (rounded to whole rupees).
+    const computedSelling = (() => {
+        const m = parseFloat(form.mrp)
+        const p = parseFloat(form.discountPct)
+        if (!isFinite(m) || !isFinite(p) || m <= 0) return null
+        const clamped = Math.min(Math.max(p, 0), 100)
+        return Math.round(m * (1 - clamped / 100))
+    })()
 
     useEffect(() => {
         fetch('/api/categories')
@@ -109,10 +120,31 @@ export default function NewProductPage() {
         e.preventDefault()
         setError('')
 
-        if (!form.name || !form.price) {
-            setError('Name and price are required')
+        if (!form.name) {
+            setError('Product name is required')
             return
         }
+
+        // Resolve selling price + original price from the discount controls.
+        let finalPrice: number
+        let finalMrp: number | null
+        if (form.discountOn) {
+            const m = parseFloat(form.mrp)
+            if (!isFinite(m) || m <= 0 || computedSelling == null || m <= computedSelling) {
+                setError('Set an original price and a discount % so the discounted price is below the original.')
+                return
+            }
+            finalPrice = computedSelling
+            finalMrp = m
+        } else {
+            finalPrice = parseFloat(form.price)
+            finalMrp = null
+            if (!isFinite(finalPrice) || finalPrice <= 0) {
+                setError('Enter a valid selling price.')
+                return
+            }
+        }
+
         if (images.length === 0) {
             setError('Please upload at least one image')
             return
@@ -130,8 +162,8 @@ export default function NewProductPage() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 ...form,
-                price: parseFloat(form.price),
-                mrp: form.mrp ? parseFloat(form.mrp) : null,
+                price: finalPrice,
+                mrp: finalMrp,
                 stock: parseInt(form.stock || '0'),
                 images,
                 meta_keywords: form.meta_keywords.trim() || null,
@@ -217,37 +249,86 @@ export default function NewProductPage() {
                         />
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-                        <div>
-                            <label style={label}>MRP / Original price (₹)</label>
+                    {/* Pricing & discount */}
+                    <div style={{
+                        background: '#fafafa', border: '1px solid #eee', borderRadius: '10px',
+                        padding: '16px', marginBottom: '16px'
+                    }}>
+                        <label style={{
+                            display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer',
+                            marginBottom: form.discountOn ? '16px' : 0
+                        }}>
                             <input
-                                style={input} name="mrp" type="number"
-                                min="0" step="0.01" value={form.mrp}
-                                onChange={handleChange} placeholder="300"
+                                type="checkbox" name="discountOn"
+                                checked={form.discountOn} onChange={handleChange}
+                                style={{ width: '18px', height: '18px', cursor: 'pointer' }}
                             />
-                            <p style={{ fontSize: '11px', color: '#888', marginTop: '4px', marginBottom: 0 }}>
-                                Optional. If set and higher than the selling price, it shows struck through.
-                            </p>
-                        </div>
-                        <div>
-                            <label style={label}>Selling price (₹) *</label>
-                            <input
-                                style={input} name="price" type="number"
-                                min="0" step="0.01" value={form.price}
-                                onChange={handleChange} placeholder="150" required
-                            />
-                            <p style={{ fontSize: '11px', color: '#888', marginTop: '4px', marginBottom: 0 }}>
-                                What the customer actually pays.
-                            </p>
-                        </div>
-                        <div>
-                            <label style={label}>Stock quantity</label>
-                            <input
-                                style={input} name="stock" type="number"
-                                min="0" value={form.stock}
-                                onChange={handleChange} placeholder="50"
-                            />
-                        </div>
+                            <span style={{ fontSize: '13px', fontWeight: 600, color: '#1a1a1a' }}>
+                                Show discount on this product
+                            </span>
+                        </label>
+
+                        {form.discountOn ? (
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                                <div>
+                                    <label style={label}>Original price / MRP (₹) *</label>
+                                    <input
+                                        style={input} name="mrp" type="number"
+                                        min="0" step="0.01" value={form.mrp}
+                                        onChange={handleChange} placeholder="649"
+                                    />
+                                </div>
+                                <div>
+                                    <label style={label}>Discount (%) *</label>
+                                    <input
+                                        style={input} name="discountPct" type="number"
+                                        min="0" max="100" step="1" value={form.discountPct}
+                                        onChange={handleChange} placeholder="40"
+                                    />
+                                </div>
+                                <div style={{ gridColumn: '1 / -1' }}>
+                                    {computedSelling != null && parseFloat(form.mrp) > computedSelling ? (
+                                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', flexWrap: 'wrap' }}>
+                                            <span style={{ fontSize: '20px', fontWeight: 700, color: '#b8860b' }}>
+                                                ₹{computedSelling.toLocaleString('en-IN')}
+                                            </span>
+                                            <span style={{ fontSize: '14px', color: '#999', textDecoration: 'line-through' }}>
+                                                ₹{parseFloat(form.mrp).toLocaleString('en-IN')}
+                                            </span>
+                                            <span style={{ fontSize: '12px', fontWeight: 700, color: '#16a34a' }}>
+                                                {Math.round((1 - computedSelling / parseFloat(form.mrp)) * 100)}% OFF
+                                            </span>
+                                        </div>
+                                    ) : (
+                                        <span style={{ fontSize: '12px', color: '#888' }}>Enter original price and discount % to preview.</span>
+                                    )}
+                                    <p style={{ fontSize: '11px', color: '#888', marginTop: '6px', marginBottom: 0 }}>
+                                        Customer pays the bold price. The original shows struck-through with the % badge.
+                                    </p>
+                                </div>
+                            </div>
+                        ) : (
+                            <div>
+                                <label style={label}>Selling price (₹) *</label>
+                                <input
+                                    style={input} name="price" type="number"
+                                    min="0" step="0.01" value={form.price}
+                                    onChange={handleChange} placeholder="300"
+                                />
+                                <p style={{ fontSize: '11px', color: '#888', marginTop: '4px', marginBottom: 0 }}>
+                                    What the customer pays. Turn on the toggle above to show a struck-through original price.
+                                </p>
+                            </div>
+                        )}
+                    </div>
+
+                    <div style={{ marginBottom: '16px', maxWidth: '240px' }}>
+                        <label style={label}>Stock quantity</label>
+                        <input
+                            style={input} name="stock" type="number"
+                            min="0" value={form.stock}
+                            onChange={handleChange} placeholder="50"
+                        />
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
@@ -309,6 +390,9 @@ export default function NewProductPage() {
                             onBlur={handleDescBlur}
                             placeholder="Describe the product..."
                         />
+                        <p style={{ fontSize: '11px', color: '#888', marginTop: '6px', marginBottom: 0 }}>
+                            Formatting is preserved: start a line with • (or - / *) for bullets, leave a blank line for a new paragraph, and emojis work too. ✨
+                        </p>
                     </div>
                 </div>
 

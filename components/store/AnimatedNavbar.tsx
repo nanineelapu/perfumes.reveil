@@ -516,7 +516,7 @@ export function AnimatedNavbar() {
 
                             <motion.div variants={itemVariants}>
                                 <a
-                                    href="https://www.refreshub.com"
+                                    href="https://refreshub.com"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     style={{ textDecoration: 'none' }}
@@ -860,7 +860,7 @@ export function AnimatedNavbar() {
                                 { name: 'Wishlist', href: '/wishlist', always: true },
                                 { name: 'My Addresses', href: '/address-book', loggedIn: true },
                                 { name: 'Track Order', href: '/track-order', always: true },
-                                { name: 'Refreshub', href: 'https://www.refreshub.com', always: true, external: true },
+                                { name: 'Refreshub', href: 'https://refreshub.com', always: true, external: true },
                                 ...(!user ? [
                                     { name: 'Login', href: '/auth?mode=login', always: true },
                                     { name: 'Register', href: '/auth?mode=signup', always: true }

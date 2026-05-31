@@ -17,6 +17,58 @@ interface ProductContentProps {
     relatedProducts?: Product[]
 }
 
+// Renders an admin-authored description while preserving its formatting:
+// blank lines split paragraphs, lines beginning with •/-/* become a bullet
+// list, and single newlines stay as line breaks. Emojis render as-is.
+function FormattedDescription({ text }: { text: string }) {
+    // Put each "•" bullet on its own line so copy that uses inline bullets
+    // (e.g. "… fragrance • Best white oud …") still lists cleanly.
+    const lines = text
+        .replace(/\r\n/g, '\n')
+        .replace(/\s*•\s*/g, '\n• ')
+        .split('\n')
+
+    const pStyle = {
+        fontSize: '14px', lineHeight: 1.7, color: '#888',
+        fontFamily: 'var(--font-tenor)', maxWidth: '480px',
+        margin: '0 0 14px', fontWeight: 300,
+    } as const
+
+    const blocks: any[] = []
+    let para: string[] = []
+    let bullets: string[] = []
+
+    const flushPara = () => {
+        if (!para.length) return
+        const content = para.flatMap((l, i) => (i === 0 ? [l] : [<br key={`br-${i}`} />, l]))
+        blocks.push(<p key={`p-${blocks.length}`} style={pStyle}>{content}</p>)
+        para = []
+    }
+    const flushBullets = () => {
+        if (!bullets.length) return
+        blocks.push(
+            <ul key={`u-${blocks.length}`} style={{ ...pStyle, paddingLeft: '20px', listStyle: 'disc' }}>
+                {bullets.map((b, i) => (
+                    <li key={i} style={{ marginBottom: '6px', lineHeight: 1.6 }}>{b}</li>
+                ))}
+            </ul>
+        )
+        bullets = []
+    }
+
+    for (const raw of lines) {
+        const t = raw.trim()
+        if (t === '') { flushPara(); flushBullets(); continue }
+        const m = t.match(/^[•\-*▪◦·]\s+(.*)$/)
+        if (m) { flushPara(); bullets.push(m[1]) }
+        else { flushBullets(); para.push(t) }
+    }
+    flushPara()
+    flushBullets()
+
+    return <div>{blocks}</div>
+}
+
 export function ProductContent({ product, initialReviews, relatedProducts = [] }: ProductContentProps) {
     const router = useRouter()
     const supabase = createClient()
@@ -430,9 +482,9 @@ export function ProductContent({ product, initialReviews, relatedProducts = [] }
                             )
                         })()}
 
-                        <p style={{ fontSize: '14px', lineHeight: 1.7, color: '#888', fontFamily: 'var(--font-tenor)', maxWidth: '480px', marginBottom: isMobile ? '32px' : '40px', fontWeight: 300 }}>
-                            {product.description || 'Accessing encrypted olfactory data. This composition is part of the REVEIL Laboratory Archive, designed for high-end olfactory resonance.'}
-                        </p>
+                        <div style={{ marginBottom: isMobile ? '32px' : '40px' }}>
+                            <FormattedDescription text={product.description || 'Accessing encrypted olfactory data. This composition is part of the REVEIL Laboratory Archive, designed for high-end olfactory resonance.'} />
+                        </div>
 
                         {/* Technical Meta */}
                         <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? '32px' : '64px', marginBottom: isMobile ? '32px' : '44px', borderTop: '1px solid rgba(0,0,0,0.05)', paddingTop: isMobile ? '24px' : '32px' }}>
