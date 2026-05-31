@@ -13,7 +13,11 @@
  * - PRODUCT_QUALIFIERS — universal terms appended to every product page
  */
 
-export const SITE_URL = 'https://www.reveilfragrance.in'
+// Single source of truth for the public site origin. Set NEXT_PUBLIC_SITE_URL
+// in the environment (Vercel) to point the whole app — SEO canonicals, sitemap,
+// robots, JSON-LD, emails and invoices — at a new domain without code changes.
+// The fallback keeps the current production domain for local/dev.
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.reveilfragrance.in').replace(/\/+$/, '')
 export const SITE_NAME = 'Reveil Fragrance'
 export const BRAND_NAME = 'REVEIL'
 export const LEGAL_NAME = 'Trimurty Enterprises'

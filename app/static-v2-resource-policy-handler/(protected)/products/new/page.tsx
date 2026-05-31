@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { SITE_URL } from '@/lib/seo/keywords'
 
 export default function NewProductPage() {
     const router = useRouter()
@@ -573,7 +574,7 @@ export default function NewProductPage() {
                                 {form.meta_title || form.name}
                             </div>
                             <div style={{ fontSize: '13px', color: '#006621', marginBottom: '4px' }}>
-                                reveilperfumes.com/products/{form.name.toLowerCase().replace(/\s+/g, '-')}
+                                {SITE_URL.replace(/^https?:\/\//, '')}/products/{form.name.toLowerCase().replace(/\s+/g, '-')}
                             </div>
                             <div style={{ fontSize: '13px', color: '#545454' }}>
                                 {form.meta_description || form.description || 'No description yet.'}

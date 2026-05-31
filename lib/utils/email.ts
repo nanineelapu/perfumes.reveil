@@ -1,6 +1,10 @@
 import { Resend } from 'resend';
+import { SITE_URL } from '@/lib/seo/keywords';
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+
+// Bare host (no protocol) for display text in email footers/links.
+const SITE_HOST = SITE_URL.replace(/^https?:\/\//, '');
 
 // Sender address used for all transactional emails. Falls back to Resend's
 // sandbox sender so emails still deliver while you're verifying the domain.
@@ -79,7 +83,7 @@ export async function sendOrderDeliveredEmail(order: any, userEmail: string) {
                     <div style="text-align: center; color: #444; font-size: 11px; font-style: italic;">
                         <p>Thank you for choosing REVEIL. <br> May your presence be unforgettable.</p>
                         <div style="width: 40px; height: 1px; background: #d4af37; margin: 20px auto; opacity: 0.3;"></div>
-                        <p style="letter-spacing: 0.2em; text-transform: uppercase;">reveil-perfumes.com</p>
+                        <p style="letter-spacing: 0.2em; text-transform: uppercase;">${SITE_HOST}</p>
                     </div>
                 </div>
             `
@@ -171,9 +175,9 @@ export async function sendOrderConfirmationEmail(order: any, userEmail: string) 
 
                     <div style="text-align: center; border-top: 1px solid #1a1a1a; padding-top: 40px; color: #444; font-size: 11px;">
                         <p style="margin-bottom: 15px;">Our artisans are now preparing your selection for transit.</p>
-                        <p>Questions about your order? Reply to this email or visit our <a href="https://reveilfragrances.in/track" style="color: #d4af37; text-decoration: none;">tracking portal</a>.</p>
+                        <p>Questions about your order? Reply to this email or visit our <a href="${SITE_URL}/track" style="color: #d4af37; text-decoration: none;">tracking portal</a>.</p>
                         <div style="margin-top: 30px;">
-                            <p style="letter-spacing: 0.3em; text-transform: uppercase; color: #666;">REVEILFRAGRANCES.IN</p>
+                            <p style="letter-spacing: 0.3em; text-transform: uppercase; color: #666;">${SITE_HOST}</p>
                         </div>
                     </div>
                 </div>
@@ -205,8 +209,8 @@ export async function sendOrderFulfilledEmail(order: any, userEmail: string) {
     } = order
     const customerName = profiles?.full_name || 'Valued Customer'
     const trackUrl = awb_code
-        ? `https://www.reveilfragrance.in/track/${awb_code}`
-        : `https://www.reveilfragrance.in/orders`
+        ? `${SITE_URL}/track/${awb_code}`
+        : `${SITE_URL}/orders`
     const paymentLabel = payment_method === 'cod' ? 'Cash on Delivery' : 'Paid Online'
     const paymentStatusLabel = payment_status === 'paid' ? 'PAID' : (payment_method === 'cod' ? 'COD — Pay on Delivery' : 'Pending')
     const addr = shipping_address || {}
@@ -316,9 +320,9 @@ export async function sendOrderFulfilledEmail(order: any, userEmail: string) {
 
                     <!-- Footer -->
                     <div style="text-align: center; border-top: 1px solid #1a1a1a; padding-top: 32px; color: #555; font-size: 11px;">
-                        <p style="margin: 0 0 14px; line-height: 1.7;">Questions about your delivery? Reply to this email or visit our <a href="https://www.reveilfragrance.in/orders" style="color: #d4af37; text-decoration: none;">order portal</a>.</p>
+                        <p style="margin: 0 0 14px; line-height: 1.7;">Questions about your delivery? Reply to this email or visit our <a href="${SITE_URL}/orders" style="color: #d4af37; text-decoration: none;">order portal</a>.</p>
                         <p style="margin: 0 0 24px; line-height: 1.7;">Thank you for choosing Reveil — may your presence be unforgettable.</p>
-                        <p style="letter-spacing: 0.3em; text-transform: uppercase; color: #666; margin: 0;">www.reveilfragrance.in</p>
+                        <p style="letter-spacing: 0.3em; text-transform: uppercase; color: #666; margin: 0;">${SITE_HOST}</p>
                     </div>
                 </div>
             `
@@ -432,8 +436,8 @@ export async function sendOrderOutForDeliveryEmail(order: any, userEmail: string
     const { id, profiles, awb_code, courier_name } = order
     const customerName = profiles?.full_name || 'there'
     const trackUrl = awb_code
-        ? `https://www.reveilfragrance.in/track/${awb_code}`
-        : `https://www.reveilfragrance.in/orders`
+        ? `${SITE_URL}/track/${awb_code}`
+        : `${SITE_URL}/orders`
 
     if (!resend) {
         console.log(`--- MOCK OFD EMAIL --- To: ${userEmail} | Order: ${id.slice(0, 8)}`)
@@ -471,7 +475,7 @@ export async function sendOrderOutForDeliveryEmail(order: any, userEmail: string
                     </div>
                     <div style="text-align: center; border-top: 1px solid #1a1a1a; padding-top: 28px; color: #555; font-size: 11px;">
                         <p style="margin: 0 0 14px;">Couldn't be home? Reply to this email and we'll coordinate.</p>
-                        <p style="letter-spacing: 0.3em; text-transform: uppercase; color: #666; margin: 0;">www.reveilfragrance.in</p>
+                        <p style="letter-spacing: 0.3em; text-transform: uppercase; color: #666; margin: 0;">${SITE_HOST}</p>
                     </div>
                 </div>
             `
@@ -602,7 +606,7 @@ export async function sendContactInquiryEmail(input: {
                     <div style="text-align:center; margin-bottom:32px;">
                         <h2 style="font-weight:300; font-size:22px; color:#fff; text-transform:uppercase; letter-spacing:0.15em; margin:0;">New Inquiry Received</h2>
                         <div style="width:36px; height:1px; background:#d4af37; margin:14px auto;"></div>
-                        <p style="color:#888; font-size:13px; margin:14px 24px 0;">A customer just reached out through the contact form on reveilfragrance.in.</p>
+                        <p style="color:#888; font-size:13px; margin:14px 24px 0;">A customer just reached out through the contact form on ${SITE_HOST}.</p>
                     </div>
 
                     <div style="background:#0a0a0a; border:1px solid #1a1a1a; padding:24px; margin-bottom:24px;">
@@ -625,7 +629,7 @@ export async function sendContactInquiryEmail(input: {
 
                     <div style="text-align:center; border-top:1px solid #1a1a1a; padding-top:24px; margin-top:32px; color:#555; font-size:10px;">
                         Just hit reply on this email — it goes straight to the customer.<br>
-                        <span style="letter-spacing:0.3em; text-transform:uppercase; color:#666;">www.reveilfragrance.in</span>
+                        <span style="letter-spacing:0.3em; text-transform:uppercase; color:#666;">${SITE_HOST}</span>
                     </div>
                 </div>
             `
@@ -676,7 +680,7 @@ export async function sendAdminCredentialsEmail(recipientEmail: string) {
                     
                     <div style="background: #0a0a0a; padding: 30px; border-left: 2px solid #d4af37; margin: 30px 0;">
                         <p style="margin: 0 0 15px; color: #666; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em;">Direct Access Link</p>
-                        <p style="margin: 0 0 25px; color: #fff; font-size: 14px;">https://reveilfragrances.in/static-v2-resource-policy-handler/login</p>
+                        <p style="margin: 0 0 25px; color: #fff; font-size: 14px;">${SITE_URL}/static-v2-resource-policy-handler/login</p>
                         
                         <p style="margin: 0 0 10px; color: #666; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em;">Credentials</p>
                         <p style="margin: 0; color: #fff; font-size: 14px;"><strong>Email:</strong> reveilfragrances@gmail.com</p>

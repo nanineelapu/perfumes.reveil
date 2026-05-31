@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { requireAdmin } from '@/lib/auth/require'
 import { NextResponse } from 'next/server'
 import { notifyGoogleOfChange } from '@/lib/utils/indexing'
+import { SITE_URL } from '@/lib/seo/keywords'
 
 type Params = Promise<{ id: string }>
 
@@ -60,7 +61,7 @@ export async function PUT(req: Request, { params }: { params: Params }) {
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
     try {
-        await notifyGoogleOfChange(`https://reveil-perfumes.com/products/${data.slug}`, 'URL_UPDATED')
+        await notifyGoogleOfChange(`${SITE_URL}/products/${data.slug}`, 'URL_UPDATED')
     } catch (err) {
         console.error('Indexing API Error:', err)
     }

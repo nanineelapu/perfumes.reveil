@@ -1,5 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { SITE_URL } from '@/lib/seo/keywords'
+
+// Bare host (no protocol) for display text in the invoice footer.
+const SITE_HOST = SITE_URL.replace(/^https?:\/\//, '')
 
 type Params = Promise<{ id: string }>
 
@@ -109,7 +113,7 @@ export async function GET(_req: Request, { params }: { params: Params }) {
   const orderStatus = (order.status || 'pending').toString().toUpperCase()
   const awb = order.awb_code || ''
   const courier = order.courier_name || ''
-  const trackUrl = awb ? `https://www.reveilfragrance.in/track/${awb}` : `https://www.reveilfragrance.in/orders`
+  const trackUrl = awb ? `${SITE_URL}/track/${awb}` : `${SITE_URL}/orders`
 
   // Compose a one-line address from any of the schema variants we've shipped.
   const addressLine1 = addr.address_line1 || addr.line1 || addr.address || ''
@@ -387,7 +391,7 @@ export async function GET(_req: Request, { params }: { params: Params }) {
         <p style="font-size:11px; color:#555; line-height:1.7; max-width:340px; margin:0;">
           <strong style="color:#1a1a1a;">Need help?</strong><br/>
           Email <a href="mailto:reveilfragrances@gmail.com" style="color:#d4af37; text-decoration:none;">reveilfragrances@gmail.com</a><br/>
-          Visit <a href="https://www.reveilfragrance.in" style="color:#d4af37; text-decoration:none;">www.reveilfragrance.in</a>
+          Visit <a href="${SITE_URL}" style="color:#d4af37; text-decoration:none;">${SITE_HOST}</a>
         </p>
       </div>
       <div class="sig-block">

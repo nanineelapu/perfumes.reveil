@@ -56,7 +56,7 @@ export async function POST(req: Request) {
             try {
                 const safe = escapeHtml(email)
                 await resend.emails.send({
-                    from: 'REVEIL <newsletter@reveil-perfumes.com>',
+                    from: process.env.RESEND_FROM || 'Reveil Fragrance <onboarding@resend.dev>',
                     to: ADMIN_EMAIL,
                     subject: `New newsletter signup — ${safe}`,
                     html: `<p>New subscriber: <strong>${safe}</strong></p>`,

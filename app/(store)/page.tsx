@@ -24,6 +24,10 @@ export const metadata: Metadata = {
   alternates: { canonical: SITE_URL },
 }
 
+// Always render fresh from the DB so admin changes — new reviews, featured
+// toggles, products, carousel slides — appear immediately, never stale-cached.
+export const dynamic = 'force-dynamic'
+
 
 export default async function HomePage() {
   const supabase = await createClient()
@@ -78,14 +82,23 @@ export default async function HomePage() {
 
   const categoryList = (shopCategories ?? []) as { id: string; name: string; slug: string }[]
 
-  // Filter out admin-authored / seeded test reviews. We match on profile.role
-  // first (proper signal), then fall back to a name heuristic so legacy test
-  // data without the role flag still gets hidden.
+  // Decide which reviews appear on the homepage showcase.
+  //
+  // Rule 1 (most important): if the admin ticked "Feature in Public Showcase"
+  // (is_featured), the review ALWAYS shows — that toggle exists precisely to
+  // curate the homepage, so we never second-guess it.
+  //
+  // Rule 2: for non-featured reviews, manual testimonials carry an explicit
+  // reviewer_name (e.g. "Joyti S") and are stored under the admin's user_id —
+  // keep those. Hide reviews authored by the admin account itself (no
+  // reviewer_name) and any obvious "admin"/"test" seed data.
   const latestReviewsFiltered = (latestReviews ?? []).filter((r: any) => {
+    if (r.is_featured) return true                    // curated for the showcase — always show
     const profile = Array.isArray(r.profiles) ? r.profiles[0] : r.profiles
-    if (profile?.role === 'admin') return false
     const name = (r.reviewer_name || '').toLowerCase()
     if (name.includes('admin') || name.includes('test')) return false
+    if (r.reviewer_name) return true                  // manual testimonial
+    if (profile?.role === 'admin') return false        // admin's own account review
     return true
   }).slice(0, 6)
 
