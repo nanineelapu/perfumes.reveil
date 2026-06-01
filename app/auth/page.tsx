@@ -201,7 +201,8 @@ function AuthPageContent() {
             }
 
             if (!res.ok || data.error) {
-                setError(data.error || 'OTP verification failed. Please try again.')
+                const extra = data.detail || data.hint
+                setError((data.error || 'OTP verification failed. Please try again.') + (extra ? ` — ${extra}` : ''))
                 setLoading(false)
                 return
             }

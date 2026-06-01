@@ -97,7 +97,8 @@ export async function POST(request: Request) {
 
         if (profileByPhone?.id) {
             userId = profileByPhone.id
-            const { data: { user: authUser } } = await supabaseAdmin.auth.admin.getUserById(userId)
+            const { data: authData } = await supabaseAdmin.auth.admin.getUserById(userId)
+            const authUser = authData?.user
             // Magic-link generation requires *some* email on auth.users. If the
             // existing user has none, we fall back to an internal placeholder
             // purely as a login identifier — it is never displayed to anyone.
@@ -175,7 +176,17 @@ export async function POST(request: Request) {
             options: { redirectTo },
         })
 
-        if (linkError) throw linkError
+        if (linkError) {
+            // This is the step that creates the login session. It usually fails
+            // because of Supabase project config, not the OTP — surface that so
+            // the operator can fix it instead of seeing a generic error.
+            console.error('[OTP Verify] generateLink failed:', linkError.message, '| redirectTo:', redirectTo, '| email:', userEmail)
+            return NextResponse.json({
+                error: 'Could not create your login session.',
+                detail: linkError.message,
+                hint: `Check Supabase → Authentication → URL Configuration: the Site URL and "Redirect URLs" must include ${siteUrl}/auth/callback, and the Email provider must be enabled.`,
+            }, { status: 500 })
+        }
 
         return NextResponse.json({
             success: true,
@@ -185,7 +196,16 @@ export async function POST(request: Request) {
         })
 
     } catch (error: any) {
-        console.error('[OTP Verify] Error:', error?.message || error)
-        return NextResponse.json({ error: 'Verification failed.' }, { status: 500 })
+        const detail = error?.message || String(error)
+        console.error('[OTP Verify] Error:', detail)
+        // "already been registered" → the auth user exists but the profile row
+        // was missing; guide the user to log in instead of signing up.
+        const alreadyExists = /already.*regist|already.*exist|duplicate/i.test(detail)
+        return NextResponse.json({
+            error: alreadyExists
+                ? 'This number is already registered. Please switch to Login.'
+                : 'Verification failed.',
+            detail,
+        }, { status: 500 })
     }
 }
