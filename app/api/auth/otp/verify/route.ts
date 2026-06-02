@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { verifyMessageCentralOTP } from '@/lib/messageCentral'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { consumeOtpBinding } from '@/lib/auth/otp-store'
+import { findAuthUserIdByPhone } from '@/lib/auth/find-user'
+import { upsertProfile } from '@/lib/auth/upsert-profile'
 import { normalizeIndianPhone, isPersonName, isEmail } from '@/lib/validators'
 import { rateLimit, getClientIp, rateLimitResponse } from '@/lib/rate-limit'
 import { isSafeInternalPath } from '@/lib/validators'
@@ -94,6 +96,7 @@ export async function POST(request: Request) {
         let userId: string
         let userEmail: string
         let needsName = false
+        let profileWriteError: string | null = null
 
         if (profileByPhone?.id) {
             userId = profileByPhone.id
@@ -138,25 +141,38 @@ export async function POST(request: Request) {
                 email_confirm: true,
                 user_metadata: safeFirst ? { first_name: safeFirst, last_name: safeLast ?? '' } : {},
             })
-            if (createError) throw createError
-            userId = newUser.user.id
-            userEmail = newUser.user.email!
 
+            if (createError) {
+                // The auth user can already exist (phone/email taken) while its
+                // profiles row is missing — an "orphaned" account left behind when
+                // an earlier signup created the auth user but failed to write the
+                // profile. Recover it and heal the profile instead of dead-ending
+                // the user into the "already registered / not registered" loop.
+                const orphan = /already.*regist|already.*exist|duplicate|registered by/i.test(createError.message || '')
+                const recoveredId = orphan ? await findAuthUserIdByPhone(supabaseAdmin, submittedDigits) : null
+                if (!recoveredId) throw createError
+
+                userId = recoveredId
+                const { data: authData } = await supabaseAdmin.auth.admin.getUserById(userId)
+                userEmail = authData?.user?.email || `${submittedDigits}@reveil.internal`
+            } else {
+                userId = newUser.user.id
+                userEmail = newUser.user.email!
+            }
+
+            // Ensure the profile row exists. This covers both a brand-new user and
+            // a recovered orphan whose profiles row never got written. The helper
+            // is resilient to a missing optional column (e.g. `email`) so a signup
+            // can never be silently orphaned again.
             const fullName = safeFirst ? `${safeFirst} ${safeLast ?? ''}`.trim() : null
-            const { error: upsertError } = await supabaseAdmin.from('profiles').upsert({
+            profileWriteError = await upsertProfile(supabaseAdmin, {
                 id: userId,
                 phone: cleanPhone,
                 role: 'user',
                 // Only persist a real email — null when the user didn't supply one.
                 email: safeEmail,
                 ...(safeFirst && { first_name: safeFirst, last_name: safeLast ?? '', full_name: fullName }),
-            }, { onConflict: 'id' })
-            if (upsertError) {
-                console.error('[OTP Verify] Profile upsert (new user) failed:', upsertError.message)
-                // Don't block the user — auth account is already created. Surface
-                // a soft error in the response so the client can prompt for a
-                // name later if needed.
-            }
+            })
 
             needsName = !safeFirst
         }
@@ -193,6 +209,9 @@ export async function POST(request: Request) {
             loginUrl: linkData.properties.action_link,
             needs_name: mode === 'signup' ? needsName : false,
             user_id: userId,
+            // Surfaced (not fatal) so a broken profiles schema is visible during
+            // testing instead of being silently swallowed. Login still proceeds.
+            ...(profileWriteError && { profile_warning: profileWriteError }),
         })
 
     } catch (error: any) {

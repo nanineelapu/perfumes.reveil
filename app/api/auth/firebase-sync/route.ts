@@ -12,6 +12,7 @@ import { NextResponse } from 'next/server'
 import { normalizeIndianPhone } from '@/lib/validators'
 import { rateLimit, getClientIp, rateLimitResponse } from '@/lib/rate-limit'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { findAuthUserIdByPhone } from '@/lib/auth/find-user'
 
 export async function POST(request: Request) {
     let body: any
@@ -48,10 +49,17 @@ export async function POST(request: Request) {
                 .maybeSingle()
 
             if (!profile) {
-                return NextResponse.json(
-                    { error: 'No account found for this number. Please create an account first.', error_code: 'user_not_found' },
-                    { status: 404 }
-                )
+                // The profiles row may be missing while an auth.users row still
+                // exists (an orphaned signup). Treat that as "registered" too —
+                // the verify step heals the missing profile on login. Only bounce
+                // to register when the number is unknown everywhere.
+                const orphanId = await findAuthUserIdByPhone(admin, digits)
+                if (!orphanId) {
+                    return NextResponse.json(
+                        { error: 'No account found for this number. Please create an account first.', error_code: 'user_not_found' },
+                        { status: 404 }
+                    )
+                }
             }
         } catch (err) {
             // If DB check fails, allow through — verify step will handle it
